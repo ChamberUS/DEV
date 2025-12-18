@@ -1,0 +1,54 @@
+{
+  "name": "ChatConversation",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "ID do produto relacionado (opcional)"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID da loja"
+    },
+    "buyer_email": {
+      "type": "string",
+      "description": "Email do comprador"
+    },
+    "seller_email": {
+      "type": "string",
+      "description": "Email do vendedor"
+    },
+    "last_message": {
+      "type": "string",
+      "description": "\u00daltima mensagem enviada"
+    },
+    "last_message_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Hora da \u00faltima mensagem"
+    },
+    "unread_buyer": {
+      "type": "number",
+      "default": 0,
+      "description": "Mensagens n\u00e3o lidas pelo comprador"
+    },
+    "unread_seller": {
+      "type": "number",
+      "default": 0,
+      "description": "Mensagens n\u00e3o lidas pelo vendedor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "store_id",
+    "buyer_email",
+    "seller_email"
+  ]
+}

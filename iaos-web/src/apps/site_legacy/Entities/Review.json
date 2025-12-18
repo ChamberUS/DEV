@@ -1,0 +1,41 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "ID do produto avaliado"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID da loja avaliada"
+    },
+    "reviewer_email": {
+      "type": "string",
+      "description": "Email do avaliador"
+    },
+    "reviewer_name": {
+      "type": "string",
+      "description": "Nome do avaliador"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Nota de 1 a 5"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Coment\u00e1rio da avalia\u00e7\u00e3o"
+    },
+    "purchase_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a compra foi verificada"
+    }
+  },
+  "required": [
+    "rating",
+    "reviewer_email"
+  ]
+}

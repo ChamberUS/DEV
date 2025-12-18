@@ -1,0 +1,53 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "store_id": {
+      "type": "string"
+    },
+    "buyer_email": {
+      "type": "string"
+    },
+    "seller_email": {
+      "type": "string"
+    },
+    "amount_byx": {
+      "type": "number"
+    },
+    "amount_brl": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "shipping",
+        "delivered",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "can_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o comprador pode avaliar"
+    },
+    "reviewed": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "product_id",
+    "buyer_email",
+    "seller_email",
+    "amount_byx"
+  ]
+}

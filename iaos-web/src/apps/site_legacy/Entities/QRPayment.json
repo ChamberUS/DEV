@@ -1,0 +1,43 @@
+{
+  "name": "QRPayment",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID da loja"
+    },
+    "store_name": {
+      "type": "string",
+      "description": "Nome da loja"
+    },
+    "seller_email": {
+      "type": "string",
+      "description": "Email do vendedor"
+    },
+    "amount_aios": {
+      "type": "number",
+      "description": "Valor em AIOS"
+    },
+    "memo": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do pagamento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "qr_data": {
+      "type": "string",
+      "description": "Dados do QR code"
+    }
+  },
+  "required": [
+    "store_id",
+    "amount_aios"
+  ]
+}

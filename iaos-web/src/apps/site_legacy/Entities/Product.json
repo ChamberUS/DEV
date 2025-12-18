@@ -1,0 +1,70 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "price_byx": {
+      "type": "number"
+    },
+    "price_brl": {
+      "type": "number"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "celulares",
+        "notebooks",
+        "tablets",
+        "games",
+        "acessorios",
+        "audio",
+        "cameras",
+        "smartwatch",
+        "outros"
+      ]
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "novo",
+        "seminovo",
+        "usado"
+      ]
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "store_id": {
+      "type": "string"
+    },
+    "seller_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "sold",
+        "reserved"
+      ],
+      "default": "available"
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "price_byx",
+    "category"
+  ]
+}

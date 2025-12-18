@@ -1,0 +1,51 @@
+{
+  "name": "StakingPool",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "amount_byx": {
+      "type": "number",
+      "description": "Quantidade de BYX depositada"
+    },
+    "lock_period_days": {
+      "type": "number",
+      "description": "Per\u00edodo de bloqueio em dias"
+    },
+    "apy_percentage": {
+      "type": "number",
+      "description": "Taxa de rendimento anual %"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de in\u00edcio"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de t\u00e9rmino"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "withdrawn"
+      ],
+      "default": "active"
+    },
+    "rewards_earned": {
+      "type": "number",
+      "default": 0,
+      "description": "Recompensas acumuladas"
+    }
+  },
+  "required": [
+    "user_email",
+    "amount_byx",
+    "lock_period_days"
+  ]
+}

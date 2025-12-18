@@ -1,0 +1,84 @@
+{
+  "name": "Store",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da loja"
+    },
+    "description": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "eletronicos",
+        "celulares",
+        "computadores",
+        "games",
+        "acessorios",
+        "outros"
+      ]
+    },
+    "rating": {
+      "type": "number",
+      "default": 5
+    },
+    "total_sales": {
+      "type": "number",
+      "default": 0
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_owner": {
+      "type": "boolean",
+      "description": "Se o usu\u00e1rio logado \u00e9 o dono da loja",
+      "default": true
+    },
+    "actual_owner_name": {
+      "type": "string",
+      "description": "Nome do dono real da loja (quando criada para outra pessoa)"
+    },
+    "actual_owner_email": {
+      "type": "string",
+      "description": "Email do dono real da loja"
+    },
+    "actual_owner_phone": {
+      "type": "string",
+      "description": "Telefone do dono real da loja"
+    },
+    "employee_count": {
+      "type": "string",
+      "enum": [
+        "1-5",
+        "6-10",
+        "11-20",
+        "21-50",
+        "50+"
+      ],
+      "description": "Quantidade de funcion\u00e1rios"
+    },
+    "monthly_revenue": {
+      "type": "string",
+      "enum": [
+        "0-1500",
+        "2000-10000",
+        "15000-30000",
+        "50000-100000"
+      ],
+      "description": "Faixa de renda mensal"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}

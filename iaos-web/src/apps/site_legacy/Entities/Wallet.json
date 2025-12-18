@@ -1,0 +1,27 @@
+{
+  "name": "Wallet",
+  "type": "object",
+  "properties": {
+    "balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo em BYX"
+    },
+    "balance_brl": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo equivalente em BRL"
+    },
+    "received_month": {
+      "type": "number",
+      "default": 0
+    },
+    "sent_month": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "balance"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "send",
+        "receive",
+        "convert",
+        "purchase"
+      ],
+      "description": "Tipo de transa\u00e7\u00e3o"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Valor em BYX"
+    },
+    "description": {
+      "type": "string"
+    },
+    "from_user": {
+      "type": "string"
+    },
+    "to_user": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "cancelled"
+      ],
+      "default": "completed"
+    }
+  },
+  "required": [
+    "type",
+    "amount"
+  ]
+}

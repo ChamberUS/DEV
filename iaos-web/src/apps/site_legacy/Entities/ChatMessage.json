@@ -1,0 +1,36 @@
+{
+  "name": "ChatMessage",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "ID da conversa"
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "Email do remetente"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Nome do remetente"
+    },
+    "message": {
+      "type": "string",
+      "description": "Conte\u00fado da mensagem"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a mensagem foi lida"
+    },
+    "attachment_url": {
+      "type": "string",
+      "description": "URL de anexo (opcional)"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "sender_email",
+    "message"
+  ]
+}

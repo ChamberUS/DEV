@@ -1,0 +1,60 @@
+{
+  "name": "TradePosition",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "asset": {
+      "type": "string",
+      "description": "Ativo negociado (ex: BTC/USD)"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "call",
+        "put"
+      ],
+      "description": "Call (sobe) ou Put (desce)"
+    },
+    "amount_byx": {
+      "type": "number",
+      "description": "Valor investido em BYX"
+    },
+    "entry_price": {
+      "type": "number",
+      "description": "Pre\u00e7o de entrada"
+    },
+    "expiry_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Tempo de expira\u00e7\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "won",
+        "lost",
+        "cancelled"
+      ],
+      "default": "open"
+    },
+    "payout_percentage": {
+      "type": "number",
+      "default": 85,
+      "description": "Porcentagem de pagamento"
+    },
+    "profit_loss": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_email",
+    "asset",
+    "direction",
+    "amount_byx",
+    "entry_price"
+  ]
+}
