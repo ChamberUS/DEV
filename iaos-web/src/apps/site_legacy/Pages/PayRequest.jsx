@@ -7,10 +7,10 @@ import { toast } from 'sonner';
 import { QRCodeCanvas } from 'qrcode.react';
 import { checkPaymentStatus, getLocalPaymentRequestById, normalizeStatus, updateLocalPaymentRequest } from '@/api/paymentsClient';
 import { getMerchantById } from '@/merchants/merchantStore';
-import { CHAIN_ID, DENOM, DENOM_DECIMALS, RPC_URL_FOR_BROWSER } from '@/config/chain';
+import { DENOM, DENOM_DECIMALS } from '@/config/chain';
 import { formatMicro } from '@/utils/amount';
-import { connectKeplr, isKeplrInstalled } from '@/wallet/keplr';
-import { broadcastTx, getAccount, getTxByHash } from '@/api/chainRestClient';
+import { isKeplrInstalled } from '@/wallet/keplr';
+import { sendPaymentWithKeplr, waitForTx } from '@/sdk/payments';
 import { Loader2, CheckCircle2, XCircle, Clock, AlertTriangle } from 'lucide-react';
 
 function formatDate(ms) {
@@ -120,86 +120,67 @@ export default function PayRequest() {
     if (flow.state !== 'confirming') return;
 
     let cancelled = false;
-    const startAt = Date.now();
     setConfirmElapsedMs(0);
 
-    async function pollOnce() {
-      const elapsed = Date.now() - startAt;
-      if (elapsed > 45000) {
+    waitForTx({
+      txhash: txHash,
+      memoNeedle,
+      timeoutMs: 45000,
+      intervalMs: 2000,
+      onTick: (elapsed) => {
+        if (!cancelled) setConfirmElapsedMs(elapsed);
+      },
+    })
+      .then((res) => {
+        if (cancelled) return;
+
+        if (res.unsupported) {
+          setFlow({
+            state: 'confirming_timeout',
+            title: 'Confirmação indisponível',
+            message: 'A rede não suporta consulta de tx por hash. Use “Verificar pagamento” para tentar detectar via eventos.',
+          });
+          return;
+        }
+
+        if (res.failed) {
+          setFlow({
+            state: 'failed',
+            title: 'Falha',
+            message: res.rawLog && res.rawLog.trim() ? res.rawLog : 'Transação falhou.',
+          });
+          return;
+        }
+
+        if (res.confirmed) {
+          const current = requestRef.current;
+          const updated = updateLocalPaymentRequest({ ...(current || request), status: 'paid', paidTxHash: txHash });
+          setRequest(updated);
+          setConfidence('high');
+          setFlow({ state: 'paid', title: 'Pago', message: 'Pagamento confirmado.' });
+          return;
+        }
+
+        setFlow({
+          state: 'confirming_timeout',
+          title: 'Confirmação pendente',
+          message: 'Tx enviada, mas a confirmação está demorando. Você pode tentar novamente ou verificar manualmente.',
+        });
+      })
+      .catch(() => {
         if (cancelled) return;
         setFlow({
           state: 'confirming_timeout',
           title: 'Confirmação pendente',
           message: 'Tx enviada, mas a confirmação está demorando. Você pode tentar novamente ou verificar manualmente.',
         });
-        return;
-      }
-
-      setConfirmElapsedMs(elapsed);
-
-      const txRes = await getTxByHash(txHash);
-      if (cancelled) return;
-
-      if (txRes.ok) {
-        const code = Number(txRes.data?.tx_response?.code ?? 0);
-        if (code !== 0) {
-          const rawLog = txRes.data?.tx_response?.raw_log;
-          setFlow({
-            state: 'failed',
-            title: 'Falha',
-            message: typeof rawLog === 'string' && rawLog.trim() ? rawLog : 'Transação falhou.',
-          });
-          return;
-        }
-
-        const returnedMemo = txRes.data?.tx?.body?.memo;
-        if (typeof returnedMemo === 'string' && !returnedMemo.includes(memoNeedle)) {
-          // Evita marcar "paid" para uma tx não relacionada; continua esperando.
-          return;
-        }
-
-        const current = requestRef.current;
-        const updated = updateLocalPaymentRequest({ ...(current || request), status: 'paid', paidTxHash: txHash });
-        setRequest(updated);
-        setConfidence('high');
-        setFlow({ state: 'paid', title: 'Pago', message: 'Pagamento confirmado.' });
-        return;
-      }
-
-      if (txRes.supported === false) {
-        setFlow({
-          state: 'confirming_timeout',
-          title: 'Confirmação indisponível',
-          message: 'A rede não suporta consulta de tx por hash. Use “Verificar pagamento” para tentar detectar via eventos.',
-        });
-        return;
-      }
-    }
-
-    const interval = setInterval(() => {
-      pollOnce().catch(() => {
-        // ignore polling errors; user can retry
       });
-    }, 2000);
-
-    pollOnce().catch(() => {
-      // ignore
-    });
-
-    const timeout = setTimeout(() => {
-      // force a final tick to update UI, interval will stop itself on next run
-      pollOnce().catch(() => {
-        // ignore
-      });
-    }, 46000);
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
-      clearTimeout(timeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [txHash, flow.state]);
+  }, [txHash, flow.state, memoNeedle, request]);
 
   async function copyText(value, label) {
     try {
@@ -260,89 +241,30 @@ export default function PayRequest() {
     setFlow({ state: 'connecting', title: 'Conectando', message: 'Conectando ao Keplr...' });
 
     try {
-      const { address, signer } = await connectKeplr();
       const memo = (request.memo || memoNeedle).trim();
 
-      const { SigningStargateClient, GasPrice, calculateFee } = await import('@cosmjs/stargate');
-      const gasPrice = GasPrice.fromString(`0.025${DENOM}`);
-
-      let txhash = null;
-
-      try {
-        setFlow({ state: 'signing', title: 'Assinando', message: 'Aguardando assinatura no Keplr...' });
-        setFlow({ state: 'broadcasting', title: 'Enviando', message: 'Enviando transação via RPC...' });
-
-        const client = await SigningStargateClient.connectWithSigner(RPC_URL_FOR_BROWSER, signer, { gasPrice });
-        const res = await client.sendTokens(
-          address,
-          merchant.byxAddress,
-          [{ denom: request.denom, amount: request.amount }],
-          'auto',
-          memo
-        );
-
-        if (res.code && res.code !== 0) {
-          throw new Error(res.rawLog || `Transação falhou (code ${res.code})`);
-        }
-
-        txhash = res.transactionHash;
-        setBroadcastMethod('rpc');
-      } catch (err) {
-        const rawMessage = err instanceof Error ? err.message : String(err);
-        if (!isNetworkErrorMessage(rawMessage)) throw err;
-
-        setFlow({ state: 'broadcasting', title: 'Enviando', message: 'Tentando via REST…' });
-        toast.message('RPC indisponível — tentando via REST…');
-
-        const accountRes = await getAccount(address);
-        if (!accountRes.ok) {
-          throw new Error(accountRes.error || 'Não foi possível carregar conta (accountNumber/sequence) para assinar.');
-        }
-
-        setFlow({ state: 'signing', title: 'Assinando', message: 'Assinando transação para enviar via REST...' });
-
-        const offline = await SigningStargateClient.offline(signer, { gasPrice });
-        const fee = calculateFee(200000, gasPrice);
-
-        const msgs = [
-          {
-            typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-            value: {
-              fromAddress: address,
-              toAddress: merchant.byxAddress,
-              amount: [{ denom: request.denom, amount: request.amount }],
-            },
-          },
-        ];
-
-        const txRaw = await offline.sign(
-          address,
-          msgs,
-          fee,
-          memo,
-          {
-            chainId: CHAIN_ID,
-            accountNumber: accountRes.data.accountNumber,
-            sequence: accountRes.data.sequence,
+      const { txhash, mode } = await sendPaymentWithKeplr({
+        toAddress: merchant.byxAddress,
+        amountMicro: request.amount,
+        denom: request.denom,
+        memo,
+        onStep: (step) => {
+          if (step === 'connecting') {
+            setFlow({ state: 'connecting', title: 'Conectando', message: 'Conectando ao Keplr...' });
+          } else if (step === 'signing') {
+            setFlow({ state: 'signing', title: 'Assinando', message: 'Aguardando assinatura no Keplr...' });
+          } else if (step === 'broadcasting_rpc') {
+            setFlow({ state: 'broadcasting', title: 'Enviando', message: 'Enviando transação via RPC...' });
+          } else if (step === 'fallback_to_rest') {
+            setFlow({ state: 'broadcasting', title: 'Enviando', message: 'Tentando via REST…' });
+            toast.message('RPC indisponível — tentando via REST…');
+          } else if (step === 'broadcasting_rest') {
+            setFlow({ state: 'broadcasting', title: 'Enviando', message: 'Enviando transação via REST...' });
           }
-        );
+        },
+      });
 
-        setFlow({ state: 'broadcasting', title: 'Enviando', message: 'Enviando transação via REST...' });
-
-        const { TxRaw } = await import('cosmjs-types/cosmos/tx/v1beta1/tx');
-        const { toBase64 } = await import('@cosmjs/encoding');
-        const txBytes = TxRaw.encode(txRaw).finish();
-
-        const broadcastRes = await broadcastTx(toBase64(txBytes), 'BROADCAST_MODE_SYNC');
-        if (!broadcastRes.ok) {
-          throw new Error(broadcastRes.error || 'Falha ao broadcast via REST.');
-        }
-
-        txhash = broadcastRes.data?.tx_response?.txhash || null;
-        if (!txhash) throw new Error('Broadcast via REST não retornou txhash.');
-        setBroadcastMethod('rest');
-      }
-
+      setBroadcastMethod(mode);
       setTxHash(txhash);
       setFlow({ state: 'confirming', title: 'Confirmando', message: 'Transação enviada. Aguardando confirmação...' });
     } catch (err) {

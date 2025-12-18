@@ -1,21 +1,13 @@
-import { DENOM, REST_URL_FOR_BROWSER } from "@/config/chain";
 import { getTxsByEvents } from "@/api/chainRestClient";
-
-export type PaymentRequestStatus = "pending" | "paid" | "expired";
-export type PaymentConfidence = "high" | "medium" | "unknown";
-
-export type PaymentRequest = {
-  id: string;
-  merchantId: string;
-  ownerEmail: string;
-  amount: string; // base units (e.g. ubyx)
-  denom: string;
-  memo: string;
-  status: PaymentRequestStatus;
-  createdAt: number;
-  expiresAt: number;
-  paidTxHash?: string;
-};
+import { DENOM, REST_URL_FOR_BROWSER } from "@/config/chain";
+import {
+  PAYMENT_MEMO_PREFIX_V1,
+  PAYMENT_REQUEST_PATHS_V1,
+  type PaymentCheckResult,
+  type PaymentConfidence,
+  type PaymentRequest,
+  type PaymentStatus,
+} from "@/contracts/payments";
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: string; supported?: boolean };
 
@@ -124,7 +116,7 @@ export function createLocalPaymentRequest(input: {
   const now = Date.now();
   const id = createId("pr");
   const denom = input.denom?.trim() || DENOM;
-  const memoBase = `aios:${id}`;
+  const memoBase = `${PAYMENT_MEMO_PREFIX_V1}${id}`;
   const description = (input.description ?? "").trim();
   const memo = description ? `${memoBase} ${description}` : memoBase;
 
@@ -156,11 +148,9 @@ export function updateLocalPaymentRequest(request: PaymentRequest): PaymentReque
 
 async function tryListOnChain(merchantId: string): Promise<Result<PaymentRequest[]>> {
   const baseUrl = REST_URL_FOR_BROWSER.replace(/\/+$/, "");
-  const paths = [
-    `/byx/payments/v1/payment_requests?merchant_id=${encodeURIComponent(merchantId)}`,
-    `/byx/payments/v1/requests?merchant_id=${encodeURIComponent(merchantId)}`,
-    `/byx/payments/v1/merchants/${encodeURIComponent(merchantId)}/requests`,
-  ];
+  const paths = PAYMENT_REQUEST_PATHS_V1.map((template) =>
+    template.replace("{merchantId}", encodeURIComponent(merchantId)),
+  );
 
   for (const path of paths) {
     try {
@@ -176,7 +166,7 @@ async function tryListOnChain(merchantId: string): Promise<Result<PaymentRequest
         const createdAt = typeof it.created_at === "string" ? Date.parse(it.created_at) : Number(it.createdAt);
         const expiresAt = typeof it.expires_at === "string" ? Date.parse(it.expires_at) : Number(it.expiresAt);
         const rawStatus = String(it.status ?? "pending");
-        const status: PaymentRequestStatus =
+        const status: PaymentStatus =
           rawStatus === "paid" || rawStatus === "expired" ? rawStatus : "pending";
 
         if (!it.id || !(it.merchant_id ?? it.merchantId) || !it.amount) return [];
@@ -215,7 +205,7 @@ export async function listPaymentRequestsByMerchant(merchantId: string): Promise
 export async function checkPaymentStatus(input: {
   request: PaymentRequest;
   merchantAddress?: string;
-}): Promise<{ status: PaymentRequestStatus; confidence: PaymentConfidence; matchedTxHash?: string; updated: PaymentRequest }> {
+}): Promise<PaymentCheckResult> {
   const now = Date.now();
   const existing = normalizeStatus(getLocalPaymentRequestById(input.request.id) ?? input.request, now);
 
@@ -237,7 +227,7 @@ export async function checkPaymentStatus(input: {
   if (!result.ok) return { status: existing.status, confidence: "unknown", updated: existing };
 
   const txs: any[] = Array.isArray(result.data?.tx_responses) ? result.data.tx_responses : [];
-  const memoNeedle = `aios:${existing.id}`;
+  const memoNeedle = `${PAYMENT_MEMO_PREFIX_V1}${existing.id}`;
   const memoMatch = txs.find((t) => {
     if (t?.code !== 0) return false;
     const memo = t?.tx?.body?.memo ?? "";
