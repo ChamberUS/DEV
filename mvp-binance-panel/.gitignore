@@ -1,0 +1,9 @@
+target/
+*.log
+*.db
+*.db-*
+security.properties
+settings.properties
+.DS_Store
+src/main/java/panel/app/QaApp.java
+src/main/java/panel/app/*Probe*.java
