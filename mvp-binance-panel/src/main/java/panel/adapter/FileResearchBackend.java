@@ -181,7 +181,7 @@ public class FileResearchBackend implements ResearchBackend {
         readLabelAggregate(s, repo);
         readFeatures(s);
 
-        
+
         for (Catalog.HypothesisDef h : Catalog.HYPOTHESES) {
             s.hypotheses.add(new HypothesisInfo(h.id(), h.name(), h.feature(), StageState.PENDING, "Pure Forward Mid", "250ms → 60s", "TRAIN", "Not executed", null));
         }
