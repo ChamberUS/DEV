@@ -54,7 +54,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
-        <configuration><excludes><exclude>**/QaApp.java</exclude><exclude>**/*Probe*.java</exclude></excludes></configuration>
+        <configuration><excludes><exclude>**/QaApp.java</exclude></excludes></configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

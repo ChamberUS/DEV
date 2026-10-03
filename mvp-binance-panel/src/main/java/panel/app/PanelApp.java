@@ -129,7 +129,7 @@ public class PanelApp extends Application {
     }
 
     @Override
-    public void stop() { ctx.research.close(); }
+    public void stop() { ctx.research.close(); ctx.captureMonitor.close(); }
 
     private void applyDensity() {
         var cls = rootStack.getStyleClass();

@@ -57,6 +57,7 @@ public class AppContext {
     public final CommandAdapter cli = new AdaptiveTraderCli(() -> settings.cliPath);
     public final JobManager jobs = new JobManager(cli, settings::project, this::refresh, adminAccess::requireAdmin);
     public final ResearchService research = new ResearchService(settings, new panel.adapter.LocalBackendGateway(new FileResearchBackend(cli)), new MockResearchBackend(), jobs);
+    public final panel.service.CaptureMonitorService captureMonitor;
     public final TradingService trading = new TradingService(settings, new ResearchModeTradingProvider(), new MockTradingProvider());
     public final MotionService motion = new MotionService();
     public final ViewTransitionService transitions = new ViewTransitionService(motion);
@@ -65,7 +66,13 @@ public class AppContext {
     public Runnable refreshDensity = () -> { };
     public Consumer<String> navigate = id -> { };
 
-    public AppContext() {
+    public AppContext() { this(null); }
+
+    public AppContext(panel.adapter.CaptureProcessProbe captureProbe) {
+        captureMonitor = new panel.service.CaptureMonitorService(captureProbe != null ? captureProbe :
+                new panel.adapter.LocalCaptureProcessProbe(Path.of(System.getProperty("user.home"), ".mvp-binance-capture"),
+                        settings.project().resolve("data/microstructure"), Path.of(settings.cliPath)), adminAccess::requireAdmin);
+        sessions.onLogout(captureMonitor::stop);
         applyMotionSettings();
         research.snapshot.addListener((o, a, s) -> trading.update(s));
         trading.update(research.snapshot.get());

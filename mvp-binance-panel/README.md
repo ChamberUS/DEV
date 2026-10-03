@@ -32,3 +32,11 @@ Não contém lógica de pesquisa e não altera o projeto Python; lê os relatór
 - Captura: identidade do processo e metadados do arquivo aberto, sem ler eventos. RUNNING significa processo observado, não garantia de saúde. Timestamp de status é mtime do arquivo ativo; uptime é da sessão. Sem preço/book/trades, health ou conta inventados.
 - Overview usa somente TRAIN; frozen spec vem do JSON de freeze. Readiness VALIDATION sem fonte autorizada fica N/A; VALIDATION LOCKED e FINAL_HOLDOUT SEALED.
 - Executar o bridge isoladamente: `.venv/bin/python -m adaptive_trader.panel_status --project /caminho/backend` no backend.
+
+## Monitor contínuo ADMIN / Capture
+- `CaptureMonitorService` publica `CaptureSnapshot` imutável via `CaptureProcessProbe`; `LocalCaptureProcessProbe` consulta `ProcessHandle` e os arquivos locais `~/.mvp-binance-capture/capture.pid` e `current_campaign`. Não executa subprocessos nem envia sinais.
+- Leitura em background a cada 5s, storage em cache por 60s e timer visual local de 1s. A varredura de storage usa somente metadados, não segue symlinks, ignora partições protegidas e tem orçamento de 2s; resultado incompleto fica N/A.
+- Uptime contínuo usa `ProcessHandle.Info.startInstant()`. A campanha usa o timestamp UTC do identificador; alvo de 86400s, barra limitada a 100%. Uma rotação não redefine o uptime do supervisor.
+- Primeiro PID morto/inválido ou de outro processo: STALE. Processo observado vivo que encerra: STOPPED. PID ausente: STOPPED. Erro de acesso ou campanha em transição: UNKNOWN. Metadados de processo restritos produzem warning, sem inventar start/symbol/market.
+- Symbol e market vêm dos argumentos do collector filho da campanha atual. Recorder health e contagem de sessões ficam N/A sem fonte barata. Última atualização é o mtime mais recente do storage observado no scan.
+- A tela e o serviço exigem AdminSession. Ao ocultar a tela/logout, polling e timer param; dados não são publicados ao Trading. Só há Refresh, sem controles de captura. FULL usa pulsação discreta; REDUCED/OFF mantêm indicador estático.
