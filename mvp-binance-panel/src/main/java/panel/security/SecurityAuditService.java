@@ -24,11 +24,17 @@ public class SecurityAuditService {
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO audit_log(ts,event,actor,detail) VALUES (?,?,?,?)")) {
                 ps.setString(1, clock.instant().toString());
                 ps.setString(2, event.name());
-                ps.setString(3, actor);
-                ps.setString(4, detail);
+                ps.setString(3, safe(actor));
+                ps.setString(4, safe(detail));
                 return ps.executeUpdate();
             }
         });
+    }
+
+    private static String safe(String value) {
+        if(value==null)return null;
+        return value.replaceAll("[^\\s@]+@[^\\s@]+", "[email redacted]")
+                .replaceAll("\\+[0-9]{8,15}", "[phone redacted]");
     }
 
     public List<Entry> recent(int limit) {

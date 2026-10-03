@@ -7,6 +7,8 @@ public record User(long id, String username, String email, String passwordHash, 
                    boolean emailVerified, boolean phoneVerified, boolean mustChangePassword,
                    Instant createdAt, Instant updatedAt, Instant lastLoginAt) {
 
+    @Override public String toString() { return "User[id=" + id + "]"; }
+
     public boolean active() {
         return status == UserStatus.ACTIVE;
     }

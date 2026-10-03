@@ -49,10 +49,33 @@ public class ProfileView implements View {
         VBox pw = Ui.card("Change password", AuthShell.field("Current password", current), AuthShell.field("New password", next),
                 AuthShell.field("Confirm new password", confirm), msg, change);
         security.setSpacing(14);
-        HBox cols = new HBox(16, colOf(Ui.card("Account", account)), colOf(security, pw));
+        HBox cols = new HBox(16, colOf(Ui.card("Account", account)), colOf(security, pw, contactEditor()));
         cols.getChildren().forEach(n -> HBox.setHgrow(n, javafx.scene.layout.Priority.ALWAYS));
         root.getChildren().addAll(Ui.pageHeader("Profile", "Your account and security"), cols);
         refresh();
+    }
+
+    private VBox contactEditor() {
+        VBox box=Ui.card("Contact details");
+        Button edit=Ui.button("Edit email / phone","ghost");box.getChildren().add(edit);
+        edit.setOnAction(e->{
+            User user=ctx.sessions.user().orElseThrow().user();
+            var email=new javafx.scene.control.TextField(user.email());var phone=new javafx.scene.control.TextField(user.phone());
+            PasswordField password=new PasswordField();var notice=Ui.label("Current password required. Changing contacts revokes device trust and AdminSession.","muted");notice.setWrapText(true);
+            Button save=Ui.button("Save contacts","primary"),cancel=Ui.button("Cancel","ghost");
+            Runnable reset=()->{email.clear();phone.clear();password.clear();box.getChildren().setAll(Ui.label("Contact details","card-title"),edit);refresh();};
+            cancel.setOnAction(x->reset.run());
+            save.setOnAction(x->{
+                char[] current=password.getText().toCharArray();String newEmail=email.getText(),newPhone=phone.getText();password.clear();save.setDisable(true);
+                Thread worker=new Thread(()->{
+                    boolean ok=false;
+                    try{ctx.userService.changeOwnContact(user.id(),current,newEmail,newPhone);ok=true;}
+                    catch(RuntimeException ignored){}finally{java.util.Arrays.fill(current,'\0');}
+                    boolean success=ok;javafx.application.Platform.runLater(()->{save.setDisable(false);if(success)reset.run();else notice.setText("Could not update contacts. Check current password, email and E.164 phone.");});
+                },"contact-update");worker.setDaemon(true);worker.start();
+            });
+            box.getChildren().setAll(Ui.label("Edit contact details","card-title"),AuthShell.field("Email",email),AuthShell.field("Phone (E.164)",phone),AuthShell.field("Current password",password),notice,new HBox(8,save,cancel));
+        });return box;
     }
 
     private static void fail(javafx.scene.control.Label l, String text) {

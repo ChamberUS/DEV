@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import panel.adapter.AdaptiveTraderCli;
 import panel.adapter.CommandSpec;
@@ -15,7 +14,6 @@ import panel.auth.AccessDecision;
 import panel.auth.AuthMethod;
 import panel.auth.AuthService.Failure;
 import panel.auth.AuthService.LoginException;
-import panel.auth.Ipv6;
 import panel.auth.OtpService.Result;
 import panel.auth.TwoFactorFlow;
 import panel.auth.TwoFactorNotConfiguredException;
@@ -36,7 +34,7 @@ class AuthSecurityTest {
 
     @Test
     void passwordsAreHashedWithArgon2id() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         String hash = f.users.findByUsernameOrEmail("boss").orElseThrow().passwordHash();
         assertTrue(hash.startsWith("$argon2id$"));
@@ -48,7 +46,7 @@ class AuthSecurityTest {
 
     @Test
     void userAndAdminCanLogIn() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedUser();
         assertEquals(Role.USER, f.auth.login("alice", USER_PW).role());
         f.auth.logout();
@@ -58,7 +56,7 @@ class AuthSecurityTest {
 
     @Test
     void invalidPasswordAndUnknownUserAreRejectedAndAudited() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         assertEquals(Failure.INVALID_CREDENTIALS, assertThrows(LoginException.class, () -> f.auth.login("boss", "nope-nope-nope".toCharArray())).failure);
         assertEquals(Failure.INVALID_CREDENTIALS, assertThrows(LoginException.class, () -> f.auth.login("ghost", ADMIN_PW)).failure);
@@ -68,10 +66,10 @@ class AuthSecurityTest {
 
     @Test
     void disabledUserCannotLogIn() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedUser();
         f.auth.login("boss", ADMIN_PW);
-        f.access.grantTrustedNetwork();
+        f.authorize();
         f.userService.setStatus(f.users.findByUsernameOrEmail("alice").orElseThrow().id(), UserStatus.DISABLED);
         f.auth.logout();
         assertEquals(Failure.ACCOUNT_DISABLED, assertThrows(LoginException.class, () -> f.auth.login("alice", USER_PW)).failure);
@@ -79,7 +77,7 @@ class AuthSecurityTest {
 
     @Test
     void repeatedFailuresAreRateLimited() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         for (int i = 0; i < 3; i++) {
             assertThrows(LoginException.class, () -> f.auth.login("boss", "bad-password-1".toCharArray()));
@@ -91,7 +89,7 @@ class AuthSecurityTest {
 
     @Test
     void initialAdminSetupOnlyWorksOnce() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         assertTrue(f.auth.firstRun());
         f.seedAdmin();
         assertFalse(f.auth.firstRun());
@@ -100,47 +98,44 @@ class AuthSecurityTest {
 
     @Test
     void userCannotAccessResearch() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedUser();
         f.auth.login("alice", USER_PW);
         assertEquals(AccessDecision.FORBIDDEN_NOT_ADMIN, f.access.evaluate());
-        assertThrows(AccessDeniedException.class, f.access::grantTrustedNetwork);
+        assertThrows(AccessDeniedException.class, f.access::requireAdmin);
         assertThrows(AccessDeniedException.class, f.access::requireAdmin);
         assertThrows(AccessDeniedException.class, f.access::startTwoFactor);
     }
 
     @Test
-    void trustedIpv6WithoutLoginGrantsNothing() {
-        AuthFixture f = AuthFixture.trusted();
+    void withoutLoginNothingGrantsAdmin() {
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         assertEquals(AccessDecision.SESSION_EXPIRED, f.access.evaluate());
-        assertThrows(AccessDeniedException.class, f.access::grantTrustedNetwork);
+        assertThrows(AccessDeniedException.class, f.access::requireAdmin);
     }
 
     @Test
-    void adminOnTrustedNetworkGetsAccess() {
-        AuthFixture f = AuthFixture.trusted();
-        f.seedAdmin();
-        f.auth.login("boss", ADMIN_PW);
-        assertEquals(AccessDecision.AUTHORIZED_TRUSTED_NETWORK, f.access.evaluate());
-        assertEquals(AuthMethod.TRUSTED_IPV6, f.access.grantTrustedNetwork().method());
-        assertEquals("boss", f.access.requireAdmin().username());
-        assertEquals(AccessDecision.ALREADY_AUTHORIZED, f.access.evaluate());
+    void adminWithoutDeviceRequiresEmailAndSms() {
+        AuthFixture f=AuthFixture.ready();f.seedAdmin();f.auth.login("boss",ADMIN_PW);
+        assertEquals(AccessDecision.REQUIRES_2FA,f.access.evaluate());
+        assertFalse(f.access.tryTrustedDevice());
+        assertThrows(AccessDeniedException.class,f.access::requireAdmin);
     }
 
     @Test
-    void adminOnWrongNetworkRequiresTwoFactor() {
-        AuthFixture f = AuthFixture.untrusted();
+    void adminLoginAloneRequiresTwoFactor() {
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
         assertEquals(AccessDecision.REQUIRES_2FA, f.access.evaluate());
-        assertThrows(AccessDeniedException.class, f.access::grantTrustedNetwork);
+        assertThrows(AccessDeniedException.class, f.access::requireAdmin);
         assertThrows(AccessDeniedException.class, f.access::requireAdmin);
     }
 
     @Test
     void emailOtpAloneDoesNotGrantAccess() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         flow.sendEmailCode();
         assertEquals(Result.OK, flow.verifyEmail(f.otpProvider.lastCode()));
@@ -151,7 +146,7 @@ class AuthSecurityTest {
 
     @Test
     void smsOtpAloneDoesNotGrantAccess() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         assertThrows(IllegalStateException.class, flow::sendSmsCode);
         assertEquals(Result.NO_CHALLENGE, flow.verifySms("123456"));
@@ -160,7 +155,7 @@ class AuthSecurityTest {
 
     @Test
     void emailPlusSmsGrantsAccess() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         flow.sendEmailCode();
         assertEquals(Result.OK, flow.verifyEmail(f.otpProvider.lastCode()));
@@ -173,7 +168,7 @@ class AuthSecurityTest {
 
     @Test
     void expiredOtpIsRejected() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         flow.sendEmailCode();
         String code = f.otpProvider.lastCode();
@@ -184,7 +179,7 @@ class AuthSecurityTest {
 
     @Test
     void reusedOtpIsRejected() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         flow.sendEmailCode();
         String code = f.otpProvider.lastCode();
@@ -194,7 +189,7 @@ class AuthSecurityTest {
 
     @Test
     void otpHasAttemptLimitAndResendCooldown() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         flow.sendEmailCode();
         String code = f.otpProvider.lastCode();
@@ -211,7 +206,7 @@ class AuthSecurityTest {
 
     @Test
     void unconfiguredProvidersNeverUnlockAdmin() {
-        AuthFixture f = new AuthFixture(Set.of(), false);
+        AuthFixture f = new AuthFixture(false);
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
         assertEquals(AccessDecision.REQUIRES_2FA, f.access.evaluate());
@@ -222,10 +217,10 @@ class AuthSecurityTest {
 
     @Test
     void expiredAdminSessionDeniesAccess() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
-        f.access.grantTrustedNetwork();
+        f.authorize();
         f.clock.advance(Duration.ofMinutes(29));
         f.access.touch();
         f.clock.advance(Duration.ofMinutes(29));
@@ -237,10 +232,10 @@ class AuthSecurityTest {
 
     @Test
     void logoutInvalidatesBothSessions() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
-        f.access.grantTrustedNetwork();
+        f.authorize();
         f.auth.logout();
         assertTrue(f.sessions.user().isEmpty());
         assertTrue(f.sessions.admin().isEmpty());
@@ -250,7 +245,7 @@ class AuthSecurityTest {
 
     @Test
     void adminOperationsAreProtectedAtServiceLayer() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
         assertThrows(AccessDeniedException.class, () -> f.userService.createUser("bob", "bob@example.com", USER_PW, null, Role.USER));
@@ -262,10 +257,10 @@ class AuthSecurityTest {
 
     @Test
     void adminCannotDisableSelfOrLastAdmin() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
-        f.access.grantTrustedNetwork();
+        f.authorize();
         long id = f.users.findByUsernameOrEmail("boss").orElseThrow().id();
         assertThrows(IllegalArgumentException.class, () -> f.userService.setStatus(id, UserStatus.DISABLED));
         assertThrows(IllegalArgumentException.class, () -> f.userService.changeRole(id, Role.USER));
@@ -273,7 +268,7 @@ class AuthSecurityTest {
 
     @Test
     void temporaryPasswordForcesChange() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedUser();
         assertTrue(f.auth.login("alice", USER_PW).mustChangePassword());
         long id = f.users.findByUsernameOrEmail("alice").orElseThrow().id();
@@ -284,7 +279,7 @@ class AuthSecurityTest {
 
     @Test
     void auditLogNeverContainsSecrets() {
-        AuthFixture f = AuthFixture.untrusted();
+        AuthFixture f = AuthFixture.ready();
         TwoFactorFlow flow = flow(f);
         flow.sendEmailCode();
         String code = f.otpProvider.lastCode();
@@ -296,23 +291,23 @@ class AuthSecurityTest {
     }
 
     @Test
-    void ipv6NormalizationAndFiltering() throws Exception {
-        assertEquals(Ipv6.normalize("2001:db8::1"), Ipv6.normalize("2001:0DB8:0:0:0:0:0:1%en0"));
-        assertTrue(Ipv6.normalize("not-an-ip").isEmpty());
-        assertTrue(Ipv6.normalize("example.com").isEmpty());
-        assertTrue(Ipv6.normalize("192.168.0.1").isEmpty());
-        assertFalse(Ipv6.isGlobal((java.net.Inet6Address) java.net.InetAddress.getByName("fe80::1")));
-        assertFalse(Ipv6.isGlobal((java.net.Inet6Address) java.net.InetAddress.getByName("::1")));
-        assertFalse(Ipv6.isGlobal((java.net.Inet6Address) java.net.InetAddress.getByName("fd00::1")));
-        assertTrue(Ipv6.isGlobal((java.net.Inet6Address) java.net.InetAddress.getByName("2001:db8::1")));
+    void legacyIpv6ConfigurationDoesNotGrantAccess(@org.junit.jupiter.api.io.TempDir java.nio.file.Path dir) throws Exception {
+        var path=dir.resolve("security.properties");
+        java.nio.file.Files.writeString(path,"security.admin.trustedIpv6=2001:db8::1\nsecurity.admin.sessionTimeoutMinutes=7\n");
+        var config=panel.security.SecurityConfig.load(path);
+        assertEquals(7,config.sessionTimeoutMinutes());assertFalse(config.devMode());
+        AuthFixture f=AuthFixture.ready();f.seedAdmin();f.auth.login("boss",ADMIN_PW);
+        var access=new panel.auth.AdminAccessService(f.sessions,config,new panel.auth.OtpService(f.clock),f.otpProvider,f.otpProvider,f.devices,f.audit,f.clock);
+        assertEquals(AccessDecision.REQUIRES_2FA,access.evaluate());
+        assertFalse(access.tryTrustedDevice());assertThrows(AccessDeniedException.class,access::requireAdmin);
     }
 
     @Test
     void validationAndFinalHoldoutRemainBlockedEvenForAdmin() {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedAdmin();
         f.auth.login("boss", ADMIN_PW);
-        f.access.grantTrustedNetwork();
+        f.authorize();
         f.access.requireAdmin();
         AdaptiveTraderCli cli = new AdaptiveTraderCli(() -> "/x/adaptive-trader");
         assertThrows(IllegalArgumentException.class, () -> cli.build(CommandSpec.LABEL_RUN_SESSION, "microstructure-20260814T011521Z-validation"));

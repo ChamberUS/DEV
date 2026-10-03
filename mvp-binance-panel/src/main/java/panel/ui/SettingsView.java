@@ -77,21 +77,12 @@ public class SettingsView extends PageView {
 
     @Override
     protected int stateKey(Snapshot s) {
-        return java.util.Objects.hash(super.stateKey(s), ctx.audit.recent(1), ctx.adminAccess.hasValidAdminSession(), ctx.adminAccess.trustedNetwork());
+        return java.util.Objects.hash(super.stateKey(s), ctx.audit.recent(1), ctx.adminAccess.hasValidAdminSession());
     }
 
     private void security(VBox page) {
-        var cfg = ctx.security;
         var user = ctx.sessions.user().map(s -> s.user()).orElse(null);
-        boolean devMail = ctx.devOtp != null;
-        String provider = devMail ? panel.auth.DevOtpProvider.LABEL : "Not configured";
-        page.getChildren().add(Ui.card("Admin access",
-                Ui.kvNode("Trusted IPv6", Ui.badge(cfg.trustedConfigured() ? "CONFIGURED" : "NOT CONFIGURED", cfg.trustedConfigured() ? "ok" : "muted")),
-                Ui.kvNode("This network", Ui.badge(ctx.adminAccess.trustedNetwork() ? "TRUSTED" : "NOT TRUSTED", ctx.adminAccess.trustedNetwork() ? "ok" : "warn")),
-                Ui.kvNode("Email 2FA", Ui.badge(provider, devMail ? "warn" : "muted")),
-                Ui.kvNode("SMS 2FA", Ui.badge(provider, devMail ? "warn" : "muted")),
-                Ui.kv("Admin session timeout", cfg.sessionTimeoutMinutes() + " min"),
-                wrapped("Config: security.properties in ~/.mvp-binance-panel or MVP_BINANCE_ADMIN_TRUSTED_IPV6. IPv6 is a trust signal only; login and ADMIN role are always required.")));
+        page.getChildren().add(new panel.ui.auth.SecuritySettingsPane(ctx));
         page.getChildren().add(Ui.card("Admin contact",
                 Ui.kv("Email", user == null ? null : user.maskedEmail()),
                 Ui.kv("Phone", user == null ? null : user.maskedPhone()),

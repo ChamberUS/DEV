@@ -14,12 +14,9 @@ import panel.auth.AdminAccessService;
 import panel.auth.AuthService;
 import panel.auth.DevOtpProvider;
 import panel.auth.InMemoryRateLimiter;
-import panel.auth.LocalNetworkIdentityProvider;
 import panel.auth.OtpService;
 import panel.auth.PasswordHasher;
 import panel.auth.SessionManager;
-import panel.auth.UnconfiguredEmailOtpProvider;
-import panel.auth.UnconfiguredSmsOtpProvider;
 import panel.model.Settings;
 import panel.motion.MotionPreference;
 import panel.motion.MotionService;
@@ -46,9 +43,14 @@ public class AppContext {
     public final SqliteUserRepository users = new SqliteUserRepository(db);
     public final SecurityAuditService audit = new SecurityAuditService(db, clock);
     public final SessionManager sessions = new SessionManager();
+    public final panel.security.SecretStore secrets = new panel.security.MacOsKeychainSecretStore();
+    public final panel.security.ProviderConfig providers = panel.security.ProviderConfig.load();
     public final DevOtpProvider devOtp = security.devMode() ? new DevOtpProvider() : null;
-    public final AdminAccessService adminAccess = new AdminAccessService(sessions, security, new LocalNetworkIdentityProvider(), new OtpService(clock),
-            devOtp != null ? devOtp : new UnconfiguredEmailOtpProvider(), devOtp != null ? devOtp : new UnconfiguredSmsOtpProvider(), audit, clock);
+    public final panel.auth.EmailOtpProvider emailProvider = devOtp != null ? devOtp : new panel.auth.ResendEmailOtpProvider(secrets, providers);
+    public final panel.auth.SmsOtpProvider smsProvider = devOtp != null ? devOtp : new panel.auth.TwilioVerifySmsProvider(secrets, providers);
+    public final panel.auth.TrustedDeviceService trustedDevices = new panel.auth.TrustedDeviceService(db, secrets, sessions, audit, clock);
+    public final AdminAccessService adminAccess = new AdminAccessService(sessions, security, new OtpService(clock),
+            emailProvider, smsProvider, trustedDevices, audit, clock);
     public final PasswordHasher hasher = new PasswordHasher();
     public final AuthService auth = new AuthService(users, hasher, sessions,
             new InMemoryRateLimiter(5, Duration.ofSeconds(60), clock), audit, clock);
@@ -73,6 +75,7 @@ public class AppContext {
                 new panel.adapter.LocalCaptureProcessProbe(Path.of(System.getProperty("user.home"), ".mvp-binance-capture"),
                         settings.project().resolve("data/microstructure"), Path.of(settings.cliPath)), adminAccess::requireAdmin);
         sessions.onLogout(captureMonitor::stop);
+        userService.onContactsChanged = trustedDevices::revokeAllForCurrentUser;
         applyMotionSettings();
         research.snapshot.addListener((o, a, s) -> trading.update(s));
         trading.update(research.snapshot.get());

@@ -1,170 +1,90 @@
 package panel.auth;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.util.Optional;
-import java.util.Set;
-import panel.security.AccessDeniedException;
-import panel.security.AdminGate;
-import panel.security.AuditEvent;
-import panel.security.SecurityAuditService;
-import panel.security.SecurityConfig;
+import java.time.*;
+import java.util.*;
+import panel.security.*;
 import panel.user.User;
 
-/**
- * Política da área Research/Admin: usuário autenticado + role ADMIN + (IPv6 confiável OU e-mail+SMS).
- * IPv6 é apenas sinal de confiança; nunca concede role nem substitui login.
- */
+/** Login and ADMIN are mandatory; only two factors or a valid Keychain-backed device grant a session. */
 public class AdminAccessService implements AdminGate {
-    private final SessionManager sessions;
-    private final SecurityConfig config;
-    private final NetworkIdentityProvider network;
-    private final OtpService otp;
-    private final EmailOtpProvider emailProvider;
-    private final SmsOtpProvider smsProvider;
-    private final SecurityAuditService audit;
-    private final Clock clock;
-
-    public AdminAccessService(SessionManager sessions, SecurityConfig config, NetworkIdentityProvider network, OtpService otp,
-                              EmailOtpProvider emailProvider, SmsOtpProvider smsProvider, SecurityAuditService audit, Clock clock) {
-        this.sessions = sessions;
-        this.config = config;
-        this.network = network;
-        this.otp = otp;
-        this.emailProvider = emailProvider;
-        this.smsProvider = smsProvider;
-        this.audit = audit;
-        this.clock = clock;
+    private final SessionManager sessions; private final SecurityConfig config; private final OtpService otp;
+    private final EmailOtpProvider email; private final SmsOtpProvider sms; private final TrustedDeviceService devices;
+    private final SecurityAuditService audit; private final Clock clock;
+    private volatile TwoFactorFlow active;
+    private final Map<String,Instant> sends=new HashMap<>();
+    public AdminAccessService(SessionManager sessions, SecurityConfig config, OtpService otp, EmailOtpProvider email,
+            SmsOtpProvider sms, TrustedDeviceService devices, SecurityAuditService audit, Clock clock) {
+        this.sessions=sessions;this.config=config;this.otp=otp;this.email=email;this.sms=sms;this.devices=devices;this.audit=audit;this.clock=clock;
+        sessions.onLogout(this::cancelChallenge);
     }
-
-    public boolean twoFactorConfigured() {
-        return emailProvider.configured() && smsProvider.configured();
-    }
-
-    public boolean trustedNetwork() {
-        String trusted = config.trustedIpv6();
-        if (trusted == null) {
-            return false;
-        }
-        Optional<String> want = Ipv6.normalize(trusted);
-        if (want.isEmpty()) {
-            return false;
-        }
-        Set<String> local = network.globalIpv6Addresses();
-        return local.contains(want.get());
-    }
-
+    public boolean twoFactorConfigured(){return email.configured() && sms.configured();}
     public AccessDecision evaluate() {
-        Optional<UserSession> us = sessions.user();
-        if (us.isEmpty()) {
-            return AccessDecision.SESSION_EXPIRED;
-        }
-        if (!us.get().user().admin() || !us.get().user().active()) {
-            return AccessDecision.FORBIDDEN_NOT_ADMIN;
-        }
-        if (hasValidAdminSession()) {
-            return AccessDecision.ALREADY_AUTHORIZED;
-        }
-        return trustedNetwork() ? AccessDecision.AUTHORIZED_TRUSTED_NETWORK : AccessDecision.REQUIRES_2FA;
+        var user=sessions.user();if(user.isEmpty())return AccessDecision.SESSION_EXPIRED;
+        if(!user.get().user().admin() || !user.get().user().active())return AccessDecision.FORBIDDEN_NOT_ADMIN;
+        return hasValidAdminSession()?AccessDecision.ALREADY_AUTHORIZED:AccessDecision.REQUIRES_2FA;
     }
-
-    /** Concede AdminSession por rede confiável. Reavalia tudo; falha se não for admin logado em rede confiável. */
-    public AdminSession grantTrustedNetwork() {
-        AccessDecision d = evaluate();
-        if (d == AccessDecision.ALREADY_AUTHORIZED) {
-            return sessions.admin().orElseThrow();
+    public boolean tryTrustedDevice() {
+        if(evaluate()!=AccessDecision.REQUIRES_2FA)return false;
+        UserSession expected=sessions.user().orElseThrow();
+        if(!devices.use(expected))return false;
+        synchronized(sessions) {
+            if(!current(expected))return false;
+            sessions.grantAdmin(newSession(AuthMethod.TRUSTED_DEVICE));
+            audit.record(AuditEvent.ADMIN_ACCESS_TRUSTED_DEVICE,actor(),"");return true;
         }
-        if (d != AccessDecision.AUTHORIZED_TRUSTED_NETWORK) {
-            throw new AccessDeniedException("Trusted network access is not available.");
-        }
-        AdminSession s = newSession(AuthMethod.TRUSTED_IPV6);
-        sessions.grantAdmin(s);
-        audit.record(AuditEvent.ADMIN_ACCESS_TRUSTED_IPV6, actor(), "");
-        return s;
     }
-
     public TwoFactorFlow startTwoFactor() {
-        AccessDecision d = evaluate();
-        if (d != AccessDecision.REQUIRES_2FA && d != AccessDecision.AUTHORIZED_TRUSTED_NETWORK) {
-            throw new AccessDeniedException("Two-factor is not applicable.");
+        if(evaluate()!=AccessDecision.REQUIRES_2FA)throw new AccessDeniedException("Two-factor is not applicable");
+        UserSession expected=sessions.user().orElseThrow();
+        if(!twoFactorConfigured())throw new TwoFactorNotConfiguredException();
+        synchronized(sessions) {
+            if(!current(expected))throw new AccessDeniedException("Session changed");
+            User u=expected.user();
+            if(u.email()==null || u.phone()==null || !u.phone().matches("\\+[1-9][0-9]{7,14}"))throw new IllegalStateException("Set an email and E.164 phone in Profile first.");
+            cancelChallenge();
+            active=new TwoFactorFlow(expected,otp,email,sms,this,clock);
+            audit.record(AuditEvent.ADMIN_2FA_STARTED,actor(),"");return active;
         }
-        if (!twoFactorConfigured()) {
-            throw new TwoFactorNotConfiguredException();
-        }
-        User u = sessions.user().orElseThrow().user();
-        if (u.email() == null || u.phone() == null) {
-            throw new IllegalStateException("Admin email and phone are required for two-factor.");
-        }
-        audit.record(AuditEvent.ADMIN_2FA_STARTED, u.username(), "");
-        return new TwoFactorFlow(u, otp, emailProvider, smsProvider, this);
     }
-
-    void twoFactorCompleted(TwoFactorFlow flow, User user) {
-        if (!flow.bothVerified()) {
-            return;
+    boolean current(UserSession expected) {
+        return sessions.user().filter(s->s.id().equals(expected.id()) && s.user().id()==expected.user().id() && s.user().admin() && s.user().active()).isPresent();
+    }
+    boolean valid(TwoFactorFlow flow,UserSession expected){return flow==active && current(expected);}
+    void sent(UserSession expected,boolean phone) {
+        synchronized(sends) {
+            String key=expected.user().id()+":"+phone; Instant now=clock.instant(),last=sends.get(key);
+            if(last!=null && now.isBefore(last.plusSeconds(30)))throw new OtpService.CooldownException(Duration.between(now,last.plusSeconds(30)));
+            sends.put(key,now);
         }
-        sessions.grantAdmin(newSession(AuthMethod.TWO_FACTOR));
-        audit.record(AuditEvent.ADMIN_2FA_SUCCESS, user.username(), "");
     }
-
-    void twoFactorFailed(User user, String detail) {
-        audit.record(AuditEvent.ADMIN_2FA_FAILED, user.username(), detail);
+    public void cancelChallenge() { if(active!=null){active.cancel();active=null;} }
+    void event(AuditEvent event,UserSession expected){audit.record(event,"user:"+expected.user().id(),"");}
+    void complete(TwoFactorFlow flow,UserSession expected) {
+        synchronized(sessions) {
+            if(!valid(flow,expected)||!flow.complete())throw new AccessDeniedException("Challenge expired or session changed");
+            sessions.grantAdmin(newSession(AuthMethod.TWO_FACTOR));event(AuditEvent.ADMIN_ACCESS_2FA,expected);
+        }
     }
-
+    void trust(TwoFactorFlow flow,UserSession expected) {
+        if(!valid(flow,expected)||!flow.complete())throw new AccessDeniedException("Complete two-factor first");
+        devices.trustCurrent();
+    }
     public boolean hasValidAdminSession() {
-        Optional<UserSession> us = sessions.user();
-        Optional<AdminSession> as = sessions.admin();
-        return us.isPresent() && us.get().user().admin() && us.get().user().active() && as.isPresent() && as.get().validAt(clock.instant());
+        return sessions.user().filter(s->s.user().admin()&&s.user().active()).isPresent()
+                && sessions.admin().filter(s->s.validAt(clock.instant())).isPresent();
     }
-
-    /** Verifica e, se expirada, revoga e audita. Devolve true se a sessão administrativa expirou agora. */
     public boolean expireIfNeeded() {
-        Optional<AdminSession> as = sessions.admin();
-        if (as.isPresent() && !as.get().validAt(clock.instant())) {
-            sessions.revokeAdmin();
-            audit.record(AuditEvent.ADMIN_SESSION_EXPIRED, actor(), "");
-            return true;
-        }
-        return false;
+        if(sessions.admin().filter(s->!s.validAt(clock.instant())).isPresent()){
+            sessions.revokeAdmin();audit.record(AuditEvent.ADMIN_SESSION_EXPIRED,actor(),"");return true;
+        }return false;
     }
-
-    public void touch() {
-        sessions.admin().ifPresent(s -> {
-            if (s.validAt(clock.instant())) {
-                s.touch(clock.instant());
-            }
-        });
+    public void touch(){sessions.admin().filter(s->s.validAt(clock.instant())).ifPresent(s->s.touch(clock.instant()));}
+    public Optional<AdminSession> adminSession(){return sessions.admin().filter(s->s.validAt(clock.instant()));}
+    public void noteDenied(String detail){audit.record(AuditEvent.ADMIN_ACCESS_DENIED,actor(),"Access denied");}
+    @Override public User requireAdmin() {
+        if(expireIfNeeded()||!hasValidAdminSession())throw new AccessDeniedException("Administrator session required");
+        return sessions.user().orElseThrow().user();
     }
-
-    public Optional<AdminSession> adminSession() {
-        return sessions.admin().filter(s -> s.validAt(clock.instant()));
-    }
-
-    public void noteDenied(String detail) {
-        audit.record(AuditEvent.ADMIN_ACCESS_DENIED, actor(), detail);
-    }
-
-    @Override
-    public User requireAdmin() {
-        Optional<UserSession> us = sessions.user();
-        if (us.isEmpty()) {
-            throw new AccessDeniedException("Session expired. Please sign in again.");
-        }
-        if (!us.get().user().admin() || !us.get().user().active()) {
-            noteDenied("service layer: not admin");
-            throw new AccessDeniedException("Access restricted to administrators.");
-        }
-        if (expireIfNeeded() || !hasValidAdminSession()) {
-            throw new AccessDeniedException("Administrator session required.");
-        }
-        return us.get().user();
-    }
-
-    private AdminSession newSession(AuthMethod m) {
-        return new AdminSession(clock.instant(), m, Duration.ofMinutes(config.sessionTimeoutMinutes()));
-    }
-
-    private String actor() {
-        return sessions.user().map(s -> s.user().username()).orElse("-");
-    }
+    private AdminSession newSession(AuthMethod method){return new AdminSession(clock.instant(),method,Duration.ofMinutes(config.sessionTimeoutMinutes()));}
+    private String actor(){return sessions.user().map(s->"user:"+s.user().id()).orElse("-");}
 }

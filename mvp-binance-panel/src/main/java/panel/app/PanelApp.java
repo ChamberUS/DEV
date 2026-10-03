@@ -297,20 +297,30 @@ public class PanelApp extends Application {
         display(id);
     }
 
+    private boolean checkingTrustedDevice;
+
     private void requestResearch(String target) {
         switch (ctx.adminAccess.evaluate()) {
             case ALREADY_AUTHORIZED -> display(views.containsKey(target) ? target : "overview");
-            case AUTHORIZED_TRUSTED_NETWORK -> {
-                try {
-                    ctx.adminAccess.grantTrustedNetwork();
-                    ctx.toasts.show(ToastType.SUCCESS, "Trusted network detected. Admin access unlocked.");
-                    updateLock(true);
-                    display(views.containsKey(target) ? target : "overview");
-                } catch (AccessDeniedException e) {
-                    deny(e.getMessage());
-                }
+            case REQUIRES_2FA -> {
+                if (checkingTrustedDevice) return;
+                checkingTrustedDevice = true;
+                var sessionId = ctx.sessions.user().orElseThrow().id();
+                Thread check = new Thread(() -> {
+                    boolean result;
+                    try { result = ctx.adminAccess.tryTrustedDevice(); }
+                    catch (RuntimeException e) { result = false; }
+                    boolean trusted = result;
+                    javafx.application.Platform.runLater(() -> {
+                        checkingTrustedDevice = false;
+                        if (ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
+                        if (trusted && ctx.adminAccess.hasValidAdminSession()) {
+                            updateLock(true); display(views.containsKey(target) ? target : "overview");
+                        } else showTwoFactor(target);
+                    });
+                }, "trusted-device-check");
+                check.setDaemon(true); check.start();
             }
-            case REQUIRES_2FA -> showTwoFactor(target);
             case FORBIDDEN_NOT_ADMIN -> {
                 ctx.adminAccess.noteDenied("research workspace requested");
                 deny("Access restricted to administrators.");
@@ -338,6 +348,7 @@ public class PanelApp extends Application {
 
     private void closeTwoFactor() {
         if (tfOverlay != null) {
+            ctx.adminAccess.cancelChallenge();
             content.getChildren().remove(tfOverlay);
             tfOverlay = null;
         }
@@ -562,7 +573,7 @@ public class PanelApp extends Application {
         topBar.getChildren().setAll(Ui.label("DATA SOURCE", "card-title"), Ui.badge(s.source.name(), mock ? "warn" : "ok"),
                 mock ? Ui.label("Fictional values — not real research data", "warn-text") : Ui.label("", "muted"), Ui.spacer());
         ctx.adminAccess.adminSession().filter(a -> !trader).ifPresent(a ->
-                topBar.getChildren().add(Ui.badge("ADMIN SESSION · " + a.method().label, a.method() == AuthMethod.TRUSTED_IPV6 ? "purple" : "info")));
+                topBar.getChildren().add(Ui.badge("ADMIN SESSION · " + a.method().label, a.method() == AuthMethod.TRUSTED_DEVICE ? "purple" : "info")));
         topBar.getChildren().addAll(Ui.label("Updated " + Fmt.time(s.loadedAt), "muted"), refreshBtn, userMenu);
         topBar.setPadding(new Insets(8, 20, 8, 28));
     }

@@ -1,11 +1,6 @@
 package panel.auth;
-
 public enum AuthMethod {
-    TRUSTED_IPV6("Trusted Network"), TWO_FACTOR("2FA");
-
+    TWO_FACTOR("2FA"), TRUSTED_DEVICE("Trusted Device"), PASSKEY("Passkey (not implemented)");
     public final String label;
-
-    AuthMethod(String label) {
-        this.label = label;
-    }
+    AuthMethod(String label) { this.label=label; }
 }

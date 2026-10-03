@@ -158,7 +158,7 @@ class MotionIconTest {
 
     @Test
     void transitionsDoNotChangeAuthorization() throws Exception {
-        AuthFixture f = AuthFixture.trusted();
+        AuthFixture f = AuthFixture.ready();
         f.seedUser();
         f.auth.login("alice", "temporary-pass-1".toCharArray());
         FxSupport.fx(() -> {

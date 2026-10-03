@@ -12,13 +12,35 @@ Não contém lógica de pesquisa e não altera o projeto Python; lê os relatór
 - Main class `panel.app.Main` (não herda de Application) para facilitar `jpackage`.
 
 ## Autenticação e autorização
-- Abre no login. Primeiro uso (sem usuários): "Initial admin setup" cria o primeiro ADMIN; não existe cadastro público nem credencial padrão.
-- Usuários e audit log: SQLite em `~/.mvp-binance-panel/panel.db`. Senhas: Argon2id.
-- USER e ADMIN entram no Trading. Research exige ADMIN + (IPv6 confiável OU e-mail + SMS). IPv6 é só sinal de confiança, nunca concede role.
-- Configuração (fora do repositório): `~/.mvp-binance-panel/security.properties` (`security.admin.trustedIpv6`, `security.admin.sessionTimeoutMinutes`, `security.dev.mode`) ou a variável `MVP_BINANCE_ADMIN_TRUSTED_IPV6`.
-- Comandos do backend e gestão de usuários exigem ADMIN + AdminSession válida na camada de serviço (`AdminGate`).
-- Provedores de e-mail/SMS: interfaces `EmailOtpProvider`/`SmsOtpProvider`; hoje "não configurados". `security.dev.mode=true` liga o DEVELOPMENT AUTH PROVIDER (apenas desenvolvimento).
-- Limitação: app desktop local. Quem controla o computador e os arquivos do app pode contornar essas barreiras (banco, configuração, binário). Autorização sensível deve migrar para um servidor no futuro.
+- Abre no login. Primeiro uso sem usuários: "Initial admin setup" cria o primeiro ADMIN; não existe credencial padrão.
+- Usuários e auditoria: SQLite em `~/.mvp-binance-panel/panel.db`. Senhas: Argon2id. USER permanece no Trading.
+- Research exige login ADMIN e uma AdminSession obtida por **Email → SMS** ou por dispositivo confiável válido. Nenhum endereço IP concede autorização; a chave legada de rede é ignorada.
+- Email: SDK oficial Resend; OTP local de seis dígitos, SecureRandom, HMAC somente em memória, validade de cinco minutos, cinco tentativas, uso único e cooldown de 30s. SMS: Twilio Verify gera e verifica o código; o app não gera SMS de produção.
+- Desafios pertencem ao UUID do login e são invalidados por logout/troca de usuário. AdminSession possui timeout independente (`security.admin.sessionTimeoutMinutes` em `security.properties`).
+- Após ambos os fatores, "Trust this Mac for 30 days" grava token aleatório de 256 bits no Keychain e somente SHA-256 no SQLite. Não usa IP, MAC, serial ou hostname. Revogar em Settings → Security invalida a sessão administrativa; o próximo acesso exige 2FA.
+- Profile permite editar email/telefone E.164 com senha atual. Contatos ficam mascarados fora da edição; alterações invalidam dispositivos e autorização administrativa.
+- `AdminGate`, TRAIN-only, VALIDATION LOCKED e FINAL_HOLDOUT SEALED continuam obrigatórios. `PasskeyProvider` é apenas interface futura; PASSKEY não concede sessão.
+
+### Setup local real (macOS)
+Execute `./setup-local-2fa.sh` em terminal interativo. API keys/secrets são digitados sem eco, enviados diretamente à API nativa do Keychain e nunca passam por argumentos de processos, histórico de shell ou arquivos temporários.
+
+Secrets no Keychain:
+- `mvp-binance-panel/resend-api-key`
+- `mvp-binance-panel/twilio-api-secret`
+- `mvp-binance-panel/trusted-device-token`
+
+O setup grava somente os quatro campos de `providers.example.properties` em `~/.mvp-binance-panel/providers.properties` (0600; diretório 0700), desativa o modo dev e preserva outras configurações de segurança. Reinicie o app depois. Account SID (AC), API Key SID (SK) e API Secret são usados para Twilio Verify; não use Primary Auth Token. Crie o Verify Service manualmente no Twilio e informe seu SID VA. Sem ele, a UI mostra **Twilio Verify / NOT_CONFIGURED / Missing Verify Service SID** e não envia SMS.
+
+Use um remetente autorizado no Resend. O default opcional `onboarding@resend.dev` está sujeito às restrições de teste da conta. Disponibilidade local CONFIGURED significa que a configuração e o segredo existem; entrega/autorização remota só são comprovadas por envio. Falhas aparecem como ERROR, com mensagem sanitizada. Keychain indisponível falha fechado, sem fallback automático.
+
+Providers fake só existem quando `security.dev.mode=true` é explicitamente definido em `~/.mvp-binance-panel/security.properties`; a UI identifica **DEVELOPMENT AUTH PROVIDER**. Testes usam doubles em memória, nunca enviam email/SMS. Não use modo dev para contas reais.
+
+Documentação: [Resend Java SDK](https://github.com/resend/resend-java), [Twilio Verify](https://www.twilio.com/docs/verify/api), [Verification](https://www.twilio.com/docs/verify/api/verification), [Verification Check](https://www.twilio.com/docs/verify/api/verification-check).
+
+### Verificação manual
+Após setup/build, abra `./run.sh`, faça login ADMIN, complete Email e SMS, marque Trust this Mac e entre em Research. Faça logout/login, confirme TRUSTED_DEVICE, revogue em Settings → Security e confirme que Research exige 2FA novamente. USER deve permanecer sem acesso. Não copie códigos/segredos para logs ou issues. Sem providers configurados, pule os envios reais; isso não impede o build.
+
+Limitação: app desktop local. Quem controla o usuário do sistema, banco e binário pode contornar as barreiras locais. Keychain protege secrets em repouso; autorização de operações sensíveis deve migrar para servidor no futuro.
 
 ## Motion, tipografia e ícones
 - `panel.motion`: `MotionService` (FULL / REDUCED / OFF, persistido em Settings → Appearance), `MotionTokens` (MICRO 110 · FAST 160 · STANDARD 220 · EMPHASIS 320 · SLOW 500 ms; easing ease-out / ease-in / ease-in-out), `ViewTransitionService` (crossfade + 10–12 px).

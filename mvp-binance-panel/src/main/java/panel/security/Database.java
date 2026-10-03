@@ -50,6 +50,12 @@ public class Database implements AutoCloseable {
                       updated_at TEXT NOT NULL,
                       last_login_at TEXT)""");
             s.execute("""
+                    CREATE TABLE IF NOT EXISTS trusted_devices (
+                      device_id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, display_name TEXT NOT NULL,
+                      token_hash TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, last_used_at TEXT NOT NULL,
+                      expires_at TEXT NOT NULL, revoked_at TEXT,
+                      FOREIGN KEY(user_id) REFERENCES users(id))""");
+            s.execute("""
                     CREATE TABLE IF NOT EXISTS audit_log (
                       id INTEGER PRIMARY KEY AUTOINCREMENT,
                       ts TEXT NOT NULL,

@@ -1,18 +1,7 @@
 package panel.auth;
-
 public class UnconfiguredSmsOtpProvider implements SmsOtpProvider {
-    @Override
-    public boolean configured() {
-        return false;
-    }
-
-    @Override
-    public String name() {
-        return "Not configured";
-    }
-
-    @Override
-    public void send(String phone, String code) {
-        throw new TwoFactorNotConfiguredException();
-    }
+    public boolean configured() { return false; }
+    public String name() { return "Not configured"; }
+    public String startVerification(String phone) { throw new TwoFactorNotConfiguredException(); }
+    public boolean checkVerification(String phone, String id, String code) { throw new TwoFactorNotConfiguredException(); }
 }

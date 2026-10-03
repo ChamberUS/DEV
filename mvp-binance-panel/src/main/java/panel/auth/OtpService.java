@@ -54,7 +54,7 @@ public class OtpService {
     }
 
     /** Gera um novo código (invalida o anterior). O chamador entrega ao provider; nunca deve logá-lo. */
-    public synchronized String issue(long userId, Channel channel) {
+    public synchronized String issue(String userId, Channel channel) {
         String k = key(userId, channel);
         Instant now = clock.instant();
         Challenge old = challenges.get(k);
@@ -72,7 +72,7 @@ public class OtpService {
         return code;
     }
 
-    public synchronized Result verify(long userId, Channel channel, String code) {
+    public synchronized Result verify(String userId, Channel channel, String code) {
         Challenge c = challenges.get(key(userId, channel));
         if (c == null || c.used) {
             return Result.NO_CHALLENGE;
@@ -92,13 +92,17 @@ public class OtpService {
         return Result.OK;
     }
 
-    public synchronized void clear(long userId) {
+    public synchronized void clear(String userId) {
         for (Channel ch : Channel.values()) {
             challenges.remove(key(userId, ch));
         }
     }
 
-    private static String key(long userId, Channel channel) {
+    public String issue(long id, Channel channel) { return issue(Long.toString(id), channel); }
+    public Result verify(long id, Channel channel, String code) { return verify(Long.toString(id), channel, code); }
+    public void clear(long id) { clear(Long.toString(id)); }
+
+    private static String key(String userId, Channel channel) {
         return userId + ":" + channel;
     }
 

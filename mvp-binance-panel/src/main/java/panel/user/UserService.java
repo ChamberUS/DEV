@@ -16,7 +16,7 @@ import panel.security.SecurityAuditService;
 public class UserService {
     private static final Pattern USERNAME = Pattern.compile("[A-Za-z0-9_.-]{3,32}");
     private static final Pattern EMAIL = Pattern.compile("[^@\\s]+@[^@\\s]+\\.[^@\\s]+");
-    private static final Pattern PHONE = Pattern.compile("\\+?[0-9]{8,15}");
+    private static final Pattern PHONE = Pattern.compile("\\+[1-9][0-9]{7,14}");
 
     private final UserRepository repo;
     private final PasswordHasher hasher;
@@ -24,6 +24,7 @@ public class UserService {
     private final SecurityAuditService audit;
     private final SessionManager sessions;
     private final Clock clock;
+    private final panel.auth.RateLimiter contactLimiter;
 
     public UserService(UserRepository repo, PasswordHasher hasher, AdminGate gate, SecurityAuditService audit, SessionManager sessions, Clock clock) {
         this.repo = repo;
@@ -32,6 +33,7 @@ public class UserService {
         this.audit = audit;
         this.sessions = sessions;
         this.clock = clock;
+        this.contactLimiter=new panel.auth.InMemoryRateLimiter(5,java.time.Duration.ofMinutes(1),clock);
     }
 
     /** Só funciona enquanto não existe nenhum usuário. */
@@ -102,6 +104,30 @@ public class UserService {
         User u = save(t, t.role(), t.status(), hasher.hash(next), false);
         sessions.updateUser(u);
         audit.record(AuditEvent.PASSWORD_CHANGED, t.username(), "");
+    }
+
+    public Runnable onContactsChanged = () -> {};
+
+    public void changeOwnContact(long id, char[] password, String email, String phone) {
+        var session = sessions.user().orElseThrow(() -> new AccessDeniedException("Login required"));
+        if(session.user().id()!=id)throw new AccessDeniedException("Cannot edit another account");
+        User current=load(id);
+        String rateKey=Long.toString(id);
+        if(contactLimiter.blockedFor(rateKey).isPresent())throw new IllegalArgumentException("Wait before retrying current password.");
+        if(!hasher.verify(password,current.passwordHash())){contactLimiter.recordFailure(rateKey);throw new IllegalArgumentException("Current password is incorrect.");}
+        contactLimiter.recordSuccess(rateKey);
+        if(email==null || !EMAIL.matcher(email.trim()).matches())throw new IllegalArgumentException("Invalid email.");
+        if(phone==null || !PHONE.matcher(phone.trim()).matches())throw new IllegalArgumentException("Phone must use E.164 format.");
+        var existing=repo.findByUsernameOrEmail(email.trim());
+        if(existing.isPresent() && existing.get().id()!=id)throw new IllegalArgumentException("Email already in use.");
+        synchronized(sessions) {
+            if(sessions.user().filter(s->s.id().equals(session.id())).isEmpty())throw new AccessDeniedException("Session changed");
+            onContactsChanged.run();
+            User updated=new User(current.id(),current.username(),email.trim(),current.passwordHash(),current.role(),current.status(),phone.trim(),
+                    false,false,current.mustChangePassword(),current.createdAt(),clock.instant(),current.lastLoginAt());
+            repo.update(updated);sessions.updateUser(updated);sessions.revokeAdmin();
+            audit.record(AuditEvent.CONTACT_CHANGED,"user:"+id,"");
+        }
     }
 
     private User create(String username, String email, char[] password, String phone, Role role, boolean mustChange) {

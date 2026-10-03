@@ -12,6 +12,7 @@ public class SessionManager {
     private final List<Runnable> onLogout = new ArrayList<>();
 
     public synchronized void login(User u, java.time.Instant now) {
+        logout();
         user = new UserSession(u, now);
         admin = null;
     }

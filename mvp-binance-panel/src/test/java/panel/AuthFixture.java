@@ -4,12 +4,10 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Set;
 import panel.auth.AdminAccessService;
 import panel.auth.AuthService;
 import panel.auth.DevOtpProvider;
 import panel.auth.InMemoryRateLimiter;
-import panel.auth.NetworkIdentityProvider;
 import panel.auth.OtpService;
 import panel.auth.PasswordHasher;
 import panel.auth.SessionManager;
@@ -24,8 +22,6 @@ import panel.user.UserService;
 
 /** Monta a pilha de autenticação em memória com rede e OTP falsos (determinístico, sem rede real). */
 class AuthFixture {
-    static final String TRUSTED = "2001:db8::1";
-    static final String OTHER = "2001:db8::2";
 
     static class MutableClock extends Clock {
         Instant now = Instant.parse("2026-10-01T12:00:00Z");
@@ -61,23 +57,25 @@ class AuthFixture {
     final AdminAccessService access;
     final UserService userService;
 
-    AuthFixture(Set<String> localAddresses, boolean twoFactorConfigured) {
-        NetworkIdentityProvider net = () -> localAddresses;
-        SecurityConfig config = new SecurityConfig(TRUSTED, 30, false);
+    final MemorySecrets secrets = new MemorySecrets();
+    final panel.auth.TrustedDeviceService devices = new panel.auth.TrustedDeviceService(db,secrets,sessions,audit,clock);
+
+    AuthFixture(boolean configured) {
+        SecurityConfig config = new SecurityConfig(30, true);
         auth = new AuthService(users, hasher, sessions, new InMemoryRateLimiter(3, Duration.ofSeconds(60), clock), audit, clock);
         OtpService otp = new OtpService(clock, Duration.ofMinutes(5), Duration.ofSeconds(30), 5);
-        access = twoFactorConfigured
-                ? new AdminAccessService(sessions, config, net, otp, otpProvider, otpProvider, audit, clock)
-                : new AdminAccessService(sessions, config, net, otp, new UnconfiguredEmailOtpProvider(), new UnconfiguredSmsOtpProvider(), audit, clock);
-        userService = new UserService(users, hasher, access, audit, sessions, clock);
+        access = new AdminAccessService(sessions,config,otp,configured?otpProvider:new UnconfiguredEmailOtpProvider(),
+                configured?otpProvider:new UnconfiguredSmsOtpProvider(),devices,audit,clock);
+        userService = new UserService(users,hasher,access,audit,sessions,clock);
+        userService.onContactsChanged=devices::revokeAllForCurrentUser;
     }
-
-    static AuthFixture trusted() {
-        return new AuthFixture(Set.of(panel.auth.Ipv6.normalize(TRUSTED).orElseThrow()), true);
-    }
-
-    static AuthFixture untrusted() {
-        return new AuthFixture(Set.of(panel.auth.Ipv6.normalize(OTHER).orElseThrow()), true);
+    static AuthFixture ready() { return new AuthFixture(true); }
+    panel.auth.AdminSession authorize() {
+        clock.advance(Duration.ofSeconds(31));
+        var flow=access.startTwoFactor();flow.sendEmailCode();
+        if(flow.verifyEmail(otpProvider.lastCode())!=OtpService.Result.OK)throw new AssertionError();
+        flow.sendSmsCode();if(flow.verifySms(otpProvider.lastCode())!=OtpService.Result.OK)throw new AssertionError();
+        return access.adminSession().orElseThrow();
     }
 
     void seedAdmin() {
@@ -88,7 +86,7 @@ class AuthFixture {
     void seedUser() {
         seedAdmin();
         auth.login("boss", "correct-horse-1".toCharArray());
-        access.grantTrustedNetwork();
+        authorize();
         userService.createUser("alice", "alice@example.com", "temporary-pass-1".toCharArray(), null, Role.USER);
         auth.logout();
     }

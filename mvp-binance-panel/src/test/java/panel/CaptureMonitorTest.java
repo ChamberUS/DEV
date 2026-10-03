@@ -145,7 +145,7 @@ class CaptureMonitorTest {
         } finally { release.countDown(); FxSupport.fx(service::close); }
     }
     @Test void userAndAdminWithoutAdminSessionCannotReadMonitor() throws Exception {
-        FxSupport.start(); var f = AuthFixture.trusted(); f.seedUser();
+        FxSupport.start(); var f = AuthFixture.ready(); f.seedUser();
         var calls = new AtomicInteger();
         var service = new CaptureMonitorService(() -> { calls.incrementAndGet(); return probe().read(); }, f.access::requireAdmin);
         try {
@@ -155,7 +155,7 @@ class CaptureMonitorTest {
             FxSupport.fx(() -> assertThrows(AccessDeniedException.class, service::refresh));
             FxSupport.fx(() -> assertThrows(AccessDeniedException.class, () -> service.start(s -> {})));
             assertEquals(0, calls.get());
-            f.access.grantTrustedNetwork(); var read = new CountDownLatch(1);
+            f.authorize(); var read = new CountDownLatch(1);
             FxSupport.fx(() -> service.start(s -> read.countDown())); assertTrue(read.await(5, TimeUnit.SECONDS));
         } finally { FxSupport.fx(service::close); }
     }

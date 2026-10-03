@@ -11,6 +11,7 @@ public class AdminSession {
     private Instant expiresAt;
 
     public AdminSession(Instant authorizedAt, AuthMethod method, Duration timeout) {
+        if (method == AuthMethod.PASSKEY) throw new IllegalArgumentException("Passkey is not implemented");
         this.authorizedAt = authorizedAt;
         this.method = method;
         this.timeout = timeout;

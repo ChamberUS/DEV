@@ -1,146 +1,85 @@
 package panel.ui.auth;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
+import javafx.animation.*;
+import javafx.application.Platform;
+import javafx.geometry.*;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import panel.app.AppContext;
-import panel.auth.DevOtpProvider;
-import panel.auth.OtpService;
-import panel.auth.TwoFactorFlow;
-import panel.auth.TwoFactorNotConfiguredException;
+import panel.auth.*;
 import panel.ui.Ui;
 import panel.user.User;
 
-/** Verificação adicional do admin fora de rede confiável: e-mail e depois celular. */
-public class TwoFactorView {
-    private final AppContext ctx;
-    private final Runnable onSuccess;
-    private final Runnable onCancel;
-    private final VBox root = new VBox(14);
-    private final VBox wrap = new VBox(root);
-    private TwoFactorFlow flow;
-    private final User user;
-    private boolean phoneStep;
-
-    public TwoFactorView(AppContext ctx, Runnable onSuccess, Runnable onCancel) {
-        this.ctx = ctx;
-        this.onSuccess = onSuccess;
-        this.onCancel = onCancel;
-        this.user = ctx.sessions.user().orElseThrow().user();
-        root.setMaxWidth(420);
-        wrap.setAlignment(Pos.CENTER);
-        wrap.setPadding(new Insets(40));
-        try {
-            flow = ctx.adminAccess.startTwoFactor();
-            render();
-        } catch (TwoFactorNotConfiguredException e) {
-            blocked("Two-factor authentication is not configured.", "Admin access outside the trusted network requires email and SMS verification. Configure the providers, or use the trusted network.");
-        } catch (IllegalStateException e) {
-            blocked("Admin contact incomplete", e.getMessage());
-        }
-    }
-
-    public Node node() {
-        return wrap;
-    }
-
-    private void blocked(String title, String detail) {
-        Button back = Ui.button("Back to Trading", "ghost");
-        back.setOnAction(e -> onCancel.run());
-        root.getChildren().setAll(Ui.label("ADMIN VERIFICATION", "card-title"), Ui.label(title, "h1"), Ui.label(detail, "muted"), Ui.badge("ACCESS NOT GRANTED", "bad"), back);
-        ((javafx.scene.control.Label) root.getChildren().get(2)).setWrapText(true);
-    }
-
-    private void render() {
-        boolean phone = phoneStep;
-        String dest = phone ? user.maskedPhone() : user.maskedEmail();
-        TextField code = new TextField();
-        code.setPromptText("6-digit code");
-        code.setAccessibleText("6-digit code");
-        code.textProperty().addListener((o, a, b) -> {
-            String d = b.replaceAll("\\D", "");
-            code.setText(d.length() > 6 ? d.substring(0, 6) : d);
-        });
-        var err = AuthShell.error();
-        var info = Ui.label("", "muted");
-        info.setWrapText(true);
-        Button send = Ui.button("Send code", "ghost");
-        Button verify = Ui.button("Verify", "primary");
-        verify.setDefaultButton(true);
-        Button cancel = Ui.button("Cancel", "ghost");
-        cancel.setOnAction(e -> {
-            flow.cancel();
-            onCancel.run();
-        });
-        send.setOnAction(e -> {
-            err.setText("");
-            try {
-                if (phone) {
-                    flow.sendSmsCode();
-                } else {
-                    flow.sendEmailCode();
-                }
-                info.setText("Code sent to " + dest + ". It expires in 5 minutes.");
-                var sent = ctx.icons.icon(phone ? "phone" : "mail", 26, "info");
-                sendIcon.getChildren().setAll(sent.node());
-                sent.play();
-                code.requestFocus();
-                refreshDev(phone);
-            } catch (OtpService.CooldownException ex) {
-                err.setText(ex.getMessage());
-            } catch (RuntimeException ex) {
-                err.setText(ex instanceof TwoFactorNotConfiguredException ? ex.getMessage() : "Could not send the code.");
+public final class TwoFactorView {
+    private final AppContext ctx; private final Runnable onSuccess,onCancel; private final User user;
+    private final VBox root=new VBox(14); private final VBox wrap=new VBox(root);
+    private final ExecutorService worker=Executors.newSingleThreadExecutor(r->{Thread t=new Thread(r,"two-factor-provider");t.setDaemon(true);return t;});
+    private final Timeline countdown;
+    private TwoFactorFlow flow; private boolean phone; private boolean busy; private volatile boolean closed;
+    private Button send; private Button verify; private Button finishButton; private Label message;
+    public TwoFactorView(AppContext ctx,Runnable onSuccess,Runnable onCancel){
+        this.ctx=ctx;this.onSuccess=onSuccess;this.onCancel=onCancel;user=ctx.sessions.user().orElseThrow().user();
+        root.setMaxWidth(460);wrap.setAlignment(Pos.CENTER);wrap.setPadding(new Insets(40));
+        root.getChildren().add(Ui.label("Checking verification providers…","muted"));
+        countdown=new Timeline(new KeyFrame(javafx.util.Duration.seconds(1),e->refreshCountdown()));countdown.setCycleCount(Timeline.INDEFINITE);countdown.play();
+        wrap.sceneProperty().addListener((o,a,b)->{if(a!=null&&b==null)dispose();});
+        worker.execute(()->{
+            try{TwoFactorFlow challenge=ctx.adminAccess.startTwoFactor();Platform.runLater(()->{if(closed){challenge.cancel();return;}flow=challenge;render();});}
+            catch(RuntimeException e){
+                String detail=e instanceof TwoFactorNotConfiguredException
+                        ? ctx.emailProvider.name()+": "+ctx.emailProvider.status().state()+" · "+ctx.emailProvider.status().detail()+"\n"
+                          +ctx.smsProvider.name()+": "+ctx.smsProvider.status().state()+" · "+ctx.smsProvider.status().detail()+"\nRun setup-local-2fa.sh and restart the app."
+                        : "Check your session and set an email and E.164 phone in Profile.";
+                Platform.runLater(()->{if(!closed)blocked(detail);});
             }
         });
-        verify.setOnAction(e -> {
-            err.setText("");
-            OtpService.Result r = phone ? flow.verifySms(code.getText()) : flow.verifyEmail(code.getText());
-            switch (r) {
-                case OK -> {
-                    if (!phone) {
-                        phoneStep = true;
-                        render();
-                    } else {
-                        var ok = ctx.icons.icon("check", 26, "ok");
-                        sendIcon.getChildren().setAll(ok.node());
-                        ok.play();
-                        javafx.animation.PauseTransition p = new javafx.animation.PauseTransition(ctx.motion.scale(javafx.util.Duration.millis(450)));
-                        p.setOnFinished(x -> onSuccess.run());
-                        p.play();
-                    }
-                }
-                case INVALID -> {
-                    err.setText("Invalid code.");
-                    var w = ctx.icons.icon("warning", 26, "warn");
-                    sendIcon.getChildren().setAll(w.node());
-                    w.play();
-                }
-                case EXPIRED -> err.setText("Code expired. Request a new one.");
-                case TOO_MANY_ATTEMPTS -> err.setText("Too many attempts. Request a new code.");
-                case NO_CHALLENGE -> err.setText("Request a code first.");
-            }
-            code.clear();
-        });
-        devBox = new VBox(4);
-        sendIcon.getChildren().clear();
-        root.getChildren().setAll(Ui.label("ADMIN VERIFICATION · STEP " + (phone ? "2" : "1") + " OF 2", "card-title"),
-                Ui.label(phone ? "Phone verification" : "Email verification", "h1"),
-                Ui.label("Research / Admin requires " + (phone ? "an SMS code sent to " : "an email code sent to ") + dest + ". Both steps are required.", "muted"),
-                AuthShell.field("Verification code", code), new HBox(10, sendIcon, info), err, devBox, new javafx.scene.layout.HBox(8, send, verify, cancel));
-        ((javafx.scene.control.Label) root.getChildren().get(2)).setWrapText(true);
     }
-
-    private VBox devBox;
-    private final javafx.scene.layout.StackPane sendIcon = new javafx.scene.layout.StackPane();
-
-    private void refreshDev(boolean phone) {
-        if (ctx.devOtp != null && devBox != null) {
-            devBox.getChildren().setAll(Ui.badge(DevOtpProvider.LABEL, "warn"),
-                    Ui.label("Development only — code: " + ctx.devOtp.lastCode(), "mono"));
-        }
+    public Node node(){return wrap;}
+    private void dispose(){closed=true;countdown.stop();if(flow!=null)flow.cancel();worker.shutdownNow();}
+    private void blocked(String detail){
+        Button back=Ui.button("Back to Trading","ghost");back.setOnAction(e->{dispose();onCancel.run();});
+        Label text=Ui.label(detail,"muted");text.setWrapText(true);
+        root.getChildren().setAll(Ui.label("ADMIN VERIFICATION","card-title"),Ui.badge("ACCESS NOT GRANTED","bad"),text,back);
+    }
+    private <T> void action(Supplier<T> work,java.util.function.Consumer<T> success){
+        if(busy||closed)return;busy=true;refreshCountdown();if(message!=null)message.setText("Working…");
+        worker.execute(()->{
+            try{T value=work.get();Platform.runLater(()->{if(closed)return;busy=false;refreshCountdown();success.accept(value);});}
+            catch(RuntimeException e){Platform.runLater(()->{if(closed)return;busy=false;refreshCountdown();
+                if(message!=null)message.setText(e instanceof OtpService.CooldownException ? e.getMessage():"Verification unavailable. Check providers, session or Keychain and try again.");});}
+        });
+    }
+    private void render(){
+        TextField code=new TextField();code.setPromptText(phone?"SMS verification code":"6-digit email code");code.setAccessibleText("Verification code");
+        code.setTextFormatter(new TextFormatter<String>(c->c.getControlNewText().matches("[0-9]{0,"+(phone?10:6)+"}")?c:null));
+        message=AuthShell.error();message.setWrapText(true);
+        Label destination=Ui.label("Send code to: "+(phone?user.maskedPhone():user.maskedEmail()),"muted");
+        send=Ui.button("Send code","ghost");verify=Ui.button(phone?"Verify Phone":"Verify Email","primary");
+        Button cancel=Ui.button("Cancel","ghost");cancel.setOnAction(e->{dispose();onCancel.run();});
+        send.setOnAction(e->action(()->{if(phone)flow.sendSmsCode();else flow.sendEmailCode();return true;},ok->{destination.setText("Code sent to: "+(phone?user.maskedPhone():user.maskedEmail()));message.setText("Code sent. Expires in 5 minutes.");code.requestFocus();refreshCountdown();}));
+        verify.setOnAction(e->{String input=code.getText();code.clear();action(()->phone?flow.verifySms(input):flow.verifyEmail(input),result->{
+            if(result==OtpService.Result.OK){if(!phone){phone=true;render();}else complete();}
+            else {message.setText(switch(result){case INVALID->"Invalid code.";case EXPIRED->"Code expired. Start verification again.";case TOO_MANY_ATTEMPTS->"Too many attempts. Request a new code after cooldown.";default->"Send a code for this step first.";});ctx.motion.shake(code,3);}
+        });});
+        root.getChildren().setAll(Ui.label("ADMIN VERIFICATION","card-title"),Ui.label("Step "+(phone?"2":"1")+" of 2","muted"),
+                Ui.label(phone?"Phone verification":"Email verification","h1"),destination,AuthShell.field("Verification code",code),message,new HBox(8,send,verify,cancel));
+        if(ctx.devOtp!=null)root.getChildren().add(Ui.badge(DevOtpProvider.LABEL,"warn"));
+        ctx.motion.fadeIn(root,javafx.util.Duration.millis(160));refreshCountdown();
+    }
+    private void refreshCountdown(){
+        if(finishButton!=null)finishButton.setDisable(busy);
+        if(flow==null||send==null)return;
+        long seconds=flow.resendSeconds(phone);send.setDisable(busy||seconds>0);verify.setDisable(busy);
+        send.setText(seconds>0?"Resend in "+seconds+"s":"Resend code");
+    }
+    private void complete(){
+        countdown.stop();CheckBox trust=new CheckBox("Trust this Mac for 30 days");
+        Button next=Ui.button("Continue to Research","primary");finishButton=next;message=AuthShell.error();
+        root.getChildren().setAll(Ui.label("Identity verified","h1"),Ui.badge("EMAIL + SMS VERIFIED","ok"),trust,message,next);
+        next.setOnAction(e->{boolean remember=trust.isSelected();action(()->{flow.finish(remember);return true;},ok->onSuccess.run());});
+        ctx.motion.fadeIn(root,javafx.util.Duration.millis(180));
     }
 }
