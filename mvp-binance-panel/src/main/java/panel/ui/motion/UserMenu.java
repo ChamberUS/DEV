@@ -16,7 +16,7 @@ import panel.motion.MotionTokens;
 import panel.motion.icon.AnimationRepository;
 import panel.ui.Ui;
 
-/** Botão de perfil com menu em Popup: fade + escala discreta, ESC e clique fora fecham, setas navegam. */
+/** Native profile popup: immediate lifecycle, ESC/outside dismissal and arrow navigation. */
 public class UserMenu extends Button {
     public record Item(String label, String icon, Runnable action) {
         public static final Item SEPARATOR = new Item(null, null, null);

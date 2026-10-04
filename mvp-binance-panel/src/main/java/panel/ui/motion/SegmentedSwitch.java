@@ -7,7 +7,7 @@ import javafx.scene.layout.StackPane;
 import panel.motion.MotionService;
 import panel.motion.MotionTokens;
 
-/** Seletor de duas opções com "thumb" que desliza. */
+/** Native two-option selector; reference selection animates paint, not thumb position. */
 public class SegmentedSwitch extends StackPane {
     public final Button left = new Button();
     public final Button right = new Button();

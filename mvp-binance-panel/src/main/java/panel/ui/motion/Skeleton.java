@@ -2,7 +2,7 @@ package panel.ui.motion;
 
 import javafx.scene.layout.Region;
 
-/** Placeholder estático de carregamento (sem shimmer contínuo: custo zero de CPU). */
+/** Loading placeholder; ReferenceMotion adds shimmer only while visible in FULL. */
 public final class Skeleton {
     private Skeleton() {
     }

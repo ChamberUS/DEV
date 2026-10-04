@@ -147,7 +147,7 @@ public final class ReferenceMotion {
         });
     }
 
-    /** Each CSS property has its own channel; stylesheet changes are coalesced by the FX pulse. */
+    /** Each CSS property has its own interruptible channel. */
     private void paint(Region node) {
         boolean[] writing = {false};
         node.backgroundProperty().addListener((o, from, to) -> {
