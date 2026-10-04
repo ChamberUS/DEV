@@ -63,7 +63,7 @@ import panel.util.Fmt;
 
 public class PanelApp extends Application {
     private static final Map<String, String> NAV_ICONS = Map.ofEntries(
-            Map.entry("t-desk", "dashboard"), Map.entry("t-markets", "chart"), Map.entry("t-bot", "bot"), Map.entry("t-strategies", "settings"),
+            Map.entry("t-wallet", "user"), Map.entry("t-benefits", "user"), Map.entry("t-byx", "feed"), Map.entry("t-desk", "dashboard"), Map.entry("t-markets", "chart"), Map.entry("t-bot", "bot"), Map.entry("t-strategies", "settings"),
             Map.entry("t-signals", "signal"), Map.entry("t-portfolio", "dashboard"), Map.entry("t-positions", "positions"), Map.entry("t-orders", "orders"),
             Map.entry("t-performance", "chart"), Map.entry("t-activity", "clock"), Map.entry("t-profile", "user"), Map.entry("t-settings", "settings"),
             Map.entry("overview", "dashboard"), Map.entry("capture", "feed"), Map.entry("sessions", "clock"), Map.entry("dataset", "positions"),
@@ -129,7 +129,7 @@ public class PanelApp extends Application {
     }
 
     @Override
-    public void stop() { ctx.research.close(); ctx.captureMonitor.close(); }
+    public void stop() { ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
 
     private void applyDensity() {
         var cls = rootStack.getStyleClass();
@@ -148,7 +148,7 @@ public class PanelApp extends Application {
         }
         rootStack.getStyleClass().remove("trader");
         rootStack.getStyleClass().add("trader");
-        stage.setTitle("MVP Binance");
+        stage.setTitle(AppBranding.title("Login"));
         if (ctx.auth.firstRun()) {
             holder.getChildren().setAll(new InitialAdminSetupView(ctx, this::showEntry).node());
         } else {
@@ -176,6 +176,7 @@ public class PanelApp extends Application {
     // ---- aplicação principal ---------------------------------------------------
 
     private void enterApp(User user) {
+        ctx.byx.start();
         tfOverlay = null;
         views.clear();
         navButtons.clear();
@@ -190,6 +191,9 @@ public class PanelApp extends Application {
         ctx.transitions.forget();
 
         views.put("t-desk", new TradingDeskView(ctx));
+        views.put("t-byx", new panel.ui.ByxNetworkView(ctx));
+        views.put("t-wallet", new panel.ui.ByxWalletView(ctx));
+        views.put("t-benefits", new panel.ui.ByxBenefitsView(ctx));
         views.put("t-markets", new TraderScreens.Markets(ctx));
         views.put("t-bot", new TraderScreens.Bot(ctx));
         views.put("t-strategies", new TraderScreens.Strategies(ctx));
@@ -399,8 +403,8 @@ public class PanelApp extends Application {
         lastView.put(toTrader, id);
         navHolder.setContent(navStacks.get(toTrader ? traderNav : researchNav));
         syncTabs();
-        ((Label) brand.getChildren().get(1)).setText(toTrader ? "Trading Terminal" : "Research Control Center");
-        stage.setTitle(toTrader ? "MVP Binance — Trading Terminal" : "MVP Binance — Research Control Center");
+        ((Label) brand.getChildren().get(1)).setText(AppBranding.ATTRIBUTION + " · " + (toTrader ? "Trading" : "Research"));
+        stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : toTrader ? "Trading" : "Research"));
         var cls = rootStack.getStyleClass();
         cls.remove("trader");
         if (toTrader) {
@@ -419,7 +423,7 @@ public class PanelApp extends Application {
     }
 
     private Node sidebar(User user) {
-        brand.getChildren().setAll(Ui.label("MVP Binance", "brand"), Ui.label("", "brand-sub"));
+        brand.getChildren().setAll(Ui.label(AppBranding.NAME, "brand"), Ui.label("", "brand-sub"));
         workspaceSwitch.left.setText("TRADING");
         workspaceSwitch.right.setText(user.admin() ? "RESEARCH" : "ADMIN");
         workspaceSwitch.right.setGraphic(lockHolder);
@@ -437,6 +441,10 @@ public class PanelApp extends Application {
 
         item(traderNav, "t-desk", "▦  Trading Desk");
         item(traderNav, "t-markets", "Markets");
+        group(traderNav, "BYX");
+        item(traderNav, "t-byx", "BYX Network");
+        item(traderNav, "t-wallet", "Wallet");
+        item(traderNav, "t-benefits", "Plano e benefícios BYX");
         group(traderNav, "AUTOMATION");
         item(traderNav, "t-bot", "Bot");
         item(traderNav, "t-strategies", "Strategies");
@@ -553,7 +561,9 @@ public class PanelApp extends Application {
     }
 
     private void render(Snapshot s) {
-        views.values().forEach(v -> v.onSnapshot(s));
+        views.forEach((id, view) -> {
+            if (id.startsWith("t-") || ctx.adminAccess.hasValidAdminSession()) view.onSnapshot(s);
+        });
         chrome(s);
     }
 

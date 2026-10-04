@@ -17,7 +17,7 @@ public final class AuthShell {
     }
 
     public static Node of(Node form, panel.motion.MotionService motion) {
-        VBox brand = new VBox(10, Ui.label("MVP Binance", "auth-brand"), Ui.label("Quantitative Trading System", "muted-lg"),
+        VBox brand = new VBox(10, Ui.label(panel.app.AppBranding.NAME, "auth-brand"), Ui.label(panel.app.AppBranding.ATTRIBUTION, "muted-lg"),
                 Ui.label("Adaptive trading.\nResearch powered.", "auth-tagline"));
         brand.setAlignment(Pos.TOP_LEFT);
         brand.setPadding(new Insets(56, 56, 0, 56));

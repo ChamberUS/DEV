@@ -56,6 +56,13 @@ public class AppContext {
             new InMemoryRateLimiter(5, Duration.ofSeconds(60), clock), audit, clock);
     public final UserService userService = new UserService(users, hasher, adminAccess, audit, sessions, clock);
 
+    public final panel.service.ByxNetworkService byx = new panel.service.ByxNetworkService(
+            new panel.adapter.CosmosByxChainGateway(clock), adminAccess::requireAdmin, clock);
+    public final panel.service.ByxWalletIdentityService byxWallets = new panel.service.ByxWalletIdentityService(
+            sessions, new panel.repository.ByxWalletRepository(db), byx, clock);
+    public final panel.service.ByxBenefitsService byxBenefits = new panel.service.ByxBenefitsService(
+            byxWallets, new panel.adapter.CosmosByxChainGateway(clock), clock, panel.service.ByxBenefitsService.defaults());
+
     public final CommandAdapter cli = new AdaptiveTraderCli(() -> settings.cliPath);
     public final JobManager jobs = new JobManager(cli, settings::project, this::refresh, adminAccess::requireAdmin);
     public final ResearchService research = new ResearchService(settings, new panel.adapter.LocalBackendGateway(new FileResearchBackend(cli)), new MockResearchBackend(), jobs);
@@ -75,6 +82,7 @@ public class AppContext {
                 new panel.adapter.LocalCaptureProcessProbe(Path.of(System.getProperty("user.home"), ".mvp-binance-capture"),
                         settings.project().resolve("data/microstructure"), Path.of(settings.cliPath)), adminAccess::requireAdmin);
         sessions.onLogout(captureMonitor::stop);
+        sessions.onLogout(byx::pause);
         userService.onContactsChanged = trustedDevices::revokeAllForCurrentUser;
         applyMotionSettings();
         research.snapshot.addListener((o, a, s) -> trading.update(s));

@@ -31,7 +31,7 @@ public final class Credits {
         box.getChildren().add(Ui.label("No Lordicon or Lottieflow assets are bundled, so no third-party attribution is currently required for icons.", "muted"));
         Alert a = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.CLOSE);
         a.setTitle("About / Credits");
-        a.setHeaderText("MVP Binance — About / Credits");
+        a.setHeaderText(panel.app.AppBranding.title("About / Credits"));
         a.getDialogPane().setContent(box);
         a.getDialogPane().getStylesheets().add(Credits.class.getResource("/panel/panel.css").toExternalForm());
         a.getDialogPane().getStyleClass().add("dialog");

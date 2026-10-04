@@ -278,7 +278,7 @@ public final class TraderScreens {
             f.getChildren().addAll(sized(Ui.card("Appearance", g1, wrap("Motion: Full = all animations · Reduced = short fades only · Off = instant.")), 460),
                     sized(Ui.card("Preferences", g2), 460),
                     sized(Ui.card("Connections", Ui.kv("Exchange", "Not connected"), Ui.kv("Order execution", "Not implemented"), Ui.kv("Data source", t.source.name())), 460),
-                    sized(Ui.card("About", Ui.label("MVP Binance · Trading Terminal", "kv-value"), aboutButton()), 460));
+                    sized(Ui.card("About", Ui.label(panel.app.AppBranding.title("Trading"), "kv-value"), aboutButton()), 460));
             page.getChildren().add(f);
         }
 
