@@ -67,6 +67,8 @@ public class OverviewView extends PageView {
             grid.getColumnConstraints().add(column);
             PipelineStage stage = stages.get(i);
             var line = new javafx.scene.layout.Region(); line.getStyleClass().addAll("pipeline-line", "pipeline-" + stage.state().tone);
+            if (stage.state() == panel.model.StageState.RUNNING) ctx.motion.reference.breathe(line,
+                    panel.motion.MotionTokens.PIPELINE, panel.motion.MotionTokens.CSS_EASE);
             String name = stage.target().equals("dataset") ? "Dataset" : stage.target().equals("labels") ? "Labels" : stage.title();
             VBox tile = new VBox(6, line, Ui.label(name, "pipeline-label"));
             tile.setAccessibleText(name + " · " + stage.state().name() + " · " + stage.summary());

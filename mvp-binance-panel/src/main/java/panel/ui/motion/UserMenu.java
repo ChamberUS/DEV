@@ -88,7 +88,7 @@ public class UserMenu extends Button {
         content.autosize();
         double right = getScene().getWindow().getX() + getScene().getWindow().getWidth();
         popup.setX(Math.min(bounds.getMaxX(), right - 8) - popup.getWidth());
-        motion.popIn(content, 0.96, MotionTokens.FAST);
+        motion.reset(content);
         content.getChildren().stream().filter(n -> n instanceof Button).findFirst().ifPresent(javafx.scene.Node::requestFocus);
     }
 
@@ -96,10 +96,8 @@ public class UserMenu extends Button {
         if (!popup.isShowing()) {
             return;
         }
-        motion.fadeOut(content, MotionTokens.MICRO, () -> {
-            popup.hide();
-            motion.reset(content);
-        });
+        popup.hide();
+        motion.reset(content);
     }
 
     private void move(int dir) {

@@ -104,10 +104,7 @@ public final class CaptureMonitorCard extends VBox {
         dot.getChildren().clear();
         Label light = Ui.label("●", snapshot != null && snapshot.state() == State.RUNNING ? "metric-ok" : "muted");
         dot.getChildren().add(light); animated = run;
-        if (run) motion.loop(light, () -> {
-            FadeTransition fade = new FadeTransition(Duration.seconds(2), light);
-            fade.setFromValue(1); fade.setToValue(0.45); fade.setAutoReverse(true); return fade;
-        });
+        if (run) motion.reference.breathe(light, panel.motion.MotionTokens.LIVE, panel.motion.MotionTokens.CSS_EASE_IN_OUT);
     }
     private static VBox tile(String title, javafx.scene.Node... children) {
         VBox card = Ui.card(title, children); card.setPrefWidth(370); return card;

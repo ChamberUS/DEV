@@ -56,34 +56,37 @@ public class BotAvatar extends StackPane {
         setPrefSize(size, size);
         setMaxSize(size, size);
         setState(state);
+        javafx.beans.value.ChangeListener<panel.motion.MotionPreference> listener = (o, was, now) -> {
+            State previous = this.state;
+            this.state = null;
+            setState(previous);
+        };
+        getProperties().put("bot.motion.preference", listener);
+        motion.preference.addListener(new javafx.beans.value.WeakChangeListener<>(listener));
     }
 
     public void setState(State s) {
         if (s == state) {
             return;
         }
-        boolean first = state == null;
         state = s;
         ring.getStyleClass().removeIf(c -> c.startsWith("bot-tone-"));
         ring.getStyleClass().add("bot-tone-" + s.tone);
         glyph.getStyleClass().removeIf(c -> c.startsWith("bot-tone-"));
         glyph.getStyleClass().add("bot-tone-" + s.tone);
         if (pulse != null) {
-            pulse.stop();
+            motion.removeLoop(pulse);
             pulse = null;
         }
         ring.setOpacity(1);
         ring.setScaleX(1);
         ring.setScaleY(1);
         if (s == State.MONITORING || s == State.ANALYZING) {
-            double to = s == State.ANALYZING ? 0.4 : 0.55;
-            Duration d = Duration.millis(s == State.ANALYZING ? 700 : 1800);
+            Duration period = MotionTokens.LIVE;
             pulse = motion.loop(this, () -> new Timeline(
                     new KeyFrame(Duration.ZERO, new KeyValue(ring.opacityProperty(), 1)),
-                    new KeyFrame(d, new KeyValue(ring.opacityProperty(), to, MotionTokens.EASE_IN_OUT)),
-                    new KeyFrame(d.multiply(2), new KeyValue(ring.opacityProperty(), 1, MotionTokens.EASE_IN_OUT))));
-        } else if (!first && s == State.ERROR) {
-            motion.flash(ring, javafx.scene.paint.Color.web("#F6465D"));
+                    new KeyFrame(period.divide(2), new KeyValue(ring.opacityProperty(), .45, MotionTokens.CSS_EASE_IN_OUT)),
+                    new KeyFrame(period, new KeyValue(ring.opacityProperty(), 1, MotionTokens.CSS_EASE_IN_OUT))));
         }
     }
 }

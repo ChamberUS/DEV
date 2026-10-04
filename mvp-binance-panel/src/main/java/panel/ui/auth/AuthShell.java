@@ -29,6 +29,12 @@ public final class AuthShell {
             bar.maxWidthProperty().bind(layers.widthProperty().multiply(.92 - i * .145));
             bar.setOpacity(new double[] {.9, .6, .4, .28, .18, .1}[i]);
             layers.getChildren().add(bar);
+            final int index = i;
+            bar.sceneProperty().addListener((o, was, scene) -> {
+                if (scene != null) motion.reference.enter(bar, panel.motion.MotionTokens.LOGIN_ENTRY,
+                        javafx.util.Duration.millis(index * 120), new double[] {.9, .6, .4, .28, .18, .1}[index]);
+                else motion.reference.settleTree(bar);
+            });
         }
         VBox tagline = new VBox(Ui.label("Capital, measured.", "auth-tagline"),
                 Ui.label("Research before risk.", "auth-tagline", "muted"));

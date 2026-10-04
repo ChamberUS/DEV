@@ -43,7 +43,7 @@ public class SegmentedSwitch extends StackPane {
             return;
         }
         leftSelected = leftSide;
-        motion.slideTo(thumb, leftSide ? 0 : getWidth() / 2, MotionTokens.STANDARD);
+        thumb.setTranslateX(leftSide ? 0 : getWidth() / 2);
     }
 
     public boolean leftSelected() {

@@ -69,7 +69,7 @@ public final class Dialogs {
     private static void style(DialogPane p) {
         p.sceneProperty().addListener((o, a, s) -> {
             if (s != null && motion != null) {
-                motion.popIn(p, 0.985, panel.motion.MotionTokens.EMPHASIS);
+                motion.reset(p);
             }
         });
         p.getStylesheets().add(Dialogs.class.getResource("/panel/panel.css").toExternalForm());

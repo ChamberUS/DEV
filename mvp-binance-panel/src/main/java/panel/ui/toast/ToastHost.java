@@ -44,8 +44,7 @@ public class ToastHost extends VBox {
         close.setOnAction(e -> dismiss(toast));
         getChildren().add(toast);
         queue.add(toast, this::dismiss);
-        motion.fadeSlideIn(toast, 16, 0, MotionTokens.STANDARD);
-        icon.play();
+        motion.reset(toast);
         PauseTransition stay = new PauseTransition(type.stay);
         stay.setOnFinished(e -> dismiss(toast));
         stay.play();
@@ -56,7 +55,8 @@ public class ToastHost extends VBox {
             return;
         }
         queue.remove(toast);
-        motion.fadeOut(toast, MotionTokens.FAST, () -> getChildren().remove(toast));
+        motion.reset(toast);
+        getChildren().remove(toast);
     }
 
     public int visibleCount() {

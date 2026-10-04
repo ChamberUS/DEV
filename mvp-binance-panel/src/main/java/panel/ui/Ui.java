@@ -24,14 +24,8 @@ public final class Ui {
         motion = m;
     }
 
-    /** Hover de card clicável: sobe 1 px (somente FULL). */
+    /** Cards have entry motion, but no hover transform in the reference. */
     public static <T extends Node> T hoverLift(T n) {
-        n.hoverProperty().addListener((o, was, now) -> {
-            if (motion != null) {
-                motion.shiftTo(n, 0, now ? -1 : 0, panel.motion.MotionTokens.MICRO);
-            }
-        });
-        n.setOnMousePressed(e -> n.setTranslateY(0));
         return n;
     }
 

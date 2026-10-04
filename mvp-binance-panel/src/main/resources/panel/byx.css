@@ -117,3 +117,9 @@
 .auth-notice, .warn-text, .stage-warn { -fx-text-fill: -warn; }
 .auth-notice { -fx-background-color: -warn-soft; -fx-border-color: -warn; }
 .stage-ok { -fx-text-fill: -ok; }
+
+.rail-motion-tooltip { -fx-background-color: -surface3; -fx-background-radius: 8; -fx-padding: 6 10; -fx-text-fill: -text; -fx-font-size: 12px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.53), 24, 0, 0, 8); }
+.nav-item:hover, .trader .nav-item:hover { -fx-text-fill: -text; }
+
+.nav-item:hover .svg-icon { -fx-stroke: -text; }
+.nav-item.selected .svg-icon { -fx-stroke: -accent; }

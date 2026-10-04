@@ -67,12 +67,9 @@ public class LoginView {
                     if (u != null) {
                         go.setDisable(true);
                         go.setText("✓  Signed in");
-                        javafx.animation.PauseTransition ok = new javafx.animation.PauseTransition(ctx.motion.scale(javafx.util.Duration.millis(260)));
-                        ok.setOnFinished(x -> onSuccess.accept(u));
-                        ok.play();
+                        onSuccess.accept(u);
                     } else {
                         err.setText(m);
-                        ctx.motion.shake(form, 4);
                         pw.requestFocus();
                     }
                 });

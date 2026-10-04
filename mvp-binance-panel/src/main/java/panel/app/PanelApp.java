@@ -120,6 +120,7 @@ public class PanelApp extends Application {
         ctx.refreshDensity = this::applyDensity;
         rootStack.getChildren().addAll(holder, ctx.toasts);
         StackPane.setAlignment(ctx.toasts, Pos.BOTTOM_RIGHT);
+        ctx.motion.setActive(false);
         Scene scene = new Scene(rootStack, 1440, 900);
         scene.getStylesheets().add(getClass().getResource("/panel/panel.css").toExternalForm());
         scene.getStylesheets().add(getClass().getResource("/panel/byx.css").toExternalForm());
@@ -133,6 +134,7 @@ public class PanelApp extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> ctx.adminAccess.touch());
         stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(!iconified));
         stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing));
+        ctx.motion.reference.bind(rootStack);
         stage.setScene(scene);
         stage.setMinWidth(1100);
         stage.setMinHeight(700);
@@ -387,7 +389,6 @@ public class PanelApp extends Application {
 
     private void deny(String message) {
         ctx.toasts.show(ToastType.WARNING, message);
-        lockIcon.play();
         syncTabs();
     }
 
@@ -412,7 +413,6 @@ public class PanelApp extends Application {
             if (unlockedNow) {
                 AnimatedIcon open = ctx.icons.icon("unlock", 13, "ok");
                 lockHolder.getChildren().setAll(open.node());
-                open.play();
                 PauseTransition p = new PauseTransition(javafx.util.Duration.millis(900));
                 p.setOnFinished(e -> {
                     if (!lockShown) {
@@ -445,6 +445,7 @@ public class PanelApp extends Application {
         if (toTrader) {
             cls.add("trader");
         }
+        views.get(id).onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), views.get(id).node(), changedWorkspace);
         navButtons.forEach((k, b) -> {
             b.getStyleClass().remove("selected");
@@ -453,7 +454,6 @@ public class PanelApp extends Application {
             }
         });
         moveIndicator(toByx ? byxNav : toTrader ? traderNav : researchNav, id);
-        views.get(id).onSnapshot(ctx.research.snapshot.get());
         chrome(ctx.research.snapshot.get());
     }
 
@@ -551,7 +551,7 @@ public class PanelApp extends Application {
 
     private void item(VBox nav, String id, String text) {
         Button b = new Button(railLabel(id, text));
-        b.setTooltip(new javafx.scene.control.Tooltip(text.replaceAll("^[^\\p{L}]+", "")));
+
         b.setAccessibleText(text);
         b.getStyleClass().add("nav-item");
         b.setMaxWidth(Double.MAX_VALUE);
@@ -561,20 +561,8 @@ public class PanelApp extends Application {
         b.setOnAction(e -> show(id));
         AnimatedIcon navIcon = ctx.icons.svg(NAV_ICONS.getOrDefault(id, "dashboard"), 16, "muted");
         b.setGraphic(navIcon.node());
-        b.hoverProperty().addListener((o, was, now) -> {
-            if (now) {
-                navIcon.play();
-            }
-        });
-        Region hover = new Region();
-        hover.getStyleClass().add("nav-hover");
-        hover.setOpacity(0);
-        hover.setMouseTransparent(true);
-        StackPane wrap = new StackPane(hover, b);
-        b.hoverProperty().addListener((o, was, now) -> {
-            ctx.motion.fadeTo(hover, now ? 1 : 0, MotionTokens.FAST);
-            ctx.motion.shiftTo(b, now ? 2 : 0, 0, MotionTokens.MICRO);
-        });
+        StackPane wrap = new StackPane(b);
+        ctx.motion.reference.tooltip(b, wrap, text.replaceAll("^[^\\p{L}]+", ""));
         navButtons.put(id, b);
         navWrappers.put(id, wrap);
         boolean primary = nav == traderNav ? java.util.Set.of("t-desk", "t-markets", "t-bot", "t-wallet", "t-orders").contains(id)
@@ -608,7 +596,7 @@ public class PanelApp extends Application {
                 ind.setTranslateY(y);
                 indicatorPlaced = wrap.getHeight() > 0;
             } else {
-                ctx.motion.slideYTo(ind, y, MotionTokens.STANDARD);
+                ind.setTranslateY(y);
             }
         });
     }
@@ -677,7 +665,6 @@ public class PanelApp extends Application {
         refreshBtn.setText("Refresh");
         refreshBtn.setGraphicTextGap(6);
         refreshBtn.setOnAction(e -> {
-            refreshIcon.play();
             ctx.refresh();
         });
         java.util.List<UserMenu.Item> items = new java.util.ArrayList<>();

@@ -23,6 +23,10 @@ public final class TwoFactorView {
     public TwoFactorView(AppContext ctx,Runnable onSuccess,Runnable onCancel){
         this.ctx=ctx;this.onSuccess=onSuccess;this.onCancel=onCancel;user=ctx.sessions.user().orElseThrow().user();
         root.getStyleClass().addAll("card", "auth-form");
+        root.sceneProperty().addListener((o, was, scene) -> {
+            if (scene != null) ctx.motion.reference.enter(root, panel.motion.MotionTokens.CARD_ENTRY, javafx.util.Duration.ZERO, 1);
+            else ctx.motion.reference.settleTree(root);
+        });
         root.setMaxWidth(460);wrap.setAlignment(Pos.CENTER);wrap.setPadding(new Insets(40));
         root.getChildren().add(Ui.label("Checking verification providers…","muted"));
         countdown=new Timeline(new KeyFrame(javafx.util.Duration.seconds(1),e->refreshCountdown()));countdown.setCycleCount(Timeline.INDEFINITE);countdown.play();
@@ -63,12 +67,12 @@ public final class TwoFactorView {
         send.setOnAction(e->action(()->{if(phone)flow.sendSmsCode();else flow.sendEmailCode();return true;},ok->{destination.setText("Code sent to: "+(phone?user.maskedPhone():user.maskedEmail()));message.setText("Code sent. Expires in 5 minutes.");code.requestFocus();refreshCountdown();}));
         verify.setOnAction(e->{String input=code.getText();code.clear();action(()->phone?flow.verifySms(input):flow.verifyEmail(input),result->{
             if(result==OtpService.Result.OK){if(!phone){phone=true;render();}else complete();}
-            else {code.getStyleClass().add("otp-invalid");message.setText(switch(result){case INVALID->"Invalid code.";case EXPIRED->"Code expired. Start verification again.";case TOO_MANY_ATTEMPTS->"Too many attempts. Request a new code after cooldown.";default->"Send a code for this step first.";});ctx.motion.shake(code,3);}
+            else {code.getStyleClass().add("otp-invalid");message.setText(switch(result){case INVALID->"Invalid code.";case EXPIRED->"Code expired. Start verification again.";case TOO_MANY_ATTEMPTS->"Too many attempts. Request a new code after cooldown.";default->"Send a code for this step first.";});}
         });});
         root.getChildren().setAll(Ui.label("ADMIN VERIFICATION","card-title"),Ui.label("Step "+(phone?"2":"1")+" of 2","muted"),
                 Ui.label(phone?"Phone verification":"Email verification","h1"),destination,AuthShell.field("Verification code",code),message,new HBox(8,send,verify,cancel));
         if(ctx.devOtp!=null)root.getChildren().add(Ui.badge(DevOtpProvider.LABEL,"warn"));
-        ctx.motion.fadeIn(root,javafx.util.Duration.millis(160));refreshCountdown();
+        refreshCountdown();
     }
     private void refreshCountdown(){
         if(finishButton!=null)finishButton.setDisable(busy);
@@ -81,6 +85,5 @@ public final class TwoFactorView {
         Button next=Ui.button("Continue to Research","primary");finishButton=next;message=AuthShell.error();
         root.getChildren().setAll(Ui.label("Identity verified","h1"),Ui.badge("EMAIL + SMS VERIFIED","ok"),trust,message,next);
         next.setOnAction(e->{boolean remember=trust.isSelected();action(()->{flow.finish(remember);return true;},ok->onSuccess.run());});
-        ctx.motion.fadeIn(root,javafx.util.Duration.millis(180));
     }
 }
