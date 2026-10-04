@@ -13,6 +13,10 @@ public final class IconPaths {
     }
 
     static {
+        add("wallet", "M3 6h18v14H3z M3 6V3h15v3 M15 11h6v5h-6z", Kind.POP, null);
+        add("benefits", "M12 3l8 5v8l-8 5-8-5V8z M8 12l3 3 5-6", Kind.POP, null);
+        add("treasury", "M3 8l9-5 9 5H3z M5 10v8 M10 10v8 M15 10v8 M20 10v8 M3 21h18", Kind.POP, null);
+        add("network", "M12 3v5 M5 19v-6h14v6 M12 8v5 M9 3h6 M2 21h6 M16 21h6", Kind.POP, null);
         add("lock", "M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3", Kind.SHAKE, null);
         add("unlock", "M6 11h12v9H6z M8 11V8a4 4 0 0 1 7.6-1.7", Kind.POP, null);
         add("check", "M5 12.5l4.5 4.5L19 7.5", Kind.DRAW, "/animations/original/check-pop.json");

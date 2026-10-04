@@ -38,6 +38,7 @@ public final class Ui {
     public static Label label(String text, String... styleClasses) {
         Label l = new Label(text);
         l.getStyleClass().addAll(styleClasses);
+        l.setWrapText(true);
         return l;
     }
 
@@ -118,10 +119,34 @@ public final class Ui {
     }
 
     public static VBox page(Node... children) {
-        VBox p = new VBox(18, children);
-        p.setPadding(new Insets(24, 28, 28, 28));
+        VBox p = new VBox(14, children);
+        p.setPadding(new Insets(16, 20, 16, 20));
         p.getStyleClass().add("page");
         return p;
+    }
+
+    public static Label testEnvironment() {
+        Label label = label("LOCALNET / TEST ASSETS / NO FINANCIAL VALUE", "environment-test");
+        label.setMaxWidth(Double.MAX_VALUE);
+        label.setWrapText(true);
+        return label;
+    }
+
+    public static javafx.scene.layout.GridPane columns(Node... nodes) {
+        var grid = new javafx.scene.layout.GridPane();
+        grid.getStyleClass().add("byx-columns");
+        for (int i = 0; i < nodes.length; i++) {
+            var column = new javafx.scene.layout.ColumnConstraints();
+            column.setPercentWidth(100.0 / nodes.length);
+            column.setHgrow(Priority.ALWAYS);
+            column.setMinWidth(0);
+            column.setFillWidth(true);
+            grid.getColumnConstraints().add(column);
+            grid.add(nodes[i], i, 0);
+            javafx.scene.layout.GridPane.setHgrow(nodes[i], Priority.ALWAYS);
+            if (nodes[i] instanceof Region region) { region.setMinWidth(0); region.setMaxWidth(Double.MAX_VALUE); }
+        }
+        return grid;
     }
 
     public static String toneOf(String s) {

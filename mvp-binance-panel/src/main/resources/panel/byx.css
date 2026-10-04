@@ -1,0 +1,101 @@
+/* Ledger de camadas: artifact V1. Approved local Inter replaces Schibsted Grotesk. */
+.root, .root.trader, .root.research, .root.byx {
+    -bg: #080A0F; -panel: #0E1119; -panel2: #141824; -surface3: #1C2131;
+    -border: #232A3C; -text: #ECEFF6; -text2: #A0A9BE; -muted: #7A839A;
+    -disabled: #4A5266; -ok: #42D79B; -bad: #FF7A7A; -warn: #E9B44C;
+    -info: #5CC8FF; -purple: #B896FF; -aqua: #5ED6C4; -accent: #7C96FF;
+    -fx-background-color: -bg; -fx-base: -panel2; -fx-control-inner-background: -panel;
+    -fx-font-family: "Inter"; -fx-font-size: 14px;
+}
+.root.research { -accent: -purple; }
+.root.byx { -accent: -aqua; }
+.label { -fx-text-fill: -text; }
+.muted, .muted-lg, .mono-small { -fx-text-fill: -text2; }
+.h0, .h1 { -fx-font-size: 26px; -fx-font-family: "Inter"; -fx-font-weight: bold; }
+.card, .trader .card { -fx-background-color: -panel; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-width: 0; -fx-padding: 16; }
+.page { -fx-padding: 16 20; -fx-spacing: 14; }
+.card-title, .dock-group { -fx-font-size: 11px; -fx-text-fill: -muted; -fx-font-weight: bold; }
+.metric { -fx-font-size: 28px; }
+.sidebar, .trader .sidebar { -fx-background-color: -panel; -fx-border-width: 0; }
+.rail-brand { -fx-padding: 14 0 20 0; }
+.ledger-layer { -fx-fill: -accent; }
+.nav-item { -fx-padding: 5 0; -fx-pref-width: 52; -fx-min-height: 52; -fx-font-size: 10px; -fx-background-radius: 11; -fx-background-insets: 0 4; -fx-graphic-text-gap: 3; -fx-text-fill: -muted; }
+.nav-item.selected, .trader .nav-item.selected { -fx-background-color: -surface3; -fx-text-fill: -accent; }
+.nav-item:hover, .trader .nav-item:hover, .nav-hover { -fx-background-color: -surface3; }
+.nav-indicator { -fx-background-color: -accent; }
+.topbar { -fx-min-height: 52; -fx-pref-height: 52; -fx-padding: 0 20; -fx-spacing: 12; -fx-background-color: -bg; }
+.breadcrumb { -fx-font-size: 13px; -fx-text-fill: -text2; }
+.ws-switch { -fx-padding: 0; }
+.ws-tab, .trader .ws-tab { -fx-background-color: -panel2; -fx-background-radius: 8; -fx-border-width: 0; -fx-padding: 6 12; -fx-font-size: 12px; }
+.ws-tab:selected, .ws-tab.selected, .trader .ws-tab:selected { -fx-background-color: -surface3; -fx-text-fill: -text; -fx-border-color: -accent; -fx-border-width: 0 0 2 0; -fx-border-radius: 8; }
+.command-search { -fx-pref-width: 240; -fx-alignment: CENTER_LEFT; -fx-text-fill: -muted; }
+.status-dock { -fx-background-color: -panel; -fx-border-color: -border; -fx-border-width: 1 0 0 0; -fx-padding: 0 20; -fx-min-height: 30; -fx-pref-height: 30; }
+.status-dock .label { -fx-font-size: 10px; }
+.status-ok { -fx-text-fill: -ok; } .status-bad { -fx-text-fill: -bad; } .status-byx { -fx-text-fill: -aqua; }
+.badge { -fx-background-radius: 6; -fx-border-width: 0; -fx-padding: 3 9; -fx-font-size: 11px; }
+.btn { -fx-background-radius: 9; -fx-border-radius: 9; -fx-padding: 9 16; -fx-font-size: 13px; }
+.btn-primary, .trader .btn-primary { -fx-background-color: -accent; -fx-text-fill: -bg; }
+.btn-primary:hover { -fx-background-color: derive(-accent, 10%); }
+.btn-ghost { -fx-background-color: -surface3; -fx-border-width: 0; }
+.btn-ghost:hover { -fx-background-color: derive(-surface3, 10%); }
+.text-field, .password-field, .text-area, .combo-box-base { -fx-background-color: -panel2; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: -border; -fx-padding: 10 14; }
+.text-area .content { -fx-background-color: -panel2; }
+.text-field:focused, .password-field:focused, .auth-input:focused { -fx-border-color: -accent; }
+.table-view { -fx-background-color: -panel; -fx-border-width: 0; -fx-background-radius: 14; -fx-border-radius: 14; }
+.table-view .column-header-background, .table-view .column-header, .table-view .filler { -fx-background-color: -panel; }
+.table-row-cell, .table-row-cell:odd, .trader .table-row-cell:odd { -fx-background-color: -panel; -fx-cell-size: 38; -fx-border-color: -border; -fx-border-width: 1 0 0 0; }
+.table-row-cell:selected, .trader .table-row-cell:selected, .table-row-cell:hover, .trader .table-row-cell:hover { -fx-background-color: -panel2; }
+.empty, .trader .empty { -fx-background-color: -panel2; -fx-background-radius: 9; }
+.stage, .guard-strip, .th-header, .th-strip { -fx-background-color: -panel; -fx-background-radius: 14; -fx-border-width: 0; -fx-padding: 16; }
+.pos { -fx-text-fill: -ok; } .neg { -fx-text-fill: -bad; }
+.th-stat { -fx-padding: 12 18; }
+.th-market-row { -fx-background-color: -panel2; }
+.chip:selected, .trader .chip:selected { -fx-border-color: -accent; -fx-text-fill: -accent; }
+.tab-pane > .tab-header-area .tab:selected, .trader .tab-pane > .tab-header-area .tab:selected { -fx-border-color: transparent transparent -accent transparent; }
+.auth-left { -fx-background-color: -panel; -fx-padding: 64; }
+.auth-right { -fx-background-color: -bg; -fx-border-width: 0; -fx-padding: 0 64; -fx-pref-width: 520; -fx-min-width: 440; }
+.auth-brand { -fx-font-size: 30px; }
+.auth-tagline { -fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: -text; -fx-padding: 0; }
+.auth-form { -fx-spacing: 16; }
+.auth-input { -fx-pref-height: 44; }
+.ledger-art { -fx-spacing: 14; -fx-padding: 0 0 0 100; }
+.ledger-bar { -fx-background-color: -accent; -fx-background-radius: 17; -fx-pref-height: 34; -fx-min-height: 34; -fx-max-height: 34; }
+.command-overlay { -fx-background-color: rgba(5,7,11,.82); }
+.command-panel { -fx-background-color: -panel2; -fx-padding: 20; -fx-background-radius: 14; -fx-border-color: -border; -fx-border-radius: 14; }
+.command-row { -fx-alignment: CENTER_LEFT; -fx-background-color: transparent; }
+.command-row:focused { -fx-background-color: -surface3; -fx-border-color: -accent; -fx-border-width: 0 0 0 2; }
+.tooltip, .context-menu, .dialog.dialog-pane { -fx-background-color: -panel2; -fx-background-radius: 9; -fx-border-color: -border; }
+.tooltip { -fx-text-fill: -text; }
+.environment-test { -fx-background-color: -panel2; -fx-text-fill: -aqua; -fx-background-radius: 9; -fx-padding: 12 16; }
+.environment-real { -fx-background-color: -panel2; -fx-text-fill: -warn; -fx-background-radius: 9; -fx-padding: 12 16; }
+.byx-columns { -fx-hgap: 14; -fx-vgap: 14; }
+.seg-switch { -fx-background-color: -panel2; -fx-background-radius: 10; -fx-padding: 3; }
+.seg-thumb { -fx-opacity: 0; }
+.seg-btn { -fx-background-color: transparent; -fx-text-fill: -text2; -fx-padding: 6 14; -fx-font-size: 13px; }
+.seg-btn.selected { -fx-background-color: -surface3; -fx-background-radius: 8; -fx-text-fill: -text; -fx-border-color: -accent; -fx-border-width: 0 0 2 0; }
+.auth-tagline.muted { -fx-text-fill: -text2; }
+.auth-form .field-label { -fx-text-fill: -muted; -fx-font-size: 11px; }
+.guard-strip { -fx-padding: 0; }
+.pipeline-grid { -fx-hgap: 8; -fx-padding: 10 0 0 0; }
+.pipeline-line { -fx-pref-height: 5; -fx-min-height: 5; -fx-max-height: 5; -fx-background-color: -disabled; -fx-background-radius: 3; }
+.pipeline-ok { -fx-background-color: -ok; }
+.pipeline-warn { -fx-background-color: -warn; }
+.pipeline-bad { -fx-background-color: -disabled; }
+.pipeline-label { -fx-font-size: 11px; -fx-font-weight: bold; }
+.desk-metrics { -fx-padding: 10 16; }
+.desk-metrics .metric { -fx-font-size: 18px; }
+.desk-metrics .th-stat { -fx-padding: 0 12; -fx-border-width: 0; }
+.otp-input { -fx-font-family: "JetBrains Mono"; -fx-font-size: 20px; }
+.otp-invalid { -fx-border-color: -bad; }
+.toast { -fx-background-color: -panel2; -fx-background-radius: 14; -fx-border-color: -border; -fx-border-radius: 14; }
+.rail-settings { -fx-background-color: transparent; -fx-padding: 8 0 14 0; -fx-font-size: 10px; -fx-text-fill: -muted; -fx-pref-width: 60; }
+.chart-grid-line { -fx-border-color: -border; -fx-border-width: 1 0 0 0; -fx-opacity: .35; }
+.chart-grid-ink { -fx-background-color: -border; }
+.chart-text-ink { -fx-background-color: -muted; }
+.chart-up-ink { -fx-background-color: -ok; }
+.chart-down-ink { -fx-background-color: -bad; }
+.tier-step { -fx-background-color: -surface3; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 11px; -fx-text-fill: -muted; }
+.tier-current { -fx-text-fill: -aqua; }
+.titled-pane > .title { -fx-background-color: -panel2; -fx-background-radius: 9; -fx-text-fill: -text; }
+.titled-pane > .content { -fx-background-color: -panel; -fx-border-color: -border; }
+.titled-pane { -fx-text-fill: -text; }
