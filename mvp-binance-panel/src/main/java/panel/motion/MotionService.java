@@ -29,11 +29,14 @@ import javafx.util.Duration;
 public class MotionService {
     private static final String KEY = "motion.anim";
 
+    public final ReferenceMotion reference = new ReferenceMotion(this);
+
     public final ObjectProperty<MotionPreference> preference = new SimpleObjectProperty<>(MotionPreference.FULL);
     public final BooleanProperty animatedIcons = new SimpleBooleanProperty(true);
 
     private final List<Animation> loops = new ArrayList<>();
     private final java.util.Map<Animation, Node> owners = new java.util.IdentityHashMap<>();
+    private final java.util.Map<Animation, javafx.beans.value.ChangeListener<javafx.scene.Scene>> loopListeners = new java.util.IdentityHashMap<>();
     private boolean active = true;
 
     public MotionService() {
@@ -276,17 +279,17 @@ public class MotionService {
             loops.add(a);
             owners.put(a, owner);
         }
-        owner.sceneProperty().addListener((o, was, now) -> {
-            if (now == null) {
-                a.stop();
-                synchronized (loops) {
-                    loops.remove(a);
-                    owners.remove(a);
-                }
-            } else {
-                refreshLoops();
+        javafx.beans.value.ChangeListener<javafx.scene.Scene> listener = new javafx.beans.value.ChangeListener<>() {
+            @Override public void changed(javafx.beans.value.ObservableValue<? extends javafx.scene.Scene> o,
+                    javafx.scene.Scene was, javafx.scene.Scene now) {
+                if (now == null) {
+                    removeLoop(a);
+                    owner.sceneProperty().removeListener(this);
+                } else refreshLoops();
             }
-        });
+        };
+        loopListeners.put(a, listener);
+        owner.sceneProperty().addListener(listener);
         refreshLoops();
         return a;
     }
@@ -306,11 +309,19 @@ public class MotionService {
         }
     }
 
+    public void removeLoop(Animation animation) {
+        animation.stop();
+        synchronized (loops) {
+            Node owner = owners.remove(animation);
+            var listener = loopListeners.remove(animation);
+            if (owner != null && listener != null) owner.sceneProperty().removeListener(listener);
+            loops.remove(animation);
+        }
+    }
+
     public void stopLoops() {
         synchronized (loops) {
-            loops.forEach(Animation::stop);
-            loops.clear();
-            owners.clear();
+            new ArrayList<>(loops).forEach(this::removeLoop);
         }
     }
 

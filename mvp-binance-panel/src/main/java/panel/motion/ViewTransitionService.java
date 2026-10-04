@@ -3,62 +3,29 @@ package panel.motion;
 import java.util.Collection;
 import javafx.scene.Node;
 
-/** Troca de páginas com crossfade + deslocamento curto. Não recria views nem dados. */
+/** The reference has card entry, but no page crossfade or workspace slide. */
 public class ViewTransitionService {
     private final MotionService motion;
     private Node current;
 
-    public ViewTransitionService(MotionService motion) {
-        this.motion = motion;
-    }
+    public ViewTransitionService(MotionService motion) { this.motion = motion; }
 
     public void show(Collection<Node> all, Node target, boolean workspaceSwitch) {
-        Node prev = current;
+        boolean changed = current != target;
+        for (Node node : all) if (node != target) {
+            motion.reference.settleTree(node);
+            motion.reset(node);
+            node.setVisible(false);
+        }
         current = target;
-        for (Node n : all) {
-            if (n != target && n != prev) {
-                hide(n);
-            }
-        }
-        if (prev == target) {
-            target.setVisible(true);
-            motion.refreshLoops();
-            return;
-        }
         target.setVisible(true);
-        if (prev != null && !motion.off() && target instanceof javafx.scene.Parent p) {
-            // aplica o CSS antes de animar: senão o 1º frame pesado consome a transição inteira
-            target.setOpacity(0);
-            p.applyCss();
+        motion.reset(target);
+        if (changed) {
+            if (target instanceof javafx.scene.Parent parent) parent.applyCss();
+            motion.reference.enterCards(target);
         }
-        if (prev == null || motion.off()) {
-            if (prev != null) {
-                hide(prev);
-            }
-            motion.reset(target);
-            motion.refreshLoops();
-            return;
-        }
-        double dy = workspaceSwitch ? 12 : 10;
-        motion.fadeSlideIn(target, 0, dy, workspaceSwitch ? MotionTokens.EMPHASIS : MotionTokens.STANDARD);
-        motion.fadeOut(prev, workspaceSwitch ? MotionTokens.FAST : MotionTokens.MICRO, () -> {
-            if (prev != current) {
-                hide(prev);
-            }
-            motion.refreshLoops();
-        });
         motion.refreshLoops();
     }
 
-    public void forget() {
-        current = null;
-    }
-
-    private void hide(Node n) {
-        motion.cancel(n);
-        n.setVisible(false);
-        n.setOpacity(1);
-        n.setTranslateX(0);
-        n.setTranslateY(0);
-    }
+    public void forget() { current = null; }
 }
