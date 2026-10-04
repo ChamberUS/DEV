@@ -67,6 +67,14 @@ public class AppContext {
             new panel.adapter.CosmosByxPaymentVerifier(clock),clock,panel.service.ByxPaymentPolicy::load);
     public final panel.service.EntitlementService byxEntitlements = new panel.service.EntitlementService(byxBenefits,byxPayments);
 
+    public final panel.repository.GasGrantRepository byxGasJournal = new panel.repository.GasGrantRepository(db);
+    public final panel.adapter.ByxGasGrantGateway byxGasGateway = security.devMode()
+            && "I_ACKNOWLEDGE_TEST_ONLY".equals(System.getenv("BYX_LOCALNET_TEST_SIGNER"))
+            ? new panel.adapter.LocalnetGasTestSigner(clock, true, Path.of("scripts/byx_gas_test.py"))
+            : new panel.adapter.CosmosGasGrantGateway(clock);
+    public final panel.service.GasSponsorshipService byxGas = new panel.service.GasSponsorshipService(
+            sessions, byxWallets, byxBenefits, byxGasJournal, byxGasGateway, panel.service.GasSponsorshipPolicy::load, clock);
+
     public final CommandAdapter cli = new AdaptiveTraderCli(() -> settings.cliPath);
     public final JobManager jobs = new JobManager(cli, settings::project, this::refresh, adminAccess::requireAdmin);
     public final ResearchService research = new ResearchService(settings, new panel.adapter.LocalBackendGateway(new FileResearchBackend(cli)), new MockResearchBackend(), jobs);

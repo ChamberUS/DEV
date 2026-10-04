@@ -15,3 +15,5 @@ current_campaign
 __pycache__/
 *.py[cod]
 /byx-payments-test.properties
+
+/byx-gas-test.properties

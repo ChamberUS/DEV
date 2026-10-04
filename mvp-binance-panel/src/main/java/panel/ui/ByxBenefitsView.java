@@ -12,6 +12,9 @@ public final class ByxBenefitsView implements View {
     private final AppContext ctx;
     private final VBox current = new VBox(8);
     private final VBox payment = new VBox(8);
+    private final VBox gas = new VBox(8);
+    private String gasMessage = "Native feegrant; explicit DEV TEST signer required";
+    private boolean gasBusy;
     private final javafx.scene.control.TextField txHash = new javafx.scene.control.TextField();
     private panel.model.PaymentIntent intent;
     private boolean confirming;
@@ -36,6 +39,7 @@ public final class ByxBenefitsView implements View {
         body.getChildren().addAll(Ui.label("Plano e benefícios BYX", "h1"),
                 Ui.label("LOCALNET / TEST ASSETS / NO FINANCIAL VALUE", "muted"), Ui.kvNode("Wallet", selected), refresh, current,
                 Ui.card("Advanced Analytics Pass — TEST",payment),
+                Ui.card("Gas sponsorship — LOCALNET TEST",gas),
                 Ui.card("Acesso normal", Ui.label("Use o aplicativo sem carteira. BYX é opcional; pagamentos não serão exclusivos em BYX.", "muted")),
                 Ui.card("Métodos de pagamento independentes", methods),
                 Ui.card("Descontos e recursos do aplicativo",
@@ -43,13 +47,40 @@ public final class ByxBenefitsView implements View {
                         Ui.kv("Limites adicionais", "Não definidos / acesso normal preservado")),
                 Ui.card("Três custos distintos",
                         Ui.kv("Taxas do aplicativo", "Política futura; sem preços ou percentuais contratados"),
-                        Ui.kv("Taxas da rede BYX", "Subsídio opcional futuro; não concedido"),
+                        Ui.kv("Taxas da rede BYX", "Patrocínio LOCALNET TEST separado; quota finita e expiração"),
                         Ui.kv("Taxas da exchange", "Independentes; custos Binance preservados")),
                 Ui.card("Prova de controle obrigatória",
                         Ui.label("Digitar um endereço não comprova propriedade. Abra BYX → Wallet para verificar uma assinatura ADR-036.", "muted"),
                         Ui.label("Benefícios não concedem ADMIN, acesso a dados reservados ou execução de estratégias.", "muted")),
                 Ui.card("Tesouraria", Ui.label("Saldos LOCALNET são ATIVOS DE TESTE / SEM VALOR FINANCEIRO.", "muted"),
                         Ui.label("Sem reservas verificadas, promessa de lastro, resgate ou rendimento.", "muted")));
+    }
+    private void renderGas(String address) {
+        var request=Ui.button("Request TEST gas allowance", "ghost");
+        var refresh=Ui.button("Refresh / reconcile grant", "ghost");
+        var revoke=Ui.button("Revoke TEST allowance", "ghost");
+        request.setDisable(gasBusy || address==null || ctx.byxWallets.verified(address).isEmpty());
+        refresh.setDisable(gasBusy || address==null); revoke.setDisable(gasBusy || address==null);
+        request.setOnAction(e -> gasAction(address, "request"));
+        refresh.setOnAction(e -> gasAction(address, "refresh"));
+        revoke.setOnAction(e -> gasAction(address, "revoke"));
+        gas.getChildren().setAll(Ui.label("LOCALNET / TEST ASSETS / NO FINANCIAL VALUE", "muted"),
+                Ui.label("One bounded V1 quota; no automatic replenishment. Only native MsgSend fees.", "muted"),
+                Ui.label(gasMessage,"muted"),request,refresh,revoke);
+    }
+    private void gasAction(String address, String action) {
+        var session=ctx.sessions.user().orElseThrow().id(); gasBusy=true;
+        java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+            try {
+                if (action.equals("revoke")) {ctx.byxGas.revoke(address); return "REVOKED on-chain";}
+                var g=action.equals("request")?ctx.byxGas.request(address):ctx.byxGas.refresh(address);
+                return g.state()+" · remaining "+g.remaining()+" ubyx · limit "+g.spendLimit()+" ubyx · expires "+g.expiration();
+            } catch(Exception failure) {return "Unavailable / blocked: "+failure.getMessage();}
+        }).whenComplete((message,error) -> javafx.application.Platform.runLater(() -> {
+            gasBusy=false;
+            if (ctx.sessions.user().filter(u -> u.id().equals(session)).isEmpty()) {gasMessage="Session changed";return;}
+            gasMessage=message;onSnapshot(null);
+        }));
     }
     private void renderPayment(String address) {
         var entitlement=ctx.byxEntitlements.snapshot(address).stream().filter(e->e.id().equals("advanced_analytics")).findFirst().orElseThrow();
@@ -135,6 +166,7 @@ public final class ByxBenefitsView implements View {
                 catch(panel.security.AccessDeniedException denied){analytics.getChildren().add(Ui.label("UNAVAILABLE — pass/tier no longer valid","muted"));}
             });
             renderPayment(address);
+            renderGas(address);
             current.getChildren().setAll(Ui.card("Experimental benefits", Ui.kv("Current tier", s.tier()),
                     Ui.kv("Verified wallet", s.walletStatus() + " · " + (address == null ? "—" : address)),
                     Ui.kv("BYX balance", s.formattedBalance()), Ui.kv("Network", "LOCALNET · " + s.chainState()),
