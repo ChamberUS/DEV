@@ -74,7 +74,7 @@ public final class MotionParitySmoke {
             }
             invoke("show", String.class, "t-markets");
             invoke("show", String.class, "t-desk");
-            Node card = stage.getScene().getRoot().lookup(".th-header");
+            Node card = stage.getScene().getRoot().lookup("#desk-header");
             observe("desk", card, "entry", false, this::hover);
         }
         private void hover() throws Exception {
@@ -90,7 +90,8 @@ public final class MotionParitySmoke {
         }
         private void driveHover() throws Exception {
             Button button = stage.getScene().getRoot().lookupAll(".btn").stream()
-                    .filter(n -> n instanceof Button b && !b.isDisabled() && visible(b))
+                    .filter(n -> n instanceof Button b && !b.isDisabled() && visible(b)
+                            && !b.getStyleClass().contains("command-search") && !b.getStyleClass().contains("ws-tab"))
                     .map(n -> (Button)n).findFirst().orElseThrow();
             setHover(button, false); ctx.motion.reference.settleTree(button);
             setHover(button, true);

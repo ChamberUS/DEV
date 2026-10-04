@@ -88,7 +88,7 @@ public final class RedesignVisualSmoke {
                     }
                     authorize();
                 }
-                if (id.equals("palette")) invoke("openPalette", null, null);
+                if (id.equals("palette")) { invoke("show", String.class, "t-desk"); invoke("openPalette", null, null); }
                 else invoke("show", String.class, id);
             }
             int width = sizes[size][0], height = sizes[size][1];

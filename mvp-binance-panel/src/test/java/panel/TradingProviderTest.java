@@ -23,6 +23,7 @@ class TradingProviderTest {
         assertNull(t.account);
         assertNull(t.equity);
         assertNull(t.price);
+        assertEquals("NOT_CONFIGURED", t.feed);
         assertTrue(t.candles.isEmpty());
     }
 

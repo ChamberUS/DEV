@@ -107,7 +107,9 @@ class ReferenceMotionTest {
             MotionService m = new MotionService(); Region card = card(); Region skeleton = panel.ui.motion.Skeleton.bar(100,10);
             Pane root = new Pane(card, skeleton); new Scene(root); m.reference.bind(root);
             m.reference.enter(card, MotionTokens.CARD_ENTRY, Duration.ZERO, 1);
+            Timeline cancelled = animation(card, "entry");
             assertEquals(1, m.loopCount()); root.getChildren().clear();
+            cancelled.jumpTo(Duration.millis(200));
             assertEquals(0, m.loopCount()); assertEquals(1, card.getOpacity()); assertEquals(0, card.getTranslateY());
             assertNull(card.getProperties().get("reference.entry"));
             assertNull(card.getProperties().get("reference.entry.pending.settle"));
@@ -117,12 +119,17 @@ class ReferenceMotionTest {
     @Test void focusBlurReversesRingAndKeepsInputValue() throws Exception {
         FxSupport.fx(() -> {
             MotionService m = new MotionService(); FocusInput input = new FocusInput(); input.setText("unchanged");
-            m.reference.bind(input); input.focus(true); Timeline focus = animation(input, "focus");
-            focus.jumpTo(Duration.millis(100)); double alpha = ((javafx.scene.effect.DropShadow)input.getEffect()).getColor().getOpacity();
+            Pane root = new Pane(input); new Scene(root);
+            root.getStylesheets().add(getClass().getResource("/panel/byx.css").toExternalForm());
+            root.applyCss(); m.reference.bind(input);
+            input.focus(true); root.applyCss(); Timeline focus = animation(input, "border");
+            focus.jumpTo(Duration.millis(100));
+            double alpha = ((Color)input.getBorder().getStrokes().get(1).getTopStroke()).getOpacity();
             assertTrue(alpha > 0 && alpha < 34.0 / 255);
-            input.focus(false); Timeline blur = animation(input, "focus");
-            assertEquals(alpha, ((javafx.scene.effect.DropShadow)input.getEffect()).getColor().getOpacity(), 1e-7);
+            input.focus(false); root.applyCss(); Timeline blur = animation(input, "border");
+            assertEquals(alpha, ((Color)input.getBorder().getStrokes().get(1).getTopStroke()).getOpacity(), 1e-7);
             finish(blur); assertNull(input.getEffect()); assertEquals("unchanged", input.getText());
+            assertEquals(3, input.getBorder().getStrokes().get(1).getWidths().getTop());
         });
     }
 
