@@ -242,7 +242,7 @@ public final class ReferenceMotion {
             for (int i = 0; i < children.size(); i++) {
                 Node child = children.get(i);
                 if (child.getStyleClass().contains("card") || child.getStyleClass().contains("th-header")
-                        || child.getStyleClass().contains("guard-strip")) {
+                        || child.getStyleClass().contains("guard-strip") || child.getStyleClass().contains("th-strip")) {
                     enter(child, MotionTokens.CARD_ENTRY, Duration.millis(i >= 1 && i <= 3 ? i * 60 : 0), 1);
                 } else enterCards(child);
             }

@@ -110,6 +110,7 @@ class ReferenceMotionTest {
             assertEquals(1, m.loopCount()); root.getChildren().clear();
             assertEquals(0, m.loopCount()); assertEquals(1, card.getOpacity()); assertEquals(0, card.getTranslateY());
             assertNull(card.getProperties().get("reference.entry"));
+            assertNull(card.getProperties().get("reference.entry.pending.settle"));
         });
     }
 
