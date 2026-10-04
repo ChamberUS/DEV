@@ -879,3 +879,30 @@ Payment files created: `PaymentIntent.java`, `PaymentReceipt.java`,
 Payment files changed: `AppContext.java`, `Entitlement.java`,
 `EntitlementService.java`, `ByxBenefitsView.java`, `ByxVisualSmoke.java`,
 `pom.xml`, `.gitignore`, `docs/BYX_INTEGRATION_V1.md`.
+
+## LOCALNET V1 freeze / native gas / Treasury / DEVNET readiness
+
+This phase supersedes the previous “SUPPORTED, not activated” feegrant audit:
+native bounded LOCALNET TEST sponsorship is now implemented and smoked. Economic
+thresholds/quotas remain development fixtures, not final tokenomics.
+
+- [Frozen technical identity and contracts](BYX_LOCALNET_V1_FREEZE.md).
+- [Gas sponsorship security, experimental policy and on-chain smoke](BYX_GAS_SPONSORSHIP_V1.md).
+- [Treasury model/UI and future external custody boundary](BYX_TREASURY_V1.md).
+- [Local-only persistent DEVNET audit and recovery alternatives](BYX_DEVNET_READINESS_V1.md).
+
+No quantitative engine, capture supervisor, reserved dataset, historical BYX
+state or remote server was modified. No real-value money moved. JavaFX continues
+without user private keys. Native TEST signing is an explicit DEV-only adapter;
+normal application writes remain disabled. Auth/motion and all research/trading
+permissions remain independent of holdings, payments and gas allowances.
+
+Validation for this phase: **185 Java tests passed** in both `mvn test` and
+`mvn clean package` (18 gas security cases, 5 treasury cases, 162 regressions).
+**3 focused Python gas helper tests passed**; Ruff for the two touched Python
+files and scoped git diff checks passed. Native gas smoke reconciled user/sponsor
+balances, confirmed revocation and rejected later sponsorship; read-only Treasury
+reconciled 0.170000 BYX TEST and zero active recorded grants. JavaFX visual QA used
+an isolated database, normal USER, existing development OTP and FULL motion;
+Treasury screenshot was inspected. No Go source/test change, full Python suite,
+heavy research, reserved data or remote deployment was executed.
