@@ -45,6 +45,9 @@ public final class ByxBenefitsView implements View {
         try { ctx.byxBenefits.refresh(selected.getValue()).whenComplete((s,e) -> javafx.application.Platform.runLater(() -> onSnapshot(null))); }
         catch (RuntimeException e) { onSnapshot(null); }
     }
+    private static String format(java.math.BigInteger amount) {
+        return amount == null ? "UNKNOWN / NOT APPLICABLE" : new java.math.BigDecimal(amount, 6).toPlainString() + " BYX";
+    }
     public Node node() { return root; }
     public void onSnapshot(Snapshot ignored) {
         try {
@@ -54,10 +57,34 @@ public final class ByxBenefitsView implements View {
             if (selected.getValue() == null && !addresses.isEmpty()) selected.setValue(addresses.get(0));
             String address = selected.getValue();
             var s = ctx.byxBenefits.snapshot(address);
+            var rows = new VBox(8);
+            ctx.byxEntitlements.snapshot(address).forEach(e -> rows.getChildren().add(
+                    Ui.kv(e.displayName(), e.requiredTier() + " · " + e.status())));
+            var history = new VBox(8);
+            var openHistory = Ui.button("Open Extended History", "ghost");
+            openHistory.setId("byx-extended-history");
+            openHistory.setDisable(!ctx.byxEntitlements.allows(address, "extended_history"));
+            openHistory.setOnAction(event -> {
+                history.getChildren().clear();
+                try {
+                    ctx.byxEntitlements.extendedHistory(address).forEach(entry -> history.getChildren().add(
+                            Ui.kv(entry.refreshedAt().toString(), format(entry.balanceUbyx()) + " · " + entry.tier())));
+                } catch (panel.security.AccessDeniedException denied) {
+                    history.getChildren().add(Ui.label("UNAVAILABLE — verified wallet and fresh chain required", "muted"));
+                }
+            });
+            var progress = ctx.byxEntitlements.progress(address);
             current.getChildren().setAll(Ui.card("Experimental benefits", Ui.kv("Current tier", s.tier()),
-                    Ui.kv("Verified wallet", s.walletStatus() + " · " + (address == null ? "—" : address)), Ui.kv("BYX balance", s.formattedBalance()),
-                    Ui.kv("Available benefits", String.join(" · ", s.availableBenefits())), Ui.kv("Next tier", s.nextTier()),
-                    Ui.kv("Last chain update", s.lastChainUpdate() == null ? "UNKNOWN" : s.lastChainUpdate().toString())));
+                    Ui.kv("Verified wallet", s.walletStatus() + " · " + (address == null ? "—" : address)),
+                    Ui.kv("BYX balance", s.formattedBalance()), Ui.kv("Network", "LOCALNET · " + s.chainState()),
+                    Ui.kv("Last refresh", s.lastChainUpdate() == null ? "UNKNOWN" : s.lastChainUpdate().toString())),
+                    Ui.card("YOUR BENEFITS", rows),
+                    Ui.card("Extended History · LOCALNET preview", openHistory, history,
+                            Ui.label("Public wallet balance refresh history, up to 20 entries in this app session. No research data or trading execution.", "muted")),
+                    Ui.card("Next tier", Ui.kv("Next tier", progress.nextTier()),
+                            Ui.kv("Required BYX", format(progress.requiredUbyx())),
+                            Ui.kv("Current BYX", format(progress.currentUbyx())),
+                            Ui.kv("Remaining BYX", format(progress.remainingUbyx()))));
         } catch (RuntimeException e) { current.getChildren().setAll(Ui.kv("Current tier", "FREE · LOCALNET configuration required")); }
     }
 }

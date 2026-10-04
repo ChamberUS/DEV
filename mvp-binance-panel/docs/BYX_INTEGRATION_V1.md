@@ -588,3 +588,116 @@ pathspec também alcança outros projetos do repositório pai e encontrou cinco
 linhas com whitespace preexistente em `iaos-web/src/apps/site_legacy/Layout.jsx`
 e `iaos-web/src/apps/site_legacy/Pages/MyStore.jsx`; esses arquivos não foram
 alterados nesta tarefa.
+
+## BYX Entitlements v1 — application capabilities, LOCALNET/TEST
+
+This phase extends the earlier badge/preview delivery with a central application
+capability service. `Entitlement` stores id, display name, required tier, enabled,
+source, optional expiry and UNLOCKED/LOCKED/UNAVAILABLE status. Tier thresholds
+remain in the existing exact-integer ubyx development configuration; they are not
+prices, financial balances, permanent policy or exchange cost reductions.
+
+`VerifiedWallet -> ByxBenefitsService -> tier -> EntitlementService -> UI capability`.
+Views never authorize from a balance. Only a fresh verified current-user wallet
+can unlock the four allowlisted application capabilities:
+
+| Capability | Required tier | Scope |
+| --- | --- | --- |
+| extended_history | HOLDER | Implemented noncritical UI demo: recent public wallet balance refreshes |
+| advanced_analytics | PLUS | Experimental application capability contract |
+| advanced_bot_controls | PLUS | Interface preview contract; no bot execution authority |
+| premium_research_tools | PRO | Synthetic preview contract; no dataset or administrative research permission |
+
+The allowlist rejects all other ids, including ADMIN, research_admin, VALIDATION,
+FINAL_HOLDOUT, live_trading and strategy_execution. Existing authentication,
+research approvals, dataset gates and execution checks are unchanged. The source
+is explicitly `LOCALNET_TEST/HOLD_TO_UNLOCK`. The metadata expiry is the chain
+freshness deadline (last update + 60 seconds); proof expiry/revocation or logout
+may remove access earlier. Every consumer must recheck through the service.
+No payment, financial discount, real custody or live execution is implemented.
+
+### Real UI gate and exact progress
+
+Benefits shows current tier, verified wallet, balance, LOCALNET + connection /
+freshness, last refresh, YOUR BENEFITS rows, and next tier / required / current /
+remaining BYX. Arithmetic is BigInteger ubyx; rendering is BigDecimal with six
+places. Unknown amounts stay unknown, rather than becoming fabricated zeroes.
+For maximum tier no required/remaining amount is applicable. Cached offline data
+is explicitly OFFLINE/STALE; policy falls back to FREE and disables grants.
+
+“Open Extended History” is disabled for FREE. Its click handler also rechecks
+`EntitlementService.extendedHistory`, so an old enabled button cannot bypass a
+subsequent downgrade, expiry, revocation, logout or stale/offline chain. The
+implemented view lists up to 20 distinct wallet balance refresh snapshots observed
+when opened during this app session. It reads no historical market/research data
+and performs no trading operation. The other three entries are capability
+contracts/preview metadata; this phase does not implement their feature modules.
+Normal application access without a wallet stays available. Auth and Motion are
+preserved; screens retain LOCALNET / TEST ASSETS / NO FINANCIAL VALUE notices.
+
+### Future payment sources — documentation only
+
+Entitlement issuance can later accept independent HOLD_TO_UNLOCK, PAY_TO_UNLOCK,
+SUBSCRIPTION and DISCOUNT policies. Each source would require its own evidence,
+expiry/revocation and enforcement; a tier should not substitute for a payment
+receipt. Payment proofs and subscription records would live separately from
+wallet ownership and balance snapshots. No external payment connection, invoice,
+price or final discount is introduced now. Normal payments remain independent of
+BYX; BYX will never be the sole mandatory payment method. App fees, BYX network
+fees and exchange fees remain separate.
+
+### Capture correction and validation for this phase
+
+Concrete cause: the rejected first chunk left `paths` empty, then the CLI
+unconditionally built an empty campaign. See
+[CAPTURE_NO_SESSION_ROBUSTNESS.md](../../mvp-binance/docs/CAPTURE_NO_SESSION_ROBUSTNESS.md)
+for incident evidence, bounded retries, NO_SESSION/INCOMPLETE exit 75 and the
+versioned supervisor's fast retry policy. Scientific rejection is unchanged.
+The old recorder autonomously failed again at 2026-10-04 01:19:57 UTC. During its
+supervisor's backoff, with no recorder active, the old supervisor was closed
+through its existing graceful cleanup and the reviewed launcher was installed.
+Capture resumed at 01:22:19 UTC, supervisor 13916 / recorder 13923 / campaign
+`ethusdt-futures-continuous-20261004T012219Z`. Fresh HTTP 200 plus growth of a new
+event part-file confirmed recording. This task did not interrupt an active
+recorder. The versioned retry policy is now installed; source details and exact
+UTC activation evidence are in the capture document. No scientific gate changed.
+
+Validation completed:
+
+- `mvn test`: 139 tests, zero failures/errors/skips, BUILD SUCCESS.
+- `mvn clean package`: 139 tests, zero failures/errors/skips, BUILD SUCCESS.
+- Seven new entitlement tests cover all tiers, upgrade/downgrade, revocation,
+  watch-only/logout, offline/stale/aged cache, exact one-ubyx progress, real history
+  enforcement and exclusion of administrative/research/trading capabilities.
+- Python: 21 targeted campaign tests passed with `--no-cov`; Ruff passed on both
+  touched Python files. Shell syntax and exit 0/75/2 retry-delay tests passed.
+  The initial pytest run passed its 16 tests but failed the full-suite coverage
+  threshold; the targeted verification intentionally disables aggregate coverage.
+- Real localnet visual smoke passed with disposable USER database, existing DEV
+  signer and fresh public proof: FREE button disabled -> verified PLUS at
+  1000.755433 BYX, unlocked history opened -> revoked wallet button disabled.
+  Screenshots were visually inspected. No transfer was repeated in this phase.
+- Scoped diff checks and private-key/credential-marker review passed. Preexisting
+  Ruff findings and another project's whitespace were not corrected.
+
+Files created: `src/main/java/panel/model/Entitlement.java`,
+`src/main/java/panel/service/EntitlementService.java`,
+`src/test/java/panel/ByxEntitlementsTest.java`.
+Files changed: `src/main/java/panel/app/AppContext.java`,
+`src/main/java/panel/service/ByxBenefitsService.java`,
+`src/main/java/panel/ui/ByxBenefitsView.java`,
+`src/test/java/panel/ByxVisualSmoke.java`, this documentation.
+Capture files: `src/adaptive_trader/cli/main.py`,
+`tests/microstructure/test_campaign_no_session.py`,
+`scripts/continuous_capture.sh`, `docs/CAPTURE_NO_SESSION_ROBUSTNESS.md` in motor repo.
+
+No active recording was interrupted. The supervisor was safely replaced only
+after a new autonomous failure left it idle. No payment integration, real transfer,
+heavy research, reserved dataset access, EVM or frozen-spec modification was run.
+
+Git: capture source/tests/launcher/documentation were committed and pushed without
+including preexisting research edits or data. The panel's preexisting BYX base is
+still untracked; its coherent phase-only commit/push remains pending the user's
+choice about including that necessary earlier base. The incremental source patch
+is retained outside Git at `/private/tmp/byx-entitlements-phase/panel-phase.patch`.
+No keys, keyrings, state, credentials, logs or raw data were staged.

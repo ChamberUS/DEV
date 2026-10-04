@@ -107,6 +107,11 @@ public final class ByxBenefitsService implements AutoCloseable {
             } finally { busy.set(false); }
         }, worker);
     }
+    public BigInteger thresholdUbyx(String tier) {
+        var value = thresholds.get(tier);
+        if (value == null) throw new IllegalArgumentException("Unknown experimental tier");
+        return value;
+    }
     public void close() { cached = null; worker.shutdownNow(); }
 
     public PaymentMethods payments() {

@@ -73,7 +73,14 @@ public final class ByxVisualSmoke {
                     ByxLocalnetSmoke.check(snapshot.identity().equals("VERIFIED"), "User summary must verify");
                     ByxLocalnetSmoke.check(!context.adminAccess.hasValidAdminSession(), "USER cannot have AdminSession");
                     invoke("show", String.class, "t-byx");
-                    later(() -> { shot("user-network"); if (Boolean.getBoolean("byx.wallet.qa")) walletFlow(); else Platform.exit(); });
+                    later(() -> { shot("user-network"); if (Boolean.getBoolean("byx.wallet.qa")) {
+                        invoke("show", String.class, "t-benefits");
+                        later(() -> {
+                            var gate = (javafx.scene.control.Button) window.getScene().getRoot().lookup("#byx-extended-history");
+                            ByxLocalnetSmoke.check(gate != null && gate.isDisabled(), "FREE UI gate closed");
+                            shot("entitlements-free"); walletFlow();
+                        });
+                    } else Platform.exit(); });
                 } catch (Throwable t) { fail(t); }
             }));
         }
@@ -116,9 +123,18 @@ public final class ByxVisualSmoke {
                         shot("wallet-verified");
                         ((javafx.scene.control.ScrollPane)node).setVvalue(1);
                         later(()->{shot("wallet-balance");invoke("show",String.class,"t-benefits");
-                            later(()->{shot("wallet-benefits");invoke("show",String.class,"t-wallet");button(node,"Unlink / Revoke").fire();
+                            later(()->{
+                                var gate = (javafx.scene.control.Button) window.getScene().getRoot().lookup("#byx-extended-history");
+                                ByxLocalnetSmoke.check(gate != null && !gate.isDisabled(), "PLUS UI gate unlocked");
+                                gate.fire(); shot("wallet-benefits");invoke("show",String.class,"t-wallet");button(node,"Unlink / Revoke").fire();
                                 ByxLocalnetSmoke.check(!context.byxBenefits.snapshot(address).benefitsEnabled(),"UI revoke");
-                                later(()->{shot("wallet-revoked");Platform.exit();});});});
+                                later(()->{shot("wallet-revoked");invoke("show",String.class,"t-benefits");
+                                    later(() -> {
+                                        var revokedGate = (javafx.scene.control.Button) window.getScene().getRoot().lookup("#byx-extended-history");
+                                        ByxLocalnetSmoke.check(revokedGate != null && revokedGate.isDisabled(), "Revoked UI gate closed");
+                                        shot("entitlements-revoked"); Platform.exit();
+                                    });
+                                });});});
                     });
                 }catch(Throwable t){fail(t);}
             }));

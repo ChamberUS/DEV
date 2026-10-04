@@ -62,6 +62,7 @@ public class AppContext {
             sessions, new panel.repository.ByxWalletRepository(db), byx, clock);
     public final panel.service.ByxBenefitsService byxBenefits = new panel.service.ByxBenefitsService(
             byxWallets, new panel.adapter.CosmosByxChainGateway(clock), clock, panel.service.ByxBenefitsService.defaults());
+    public final panel.service.EntitlementService byxEntitlements = new panel.service.EntitlementService(byxBenefits);
 
     public final CommandAdapter cli = new AdaptiveTraderCli(() -> settings.cliPath);
     public final JobManager jobs = new JobManager(cli, settings::project, this::refresh, adminAccess::requireAdmin);
