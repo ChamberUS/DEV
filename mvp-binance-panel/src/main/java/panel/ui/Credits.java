@@ -34,6 +34,7 @@ public final class Credits {
         a.setHeaderText(panel.app.AppBranding.title("About / Credits"));
         a.getDialogPane().setContent(box);
         a.getDialogPane().getStylesheets().add(Credits.class.getResource("/panel/panel.css").toExternalForm());
+        a.getDialogPane().getStylesheets().add(Credits.class.getResource("/panel/byx.css").toExternalForm());
         a.getDialogPane().getStyleClass().add("dialog");
         a.showAndWait();
     }

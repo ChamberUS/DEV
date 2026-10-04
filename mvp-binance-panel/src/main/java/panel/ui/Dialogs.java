@@ -73,6 +73,7 @@ public final class Dialogs {
             }
         });
         p.getStylesheets().add(Dialogs.class.getResource("/panel/panel.css").toExternalForm());
+        p.getStylesheets().add(Dialogs.class.getResource("/panel/byx.css").toExternalForm());
         p.getStyleClass().add("dialog");
     }
 }
