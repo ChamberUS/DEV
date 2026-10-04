@@ -29,32 +29,40 @@ public class TradingDeskView extends TraderPage {
     protected void build(TraderSnapshot t, VBox page) {
         page.getChildren().add(header(t));
 
-        VBox markets = Ui.card("Markets", marketRow(t));
-        markets.setPrefWidth(150);
-        markets.setMinWidth(150);
-        markets.setMaxWidth(150);
         Node chart = t.candles.isEmpty() ? chartPlaceholder(t) : new CandleChart(t.candles);
-        VBox chartCard = Ui.card(Fmt.text(t.symbol) + " " + Fmt.text(t.market) + " · 1m", chart);
-        chartCard.setPrefHeight(400);
-        chartCard.setMinHeight(400);
-        if (chart instanceof Region r) {
-            VBox.setVgrow(r, Priority.ALWAYS);
+        HBox timeframes = new HBox(8);
+        for (String interval : new String[] {"1m", "5m", "15m", "1h", "4h"}) {
+            var button = new javafx.scene.control.ToggleButton(interval);
+            button.getStyleClass().add("chip");
+            button.setSelected(interval.equals("1m"));
+            button.setDisable(!interval.equals("1m"));
+            button.setTooltip(new javafx.scene.control.Tooltip("The current backend supplies 1m candles."));
+            timeframes.getChildren().add(button);
         }
-        HBox.setHgrow(chartCard, Priority.ALWAYS);
+        VBox chartCard = new VBox(14, timeframes, chart);
+        chartCard.getStyleClass().add("card");
+        chartCard.setPrefHeight(440);
+        VBox.setVgrow(chart, Priority.ALWAYS);
         VBox right = new VBox(14, orderBook(t), recentTrades(t), botCard(t));
-        right.setPrefWidth(280);
-        right.setMinWidth(280);
-        right.setMaxWidth(280);
-        HBox mid = new HBox(14, markets, chartCard, right);
-        page.getChildren().add(mid);
-
+        right.setMinWidth(0);
+        var middle = new javafx.scene.layout.GridPane();
+        middle.getStyleClass().add("byx-columns");
+        var mainColumn = new javafx.scene.layout.ColumnConstraints();
+        mainColumn.setPercentWidth(76);
+        var sideColumn = new javafx.scene.layout.ColumnConstraints();
+        sideColumn.setPercentWidth(24);
+        middle.getColumnConstraints().addAll(mainColumn, sideColumn);
+        middle.add(chartCard, 0, 0);
+        middle.add(right, 1, 0, 1, 3);
+        javafx.scene.layout.GridPane.setVgrow(chartCard, Priority.ALWAYS);
+        VBox.setVgrow(middle, Priority.ALWAYS);
         HBox strip = new HBox(0,
                 stat("Equity", Fmt.price(t.equity), "muted"), stat("Daily PnL", Fmt.signed(t.dailyPnl, ""), t.dailyPnl == null ? "muted" : (t.dailyPnl >= 0 ? "ok" : "bad")),
-                stat("Position", String.valueOf(t.positions), "muted"), stat("Exposure", Fmt.price(t.exposure), "muted"), stat("Drawdown", Fmt.signed(t.drawdown, "%"), "muted"));
-        strip.getStyleClass().add("th-strip");
-        page.getChildren().add(strip);
+                stat("Exposure", Fmt.price(t.exposure), "muted"), stat("Drawdown", Fmt.signed(t.drawdown, "%"), "muted"), stat("Data age", "N/A", "muted"));
+        strip.getStyleClass().addAll("th-strip", "desk-metrics");
+        middle.add(strip, 0, 1);
 
-        double h = 210;
+        double h = 110;
         TabPane tabs = new TabPane(
                 new Tab("Positions (" + t.positions + ")", TTable.of(new String[] {"Symbol", "Side", "Size", "Entry", "Mark", "uPnL"}, t.positionRows, EmptyState.compact("positions", "No active positions", "Research mode does not place orders."), h)),
                 new Tab("Orders (" + t.orders + ")", TTable.of(new String[] {"Time", "Symbol", "Type", "Side", "Size", "Price", "Status"}, t.orderRows, EmptyState.compact("orders", "No open orders", "Order execution is disabled."), h)),
@@ -64,21 +72,17 @@ public class TradingDeskView extends TraderPage {
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabs.getSelectionModel().select(tab);
         tabs.getSelectionModel().selectedIndexProperty().addListener((o, a, b) -> tab = b.intValue());
-        page.getChildren().add(tabs);
+        middle.add(tabs, 0, 2);
+        page.getChildren().add(middle);
     }
 
     private javafx.scene.Node header(TraderSnapshot t) {
         boolean mock = t.source == DataSource.MOCK;
         Node change = Ui.label(Fmt.signed(t.change24hPct, "%"), t.change24hPct == null ? "muted" : (t.change24hPct >= 0 ? "pos" : "neg"));
-        HBox badges = new HBox(8, Ui.badge("MARKET ● " + (t.feed == null ? "NO FEED" : t.feed), t.feed == null ? "muted" : "warn"),
-                Ui.badge("BACKEND " + (t.backendOnline ? "ONLINE" : "OFFLINE"), t.backendOnline ? "ok" : "bad"),
-                Ui.badge("RECORDER " + Fmt.text(t.recorder), "muted"),
-                Ui.badge(t.source + " · " + t.mode, "info"), Ui.badge("BOT: " + t.botState, "warn"), Ui.badge("TRADING " + t.trading, "bad"));
-        if (mock) {
-            badges.getChildren().add(Ui.badge("MOCK DATA", "warn"));
-        }
+        HBox badges = new HBox(8, Ui.badge("LIVE TRADING OFF / DISABLED", "muted"));
+        if (mock) badges.getChildren().add(Ui.badge("MOCK DATA", "warn"));
         badges.setAlignment(Pos.CENTER_LEFT);
-        javafx.scene.layout.FlowPane h = new javafx.scene.layout.FlowPane(22, 8, Ui.label(Fmt.text(t.symbol) + " " + Fmt.text(t.market), "th-symbol"),
+        javafx.scene.layout.FlowPane h = new javafx.scene.layout.FlowPane(22, 8, Ui.label((t.symbol == null ? "ETHUSDT" : t.symbol) + " · " + (t.market == null ? "Binance USD-M Futures" : t.market), "th-symbol"),
                 t.loading ? panel.ui.motion.Skeleton.bar(120, 26) : Ui.label(Fmt.price(t.price), "th-price"), change,
                 labeled("24h High", Fmt.price(t.high24h)), labeled("24h Low", Fmt.price(t.low24h)), labeled("24h Volume", Fmt.price(t.volume24h)), badges);
         h.setAlignment(Pos.CENTER_LEFT);
@@ -111,36 +115,26 @@ public class TradingDeskView extends TraderPage {
     }
 
     private Node chartPlaceholder(TraderSnapshot t) {
-        javafx.scene.canvas.Canvas grid = new javafx.scene.canvas.Canvas();
-        StackPane sp = new StackPane() {
-            @Override
-            protected void layoutChildren() {
-                super.layoutChildren();
-                grid.setWidth(getWidth());
-                grid.setHeight(getHeight());
-                var g = grid.getGraphicsContext2D();
-                g.clearRect(0, 0, getWidth(), getHeight());
-                g.setStroke(javafx.scene.paint.Color.web("#2B3139", 0.55));
-                for (int i = 1; i < 6; i++) {
-                    g.strokeLine(0, getHeight() * i / 6, getWidth(), getHeight() * i / 6);
-                }
-                for (int i = 1; i < 10; i++) {
-                    g.strokeLine(getWidth() * i / 10, 0, getWidth() * i / 10, getHeight());
-                }
-            }
-        };
-        grid.setManaged(false);
+        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+        grid.getStyleClass().add("chart-grid");
+        for (int i = 0; i < 6; i++) {
+            var row = new javafx.scene.layout.RowConstraints(); row.setPercentHeight(100.0 / 6);
+            grid.getRowConstraints().add(row);
+            Region line = new Region(); line.getStyleClass().add("chart-grid-line");
+            grid.add(line, 0, i); javafx.scene.layout.GridPane.setHgrow(line, Priority.ALWAYS);
+        }
+        StackPane sp = new StackPane();
         grid.setMouseTransparent(true);
         var feed = ctx.icons.icon("feed", 38, "muted");
-        VBox center = new VBox(10, feed.node(), Ui.label("MARKET DATA NOT CONNECTED", "chart-watermark"),
-                Ui.label("Prices, candles and the order book will appear here once a market feed is connected.", "muted"),
+        VBox center = new VBox(10, feed.node(), Ui.label("Waiting for market data", "empty-title"),
+                Ui.label("Candles appear once the Binance USD-M feed connects. No values are simulated.", "muted"),
                 Ui.badge("MARKET · NO FEED", "muted"));
         center.setAlignment(Pos.CENTER);
         ((javafx.scene.control.Label) center.getChildren().get(2)).setWrapText(true);
         ((javafx.scene.control.Label) center.getChildren().get(2)).setMaxWidth(360);
         ((javafx.scene.control.Label) center.getChildren().get(2)).setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         sp.getChildren().addAll(grid, center);
-        sp.setMinHeight(300);
+        sp.setMinHeight(220);
         sp.sceneProperty().addListener((o, a, s) -> {
             if (s != null) {
                 javafx.application.Platform.runLater(feed::play);

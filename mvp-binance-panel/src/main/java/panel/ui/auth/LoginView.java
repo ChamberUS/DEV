@@ -23,20 +23,17 @@ public class LoginView {
         pw.setPromptText("Password");
         pw.setAccessibleText("Password");
         var err = AuthShell.error();
-        Button go = Ui.button("Sign In", "primary");
+        Button go = Ui.button("Continue", "primary");
         go.setDefaultButton(true);
         go.setMaxWidth(Double.MAX_VALUE);
-        go.setPrefHeight(38);
+        go.setPrefHeight(44);
 
-        VBox form = AuthShell.form("Sign in", "Access the trading terminal");
-        var lock = ctx.icons.icon("lock", 22, "warn");
-        form.getChildren().add(0, lock.node());
-        lock.play();
+        VBox form = AuthShell.form("Sign in", null);
         if (notice != null) {
             form.getChildren().add(AuthShell.notice(notice));
         }
         form.getChildren().addAll(AuthShell.field("Email / Username", id), AuthShell.field("Password", pw), err, go,
-                Ui.label("🔒  Secure local session", "muted"));
+                Ui.label("Admin verification is required when opening Research.", "muted"));
 
         go.setOnAction(e -> {
             err.setText("");
@@ -65,7 +62,7 @@ public class LoginView {
                     pw.clear();
                     if (u == null) {
                         go.setDisable(false);
-                        go.setText("Sign In");
+                        go.setText("Continue");
                     }
                     if (u != null) {
                         go.setDisable(true);

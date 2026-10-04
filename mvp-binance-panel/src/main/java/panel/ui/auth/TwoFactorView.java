@@ -22,6 +22,7 @@ public final class TwoFactorView {
     private Button send; private Button verify; private Button finishButton; private Label message;
     public TwoFactorView(AppContext ctx,Runnable onSuccess,Runnable onCancel){
         this.ctx=ctx;this.onSuccess=onSuccess;this.onCancel=onCancel;user=ctx.sessions.user().orElseThrow().user();
+        root.getStyleClass().addAll("card", "auth-form");
         root.setMaxWidth(460);wrap.setAlignment(Pos.CENTER);wrap.setPadding(new Insets(40));
         root.getChildren().add(Ui.label("Checking verification providers…","muted"));
         countdown=new Timeline(new KeyFrame(javafx.util.Duration.seconds(1),e->refreshCountdown()));countdown.setCycleCount(Timeline.INDEFINITE);countdown.play();
@@ -53,7 +54,7 @@ public final class TwoFactorView {
         });
     }
     private void render(){
-        TextField code=new TextField();code.setPromptText(phone?"SMS verification code":"6-digit email code");code.setAccessibleText("Verification code");
+        TextField code=new TextField();code.getStyleClass().addAll("auth-input", "otp-input");code.setPromptText(phone?"SMS verification code":"6-digit email code");code.setAccessibleText("Verification code");
         code.setTextFormatter(new TextFormatter<String>(c->c.getControlNewText().matches("[0-9]{0,"+(phone?10:6)+"}")?c:null));
         message=AuthShell.error();message.setWrapText(true);
         Label destination=Ui.label("Send code to: "+(phone?user.maskedPhone():user.maskedEmail()),"muted");
@@ -62,7 +63,7 @@ public final class TwoFactorView {
         send.setOnAction(e->action(()->{if(phone)flow.sendSmsCode();else flow.sendEmailCode();return true;},ok->{destination.setText("Code sent to: "+(phone?user.maskedPhone():user.maskedEmail()));message.setText("Code sent. Expires in 5 minutes.");code.requestFocus();refreshCountdown();}));
         verify.setOnAction(e->{String input=code.getText();code.clear();action(()->phone?flow.verifySms(input):flow.verifyEmail(input),result->{
             if(result==OtpService.Result.OK){if(!phone){phone=true;render();}else complete();}
-            else {message.setText(switch(result){case INVALID->"Invalid code.";case EXPIRED->"Code expired. Start verification again.";case TOO_MANY_ATTEMPTS->"Too many attempts. Request a new code after cooldown.";default->"Send a code for this step first.";});ctx.motion.shake(code,3);}
+            else {code.getStyleClass().add("otp-invalid");message.setText(switch(result){case INVALID->"Invalid code.";case EXPIRED->"Code expired. Start verification again.";case TOO_MANY_ATTEMPTS->"Too many attempts. Request a new code after cooldown.";default->"Send a code for this step first.";});ctx.motion.shake(code,3);}
         });});
         root.getChildren().setAll(Ui.label("ADMIN VERIFICATION","card-title"),Ui.label("Step "+(phone?"2":"1")+" of 2","muted"),
                 Ui.label(phone?"Phone verification":"Email verification","h1"),destination,AuthShell.field("Verification code",code),message,new HBox(8,send,verify,cancel));

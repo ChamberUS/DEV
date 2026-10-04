@@ -17,17 +17,36 @@ public final class AuthShell {
     }
 
     public static Node of(Node form, panel.motion.MotionService motion) {
-        VBox brand = new VBox(10, Ui.label(panel.app.AppBranding.NAME, "auth-brand"), Ui.label(panel.app.AppBranding.ATTRIBUTION, "muted-lg"),
-                Ui.label("Adaptive trading.\nResearch powered.", "auth-tagline"));
-        brand.setAlignment(Pos.TOP_LEFT);
-        brand.setPadding(new Insets(56, 56, 0, 56));
-        StackPane left = new StackPane(new MarketArt(motion), brand);
-        StackPane.setAlignment(brand, Pos.TOP_LEFT);
+        VBox brand = new VBox(6, Ui.label(panel.app.AppBranding.NAME, "auth-brand"),
+                Ui.label(panel.app.AppBranding.ATTRIBUTION, "card-title"));
+        VBox layers = new VBox(14);
+        layers.getStyleClass().add("ledger-art");
+        layers.setAlignment(Pos.CENTER_RIGHT);
+        layers.setMaxWidth(Double.MAX_VALUE);
+        for (int i = 0; i < 6; i++) {
+            javafx.scene.layout.Region bar = new javafx.scene.layout.Region();
+            bar.getStyleClass().add("ledger-bar");
+            bar.maxWidthProperty().bind(layers.widthProperty().multiply(.92 - i * .145));
+            bar.setOpacity(new double[] {.9, .6, .4, .28, .18, .1}[i]);
+            layers.getChildren().add(bar);
+        }
+        VBox tagline = new VBox(Ui.label("Capital, measured.", "auth-tagline"),
+                Ui.label("Research before risk.", "auth-tagline", "muted"));
+        javafx.scene.layout.Region upper = new javafx.scene.layout.Region();
+        javafx.scene.layout.Region lower = new javafx.scene.layout.Region();
+        VBox.setVgrow(upper, Priority.ALWAYS);
+        VBox.setVgrow(lower, Priority.ALWAYS);
+        VBox left = new VBox(brand, upper, layers, lower, tagline);
+        layers.maxWidthProperty().bind(left.widthProperty().subtract(128).multiply(.7));
+        left.setAlignment(Pos.TOP_RIGHT);
+        brand.setMaxWidth(Double.MAX_VALUE);
+        tagline.setMaxWidth(Double.MAX_VALUE);
         left.getStyleClass().add("auth-left");
         HBox.setHgrow(left, Priority.ALWAYS);
+        left.setMinWidth(0);
         StackPane right = new StackPane(form);
         right.getStyleClass().add("auth-right");
-        right.setPrefWidth(480);
+        right.setPrefWidth(520);
         right.setMinWidth(440);
         right.setMaxWidth(520);
         HBox root = new HBox(left, right);
@@ -42,7 +61,8 @@ public final class AuthShell {
             s.setWrapText(true);
             f.getChildren().add(s);
         }
-        f.setMaxWidth(340);
+        f.setMaxWidth(392);
+        f.getStyleClass().add("auth-form");
         f.setAlignment(Pos.CENTER_LEFT);
         return f;
     }

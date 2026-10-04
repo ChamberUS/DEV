@@ -11,13 +11,25 @@ import panel.model.TraderSnapshot.Candle;
 public class CandleChart extends Pane {
     private final Canvas canvas = new Canvas();
     private final List<Candle> candles;
+    private final javafx.scene.layout.Region grid = ink("chart-grid-ink");
+    private final javafx.scene.layout.Region text = ink("chart-text-ink");
+    private final javafx.scene.layout.Region up = ink("chart-up-ink");
+    private final javafx.scene.layout.Region down = ink("chart-down-ink");
+
+    private static javafx.scene.layout.Region ink(String style) {
+        var region = new javafx.scene.layout.Region(); region.getStyleClass().add(style); region.setManaged(false); region.setVisible(false);
+        return region;
+    }
+    private static javafx.scene.paint.Paint paint(javafx.scene.layout.Region ink) {
+        return ink.getBackground() == null ? Color.TRANSPARENT : ink.getBackground().getFills().getFirst().getFill();
+    }
 
     public CandleChart(List<Candle> candles) {
         this.candles = candles;
         canvas.setManaged(false);
         setMinHeight(0);
         setPrefHeight(340);
-        getChildren().add(canvas);
+        getChildren().addAll(canvas, grid, text, up, down);
     }
 
     @Override
@@ -33,8 +45,8 @@ public class CandleChart extends Pane {
         double lo = candles.stream().mapToDouble(Candle::low).min().orElse(0);
         double padR = 60, h = getHeight() - 16, w = getWidth() - padR;
         double step = w / candles.size();
-        g.setStroke(Color.web("#2B3139"));
-        g.setFill(Color.web("#848E9C"));
+        g.setStroke(paint(grid));
+        g.setFill(paint(text));
         for (int i = 0; i <= 4; i++) {
             double y = 8 + h * i / 4;
             g.strokeLine(0, y, w, y);
@@ -42,7 +54,7 @@ public class CandleChart extends Pane {
         }
         for (int i = 0; i < candles.size(); i++) {
             Candle c = candles.get(i);
-            Color col = c.close() >= c.open() ? Color.web("#0ECB81") : Color.web("#F6465D");
+            javafx.scene.paint.Paint col = c.close() >= c.open() ? paint(up) : paint(down);
             g.setStroke(col);
             g.setFill(col);
             double x = i * step + step / 2;

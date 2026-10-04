@@ -27,16 +27,40 @@ public final class TraderScreens {
     }
 
     public static class Markets extends TraderPage {
-        public Markets(AppContext c) {
-            super(c);
+        private javafx.scene.control.TableView<String[]> marketTable;
+        private javafx.scene.control.TableView<String[]> positions;
+        private javafx.scene.control.TableView<String[]> orders;
+        private final javafx.scene.control.Label equity = Ui.label("N/A", "metric");
+        private final javafx.scene.control.Label risk = Ui.label("N/A", "metric");
+        private final javafx.scene.control.Label freshness = Ui.label("Unavailable", "muted");
+        private final javafx.scene.control.Label source = Ui.label("", "muted");
+
+        public Markets(AppContext c) { super(c); }
+
+        @Override protected void build(TraderSnapshot t, VBox page) {
+            marketTable = TTable.of(new String[] {"Symbol", "Market", "Last", "24h change", "24h high", "24h low", "24h volume", "Feed"},
+                    List.of(), "Waiting for market data", 130);
+            positions = TTable.of(new String[] {"Symbol", "Side", "Size", "Entry", "Mark", "uPnL"},
+                    List.of(), "No active positions · Live trading OFF", 170);
+            orders = TTable.of(new String[] {"Time", "Symbol", "Type", "Side", "Size", "Price", "Status"},
+                    List.of(), "No open orders · Execution DISABLED", 170);
+            page.getChildren().addAll(Ui.pageHeader("Markets + Portfolio", "Binance USD-M Futures", source),
+                    Ui.card("Markets", marketTable, freshness),
+                    Ui.columns(Ui.card("Portfolio · Equity", equity), Ui.card("Risk · Exposure", risk)),
+                    Ui.card("Positions", positions), Ui.card("Orders", orders));
         }
 
-        @Override
-        protected void build(TraderSnapshot t, VBox page) {
-            page.getChildren().add(Ui.pageHeader("Markets", "Instruments available to the bot", mockNote(t)));
-            page.getChildren().add(TTable.of(new String[] {"Symbol", "Market", "Last", "24h change", "24h high", "24h low", "24h volume", "Feed"},
-                    List.<String[]>of(new String[] {t.symbol, t.market, Fmt.price(t.price), Fmt.signed(t.change24hPct, "%"), Fmt.price(t.high24h), Fmt.price(t.low24h), Fmt.price(t.volume24h), t.feed == null ? "NO FEED" : t.feed}),
-                    "No markets", 120));
+        @Override public void onSnapshot(panel.model.Snapshot snapshot) {
+            if (marketTable == null) super.onSnapshot(snapshot);
+            TraderSnapshot t = ctx.trading.snapshot.get();
+            TTable.update(marketTable, List.<String[]>of(new String[] {Fmt.text(t.symbol), Fmt.text(t.market),
+                    Fmt.price(t.price), Fmt.signed(t.change24hPct, "%"), Fmt.price(t.high24h), Fmt.price(t.low24h),
+                    Fmt.price(t.volume24h), t.feed == null ? "NO FEED" : t.feed}));
+            TTable.update(positions, t.positionRows); TTable.update(orders, t.orderRows);
+            equity.setText(Fmt.price(t.equity)); risk.setText(Fmt.price(t.exposure));
+            source.setText(t.source + (t.source == panel.model.DataSource.MOCK ? " · Fictional values" : ""));
+            freshness.setText("Feed · " + (t.feed == null ? "Offline / Waiting for market data" : t.feed)
+                    + " · Data age unavailable · Backend " + (t.backendOnline ? "Online" : "Offline"));
         }
     }
 
@@ -212,6 +236,9 @@ public final class TraderScreens {
     }
 
     public static class Settings extends TraderPage {
+        @Override protected int stateKey(panel.model.Snapshot s) {
+            return java.util.Objects.hash(super.stateKey(s), ctx.adminAccess.hasValidAdminSession());
+        }
         public Settings(AppContext c) {
             super(c);
         }
@@ -261,7 +288,7 @@ public final class TraderScreens {
             icons.setOnAction(e -> persist.run());
             density.setOnAction(e -> persist.run());
 
-            page.getChildren().add(Ui.pageHeader("Settings", "Your preferences", saved));
+            page.getChildren().add(Ui.pageHeader("Settings", "Account · Security · Appearance · Motion · Data sources · BYX", saved));
             var g1 = new javafx.scene.layout.GridPane();
             g1.setHgap(18);
             g1.setVgap(12);
@@ -280,6 +307,16 @@ public final class TraderScreens {
                     sized(Ui.card("Connections", Ui.kv("Exchange", "Not connected"), Ui.kv("Order execution", "Not implemented"), Ui.kv("Data source", t.source.name())), 460),
                     sized(Ui.card("About", Ui.label(panel.app.AppBranding.title("Trading"), "kv-value"), aboutButton()), 460));
             page.getChildren().add(f);
+            var account = Ui.button("Account / Security", "ghost");
+            account.setOnAction(e -> ctx.navigate.accept("t-profile"));
+            var byx = Ui.button("BYX Network", "ghost");
+            byx.setOnAction(e -> ctx.navigate.accept("t-byx"));
+            page.getChildren().add(new HBox(14, account, byx));
+            if (ctx.adminAccess.hasValidAdminSession()) {
+                var advanced = Ui.button("Advanced · Admin settings", "ghost");
+                advanced.setOnAction(e -> ctx.navigate.accept("settings"));
+                page.getChildren().add(advanced);
+            }
         }
 
         private static Node aboutButton() {
