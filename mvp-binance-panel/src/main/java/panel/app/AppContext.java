@@ -75,6 +75,10 @@ public class AppContext {
     public final panel.service.GasSponsorshipService byxGas = new panel.service.GasSponsorshipService(
             sessions, byxWallets, byxBenefits, byxGasJournal, byxGasGateway, panel.service.GasSponsorshipPolicy::load, clock);
 
+    public final panel.service.TreasuryService byxTreasury = new panel.service.TreasuryService(
+            byxWallets, new panel.adapter.CosmosByxChainGateway(clock), byxGasGateway, byxGasJournal,
+            panel.service.GasSponsorshipPolicy::load, clock);
+
     public final CommandAdapter cli = new AdaptiveTraderCli(() -> settings.cliPath);
     public final JobManager jobs = new JobManager(cli, settings::project, this::refresh, adminAccess::requireAdmin);
     public final ResearchService research = new ResearchService(settings, new panel.adapter.LocalBackendGateway(new FileResearchBackend(cli)), new MockResearchBackend(), jobs);

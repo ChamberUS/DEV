@@ -33,6 +33,9 @@ public final class ByxVisualSmoke {
             Path policy=Path.of(System.getProperty("user.home"),".mvp-binance-panel","byx-payments-test.properties");
             Files.writeString(config.resolve("byx-payments-test.properties"),Files.readString(policy).replace("pass_seconds=300","pass_seconds=12"));
         }
+        if(Boolean.getBoolean("byx.treasury.qa")) {
+            Files.copy(Path.of(System.getProperty("user.home"),".mvp-binance-panel/byx-gas-test.properties"),config.resolve("byx-gas-test.properties"));
+        }
         System.setProperty("user.home", home.toString());
         Application.launch(VisualApp.class, args);
         if (failure != null) throw new RuntimeException(failure);
@@ -84,6 +87,13 @@ public final class ByxVisualSmoke {
                             ByxLocalnetSmoke.check(gate != null && gate.isDisabled(), "FREE UI gate closed");
                             shot("entitlements-free"); walletFlow();
                         });
+                    } else if(Boolean.getBoolean("byx.treasury.qa")) {
+                        try(var journal=panel.security.Database.open(localnetRoot.resolve("evidence/gas-journal.db"))) {
+                            var repo=new panel.repository.GasGrantRepository(journal);
+                            for(var row:repo.all()) {context.byxGasJournal.claim(row);context.byxGasJournal.update(row,row.state(),row.txHash());context.byxGasJournal.observed(row,row.remaining());}
+                        }
+                        invoke("show", String.class, "t-treasury");
+                        later(() -> {shot("user-treasury");Platform.exit();});
                     } else Platform.exit(); });
                 } catch (Throwable t) { fail(t); }
             }));

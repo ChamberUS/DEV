@@ -63,7 +63,7 @@ import panel.util.Fmt;
 
 public class PanelApp extends Application {
     private static final Map<String, String> NAV_ICONS = Map.ofEntries(
-            Map.entry("t-wallet", "user"), Map.entry("t-benefits", "user"), Map.entry("t-byx", "feed"), Map.entry("t-desk", "dashboard"), Map.entry("t-markets", "chart"), Map.entry("t-bot", "bot"), Map.entry("t-strategies", "settings"),
+            Map.entry("t-treasury", "user"), Map.entry("t-wallet", "user"), Map.entry("t-benefits", "user"), Map.entry("t-byx", "feed"), Map.entry("t-desk", "dashboard"), Map.entry("t-markets", "chart"), Map.entry("t-bot", "bot"), Map.entry("t-strategies", "settings"),
             Map.entry("t-signals", "signal"), Map.entry("t-portfolio", "dashboard"), Map.entry("t-positions", "positions"), Map.entry("t-orders", "orders"),
             Map.entry("t-performance", "chart"), Map.entry("t-activity", "clock"), Map.entry("t-profile", "user"), Map.entry("t-settings", "settings"),
             Map.entry("overview", "dashboard"), Map.entry("capture", "feed"), Map.entry("sessions", "clock"), Map.entry("dataset", "positions"),
@@ -194,6 +194,7 @@ public class PanelApp extends Application {
         views.put("t-byx", new panel.ui.ByxNetworkView(ctx));
         views.put("t-wallet", new panel.ui.ByxWalletView(ctx));
         views.put("t-benefits", new panel.ui.ByxBenefitsView(ctx));
+        views.put("t-treasury", new panel.ui.ByxTreasuryView(ctx));
         views.put("t-markets", new TraderScreens.Markets(ctx));
         views.put("t-bot", new TraderScreens.Bot(ctx));
         views.put("t-strategies", new TraderScreens.Strategies(ctx));
@@ -445,6 +446,7 @@ public class PanelApp extends Application {
         item(traderNav, "t-byx", "BYX Network");
         item(traderNav, "t-wallet", "Wallet");
         item(traderNav, "t-benefits", "Plano e benefícios BYX");
+        item(traderNav, "t-treasury", "Treasury");
         group(traderNav, "AUTOMATION");
         item(traderNav, "t-bot", "Bot");
         item(traderNav, "t-strategies", "Strategies");
