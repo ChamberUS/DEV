@@ -68,12 +68,13 @@ public final class ByxWalletView implements View {
             catch (RuntimeException error) { status.setText(error.getMessage()); }
         });
         Button refresh = Ui.button("Refresh balance and tier", "ghost"); refresh.setOnAction(e -> refresh());
-        body.getChildren().addAll(Ui.label("BYX → Wallet", "h1"), Ui.label("LOCALNET / TEST ASSETS / NO FINANCIAL VALUE", "muted"),
-                Ui.label("No private keys. Normal app access does not require a wallet.", "muted"), status,
-                Ui.kvNode("Linked wallets", linked), Ui.kvNode("Address", address), link,
-                Ui.card("Exact UTF-8 data to sign using ADR-036", challengeText, copyChallenge,
-                        Ui.label("Sign externally. Paste only the public proof below; never paste a seed/private key.", "muted")),
-                proofText, verify, revoke, refresh, summary);
+        VBox watch = Ui.card("Observed address", status, Ui.kvNode("Linked wallets", linked),
+                Ui.kvNode("Address", address), new javafx.scene.layout.FlowPane(8, 8, link, revoke, refresh), summary);
+        VBox ownership = Ui.card("Verified ownership", Ui.label("Sign a challenge externally. No funds move.", "muted"),
+                challengeText, copyChallenge, proofText, verify);
+        body.getChildren().addAll(Ui.pageHeader("BYX Wallet", "Watch address · verified ownership · signer outside app"),
+                Ui.testEnvironment(), Ui.columns(watch, ownership),
+                Ui.card("Private key outside app", Ui.label("BYX-MVP stores public proof only. Never enter a seed or private key.", "muted")));
         Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> { render(); if (++ticks % 30 == 0) refresh(); }));
         timer.setCycleCount(Timeline.INDEFINITE);
         root.visibleProperty().addListener((o,a,b) -> { if (b) { render(); timer.play(); } else timer.stop(); });
@@ -98,7 +99,7 @@ public final class ByxWalletView implements View {
             summary.getChildren().setAll(Ui.kv("Balance", s.formattedBalance()), Ui.kv("Current tier", s.tier()),
                     Ui.kv("Benefits enabled (TEST)", Boolean.toString(s.benefitsEnabled())), Ui.kv("Chain", s.chainState()),
                     Ui.kv("Last chain update", s.lastChainUpdate() == null ? "UNKNOWN" : s.lastChainUpdate().toString()), Ui.kv("Next tier", s.nextTier()));
-        } catch (RuntimeException error) { status.setText("NO WALLET · ADMIN must configure LOCALNET in BYX Network"); summary.getChildren().clear(); }
+        } catch (RuntimeException error) { status.setText("NO WALLET · ADMIN must configure LOCALNET in BYX Network"); summary.getChildren().setAll(Ui.kv("Balance", "N/A"), Ui.kv("Verified ownership", "Unavailable"), Ui.kv("Private key", "OUTSIDE APP")); }
     }
     public Node node() { return root; }
     public void onSnapshot(Snapshot ignored) { render(); }

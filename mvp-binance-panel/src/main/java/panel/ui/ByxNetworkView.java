@@ -15,15 +15,28 @@ public final class ByxNetworkView implements View {
     private final ScrollPane root = Ui.scroll(body);
     private final VBox status = new VBox(8);
     private final VBox admin = new VBox(8);
+    private final VBox observed = new VBox(8);
+    private final TableView<String[]> blocks = panel.ui.trader.TTable.of(new String[] {"Height", "Hash", "Txs", "Block time"},
+            java.util.List.of(), "Recent history unavailable · waiting for the node", 180);
     private final Label message = Ui.label("", "muted");
     private final Timeline timer;
     private boolean controlsVisible;
     public ByxNetworkView(AppContext ctx) {
         this.ctx = ctx;
-        body.getChildren().addAll(Ui.label("BYX Network", "h1"),
-                Ui.label("LOCALNET / ATIVOS DE TESTE / SEM VALOR FINANCEIRO", "muted"),
-                Ui.label("Read-only · Observed address is not proof of ownership · No private keys", "muted"),
-                status, admin, message);
+        var states = new javafx.scene.layout.FlowPane(8, 8,
+                Ui.badge("HEALTHY", "ok"), Ui.badge("SYNCING", "info"), Ui.badge("STALE", "warn"),
+                Ui.badge("DEGRADED", "warn"), Ui.badge("OFFLINE", "bad"), Ui.badge("IDENTITY MISMATCH", "bad"));
+        var configuration = new TitledPane("Admin · LOCALNET configuration", admin);
+        configuration.setExpanded(false);
+        VBox main = new VBox(14, Ui.card("Network identity & health", status),
+                Ui.card("Latest observed block · history unavailable", blocks));
+        VBox side = new VBox(14, Ui.card("Network states · reference", states),
+                Ui.card("Observed wallet · no ownership claim", observed), configuration, message);
+        var columns = Ui.columns(main, side);
+        columns.getColumnConstraints().get(0).setPercentWidth(70);
+        columns.getColumnConstraints().get(1).setPercentWidth(30);
+        body.getChildren().addAll(Ui.pageHeader("BYX Network", "Development environment · read-only"),
+                Ui.testEnvironment(), columns);
         timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> render()));
         timer.setCycleCount(Timeline.INDEFINITE);
         root.visibleProperty().addListener((o, a, visible) -> { if (visible) { render(); timer.play(); } else timer.stop(); });
@@ -35,10 +48,13 @@ public final class ByxNetworkView implements View {
         status.getChildren().setAll(Ui.kv("Source / Network", s.source() + " / " + s.environment()),
                 Ui.kv("Bot execution", s.execution()), Ui.kv("Connection / Identity", s.connection() + " / " + s.identity()),
                 Ui.kv("Freshness / Syncing", s.freshness() + " / " + (s.syncing() == null ? "UNKNOWN" : s.syncing())),
-                Ui.kv("Chain ID", s.chainId()), Ui.kv("Block height / time", s.height() + " / " + s.blockTime()),
+                Ui.kv("Chain ID", s.chainId()), Ui.kv("Block height / time", panel.util.Fmt.text(s.height()) + " / " + panel.util.Fmt.dateTime(s.blockTime())),
                 Ui.kv("Observed address", s.address()), Ui.kv("Balance", s.formattedBalance()),
                 Ui.kv("Last successful update", s.updatedAt() == null ? "UNKNOWN" : s.updatedAt().toString()),
                 Ui.kv("Status", s.message()), Ui.kv("Transactions", "Unavailable in V1; pagination/indexer not verified"));
+        observed.getChildren().setAll(Ui.kv("Address", s.address()), Ui.kv("BYX balance · TEST", s.formattedBalance()));
+        panel.ui.trader.TTable.update(blocks, s.height() == null ? java.util.List.of() :
+                java.util.List.<String[]>of(new String[] {s.height(), "N/A", "N/A", panel.util.Fmt.dateTime(s.blockTime())}));
         boolean allowed = ctx.adminAccess.hasValidAdminSession();
         if (allowed != controlsVisible) {
             admin.getChildren().clear(); controlsVisible = allowed;

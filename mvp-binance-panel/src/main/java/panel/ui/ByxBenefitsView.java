@@ -36,24 +36,15 @@ public final class ByxBenefitsView implements View {
         VBox methods = new VBox(8);
         benefits.payments().methods().forEach(method -> methods.getChildren().add(
                 Ui.kv(method.name(), "Não conectado")));
-        body.getChildren().addAll(Ui.label("Plano e benefícios BYX", "h1"),
-                Ui.label("LOCALNET / TEST ASSETS / NO FINANCIAL VALUE", "muted"), Ui.kvNode("Wallet", selected), refresh, current,
-                Ui.card("Advanced Analytics Pass — TEST",payment),
-                Ui.card("Gas sponsorship — LOCALNET TEST",gas),
-                Ui.card("Acesso normal", Ui.label("Use o aplicativo sem carteira. BYX é opcional; pagamentos não serão exclusivos em BYX.", "muted")),
-                Ui.card("Métodos de pagamento independentes", methods),
-                Ui.card("Descontos e recursos do aplicativo",
-                        Ui.kv("Desconto", "Não definido / sem concessão"),
-                        Ui.kv("Limites adicionais", "Não definidos / acesso normal preservado")),
-                Ui.card("Três custos distintos",
-                        Ui.kv("Taxas do aplicativo", "Política futura; sem preços ou percentuais contratados"),
-                        Ui.kv("Taxas da rede BYX", "Patrocínio LOCALNET TEST separado; quota finita e expiração"),
-                        Ui.kv("Taxas da exchange", "Independentes; custos Binance preservados")),
-                Ui.card("Prova de controle obrigatória",
-                        Ui.label("Digitar um endereço não comprova propriedade. Abra BYX → Wallet para verificar uma assinatura ADR-036.", "muted"),
-                        Ui.label("Benefícios não concedem ADMIN, acesso a dados reservados ou execução de estratégias.", "muted")),
-                Ui.card("Tesouraria", Ui.label("Saldos LOCALNET são ATIVOS DE TESTE / SEM VALOR FINANCEIRO.", "muted"),
-                        Ui.label("Sem reservas verificadas, promessa de lastro, resgate ou rendimento.", "muted")));
+        body.getChildren().addAll(Ui.pageHeader("BYX Benefits", "TEST POLICY · NOT FINAL TOKENOMICS", refresh),
+                Ui.testEnvironment(), Ui.kvNode("Wallet", selected), current,
+                Ui.columns(Ui.card("Pay to unlock · TEST payment intent", payment),
+                        Ui.card("Gas sponsorship · LOCALNET TEST", gas)),
+                Ui.card("BYX never grants", Ui.kv("ADMIN", "NEVER"), Ui.kv("VALIDATION", "NEVER"),
+                        Ui.kv("FINAL_HOLDOUT", "NEVER"), Ui.kv("Unapproved live trading", "NEVER")),
+                Ui.card("Independent payment methods", methods,
+                        Ui.label("Normal app access does not require a wallet. Application fees, BYX gas and Binance fees remain separate.", "muted")));
+
     }
     private void renderGas(String address) {
         var request=Ui.button("Request TEST gas allowance", "ghost");
@@ -127,6 +118,15 @@ public final class ByxBenefitsView implements View {
         try { ctx.byxBenefits.refresh(selected.getValue()).whenComplete((s,e) -> javafx.application.Platform.runLater(() -> onSnapshot(null))); }
         catch (RuntimeException e) { onSnapshot(null); }
     }
+    private static javafx.scene.layout.HBox tierTrack(String currentTier) {
+        var track = new javafx.scene.layout.HBox(8);
+        for (String tier : java.util.List.of("FREE", "HOLDER", "PLUS", "PRO")) {
+            var label = Ui.label(tier, "tier-step");
+            if (tier.equals(currentTier)) label.getStyleClass().add("tier-current");
+            track.getChildren().add(label);
+        }
+        return track;
+    }
     private static String format(java.math.BigInteger amount) {
         return amount == null ? "UNKNOWN / NOT APPLICABLE" : new java.math.BigDecimal(amount, 6).toPlainString() + " BYX";
     }
@@ -167,18 +167,27 @@ public final class ByxBenefitsView implements View {
             });
             renderPayment(address);
             renderGas(address);
-            current.getChildren().setAll(Ui.card("Experimental benefits", Ui.kv("Current tier", s.tier()),
+            current.getChildren().setAll(Ui.columns(Ui.card("Current tier · HOLD_TO_UNLOCK", Ui.metric("Current tier", s.tier(), "info"), tierTrack(s.tier()),
                     Ui.kv("Verified wallet", s.walletStatus() + " · " + (address == null ? "—" : address)),
                     Ui.kv("BYX balance", s.formattedBalance()), Ui.kv("Network", "LOCALNET · " + s.chainState()),
                     Ui.kv("Last refresh", s.lastChainUpdate() == null ? "UNKNOWN" : s.lastChainUpdate().toString())),
-                    Ui.card("YOUR BENEFITS", rows),
+                    Ui.card("YOUR BENEFITS", rows)),
+                    Ui.columns(
                     Ui.card("Extended History · LOCALNET preview", openHistory, history,
                             Ui.label("Public wallet balance refresh history, up to 20 entries in this app session. No research data or trading execution.", "muted")),
-                    Ui.card("Advanced Analytics — synthetic demo",analyticsButton,analytics),
+                    Ui.card("Advanced Analytics — synthetic demo",analyticsButton,analytics)),
                     Ui.card("Next tier", Ui.kv("Next tier", progress.nextTier()),
                             Ui.kv("Required BYX", format(progress.requiredUbyx())),
                             Ui.kv("Current BYX", format(progress.currentUbyx())),
                             Ui.kv("Remaining BYX", format(progress.remainingUbyx()))));
-        } catch (RuntimeException e) { current.getChildren().setAll(Ui.kv("Current tier", "FREE · LOCALNET configuration required")); }
+        } catch (RuntimeException e) {
+            current.getChildren().setAll(Ui.columns(Ui.card("Current tier", Ui.metric("No verified wallet", "FREE", "muted"), tierTrack("FREE"),
+                    Ui.kv("BYX balance", "N/A"), Ui.label("LOCALNET configuration required", "muted")),
+                    Ui.card("HOLD_TO_UNLOCK", Ui.label("Verify wallet ownership to evaluate tier and entitlements.", "muted"),
+                            Ui.kv("Next tier / remaining", "N/A"))));
+            var create = Ui.button("Unlock with BYX (TEST)", "ghost"); create.setId("byx-payment-create"); create.setDisable(true);
+            payment.getChildren().setAll(Ui.label("No intent open · verified wallet and LOCALNET required", "muted"), create);
+            gas.getChildren().setAll(Ui.kv("Eligibility", "Unavailable · verified wallet required"), Ui.kv("Quota / remaining / expiration", "N/A"));
+        }
     }
 }
