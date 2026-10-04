@@ -99,3 +99,21 @@
 .titled-pane > .title { -fx-background-color: -panel2; -fx-background-radius: 9; -fx-text-fill: -text; }
 .titled-pane > .content { -fx-background-color: -panel; -fx-border-color: -border; }
 .titled-pane { -fx-text-fill: -text; }
+.root {
+    -ok-soft: rgba(66,215,155,.11); -bad-soft: rgba(255,122,122,.11);
+    -warn-soft: rgba(233,180,76,.11); -info-soft: rgba(92,200,255,.11);
+    -purple-soft: rgba(184,150,255,.11);
+}
+.badge-ok { -fx-text-fill: -ok; -fx-background-color: -ok-soft; }
+.badge-bad { -fx-text-fill: -bad; -fx-background-color: -bad-soft; }
+.badge-warn { -fx-text-fill: -warn; -fx-background-color: -warn-soft; }
+.badge-info { -fx-text-fill: -info; -fx-background-color: -info-soft; }
+.badge-purple { -fx-text-fill: -purple; -fx-background-color: -purple-soft; }
+.badge-muted { -fx-text-fill: -text2; -fx-background-color: -surface3; }
+.metric-ok { -fx-text-fill: -ok; } .metric-bad { -fx-text-fill: -bad; }
+.metric-warn { -fx-text-fill: -warn; } .metric-info { -fx-text-fill: -info; }
+.metric-purple { -fx-text-fill: -purple; }
+.auth-error, .stage-bad { -fx-text-fill: -bad; }
+.auth-notice, .warn-text, .stage-warn { -fx-text-fill: -warn; }
+.auth-notice { -fx-background-color: -warn-soft; -fx-border-color: -warn; }
+.stage-ok { -fx-text-fill: -ok; }
