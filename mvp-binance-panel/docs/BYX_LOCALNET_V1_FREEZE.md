@@ -55,3 +55,10 @@ DEVNET readiness claim; runtime keys/state are unversioned. No indexer, producti
 sponsor, external wallet UI, payment settlement service or final tokenomics.
 Uncertain broadcasts fail closed and need manual public evidence reconciliation.
 No reserves, backing, USD price, redemption or yield is asserted.
+
+## Remote development status
+
+DEVNET STATUS: DEFERRED
+
+Remote infrastructure intentionally inactive.
+Development continues on LOCALNET until explicitly requested.
