@@ -906,3 +906,13 @@ reconciled 0.170000 BYX TEST and zero active recorded grants. JavaFX visual QA u
 an isolated database, normal USER, existing development OTP and FULL motion;
 Treasury screenshot was inspected. No Go source/test change, full Python suite,
 heavy research, reserved data or remote deployment was executed.
+
+## DEVNET V1 remote preflight — deployment deferred
+
+The derived branch `feature/byx-devnet-v1` documents the
+[DEVNET V1 deployment plan](BYX_DEVNET_V1.md). Secure noninteractive SSH to the
+known BYX candidate host timed out before authentication. Following the explicit
+preflight stop condition, this phase performs no remote changes, build, new chain,
+panel DEVNET implementation or DEVNET transaction smoke. LOCALNET V1 remains
+frozen and LEGACY remains uninspected/preserved. No credentials were requested or
+exposed; the documentation lists the missing evidence and future deployment gates.
