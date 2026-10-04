@@ -82,7 +82,10 @@ public final class CaptureMonitorCard extends VBox {
                 Ui.kv("Storage checked UTC", utc(value.storageCheckedAt()))),
             tile("Health", Ui.kv("Supervisor", value.state().name()), Ui.kv("Recorder health", null),
                 Ui.kv("Last update UTC", utc(value.lastUpdate())),
-                Ui.kv("Warnings", String.join("\n", value.warnings()))));
+                Ui.kv("Warnings", String.join("\n", value.warnings()))),
+            tile("Scientific integrity", Ui.kv("Sequence continuity", "NOT REPORTED"), Ui.kv("Gaps detected", "NOT REPORTED"),
+                    Ui.kv("Clock drift", "NOT REPORTED"), Ui.kv("Schema match", "NOT REPORTED")),
+            tile("Timeline", Ui.label("Retry / recovery history is not reported by the current monitor.", "muted")));
         updateTimers(); updateIndicator();
     }
     public void updateTimers() {
