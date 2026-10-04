@@ -11,6 +11,7 @@ public class ResearchModeTradingProvider implements TradingProvider {
         TraderSnapshot t = new TraderSnapshot();
         t.loading = research.loading;
         t.backendOnline = research.backendOnline;
+        t.feed = "NOT_CONFIGURED";
         t.recorder = research.capture.recorder();
         t.symbol = research.capture.symbol();
         t.market = research.capture.market();

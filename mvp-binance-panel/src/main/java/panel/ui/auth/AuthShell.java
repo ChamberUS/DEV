@@ -26,7 +26,7 @@ public final class AuthShell {
         for (int i = 0; i < 6; i++) {
             javafx.scene.layout.Region bar = new javafx.scene.layout.Region();
             bar.getStyleClass().add("ledger-bar");
-            bar.maxWidthProperty().bind(layers.widthProperty().multiply(.92 - i * .145));
+            bar.maxWidthProperty().bind(layers.widthProperty().multiply(new double[] {.92, .76, .60, .44, .30, .18}[i]));
             bar.setOpacity(new double[] {.9, .6, .4, .28, .18, .1}[i]);
             layers.getChildren().add(bar);
             final int index = i;

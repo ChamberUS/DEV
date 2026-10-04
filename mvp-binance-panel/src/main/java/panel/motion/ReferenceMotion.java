@@ -17,7 +17,6 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -42,7 +41,7 @@ public final class ReferenceMotion {
         node.sceneProperty().addListener((o, was, now) -> { if (now == null) settleNode(node); });
         if (node instanceof Button button) {
             var styles = button.getStyleClass();
-            if (styles.contains("btn") && !styles.contains("command-row")) buttonHover(button);
+            if (styles.contains("btn") && !styles.contains("command-row") && !styles.contains("ws-tab") && !styles.contains("command-search")) buttonHover(button);
             if (styles.contains("nav-item") || styles.contains("seg-btn") || styles.contains("ws-tab")) paint(button);
             if (styles.contains("nav-item") && button.getGraphic() != null) install(button.getGraphic());
         }
@@ -57,15 +56,7 @@ public final class ReferenceMotion {
         }
         if (node instanceof TextInputControl input && !insidePalette(node)) {
             paint(input);
-            DropShadow ring = new DropShadow();
-            ring.setRadius(3); ring.setSpread(1); ring.setColor(Color.TRANSPARENT);
-            input.focusedProperty().addListener((o, was, focused) -> {
-                double alpha = ring.getColor().getOpacity();
-                input.setEffect(ring);
-                tween(input, "focus", MotionTokens.CONTROL, f -> ring.setColor(
-                        Color.web("#7C96FF22").deriveColor(0, 1, 1, (alpha + ((focused ? 34.0 / 255 : 0) - alpha) * f) / (34.0 / 255))),
-                        () -> { if (!focused) input.setEffect(null); });
-            });
+
         }
         if (node.getStyleClass().contains("skeleton") && node instanceof Region region) shimmer(region);
         if (node instanceof javafx.scene.control.ScrollPane scroll) {
@@ -111,15 +102,20 @@ public final class ReferenceMotion {
         label.setMouseTransparent(true); label.setOpacity(0); label.setTranslateX(-4);
         var popup = new javafx.stage.Popup();
         popup.getContent().add(label);
+        button.getProperties().put("reference.tooltip.node", label);
+        button.getProperties().put("reference.tooltip.popup", popup);
         button.sceneProperty().addListener((o, was, now) -> { if (now == null) { settleTree(label); popup.hide(); } });
-        button.hoverProperty().addListener((o, was, hovered) -> {
+        Runnable updateTooltip = () -> {
+            boolean hovered = button.isHover() || button.isFocused();
             if (hovered && button.getScene() != null && button.getScene().getWindow() != null) {
                 var bounds = wrap.localToScreen(wrap.getBoundsInLocal());
                 if (bounds != null) {
                     label.getStylesheets().setAll(button.getScene().getStylesheets());
-                    popup.show(button, bounds.getMinX() + 62, bounds.getMinY());
+                    popup.show(button, bounds.getMinX() + 66, bounds.getMinY());
                     label.applyCss(); label.autosize();
-                    popup.setY(bounds.getMinY() + (bounds.getHeight() - popup.getHeight()) / 2);
+                    var contentBounds = label.localToScreen(label.getLayoutBounds());
+                    popup.setX(popup.getX() + bounds.getMinX() + 66 + label.getTranslateX() - contentBounds.getMinX());
+                    popup.setY(popup.getY() + bounds.getMinY() + (bounds.getHeight() - contentBounds.getHeight()) / 2 - contentBounds.getMinY());
                 }
             }
             double opacity = label.getOpacity(), x = label.getTranslateX();
@@ -127,7 +123,10 @@ public final class ReferenceMotion {
                 label.setOpacity(opacity + ((hovered ? 1 : 0) - opacity) * f);
                 label.setTranslateX(x + ((hovered ? 0 : -4) - x) * f);
             }, () -> { if (!hovered) popup.hide(); });
-        });
+        };
+        button.hoverProperty().addListener((o, was, now) -> updateTooltip.run());
+        button.focusedProperty().addListener((o, was, now) -> updateTooltip.run());
+        button.getProperties().put("reference.tooltip.hide", (Runnable) () -> { settleTree(label); popup.hide(); label.setOpacity(0); label.setTranslateX(-4); });
         ChangeListener<MotionPreference> listener = (o, was, now) -> { if (now != MotionPreference.FULL) settleTree(label); };
         button.getProperties().put("reference.tooltip.listener", listener);
         motion.preference.addListener(new WeakChangeListener<>(listener));
@@ -200,13 +199,19 @@ public final class ReferenceMotion {
         if (node.getProperties().remove(key) instanceof Animation previous) previous.stop();
         if (!motion.full()) { frame.accept(1); finished.run(); return null; }
         var fraction = new SimpleDoubleProperty();
-        fraction.addListener((o, was, now) -> frame.accept(now.doubleValue()));
-        Timeline timeline = new Timeline(new KeyFrame(duration, new KeyValue(fraction, 1, MotionTokens.CSS_EASE)));
+        Timeline timeline = new Timeline();
+        fraction.addListener((o, was, now) -> {
+            if (node.getProperties().get(key) == timeline) frame.accept(now.doubleValue());
+        });
+        timeline.getKeyFrames().add(new KeyFrame(duration, new KeyValue(fraction, 1, MotionTokens.CSS_EASE)));
         Runnable settle = () -> { timeline.stop(); frame.accept(1); finished.run(); node.getProperties().remove(key, timeline); };
         node.getProperties().put(key, timeline);
         node.getProperties().put(key + ".settle", settle);
         timeline.setOnFinished(e -> {
-            node.getProperties().remove(key, timeline); node.getProperties().remove(key + ".settle", settle); finished.run();
+            if (node.getProperties().get(key) == timeline) {
+                frame.accept(1);
+                node.getProperties().remove(key, timeline); node.getProperties().remove(key + ".settle", settle); finished.run();
+            }
         });
         frame.accept(0); timeline.play();
         return timeline;
@@ -250,6 +255,7 @@ public final class ReferenceMotion {
     }
 
     private void settleNode(Node node) {
+        if (node.getProperties().get("reference.tooltip.hide") instanceof Runnable hide) hide.run();
         var keys = new java.util.ArrayList<>(node.getProperties().keySet());
         for (Object key : keys) if (key.toString().startsWith("reference.") && key.toString().endsWith(".settle")) {
             if (node.getProperties().remove(key) instanceof Runnable settle) settle.run();
@@ -261,6 +267,11 @@ public final class ReferenceMotion {
         if (node instanceof Parent parent) parent.getChildrenUnmodifiable().forEach(this::settleTree);
     }
 
+    public void setBreathing(Node node, boolean enabled, Duration period, javafx.animation.Interpolator easing) {
+        if (!node.getProperties().containsKey("reference.loop.listener")) breathe(node, period, easing);
+        ((javafx.beans.property.BooleanProperty)node.getProperties().get("reference.loop.enabled")).set(enabled);
+    }
+
     public void breathe(Node node, Duration period, javafx.animation.Interpolator easing) {
         visibleLoop(node, () -> new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(node.opacityProperty(), 1)),
@@ -268,32 +279,36 @@ public final class ReferenceMotion {
                 new KeyFrame(period, new KeyValue(node.opacityProperty(), 1, easing))), () -> node.setOpacity(1));
     }
 
+    private static Background shimmerPaint(double x) {
+        return new Background(new BackgroundFill(new LinearGradient(x, 0, x + 2, 0, true,
+                CycleMethod.REPEAT, new Stop(.25, Color.web("#1C2131")), new Stop(.5, Color.web("#283049")),
+                new Stop(.75, Color.web("#1C2131"))), new javafx.scene.layout.CornerRadii(5), Insets.EMPTY));
+    }
+
     private void shimmer(Region node) {
         visibleLoop(node, () -> {
-            Color dark = Color.web("#1C2131"), light = Color.web("#283049");
             var offset = new SimpleDoubleProperty();
-            offset.addListener((o, was, now) -> {
-                double x = now.doubleValue();
-                node.setBackground(new Background(new BackgroundFill(new LinearGradient(x, 0, x + 2, 0, true,
-                        CycleMethod.REPEAT, new Stop(.25, dark), new Stop(.5, light), new Stop(.75, dark)),
-                        new javafx.scene.layout.CornerRadii(5), Insets.EMPTY)));
-            });
-            return new Timeline(new KeyFrame(MotionTokens.SHIMMER, new KeyValue(offset, 2, MotionTokens.CSS_EASE)));
-        }, () -> node.setBackground(new Background(new BackgroundFill(Color.web("#1C2131"),
-                new javafx.scene.layout.CornerRadii(5), Insets.EMPTY))));
+            node.backgroundProperty().bind(javafx.beans.binding.Bindings.createObjectBinding(() -> shimmerPaint(offset.get()), offset));
+            return new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(offset, 0)),
+                    new KeyFrame(MotionTokens.SHIMMER, new KeyValue(offset, 2, MotionTokens.CSS_EASE)));
+        }, () -> { node.backgroundProperty().unbind(); node.setBackground(shimmerPaint(0)); });
     }
 
     private void visibleLoop(Node node, java.util.function.Supplier<Animation> factory, Runnable reset) {
+        if (node.getProperties().containsKey("reference.loop.listener")) return;
+        var enabled = new javafx.beans.property.SimpleBooleanProperty(true);
+        node.getProperties().put("reference.loop.enabled", enabled);
         Runnable refresh = () -> {
-            if (motion.full() && node.getScene() != null && !node.getProperties().containsKey("reference.loop")) {
+            if (enabled.get() && motion.full() && node.getScene() != null && !node.getProperties().containsKey("reference.loop")) {
                 Animation loop = motion.loop(node, factory);
                 node.getProperties().put("reference.loop", loop);
-            } else if (!motion.full() || node.getScene() == null) {
+            } else if (!enabled.get() || !motion.full() || node.getScene() == null) {
                 if (node.getProperties().remove("reference.loop") instanceof Animation loop) motion.removeLoop(loop);
                 reset.run();
             }
             motion.refreshLoops();
         };
+        enabled.addListener((o, was, now) -> refresh.run());
         ChangeListener<MotionPreference> preference = (o, was, now) -> refresh.run();
         var weak = new WeakChangeListener<>(preference);
         node.getProperties().put("reference.loop.listener", preference);

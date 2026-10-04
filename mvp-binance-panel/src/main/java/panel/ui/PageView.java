@@ -9,8 +9,8 @@ import panel.model.Snapshot;
 /** Tela simples: reconstrói o conteúdo a cada Snapshot, preservando a posição de scroll. */
 public abstract class PageView implements View {
     protected final AppContext ctx;
-    private final VBox body = Ui.page();
-    private final ScrollPane scroll = Ui.scroll(body);
+    protected final VBox body = Ui.page();
+    protected final ScrollPane scroll = Ui.scroll(body);
 
     protected PageView(AppContext ctx) {
         this.ctx = ctx;

@@ -1,4 +1,4 @@
-/* Ledger de camadas: artifact V1. Approved local Inter replaces Schibsted Grotesk. */
+/* Executable Claude reference tokens; licensed Schibsted Grotesk and JetBrains Mono. */
 .root, .root.trader, .root.research, .root.byx {
     -bg: #080A0F; -panel: #0E1119; -panel2: #141824; -surface3: #1C2131;
     -border: #232A3C; -text: #ECEFF6; -text2: #A0A9BE; -muted: #7A839A;
@@ -123,3 +123,90 @@
 
 .nav-item:hover .svg-icon { -fx-stroke: -text; }
 .nav-item.selected .svg-icon { -fx-stroke: -accent; }
+
+.root, .root.trader, .root.research, .root.byx { -fx-font-family: "Schibsted Grotesk"; }
+.h0, .h1, .brand, .auth-brand, .th-symbol, .stage-title, .stage-name, .user-name,
+.nav-item, .nav-item.selected, .seg-btn, .ws-tab, .btn, .card-title, .dock-group,
+.tab-pane > .tab-header-area .tab .tab-label { -fx-font-family: "Schibsted Grotesk"; }
+.rail-brand { -fx-padding: 14 0 16 0; -fx-min-height: 58; -fx-pref-height: 58; -fx-max-height: 58; }
+.nav-item { -fx-min-width: 52; -fx-pref-width: 52; -fx-max-width: 52; -fx-min-height: 52; -fx-pref-height: 52; -fx-max-height: 52; -fx-padding: 0; -fx-background-insets: 0; -fx-font-size: 10px; -fx-font-weight: bold; }
+.nav-indicator { -fx-background-radius: 2 0 0 2; }
+.topbar { -fx-max-height: 52; -fx-spacing: 16; -fx-border-color: -border; -fx-border-width: 0 0 1 0; }
+.command-search { -fx-min-width: 300; -fx-pref-width: 300; -fx-max-width: 300; -fx-background-color: -panel2; -fx-padding: 7 12; }
+.user-menu { -fx-font-size: 11; -fx-font-weight: bold; -fx-background-color: rgba(255,255,255,.05); -fx-text-fill: -accent; -fx-border-width: 0; -fx-padding: 3 9; }
+.card-title { -fx-pref-height: 15.4; -fx-min-height: 15.4; }
+.status-dock { -fx-max-height: 30; -fx-spacing: 16; }
+.status-dock .label { -fx-font-size: 12; }
+.status-dock .dock-group { -fx-font-size: 10; }
+.reference-row { -fx-border-color: -border; -fx-border-width: 1 0 0 0; -fx-padding: 9 0; }
+.reference-row .label { -fx-font-size: 13; -fx-min-height: 18.2; -fx-pref-height: 18.2; }
+.mono, .mono .label, .reference-row .mono { -fx-font-family: "JetBrains Mono"; }
+.desk-header { -fx-padding: 0 16; }
+.desk-header .metric { -fx-font-size: 28; }
+.desk-symbol { -fx-font-size: 18; -fx-font-weight: bold; }
+.desk-period { -fx-background-color: transparent; -fx-padding: 4 10; -fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: -muted; }
+.desk-period:disabled { -fx-opacity: 1; }
+.desk-period.selected { -fx-background-color: -surface3; -fx-background-radius: 6; -fx-text-fill: -text; }
+.desk-chart { -fx-padding: 0; }
+.desk-empty-title { -fx-font-size: 16; -fx-font-weight: bold; -fx-pref-height: 22.4; }
+.desk-value { -fx-font-size: 18; -fx-text-fill: -text2; -fx-pref-height: 25.2; }
+.desk-tabs { -fx-border-color: -border; -fx-border-width: 0 0 1 0; }
+.desk-tab { -fx-background-color: transparent; -fx-padding: 8 0; -fx-text-fill: -muted; -fx-font-size: 13; -fx-font-weight: bold; -fx-border-width: 0 0 2 0; -fx-border-color: transparent; }
+.desk-tab.selected { -fx-text-fill: -text; -fx-border-color: transparent transparent -accent transparent; }
+.desk-tab:focused { -fx-text-fill: -text; }
+.desk-empty { -fx-padding: 6 0 0 0; }
+.bot-monitor-dot { -fx-min-width: 7; -fx-max-width: 7; -fx-min-height: 7; -fx-max-height: 7; -fx-background-radius: 4; -fx-background-color: -warn; }
+.research-title { -fx-font-size: 20; -fx-font-weight: bold; -fx-min-height: 28; -fx-pref-height: 28; }
+.research-kpi-value { -fx-font-size: 28; -fx-font-family: "JetBrains Mono"; -fx-min-height: 39.2; -fx-pref-height: 39.2; }
+.research-note { -fx-font-size: 12; -fx-min-height: 16.8; -fx-pref-height: 16.8; }
+.research-next-title { -fx-font-size: 16; -fx-font-weight: bold; -fx-min-height: 22.4; -fx-pref-height: 22.4; }
+.research-environment-note { -fx-font-size: 13; }
+.pipeline-label { -fx-font-size: 12; -fx-font-weight: bold; -fx-min-height: 16.8; -fx-pref-height: 16.8; }
+.pipeline-available { -fx-text-fill: -text; }
+.pipeline-unavailable { -fx-text-fill: -muted; }
+.pipeline-capture-live { -fx-background-color: -purple; }
+.pipeline-hatch { -fx-background-color: linear-gradient(from 0px 0px to 8px 8px, repeat, #4A5266 0%, #4A5266 50%, transparent 50%, transparent 100%); -fx-opacity: .5; }
+.holdout-hatch { -fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, #1C2131 0%, #1C2131 50%, #141824 50%, #141824 100%); }
+.sessions-link { -fx-background-color: transparent; -fx-padding: 0; -fx-text-fill: -muted; -fx-font-size: 11; -fx-font-weight: bold; -fx-min-height: 19.6; -fx-pref-height: 19.6; }
+.session-segment { -fx-min-height: 34; -fx-pref-height: 34; -fx-max-height: 34; -fx-background-radius: 6; }
+.session-complete { -fx-background-color: -ok; -fx-opacity: .75; }
+.session-capturing { -fx-background-color: -purple; }
+.session-partial { -fx-background-color: -warn; -fx-opacity: .75; }
+.session-failed { -fx-background-color: -bad; }
+.session-missing { -fx-background-color: -disabled; }
+.command-panel { -fx-padding: 8; }
+.text-field, .password-field, .text-area { -fx-border-color: -border, transparent; -fx-border-width: 1, 3; -fx-border-insets: 0, -3; -fx-border-radius: 10, 13; }
+.text-field:focused, .password-field:focused, .auth-input:focused { -fx-border-color: #7C96FF, #7C96FF22; }
+.otp-invalid, .otp-invalid:focused { -fx-border-color: -bad, transparent; }
+
+.card-title, .dock-group, .nav-item, .nav-item.selected, .seg-btn, .ws-tab,
+.btn, .h0, .h1, .auth-brand, .auth-tagline, .stage-title, .stage-name,
+.desk-symbol, .desk-empty-title, .research-title, .research-next-title,
+.pipeline-label, .sessions-link, .desk-tab, .badge, .user-menu {
+    -fx-font-family: "Schibsted Grotesk SemiBold";
+}
+.trader .desk-header { -fx-padding: 0 16; }
+.trader .desk-chart { -fx-padding: 0; }
+.nav-item { -fx-min-width: 60; -fx-pref-width: 60; -fx-max-width: 60; -fx-background-insets: 0 4; }
+.seg-switch { -fx-border-width: 0; -fx-pref-height: 36.2; }
+.network-outer { -fx-fill: transparent; -fx-stroke: -aqua; }
+.network-inner { -fx-fill: transparent; -fx-stroke: -disabled; }
+.network-core { -fx-fill: -aqua; -fx-stroke: -aqua; }
+.capture-now { -fx-min-width: 18; -fx-max-width: 18; -fx-min-height: 18; -fx-max-height: 18; -fx-background-radius: 9; -fx-background-color: -purple; }
+.comfortable .nav-item { -fx-padding: 0; -fx-font-size: 10; }
+.treasury-lane { -fx-background-color: -panel; -fx-background-radius: 14; -fx-padding: 18; -fx-border-radius: 14; -fx-border-width: 1; }
+.treasury-lane-0 { -fx-border-color: #42D79B66; -fx-border-style: dashed; }
+.treasury-lane-1 { -fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, #1C1B1C 0%, #1C1B1C 50%, #0E1119 50%, #0E1119 100%); }
+.treasury-lane-2 { -fx-border-color: #5CC8FF44; }
+.treasury-lane-3 { -fx-border-color: #FF7A7A66; -fx-border-style: dotted; }
+.metric, .research-kpi-value { -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-weight: normal; }
+.ledger-art { -fx-padding: 0 0 14 0; }
+.command-search:hover { -fx-background-color: -panel2; }
+.command-search { -fx-min-height: 32; -fx-pref-height: 32; -fx-max-height: 32; }
+.command-search .label { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13; -fx-text-fill: -muted; }
+.skeleton { -fx-background-color: linear-gradient(from 0% 0% to 200% 0%, repeat, #1C2131 25%, #283049 50%, #1C2131 75%); -fx-background-radius: 5; }
+.badge { -fx-min-height: 21.4; -fx-pref-height: 21.4; }
+.research-attention-text { -fx-min-height: 19.6; -fx-pref-height: 19.6; }
+.rail-brand { -fx-padding: 14 0 22 0; -fx-min-height: 64; -fx-pref-height: 64; -fx-max-height: 64; }
+.rail-settings { -fx-min-height: 66; -fx-pref-height: 66; -fx-max-height: 66; -fx-padding: 0 0 14 0; }
+.market-feed-dot { -fx-min-width: 7; -fx-max-width: 7; -fx-min-height: 7; -fx-max-height: 7; -fx-background-radius: 4; -fx-background-color: -disabled; }

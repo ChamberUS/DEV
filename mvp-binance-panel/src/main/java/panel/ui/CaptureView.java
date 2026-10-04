@@ -32,12 +32,18 @@ public class CaptureView extends PageView {
         if (!ctx.adminAccess.hasValidAdminSession()) {
             ctx.captureMonitor.stop(); monitor.stop(); monitor.clear(); observing = false; return;
         }
+        monitor.setCurrentSession(s.capture.currentSession());
         super.onSnapshot(s); visibility();
     }
     @Override protected void build(Snapshot s, VBox page) {
         ctx.adminAccess.requireAdmin();
-        var refresh = Ui.button("Refresh", "");
-        refresh.setOnAction(e -> ctx.captureMonitor.refresh());
-        page.getChildren().addAll(Ui.pageHeader("Capture", "Read-only continuous capture monitor", refresh), monitor);
+        javafx.scene.control.ContextMenu menu = new javafx.scene.control.ContextMenu();
+        var item = new javafx.scene.control.MenuItem("Refresh read-only monitor");
+        item.setOnAction(e -> ctx.captureMonitor.refresh()); menu.getItems().add(item);
+        monitor.setOnContextMenuRequested(e -> menu.show(monitor, e.getScreenX(), e.getScreenY()));
+        monitor.setFocusTraversable(true);
+        monitor.setOnKeyPressed(e -> { if (e.getCode() == javafx.scene.input.KeyCode.F5) ctx.captureMonitor.refresh(); });
+        page.getChildren().add(monitor);
+        VBox.setVgrow(monitor, javafx.scene.layout.Priority.ALWAYS);
     }
 }

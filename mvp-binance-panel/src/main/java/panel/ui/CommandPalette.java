@@ -56,7 +56,7 @@ public final class CommandPalette {
         var results = Ui.scroll(rows); results.setPrefHeight(400);
         VBox panel = new VBox(14, search, results, Ui.label("↑↓ navigate   ↵ open   esc close", "muted"));
         panel.getStyleClass().add("command-panel");
-        panel.setMaxSize(620, javafx.scene.layout.Region.USE_PREF_SIZE);
+        panel.setMaxSize(560, javafx.scene.layout.Region.USE_PREF_SIZE);
         List<Command> available = commands(admin, verified);
         Runnable filter = () -> {
             rows.getChildren().clear();
@@ -73,6 +73,8 @@ public final class CommandPalette {
         search.textProperty().addListener((o, a, b) -> filter.run());
         filter.run();
         overlay = new StackPane(panel);
+        StackPane.setAlignment(panel, javafx.geometry.Pos.TOP_CENTER);
+        StackPane.setMargin(panel, new javafx.geometry.Insets(110, 0, 0, 0));
         overlay.getStyleClass().add("command-overlay");
         overlay.setOnMouseClicked(e -> { if (e.getTarget() == overlay) close(); });
         overlay.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, e -> {

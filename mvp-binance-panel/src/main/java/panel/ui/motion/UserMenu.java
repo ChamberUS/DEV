@@ -58,13 +58,12 @@ public class UserMenu extends Button {
 
     public void setUser(String name, String role, List<Item> items) {
         this.items = items;
-        Label n = Ui.label(name, "user-name");
-        Label r = Ui.label(role, "muted");
-        setGraphic(new VBox(0, n, r));
+        setAccessibleText(name + " · " + role + " · account menu");
+        content.getProperties().put("account.identity", name + " · " + role);
     }
 
     private void open() {
-        content.getChildren().clear();
+        content.getChildren().setAll(Ui.label((String) content.getProperties().get("account.identity"), "muted"));
         for (Item it : items) {
             if (it.label() == null) {
                 content.getChildren().add(new Separator());

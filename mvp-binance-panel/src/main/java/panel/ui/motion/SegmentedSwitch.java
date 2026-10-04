@@ -49,4 +49,9 @@ public class SegmentedSwitch extends StackPane {
     public boolean leftSelected() {
         return leftSelected;
     }
+
+    public void addOption(javafx.scene.control.Button button) {
+        button.getStyleClass().add("seg-btn");
+        ((HBox) getChildren().get(1)).getChildren().add(button);
+    }
 }

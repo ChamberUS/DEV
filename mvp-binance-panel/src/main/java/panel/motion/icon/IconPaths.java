@@ -26,18 +26,20 @@ public final class IconPaths {
         add("mail", "M3 6h18v12H3z M3 7l9 6 9-6", Kind.RING, null);
         add("phone", "M8 3h8v18H8z M11 18h2", Kind.RING, null);
         add("refresh", "M20 12a8 8 0 1 1-2.6-5.9 M20 4v5h-5", Kind.SPIN, null);
-        add("chart", "M4 19V5 M4 19h16 M7 15l4-5 3 3 5-7", Kind.DRAW, null);
+        add("chart", "M4 18l5-6 4 3 7-9", Kind.DRAW, null);
         add("signal", "M4 18v-3 M9 18v-7 M14 18v-11 M19 18V4", Kind.DRAW, null);
         add("user", "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 20c0-4 4-6 8-6s8 2 8 6", Kind.POP, null);
         add("shield", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", Kind.POP, null);
         add("logout", "M10 4H5v16h5 M14 8l4 4-4 4 M18 12H9", Kind.POP, null);
-        add("settings", "M4 8h16 M4 16h16 M9 5v6 M15 13v6", Kind.POP, null);
-        add("orders", "M5 6h14 M5 12h14 M5 18h9", Kind.POP, null);
+        add("settings", "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M12 3v3 M12 18v3 M3 12h3 M18 12h3", Kind.POP, null);
+        add("orders", "M5 7h14 M5 12h14 M5 17h9", Kind.POP, null);
         add("positions", "M4 8h16v11H4z M9 8V5h6v3", Kind.POP, null);
-        add("bot", "M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z M9.5 12h5", Kind.POP, "/animations/original/pulse-ring.json");
+        add("bot", "M5 9h14v10H5z M12 5v4 M9 14h.01 M15 14h.01", Kind.POP, "/animations/original/pulse-ring.json");
         add("search", "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z M20 20l-4-4", Kind.POP, null);
         add("feed", "M4 12a8 8 0 0 1 8-8 M4 12a8 8 0 0 0 8 8 M8 12a4 4 0 0 1 4-4 M12 12h.01", Kind.POP, null);
-        add("dashboard", "M4 4h7v7H4z M13 4h7v4h-7z M13 10h7v10h-7z M4 13h7v7H4z", Kind.POP, null);
+        add("dashboard", "M4 4h7v7H4z M13 4h7v4h-7z M13 11h7v9h-7z M4 14h7v6H4z", Kind.POP, null);
+        add("capture", "M5 6c0-3 14-3 14 0v12c0 3-14 3-14 0z M5 6c0 3 14 3 14 0 M5 12c0 3 14 3 14 0", Kind.POP, null);
+        add("hypotheses", "M10 4h4 M11 4v6L6 20h12l-5-10V4", Kind.POP, null);
         add("clock", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7v5l3 2", Kind.POP, null);
     }
 

@@ -66,8 +66,8 @@ public class PanelApp extends Application {
             Map.entry("t-treasury", "treasury"), Map.entry("t-wallet", "wallet"), Map.entry("t-benefits", "benefits"), Map.entry("t-byx", "network"), Map.entry("t-desk", "dashboard"), Map.entry("t-markets", "chart"), Map.entry("t-bot", "bot"), Map.entry("t-strategies", "settings"),
             Map.entry("t-signals", "signal"), Map.entry("t-portfolio", "dashboard"), Map.entry("t-positions", "positions"), Map.entry("t-orders", "orders"),
             Map.entry("t-performance", "chart"), Map.entry("t-activity", "clock"), Map.entry("t-profile", "user"), Map.entry("t-settings", "settings"),
-            Map.entry("overview", "dashboard"), Map.entry("capture", "feed"), Map.entry("sessions", "clock"), Map.entry("dataset", "positions"),
-            Map.entry("labels", "orders"), Map.entry("features", "chart"), Map.entry("hypotheses", "search"), Map.entry("validation", "lock"),
+            Map.entry("overview", "dashboard"), Map.entry("capture", "capture"), Map.entry("sessions", "clock"), Map.entry("dataset", "positions"),
+            Map.entry("labels", "orders"), Map.entry("features", "chart"), Map.entry("hypotheses", "hypotheses"), Map.entry("validation", "lock"),
             Map.entry("execution", "chart"), Map.entry("paper", "lock"), Map.entry("live", "lock"), Map.entry("jobs", "refresh"),
             Map.entry("logs", "orders"), Map.entry("users", "user"), Map.entry("settings", "settings"));
 
@@ -83,6 +83,9 @@ public class PanelApp extends Application {
     private boolean adminChrome;
     private final panel.ui.CommandPalette palette = new panel.ui.CommandPalette(this::show);
     private final HBox topBar = new HBox(10);
+    private final Button commandSearch = Ui.button("", "ghost");
+    private final Label breadcrumb = Ui.label("", "breadcrumb");
+    private final Label mockBadge = Ui.badge("MOCK", "warn");
     private final VBox researchNav = new VBox(2);
     private final VBox traderNav = new VBox(2);
     private final VBox brand = new VBox();
@@ -111,7 +114,7 @@ public class PanelApp extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        for (String f : new String[] {"Inter-Regular", "Inter-Medium", "Inter-SemiBold", "Inter-Bold", "JetBrainsMono-Regular", "JetBrainsMono-Medium", "JetBrainsMono-Bold"}) {
+        for (String f : new String[] {"SchibstedGrotesk-Regular", "SchibstedGrotesk-SemiBold", "Inter-Regular", "Inter-Medium", "Inter-SemiBold", "Inter-Bold", "JetBrainsMono-Regular", "JetBrainsMono-Medium", "JetBrainsMono-SemiBold", "JetBrainsMono-Bold"}) {
             Font.loadFont(getClass().getResourceAsStream("/fonts/" + f + ".ttf"), 13);
         }
         EmptyState.init(ctx.icons);
@@ -132,8 +135,8 @@ public class PanelApp extends Application {
         });
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> ctx.adminAccess.touch());
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> ctx.adminAccess.touch());
-        stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(!iconified));
-        stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing));
+        stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(stage.isShowing() && !iconified));
+        stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing && !stage.isIconified()));
         ctx.motion.reference.bind(rootStack);
         stage.setScene(scene);
         stage.setMinWidth(1100);
@@ -141,6 +144,29 @@ public class PanelApp extends Application {
         applyDensity();
         showEntry(null);
         stage.show();
+        Platform.runLater(() -> runtimeDiagnostics(scene));
+    }
+
+    private void runtimeDiagnostics(Scene scene) {
+        StringBuilder diagnostic = new StringBuilder("BYX_RUNTIME classes=").append(PanelApp.class.getProtectionDomain().getCodeSource().getLocation())
+                .append(" java=").append(System.getProperty("java.version"))
+                .append(" javafx=").append(System.getProperty("javafx.version"))
+                .append(" scene=").append(scene.getWidth()).append("x").append(scene.getHeight())
+                .append(" scale=").append(stage.getOutputScaleX()).append("x").append(stage.getOutputScaleY())
+                .append(" motion=").append(ctx.motion.preference.get()).append(" density=").append(ctx.settings.density)
+                .append(" motionSource=").append(java.nio.file.Files.exists(java.nio.file.Path.of(System.getProperty("user.home"), ".mvp-binance-panel", "settings.properties")) ? "persisted-settings" : "default");
+        for (String css : scene.getStylesheets()) {
+            try (var input = java.net.URI.create(css).toURL().openStream()) {
+                diagnostic.append(" css=").append(css).append(" sha256=")
+                        .append(java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input.readAllBytes())));
+            } catch (java.io.IOException | java.security.NoSuchAlgorithmException error) {
+                diagnostic.append(" cssReadError=").append(error.getClass().getSimpleName());
+            }
+        }
+        scene.getRoot().applyCss();
+        scene.getRoot().lookupAll(".label").stream().filter(n -> n instanceof Label).findFirst()
+                .ifPresent(n -> diagnostic.append(" font=").append(((Label)n).getFont()));
+        System.out.println(diagnostic);
     }
 
     @Override
@@ -234,12 +260,12 @@ public class PanelApp extends Application {
 
         BorderPane root = new BorderPane();
         root.setLeft(sidebar(user));
-        VBox right = new VBox(topBar, content);
+        VBox right = new VBox(topBar, content, footer);
         VBox.setVgrow(content, javafx.scene.layout.Priority.ALWAYS);
         topBar.getStyleClass().add("topbar");
         topBar.setAlignment(Pos.CENTER_LEFT);
         root.setCenter(right);
-        root.setBottom(footer);
+
         holder.getChildren().setAll(root);
 
         ctx.navigate = this::show;
@@ -461,8 +487,10 @@ public class PanelApp extends Application {
         brand.getChildren().setAll(panel.ui.LedgerMark.create());
         brand.setAlignment(Pos.CENTER);
         brand.getStyleClass().add("rail-brand");
-        workspaceSwitch.left.setText("TRADING");
-        workspaceSwitch.right.setText("RESEARCH");
+        workspaceSwitch.left.setText("Trading");
+        workspaceSwitch.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        workspaceSwitch.right.setText("Research");
+        if (byxSwitch.getParent() == null) workspaceSwitch.addOption(byxSwitch);
         workspaceSwitch.right.setVisible(user.admin());
         workspaceSwitch.right.setManaged(user.admin());
         byxSwitch.setOnAction(e -> show("t-byx"));
@@ -479,7 +507,6 @@ public class PanelApp extends Application {
 
         item(traderNav, "t-desk", "▦  Trading Desk");
         item(traderNav, "t-markets", "Markets");
-        item(traderNav, "t-wallet", "Wallet");
 
         item(byxNav, "t-byx", "BYX Network");
         item(byxNav, "t-wallet", "Wallet");
@@ -487,6 +514,7 @@ public class PanelApp extends Application {
         item(byxNav, "t-treasury", "Treasury");
         group(traderNav, "AUTOMATION");
         item(traderNav, "t-bot", "Bot");
+        item(traderNav, "t-wallet", "Wallet");
         item(traderNav, "t-strategies", "Strategies");
         item(traderNav, "t-signals", "Signals");
         group(traderNav, "PORTFOLIO");
@@ -557,11 +585,17 @@ public class PanelApp extends Application {
         b.setMaxWidth(Double.MAX_VALUE);
         b.setAlignment(Pos.CENTER);
         b.setContentDisplay(javafx.scene.control.ContentDisplay.TOP);
-        b.setGraphicTextGap(10);
+        b.setGraphicTextGap(3);
+        b.setWrapText(false);
+        b.setMinWidth(60);
+        b.setMaxWidth(60);
         b.setOnAction(e -> show(id));
-        AnimatedIcon navIcon = ctx.icons.svg(NAV_ICONS.getOrDefault(id, "dashboard"), 16, "muted");
+        AnimatedIcon navIcon = ctx.icons.svg(NAV_ICONS.getOrDefault(id, "dashboard"), 20, "muted");
         b.setGraphic(navIcon.node());
         StackPane wrap = new StackPane(b);
+        wrap.setMaxWidth(60);
+        nav.setAlignment(Pos.TOP_CENTER);
+        nav.setSpacing(6);
         ctx.motion.reference.tooltip(b, wrap, text.replaceAll("^[^\\p{L}]+", ""));
         navButtons.put(id, b);
         navWrappers.put(id, wrap);
@@ -573,8 +607,9 @@ public class PanelApp extends Application {
     private void navStack(VBox nav) {
         Region ind = new Region();
         ind.getStyleClass().add("nav-indicator");
-        ind.setPrefSize(3, 18);
-        ind.setMaxSize(3, 18);
+        ind.setPrefSize(2, 52);
+        ind.setMaxSize(2, 52);
+        ind.setTranslateX(4);
         ind.setMouseTransparent(true);
         StackPane st = new StackPane(nav, ind);
         StackPane.setAlignment(ind, Pos.TOP_LEFT);
@@ -591,7 +626,7 @@ public class PanelApp extends Application {
         Platform.runLater(() -> {
             navHolder.applyCss();
             navHolder.layout();
-            double y = wrap.getBoundsInParent().getMinY() + (wrap.getHeight() - 18) / 2;
+            double y = wrap.getBoundsInParent().getMinY() + (wrap.getHeight() - 52) / 2;
             if (!indicatorPlaced || wrap.getHeight() == 0) {
                 ind.setTranslateY(y);
                 indicatorPlaced = wrap.getHeight() > 0;
@@ -630,15 +665,21 @@ public class PanelApp extends Application {
         boolean mock = (trader ? t.source : s.source) == DataSource.MOCK;
         String current = lastView.get(trader);
         String title = navButtons.containsKey(current) ? navButtons.get(current).getAccessibleText() : "Overview";
-        Button search = Ui.button("Search or jump to…  ⌘K", "ghost");
-        search.getStyleClass().add("command-search");
-        search.setOnAction(e -> openPalette());
-        topBar.getChildren().setAll(workspaceSwitch, byxSwitch,
-                Ui.label((byxWorkspace ? "BYX" : trader ? "Trading" : "Research") + " / " + title, "breadcrumb"),
-                Ui.spacer(), search);
-        if (mock) topBar.getChildren().add(Ui.badge("MOCK", "warn"));
-        ctx.adminAccess.adminSession().ifPresent(a -> topBar.getChildren().add(Ui.badge("ADMIN SESSION", "info")));
-        topBar.getChildren().addAll(refreshBtn, userMenu);
+        if (commandSearch.getGraphic() == null) {
+            HBox graphic = new HBox(8, ctx.icons.staticIcon("search", 16, "muted").node(),
+                    Ui.label("Search or jump to…", "muted"), Ui.spacer(), Ui.label("⌘K", "muted"));
+            graphic.setAlignment(Pos.CENTER_LEFT); graphic.setPrefWidth(276);
+            commandSearch.setGraphic(graphic); commandSearch.setGraphicTextGap(0);
+            commandSearch.getStyleClass().add("command-search");
+            commandSearch.setAccessibleText("Search or jump to · Command K");
+            commandSearch.setOnAction(e -> openPalette());
+        }
+        breadcrumb.setText(current.equals("t-desk") ? "Desk / " + (t.symbol == null ? "ETHUSDT" : t.symbol)
+                : (byxWorkspace ? "BYX" : trader ? "Trading" : "Research") + " / " + title.replaceAll("^[^\\p{L}]+", ""));
+        mockBadge.setVisible(mock); mockBadge.setManaged(mock);
+        userMenu.setText(adminChrome ? "ADMIN SESSION" : "ACCOUNT");
+        if (!topBar.getChildren().contains(commandSearch))
+            topBar.getChildren().setAll(workspaceSwitch, breadcrumb, Ui.spacer(), commandSearch, mockBadge, userMenu);
     }
 
     private void openPalette() {
@@ -654,7 +695,7 @@ public class PanelApp extends Application {
             case "t-portfolio" -> "Portfolio";
             case "t-performance" -> "Results";
             case "t-strategies" -> "Strategy";
-            case "hypotheses" -> "Hypoth.";
+            case "hypotheses" -> "Hypotheses";
             case "validation" -> "Locked";
             default -> fallback.replaceAll("^[^\\p{L}]+", "");
         };
@@ -668,6 +709,7 @@ public class PanelApp extends Application {
             ctx.refresh();
         });
         java.util.List<UserMenu.Item> items = new java.util.ArrayList<>();
+        items.add(new UserMenu.Item("Refresh", "refresh", ctx::refresh));
         items.add(new UserMenu.Item("Profile", "user", () -> show("t-profile")));
         items.add(new UserMenu.Item("Security", "shield", () -> show("t-profile")));
         if (u.admin()) {

@@ -11,7 +11,8 @@ public final class Credits {
     }
 
     public static final List<Entry> ENTRIES = List.of(
-            new Entry("Inter (Rasmus Andersson)", "SIL OFL 1.1", "UI typeface (bundled)"),
+            new Entry("Schibsted Grotesk Project Authors", "SIL OFL 1.1", "Reference UI typeface (static 400/600 instances)"),
+            new Entry("Inter (Rasmus Andersson)", "SIL OFL 1.1", "Legacy UI typeface (bundled)"),
             new Entry("JetBrains Mono", "SIL OFL 1.1", "Numbers and code typeface (bundled)"),
             new Entry("Lottie4J", "Apache-2.0", "Native Lottie renderer"),
             new Entry("OpenJFX", "GPL v2 + Classpath Exception", "UI toolkit"),
