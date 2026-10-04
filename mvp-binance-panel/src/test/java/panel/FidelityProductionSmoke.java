@@ -215,7 +215,7 @@ public final class FidelityProductionSmoke {
             Path frames=Files.createDirectories(output.resolve("frames").resolve(name));
             List<String> times=new ArrayList<>();times.add("frame,elapsed_ms");interactions=0;
             if (!name.equals("login")) robot.mouseMove(stage.getX()+450, stage.getY()+300);
-            new AnimationTimer(){long start,last;int frame;boolean opacityChecked;
+            new AnimationTimer(){long start,last;int frame;boolean opacityChecked;Node keyboardBefore;
                 @Override public void handle(long now){try{
                     if(start==0)start=now;double ms=(now-start)/1e6;
                     if (!name.equals("login") && ms > 1000 && !opacityChecked) {
@@ -241,10 +241,10 @@ public final class FidelityProductionSmoke {
                     if(nativeInput&&name.equals("trading")&&ms>3300&&interactions==4)check(Window.getWindows().stream()
                             .filter(w->w instanceof PopupWindow&&w.isShowing()).anyMatch(w->w.getScene().getRoot().lookup(".rail-motion-tooltip")!=null),"Robot opens the real rail tooltip: hover="+stage.getScene().getRoot().lookup(".nav-item").isHover()+" pointer="+robot.getMousePosition()+" popup="+stage.getScene().getRoot().lookup(".nav-item").getProperties().get("reference.tooltip.popup"));
                     if(name.equals("trading")&&ms>4500&&interactions==4){robot.mouseMove(stage.getX()+400,stage.getY()+200);interactions++;}
-                    if(name.equals("trading")&&ms>6000&&interactions==2){robot.keyPress(javafx.scene.input.KeyCode.TAB);robot.keyRelease(javafx.scene.input.KeyCode.TAB);interactions++;}
+                    if(nativeInput&&name.equals("trading")&&ms>6000&&interactions==5){keyboardBefore=stage.getScene().getFocusOwner();robot.keyPress(javafx.scene.input.KeyCode.TAB);robot.keyRelease(javafx.scene.input.KeyCode.TAB);interactions=6;}
                     if(name.equals("research")&&ms>3000&&interactions==0){move(view("overview").node().lookup(".btn"));interactions++;}
                     if(nativeInput&&name.equals("research")&&ms>3250&&interactions==1)check(((Button)view("overview").node().lookup(".btn")).isHover(),"Real Robot button hover");
-                    if(nativeInput&&name.equals("trading")&&ms>6300&&interactions==3)check(stage.getScene().getFocusOwner()!=null && keyEvents>0,"Robot keyboard focus");
+                    if(nativeInput&&name.equals("trading")&&ms>6300&&interactions==6)check(stage.getScene().getFocusOwner()!=null && stage.getScene().getFocusOwner()!=keyboardBefore && keyEvents>0,"Robot keyboard changes real focus");
                     if(name.equals("research")&&ms>3400&&interactions==1){robot.mouseMove(stage.getX()+500,stage.getY()+200);interactions++;}
                     if(name.equals("research")&&ms>3500&&interactions==2){move(view("overview").node().lookup(".btn"));interactions++;}
                     if(ms>=seconds*1000){stop();Files.write(frames.resolve("times.csv"),times);next.run();}
