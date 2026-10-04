@@ -29,6 +29,10 @@ public final class ByxVisualSmoke {
         Path config = Files.createDirectory(home.resolve(".mvp-binance-panel"));
         Files.writeString(config.resolve("security.properties"), "security.dev.mode=true\n");
         Files.writeString(config.resolve("settings.properties"), "dataSource=MOCK\nprojectPath=" + home.resolve("empty-project") + "\nmotion=FULL\n");
+        if(Boolean.getBoolean("byx.payment.qa")) {
+            Path policy=Path.of(System.getProperty("user.home"),".mvp-binance-panel","byx-payments-test.properties");
+            Files.writeString(config.resolve("byx-payments-test.properties"),Files.readString(policy).replace("pass_seconds=300","pass_seconds=12"));
+        }
         System.setProperty("user.home", home.toString());
         Application.launch(VisualApp.class, args);
         if (failure != null) throw new RuntimeException(failure);
@@ -98,7 +102,7 @@ public final class ByxVisualSmoke {
             invoke("show",String.class,"t-wallet");
             var field=PanelApp.class.getDeclaredField("views");field.setAccessible(true);
             walletView=((java.util.Map<?,?>)field.get(this)).get("t-wallet");
-            ((javafx.scene.control.TextField)walletField("address")).setText(manifest.path("addresses").path("alice-test").asText());
+            ((javafx.scene.control.TextField)walletField("address")).setText(manifest.path("addresses").path(Boolean.getBoolean("byx.payment.qa")?"bob-test":"alice-test").asText());
             var node=((panel.ui.View)walletView).node();
             button(node,"Link BYX Wallet / Reverify").fire();
             var challenge=(panel.model.WalletChallenge)walletField("challenge");
@@ -124,6 +128,7 @@ public final class ByxVisualSmoke {
                         ((javafx.scene.control.ScrollPane)node).setVvalue(1);
                         later(()->{shot("wallet-balance");invoke("show",String.class,"t-benefits");
                             later(()->{
+                                if(Boolean.getBoolean("byx.payment.qa")){paymentFlow(address);return;}
                                 var gate = (javafx.scene.control.Button) window.getScene().getRoot().lookup("#byx-extended-history");
                                 ByxLocalnetSmoke.check(gate != null && !gate.isDisabled(), "PLUS UI gate unlocked");
                                 gate.fire(); shot("wallet-benefits");invoke("show",String.class,"t-wallet");button(node,"Unlink / Revoke").fire();
@@ -138,6 +143,47 @@ public final class ByxVisualSmoke {
                     });
                 }catch(Throwable t){fail(t);}
             }));
+        }
+        panel.ui.View benefitsView()throws Exception {
+            var field=PanelApp.class.getDeclaredField("views");field.setAccessible(true);
+            return (panel.ui.View)((java.util.Map<?,?>)field.get(this)).get("t-benefits");
+        }
+        Object paymentField(String name)throws Exception {
+            var view=benefitsView();var field=view.getClass().getDeclaredField(name);field.setAccessible(true);return field.get(view);
+        }
+        void paymentFlow(String address)throws Exception {
+            ByxLocalnetSmoke.check(!context.byxEntitlements.allows(address,"advanced_analytics"),"FREE analytics locked");
+            button(benefitsView().node(),"Unlock with BYX (TEST)").fire();
+            var intent=(panel.model.PaymentIntent)paymentField("intent");ByxLocalnetSmoke.check(intent!=null,"UI intent created");
+            ((javafx.scene.control.ScrollPane)benefitsView().node()).setVvalue(1);shot("payment-awaiting");
+            java.util.concurrent.CompletableFuture.supplyAsync(()->{
+                try {
+                    var payload=java.util.Map.of("id",intent.id(),"chainId",intent.chainId(),"genesisFingerprint",intent.genesisFingerprint(),"recipient",intent.recipient(),"verifiedWallet",intent.verifiedWallet(),"amountUbyx",intent.amountUbyx().toString(),"purpose",intent.purpose(),"createdAt",intent.createdAt().toString(),"expiresAt",intent.expiresAt().toString());
+                    var builder=new ProcessBuilder("python3","scripts/byx_payment_test.py","send");builder.environment().put("BYX_LOCALNET_TEST_SIGNER","I_ACKNOWLEDGE_TEST_ONLY");
+                    var child=builder.start();try(var input=child.getOutputStream()){new ObjectMapper().writeValue(input,payload);}
+                    byte[] out=child.getInputStream().readAllBytes();if(!child.waitFor(15,java.util.concurrent.TimeUnit.SECONDS)||child.exitValue()!=0)throw new IllegalStateException("DEV UI transfer failed");
+                    return new ObjectMapper().readTree(out).path("tx_hash").asText();
+                }catch(Exception e){throw new RuntimeException(e);}
+            }).whenComplete((hash,error)->Platform.runLater(()->{
+                try{if(error!=null)throw new RuntimeException(error);((javafx.scene.control.TextField)paymentField("txHash")).setText(hash);checkPayment(address,intent.id(),30);}
+                catch(Throwable t){fail(t);}
+            }));
+        }
+        void checkPayment(String address,String id,int tries)throws Exception {
+            var status=context.byxPayments.get(id).status();
+            if(status==panel.model.PaymentIntent.Status.CONSUMED){
+                ByxLocalnetSmoke.check(context.byxEntitlements.allows(address,"advanced_analytics"),"UI payment gate opens");
+                var open=button(benefitsView().node(),"Open Advanced Analytics (TEST)");ByxLocalnetSmoke.check(!open.isDisabled(),"Paid UI button enabled");open.fire();shot("payment-confirmed");
+                ((javafx.scene.control.ScrollPane)benefitsView().node()).setVvalue(0);shot("payment-analytics");
+                var delay=new PauseTransition(Duration.seconds(13));delay.setOnFinished(e->{try{
+                    ByxLocalnetSmoke.check(!context.byxEntitlements.allows(address,"advanced_analytics"),"UI paid pass expired");
+                    benefitsView().onSnapshot(null);shot("payment-expired");
+                    context.byxWallets.revoke(address);ByxLocalnetSmoke.check(context.byxPayments.receipts().size()==1,"Public receipt survives revoke");Platform.exit();
+                }catch(Throwable t){fail(t);}});delay.play();return;
+            }
+            ByxLocalnetSmoke.check(tries>0&&status!=panel.model.PaymentIntent.Status.REJECTED,"UI payment not rejected");
+            if(status==panel.model.PaymentIntent.Status.AWAITING_PAYMENT)button(benefitsView().node(),"Confirm transaction").fire();
+            later(()->checkPayment(address,id,tries-1));
         }
         void invoke(String name, Class<?> type, Object value) throws Exception {
             Method method = PanelApp.class.getDeclaredMethod(name, type); method.setAccessible(true); method.invoke(this, value);

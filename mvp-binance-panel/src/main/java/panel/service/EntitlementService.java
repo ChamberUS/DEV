@@ -19,11 +19,22 @@ public final class EntitlementService {
     public record Progress(String nextTier, BigInteger requiredUbyx, BigInteger currentUbyx,
             BigInteger remainingUbyx) { }
     private final ByxBenefitsService benefits;
+    private final ByxPaymentService payments;
     private final Map<String, Deque<HistoryEntry>> history = new HashMap<>();
-    public EntitlementService(ByxBenefitsService benefits) { this.benefits = Objects.requireNonNull(benefits); }
+    public EntitlementService(ByxBenefitsService benefits) { this(benefits,null); }
+    public EntitlementService(ByxBenefitsService benefits,ByxPaymentService payments) {
+        this.benefits=Objects.requireNonNull(benefits);this.payments=payments;
+    }
 
     public List<Entitlement> snapshot(String address) {
-        return resolve(benefits.snapshot(address));
+        var tiers=resolve(benefits.snapshot(address));
+        if(payments==null)return tiers;
+        var paid=payments.active(address);
+        if(paid.isEmpty())return tiers;
+        var receipt=paid.get();
+        return tiers.stream().map(e -> e.id().equals("advanced_analytics")&&!e.enabled()
+                ?new Entitlement(e.id(),e.displayName(),e.requiredTier(),true,"BYX_PAYMENT",receipt.expiresAt(),
+                    Entitlement.Status.UNLOCKED,receipt.startsAt(),receipt.paymentIntentId(),receipt.txHash()):e).toList();
     }
     private List<Entitlement> resolve(BenefitsSnapshot s) {
         boolean fresh = "VERIFIED".equals(s.walletStatus()) && "ONLINE/FRESH".equals(s.chainState())
@@ -52,6 +63,10 @@ public final class EntitlementService {
             if (entries.size() > 20) entries.removeFirst();
         }
         return List.copyOf(entries);
+    }
+    public List<String> analyticsPreview(String address) {
+        if(!allows(address,"advanced_analytics"))throw new panel.security.AccessDeniedException("Analytics entitlement required");
+        return List.of("SYNTHETIC DEMO / NO RESEARCH DATA", "Sample observations: 20", "Sample processing time: 12 ms");
     }
     public Progress progress(String address) {
         var s = benefits.snapshot(address);

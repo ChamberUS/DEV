@@ -11,3 +11,7 @@ src/main/java/panel/app/*Probe*.java
 providers.properties
 capture.pid
 current_campaign
+
+__pycache__/
+*.py[cod]
+/byx-payments-test.properties

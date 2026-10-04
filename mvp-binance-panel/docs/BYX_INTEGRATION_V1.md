@@ -701,3 +701,181 @@ still untracked; its coherent phase-only commit/push remains pending the user's
 choice about including that necessary earlier base. The incremental source patch
 is retained outside Git at `/private/tmp/byx-entitlements-phase/panel-phase.patch`.
 No keys, keyrings, state, credentials, logs or raw data were staged.
+
+## Spend-to-Unlock v1 — LOCALNET TEST ONLY
+
+### GIT baseline
+
+Branch `feature/byx-integration-v1` contains two separate initial commits:
+`46c5011` (37 BYX baseline files: branding, gateway/localnet, proof/persistence,
+benefits foundation and their documentation/tests), `8f7d5b0` (8 entitlement
+files/changes). The index used the pre-entitlements copies without rolling back
+the working files. The original `/private/tmp/byx-entitlements-phase/panel-phase.patch`
+was preserved byte-for-byte, with an additional external backup. Other projects,
+installed skills, research changes and runtime files were excluded. Baseline
+`mvn test` and `mvn clean package` each passed 139 tests after those commits.
+
+### PAYMENT INTENT
+
+`PaymentIntent` contains a SecureRandom 256-bit id, user id, verified wallet address,
+chain id + canonical genesis identity, recipient, exact integer amount_ubyx,
+fixed purpose `advanced_analytics_test`, creation/expiry and status. Lifecycle:
+CREATED -> AWAITING_PAYMENT -> CONFIRMING -> PAID -> CONSUMED; EXPIRED/REJECTED
+are terminal. PAID and receipt insertion/CONSUMED happen in one SQLite transaction
+only after verification. An unavailable/unindexed/offline/stale chain returns to
+AWAITING_PAYMENT without a grant. The GUI performs confirmation off the FX thread.
+The row is scoped to the authenticated user; session/proof/network are rechecked
+before consuming. No account balance alone creates a payment entitlement.
+
+Policy resource `panel/byx-localnet-payment.properties` has TEST defaults of
+10000 ubyx (0.010000 BYX), 300-second intent and 300-second pass. Recipient/chain/
+genesis are deliberately blank until an explicit public-only LOCALNET configuration
+is supplied at `~/.mvp-binance-panel/byx-payments-test.properties`. Environment must
+be LOCALNET_TEST_ONLY; chain must match the configured loopback localnet identity.
+The amount is bounded to 1000000 ubyx in this prototype. These are configurable
+nonfinancial fixtures, not tokenomics, USD prices or future token valuation.
+
+### VERIFICATION MODEL
+
+Use a standard `cosmos.bank.v1beta1.MsgSend`; x/payments is not used. Memo must equal
+`BYX-MVP:PAY:v1:<256-bit intent id>`, without additional text. In this SDK the CLI
+flag is **--note**, which populates the transaction body memo. Exactly one MsgSend
+and one coin are supported: sender == the currently verified wallet, recipient ==
+the configured TEST receiver, denom == ubyx, amount == the exact intent amount.
+Partial, wrong, mixed-denom, multi-message and ambiguous-reference payments fail.
+
+`CosmosByxPaymentVerifier` first reuses the gateway to validate REST/RPC node identity,
+chain, genesis, metadata, freshness and sync state. It then reconciles REST transaction
+hash/height/success with RPC tx hash/height/code, verifies SHA-256 of the actual TxRaw
+bytes, decodes signed TxBody/Any/MsgSend/Coin fields using standard Google Protobuf,
+and checks inclusion of those exact bytes in the block at that height. Block chain
+id and time must match policy. Both decoded REST and signed-body contents must agree
+with the intent. This is a trusted loopback node verifier, not a light client against
+a Byzantine RPC or a production payment backend. SDK consensus/application validation
+is relied upon for transaction signatures; Java does not sign or own keys.
+
+Verification must occur before intent expiry (strict, including the boundary).
+The block time lower bound allows 30 seconds before intent creation because CometBFT
+BFT Time uses the preceding commit; the real smoke observed a 1.47-second difference.
+This does not extend intent expiry. The unpredictable unique memo binds the payment
+to the already-created intent. Older blocks beyond that bound and blocks over five
+seconds ahead of the verifier clock are rejected. See the
+[CometBFT header specification](https://github.com/cometbft/cometbft/blob/main/spec/core/data_structures.md)
+and [standard Protobuf parser API](https://protobuf.dev/reference/java/api-docs/com/google/protobuf/CodedInputStream.html).
+
+### PAY-TO-UNLOCK
+
+Advanced Analytics Pass — TEST is optional: PLUS/PRO tier OR an active verified
+payment receipt enables `advanced_analytics`. Other capabilities are never granted
+by a payment. Entitlement metadata records source BYX_PAYMENT, starts_at, expires_at,
+payment_intent_id and tx hash. The tier itself remains unchanged. A paid pass uses
+its confirmed receipt, independently of a later balance; offline cannot manufacture
+a new receipt. Every access rechecks current-user proof, network and pass expiry.
+Revoking/expiring the wallet suspends access, while immutable payment history remains.
+An expired pass can fall back to a sufficient tier. No financial refunds or renewals
+are promised; an interrupted CONFIRMING run fails closed and expires if not completed.
+
+Benefits provides Create Payment Intent, amount, summarized/full-copy recipient,
+intent expiry, exact memo reference, transaction hash input/copy, asynchronous
+CONFIRMING and confirmed activation. It never asks for seed/private key. The real
+consumer “Open Advanced Analytics (TEST)” checks EntitlementService again on click
+and displays only synthetic interface samples, not market/research data. Notices:
+LOCALNET / TEST PAYMENT / TEST ASSETS / NO FINANCIAL VALUE. Normal access and normal
+future payment methods remain independent of BYX; BYX is never mandatory.
+
+### TEST service wallet / SECURITY
+
+The SDK created `payments-service-test`, public receiver
+`byx1nv8dxx4kyjhcnz8826927q7y5ajn9792ty6qp8`, exclusively in the existing isolated
+TEST keyring. Mnemonic output was discarded; no keys enter Java, SQLite, config,
+logs or Git. Runtime configuration contains only public identity and TEST policy.
+DEV-only `scripts/byx_payment_test.py` requires an explicit test opt-in, the audited
+home/binary/genesis/process, bob-test sender, bounded amount, valid intent and a
+single-broadcast claim. The normal Java application never invokes it or byxd.
+The separate existing SDK helper proves control before broadcast in QA.
+
+SQLite persists public intent/receipt fields only. A CAS claim prevents concurrent
+confirmation of an intent. Receipt intent_id is unique, and (chain_id, genesis,
+tx_hash) is unique across users/intents. Receipt insertion and consumption are atomic,
+so replay or a crash cannot create two receipts or extend a pass. Consumption and
+receipt survive service restart. Verification also rejects changed user/session,
+revoked/unverified wallet, wrong chain/address/amount/denom/memo, missing block
+inclusion, altered raw bytes, stale/offline evidence and expired intent. Existing
+ADMIN, research/data permissions, VALIDATION/FINAL_HOLDOUT and strategy/live approvals
+are independent; the capability allowlist does not contain them.
+
+### FEEGRANT AUDIT
+
+**SUPPORTED**, not activated. Audited BYX checkout `app/app_config.go` imports
+cosmossdk.io/x/feegrant, registers it in InitGenesis/EndBlockers ordering and
+contains its module configuration; go.mod includes feegrant v0.1.1. The isolated
+byxd exposes query feegrant grant/grants-by-grantee/grants-by-granter. The running
+localnet answered grants-by-granter for the TEST service address with an empty
+allowance result. SDK v0.53.3 x/auth/tx/config supplies optional FeeGrantKeeper to the default
+AnteHandler; the app's default depinject runtime wiring is used. No grant,
+economic parameter or genesis change was submitted.
+Future PLUS/PRO sponsorship could issue bounded, expiring periodic allowances,
+preferably restricted by message type, with a per-user quota and a separate gas
+budget. It would need proof/policy/server enforcement and would not subsidize
+Binance/exchange costs. This phase only audits support.
+
+### LOCALNET SMOKE / tests
+
+Real service smoke: Bob remained FREE; fresh proof -> intent -> SDK TEST send ->
+confirmed tx `046AAB789088E8FE19DF28AFD3B558B9F2E39A14F53CB823990F2DFD63007E25`,
+height 1208 -> consumed receipt -> BYX_PAYMENT analytics gate/consumer opened ->
+5-second fixture pass expired while wallet proof remained valid -> revoke retained
+receipt. Sender delta reconciled as 10000 ubyx payment + 10000 ubyx network fee.
+
+A separate real JavaFX USER smoke used the complete UI intent/confirmation/gate flow,
+with a 12-second temporary fixture pass; expiration closed the gate and revocation
+preserved the receipt. Screenshots of awaiting/confirmed/analytics/expired states
+were inspected. Motion/auth remained intact. No real money or external wallet was used.
+
+Debug attempts were retained outside Git: --memo was rejected before broadcast;
+a subsequent TEST tx `486F710956940016C576A600CF17FEDEB9B6208FF06FDF5825C68A83B62C4641`
+(height 1160, code 0) transferred 10000 ubyx plus 10000 ubyx gas but the initial strict
+block-time check correctly produced no receipt/grant. The CometBFT-aware bound was
+then added with regression tests, and a fresh intent was used for the successful
+smoke. Old claims and transaction evidence were not deleted/rebroadcast.
+
+Validation: mvn test and mvn clean package; targeted payment tests cover all requested
+negative/replay/expiry cases, raw-byte binding, actual inclusion, restart, races,
+BFT-time bounds and tier/payment independence. Python DEV helper tests cover opt-in,
+wrong chain, exact --note reference and duplicate claim. No Go source changed; no
+Go tests or heavy Python research were run. Scoped Ruff/diff/secret review excludes
+the 18 previously recorded Python issues and other projects' whitespace.
+
+### CAPTURE
+
+No supervisor/process was stopped, restarted or modified in this phase. PIDs 13916
+(supervisor) / 13923 (recorder) remained active. The same campaign continued after
+scientific rejection using the repaired 10-second retry, evidenced by
+`NO_ADMITTED_CHUNK: scientific admission rejected; retry in 10s` and fresh Binance
+HTTP 200 at 2026-10-04 01:53:07.266456 UTC. New session
+`microstructure-20261004T015305Z-usd_m_futures` produced growing event part-files;
+no raw event contents, returns or reserved datasets were inspected.
+
+
+Final verification: **162 tests passed** in `mvn test` and `mvn clean package`
+(23 payment tests plus 139 existing regressions). **3 Python helper tests passed**;
+Ruff passed for the two new Python files. The last small UI polish makes hash/
+reference fields wider, disables terminal-intent reconfirmation and refreshes
+balance after confirmed payment; build/regressions were repeated after that change.
+
+The real GUI transfer was tx
+`F064BD3CF07CF5A9DD16C13469BE526F5C83911295CF4BBCA09D01588DCEBD4F`, height 1233, as independently read from the retained QA receipt. Three actual TEST transfers occurred in this phase, including
+the initial timing-check rejection: the service receiver finished with 30000 ubyx,
+and Bob paid 30000 ubyx plus 30000 ubyx of network gas in total. No real-value funds
+or exchange costs were involved. Detailed public evidence and temporary QA database
+remain outside Git.
+
+Payment files created: `PaymentIntent.java`, `PaymentReceipt.java`,
+`ByxPaymentPolicy.java`, `ByxPaymentService.java`, `ByxPaymentRepository.java`,
+`ByxPaymentVerifier.java`, `CosmosByxPaymentVerifier.java`,
+`byx-localnet-payment.properties`, `ByxPaymentTest.java`,
+`ByxPaymentLocalnetSmoke.java`, `scripts/byx_payment_test.py`,
+`src/test/python/test_byx_payment_test.py`.
+Payment files changed: `AppContext.java`, `Entitlement.java`,
+`EntitlementService.java`, `ByxBenefitsView.java`, `ByxVisualSmoke.java`,
+`pom.xml`, `.gitignore`, `docs/BYX_INTEGRATION_V1.md`.
