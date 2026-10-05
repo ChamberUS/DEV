@@ -38,7 +38,6 @@ import panel.ui.Ui;
 import panel.ui.toast.ToastType;
 import panel.ui.View;
 import panel.ui.auth.ProfileView;
-import panel.ui.auth.TwoFactorView;
 import panel.ui.auth.UsersView;
 import panel.ui.trader.TraderScreens;
 import panel.ui.trader.TradingDeskView;
@@ -70,7 +69,7 @@ public class PanelApp extends Application {
     private boolean listening;
     private Timeline expiryWatch;
     private Stage stage;
-    private StackPane tfOverlay;
+    private Node tfOverlay;
 
     @Override
     public void start(Stage stage) {
@@ -383,27 +382,60 @@ public class PanelApp extends Application {
         if (t != null) showTwoFactor(t, target);
     }
 
+    /** Verificação de admin V2 sobre a área principal; concluir só aplica a rota se o ticket ainda for o atual. */
     private void showTwoFactor(panel.nav.Navigator.Ticket ticket, String target) {
         closeTwoFactor();
-        TwoFactorView[] ref = new TwoFactorView[1];
-        Runnable close = this::closeTwoFactor;
-        ref[0] = new TwoFactorView(ctx, () -> {
-            close.run();
-            updateLock(true);
-            router.complete(ticket, views.containsKey(target) ? target : "overview");
-        }, () -> {
-            close.run();
-            router.cancelPending();
-        });
-        tfOverlay = new StackPane(ref[0].node());
-        tfOverlay.getStyleClass().add("page");
-        content.getChildren().add(tfOverlay);
+        if (shell == null) return;
+        User user = ctx.sessions.user().orElseThrow().user();
+        panel.authview.AdminVerificationView[] ref = new panel.authview.AdminVerificationView[1];
+        ref[0] = new panel.authview.AdminVerificationView(ctx.motion, this::startAdminVerification, twoFactorWorker,
+                javafx.application.Platform::runLater, user.maskedEmail(), user.maskedPhone(), ctx.devOtp != null, () -> {
+                    closeTwoFactor();
+                    updateLock(true);
+                    router.complete(ticket, views.containsKey(target) ? target : "overview");
+                }, () -> {
+                    closeTwoFactor();
+                    router.cancelPending();
+                });
+        tfOverlay = ref[0];
+        shell.setMainOverlay(ref[0]);
+    }
+
+    private final java.util.concurrent.ExecutorService twoFactorWorker = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "two-factor-provider");
+        t.setDaemon(true);
+        return t;
+    });
+
+    /** Abre o desafio real; providers ausentes viram NOT CONFIGURED com o status real de cada um. */
+    private panel.authview.AdminVerificationView.Flow startAdminVerification() {
+        TwoFactorFlowAdapter adapter;
+        try {
+            adapter = new TwoFactorFlowAdapter(ctx.adminAccess.startTwoFactor());
+        } catch (panel.auth.TwoFactorNotConfiguredException e) {
+            throw new panel.authview.AdminVerificationView.NotConfigured(
+                    ctx.emailProvider.name() + ": " + ctx.emailProvider.status().state() + " · " + ctx.emailProvider.status().detail() + "\n"
+                    + ctx.smsProvider.name() + ": " + ctx.smsProvider.status().state() + " · " + ctx.smsProvider.status().detail()
+                    + "\nRun setup-local-2fa.sh and restart the app.");
+        }
+        return adapter;
+    }
+
+    private record TwoFactorFlowAdapter(panel.auth.TwoFactorFlow flow) implements panel.authview.AdminVerificationView.Flow {
+        @Override public void sendEmailCode() { flow.sendEmailCode(); }
+        @Override public panel.auth.OtpService.Result verifyEmail(String code) { return flow.verifyEmail(code); }
+        @Override public void sendSmsCode() { flow.sendSmsCode(); }
+        @Override public panel.auth.OtpService.Result verifySms(String code) { return flow.verifySms(code); }
+        @Override public void finish(boolean trust) { flow.finish(trust); }
+        @Override public long resendSeconds(boolean phone) { return flow.resendSeconds(phone); }
+        @Override public void cancel() { flow.cancel(); }
     }
 
     private void closeTwoFactor() {
         if (tfOverlay != null) {
+            ((panel.authview.AdminVerificationView) tfOverlay).dispose();
             ctx.adminAccess.cancelChallenge();
-            content.getChildren().remove(tfOverlay);
+            if (shell != null) shell.setMainOverlay(null);
             tfOverlay = null;
         }
     }

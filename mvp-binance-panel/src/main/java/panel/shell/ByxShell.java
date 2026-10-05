@@ -38,6 +38,8 @@ public final class ByxShell extends StackPane {
     private Function<String, String> crumb = id -> ShellRoutes.get(id).map(ShellRoutes.Route::title).orElse(id);
     private Runnable openSearch = () -> { };
     private ShellContext accent;
+    private final StackPane main;
+    private javafx.scene.Node mainOverlay;
 
     public ByxShell(ShellRouter router, MotionService motion, LegacyHost content) {
         this.router = router;
@@ -48,7 +50,7 @@ public final class ByxShell extends StackPane {
         switcher = new WorkspaceSwitcher(motion, this::pickWorkspace);
         topBar = new ShellTopBar(switcher, shortcutPrefix);
         dock = new StatusDock(motion, router::request);
-        StackPane main = new StackPane(content);
+        main = new StackPane(content);
         main.getStyleClass().add("byx-main");
         main.setMinSize(0, 0);
         VBox center = new VBox(topBar, main, dock);
@@ -98,6 +100,24 @@ public final class ByxShell extends StackPane {
 
     public LegacyHost content() {
         return content;
+    }
+
+    /**
+     * Conteúdo V2 por cima da área principal (ex.: verificação de admin enquanto a rota Research está pendente).
+     * Fica fora do LegacyHost; null remove. Não muda a rota.
+     */
+    public void setMainOverlay(javafx.scene.Node node) {
+        if (mainOverlay != null) {
+            main.getChildren().remove(mainOverlay);
+        }
+        mainOverlay = node;
+        if (node != null) {
+            main.getChildren().add(node);
+        }
+    }
+
+    public javafx.scene.Node mainOverlay() {
+        return mainOverlay;
     }
 
     /** Rotas que existem nesta sessão (papéis vêm da autenticação; a UI não concede nada). */

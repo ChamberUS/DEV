@@ -106,6 +106,7 @@ public final class ShellQaSmoke {
                     case "palette" -> sh.topBar().search().fire();
                     case "menu" -> sh.topBar().avatar().fire();
                     case "notifications" -> sh.topBar().notifications().fire();
+                    case "revoke-admin" -> ctx.sessions.revokeAdmin(); // força a verificação na próxima ida a Research
                     case "toast" -> sh.overlay().toast(panel.design.ByxOverlayHost.ToastKind.INFO, "Data refreshed.");
                     case "esc" -> {
                         javafx.scene.Node t = stage.getScene().getFocusOwner() != null ? stage.getScene().getFocusOwner() : sh.overlay();

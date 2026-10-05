@@ -51,3 +51,9 @@
 .byx-auth-okc .byx-icon { -fx-stroke: -byx-positive; }
 .byx-pbar { -fx-background-color: -byx-bg3; -fx-background-radius: 2; -fx-min-height: 4; -fx-max-height: 4; }
 .byx-pbar-fill { -fx-background-color: -byx-trading; -fx-background-radius: 2; }
+
+/* admin verification over the main area (covers the legacy content while the Research route is pending) */
+.byx-admin-verify { -fx-background-color: -byx-bg0; }
+.byx-verify-card { -fx-spacing: 16; }
+.byx-verify-message { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-secondary; }
+.byx-verify-message.error { -fx-text-fill: #FF9B9B; }
