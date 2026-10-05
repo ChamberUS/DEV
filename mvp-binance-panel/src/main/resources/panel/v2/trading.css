@@ -1,0 +1,165 @@
+/*
+ * BYX-MVP V2 Trading Desk (handoff css/components.css + screens/trading). Only .byx-desk / .byx-panel classes;
+ * nothing here depends on panel.css or byx.css. Numbers are JetBrains Mono; labels follow typography.css.
+ * Colour never carries meaning alone: every state keeps its text.
+ */
+.byx-desk { -fx-background-color: -byx-bg0; }
+
+/* ---------- panel (referência .p) ---------- */
+.byx-panel {
+    -fx-background-color: #FFFFFF0A, -byx-bg1;
+    -fx-background-insets: 0, 1 0 0 0;
+    -fx-background-radius: 14, 14;
+    -fx-padding: 16;
+}
+.byx-desk-inline { -fx-background-color: transparent; -fx-padding: 0; }
+
+.byx-desk-t3 { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-secondary { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
+.byx-desk-body { -fx-line-spacing: 3px; }
+.byx-desk-panel-head { -fx-padding: 0 0 8 0; -fx-min-height: 28; }
+.byx-desk-message { -fx-padding: 8 8 0 8; -fx-alignment: top-left; }
+.byx-desk-sk {
+    -fx-background-color: -byx-bg3; -fx-background-radius: 4;
+    -fx-min-height: 8; -fx-pref-height: 8; -fx-max-height: 8;
+}
+
+/* ---------- header ---------- */
+.byx-desk-header { -fx-padding: 0 20 0 20; }
+.byx-desk-symbol { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 20px; -fx-text-fill: -byx-text-primary; }
+.byx-desk-venue { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
+.byx-desk-price { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 26px; -fx-text-fill: -byx-text-primary; }
+.byx-desk-price.na { -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-price.stale, .byx-desk-change.stale, .byx-desk-stat-value.stale { -fx-opacity: 0.6; }
+.byx-desk-change { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-change.pos { -fx-text-fill: -byx-positive; }
+.byx-desk-change.neg { -fx-text-fill: -byx-negative; }
+.byx-desk-stat { -fx-spacing: 0; }
+.byx-desk-stat-value { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 15px; -fx-text-fill: -byx-text-primary; }
+.byx-desk-status {
+    -fx-background-color: -byx-bg2; -fx-background-radius: 8; -fx-padding: 6 12 6 12;
+}
+.byx-desk-status-text { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
+.byx-desk-update { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 12px; -fx-text-fill: -byx-warning; }
+
+/* ---------- segmented control (timeframe, context tabs) ---------- */
+.byx-desk-seg { -fx-background-color: -byx-bg2; -fx-background-radius: 9; -fx-padding: 3; -fx-spacing: 0; }
+.byx-desk-seg-btn {
+    -fx-background-color: transparent; -fx-background-radius: 7; -fx-background-insets: 0;
+    -fx-padding: 6 12 6 12; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;
+    -fx-text-fill: -byx-text-secondary; -fx-cursor: hand;
+}
+.byx-desk-seg-btn:hover { -fx-text-fill: -byx-text-primary; }
+.byx-desk-seg-btn:selected {
+    -fx-background-color: -byx-accent, -byx-bg3; -fx-background-insets: 0, 0 0 2 0;
+    -fx-background-radius: 7, 7; -fx-text-fill: -byx-text-primary;
+}
+.byx-desk-seg-btn:disabled { -fx-opacity: 0.45; -fx-cursor: default; }
+.byx-desk-seg-btn:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 7; -fx-border-insets: -2; }
+.byx-desk-seg-btn:focused:disabled { -fx-border-width: 0; }
+
+/* ---------- metrics strip (.ms) ---------- */
+.byx-desk-metrics { -fx-padding: 0; -fx-alignment: center-left; }
+.byx-desk-metric { -fx-border-color: transparent transparent transparent -byx-line; -fx-border-width: 0 0 0 1; }
+.byx-desk-metrics > .byx-desk-metric:first-child { -fx-border-width: 0; }
+.byx-desk-metric-value {
+    -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 22px; -fx-min-height: 30; -fx-text-fill: -byx-text-tertiary;
+}
+.byx-desk-metric-value.ready { -fx-text-fill: -byx-text-primary; }
+.byx-desk-metric-value.ready.pos { -fx-text-fill: -byx-positive; }
+.byx-desk-metric-value.ready.neg { -fx-text-fill: -byx-negative; }
+.byx-desk-metric-value.stale { -fx-text-fill: -byx-text-primary; -fx-opacity: 0.6; }
+.byx-desk-metric-value.na, .byx-desk-metric-value.unavailable { -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-reason { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-min-height: 16; -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-reason.warn { -fx-text-fill: -byx-warning; }
+
+/* ---------- chart ---------- */
+.byx-desk-chart { -fx-padding: 0; }
+.byx-desk-axis { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-mark-bar { -fx-fill: -byx-trading; }
+.byx-desk-chart-overlay { -fx-font-size: 12px; }
+.chart-grid-ink { -fx-background-color: #FFFFFF10; }
+.chart-text-ink { -fx-background-color: #8791A8; }
+.chart-up-ink { -fx-background-color: -byx-positive; }
+.chart-down-ink { -fx-background-color: -byx-negative; }
+
+/* ---------- order book / recent trades (.or) ---------- */
+.byx-desk-grid-row { -fx-background-radius: 4; }
+.byx-desk-cell { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 13px; -fx-text-fill: -byx-text-primary; }
+.byx-desk-grid-row.header .byx-desk-cell { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-cell.tone-ask, .byx-desk-cell.tone-sell { -fx-text-fill: -byx-negative; }
+.byx-desk-cell.tone-bid, .byx-desk-cell.tone-buy { -fx-text-fill: -byx-positive; }
+.byx-desk-grid-row.mid { -fx-background-color: -byx-bg2; -fx-background-radius: 6; }
+.byx-desk-grid-row.mid .byx-desk-cell { -fx-text-fill: -byx-text-primary; }
+.byx-desk-grid-row.mid .byx-desk-cell.byx-desk-t3 { -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-grid-row.mid .byx-desk-mid-label { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-depth.ask { -fx-background-color: #FF7A7A18; -fx-background-radius: 4; }
+.byx-desk-depth.bid { -fx-background-color: #42D79B18; -fx-background-radius: 4; }
+.byx-desk-book .stale, .byx-desk-trades .stale { -fx-opacity: 0.6; }
+
+/* ---------- bot / info rows (.r) ---------- */
+.byx-desk-row { -fx-border-color: -byx-line transparent transparent transparent; -fx-border-width: 1 0 0 0; -fx-padding: 9 0 9 0; }
+.byx-desk-row-key { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
+.byx-desk-row-value { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-desk-row-value.mono { -fx-font-family: "JetBrains Mono Medium"; }
+.byx-desk-row-value.muted { -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-row-value.warn { -fx-text-fill: -byx-warning; }
+.byx-desk-row-value.pos { -fx-text-fill: -byx-positive; }
+.byx-desk-row-value.neg { -fx-text-fill: -byx-negative; }
+.byx-desk-bot.strip { -fx-background-color: -byx-bg2; -fx-background-radius: 10; -fx-padding: 10 12 10 12; }
+.byx-desk-bot-name { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-desk-bot-dot { -fx-fill: -byx-warning; }
+.byx-desk-context { -fx-padding: 14; }
+
+/* ---------- blotter ---------- */
+.byx-desk-blotter { -fx-padding: 0 16 8 16; }
+.byx-desk-tabs { -fx-border-color: transparent transparent -byx-line transparent; -fx-border-width: 0 0 1 0; }
+.byx-desk-tab {
+    -fx-background-color: transparent; -fx-background-radius: 0; -fx-background-insets: 0;
+    -fx-padding: 10 0 10 0; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px;
+    -fx-text-fill: -byx-text-tertiary; -fx-cursor: hand;
+}
+.byx-desk-tab:hover { -fx-text-fill: -byx-text-secondary; }
+.byx-desk-tab:selected { -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-accent; -fx-background-insets: 37 0 -1 0; }
+.byx-desk-tab:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 4; -fx-border-insets: -2 -4 -2 -4; }
+.byx-desk-empty-icon { -fx-background-color: -byx-bg2; -fx-background-radius: 23; }
+
+/* ---------- table (TTable, V2 skin) ---------- */
+.byx-desk-table { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.byx-desk-table .column-header-background { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.byx-desk-table .column-header, .byx-desk-table .filler {
+    -fx-background-color: transparent; -fx-size: 40; -fx-border-width: 0; -fx-padding: 0 6 0 6;
+}
+.byx-desk-table .column-header .label {
+    -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; -fx-alignment: center-left;
+}
+.byx-desk-table .column-header .arrow-button, .byx-desk-table .column-header .arrow { -fx-padding: 0; -fx-shape: " "; }
+.byx-desk-table .table-row-cell { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-table-cell-border-color: transparent; -fx-border-color: -byx-line transparent transparent transparent; -fx-border-width: 1 0 0 0; }
+.byx-desk-table .table-row-cell:hover { -fx-background-color: -byx-bg2; }
+.byx-desk-table .table-row-cell:selected, .byx-desk-table .table-row-cell:selected:hover { -fx-background-color: -byx-bg2; }
+.byx-desk-table .table-row-cell:empty { -fx-border-width: 0; -fx-background-color: transparent; }
+.byx-desk-table .table-cell {
+    -fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 0 6 0 6; -fx-alignment: center-left;
+    -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary;
+}
+.byx-desk-table .table-cell.tone-pos { -fx-text-fill: -byx-positive; }
+.byx-desk-table .table-cell.tone-neg { -fx-text-fill: -byx-negative; }
+.byx-desk-table .placeholder .label { -fx-text-fill: transparent; }
+.byx-desk-table:focused .table-row-cell:filled:selected { -fx-background-color: -byx-bg2; }
+.byx-desk-table .scroll-bar { -fx-background-color: transparent; -fx-padding: 0 2 0 2; }
+.byx-desk-table .scroll-bar .thumb { -fx-background-color: -byx-line; -fx-background-radius: 6; }
+.byx-desk-table .scroll-bar .track, .byx-desk-table .scroll-bar .track-background { -fx-background-color: transparent; }
+.byx-desk-table .scroll-bar .increment-button, .byx-desk-table .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
+.byx-desk-table .scroll-bar .increment-arrow, .byx-desk-table .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
+.byx-desk-table .corner { -fx-background-color: transparent; }
+
+/* ---------- scroll columns (right context) ---------- */
+.byx-desk-scroll { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.byx-desk-scroll > .viewport { -fx-background-color: transparent; }
+.byx-desk-scroll.byx-panel { -fx-background-color: #FFFFFF0A, -byx-bg1; -fx-background-insets: 0, 1 0 0 0; -fx-background-radius: 14, 14; -fx-padding: 14; }
+.byx-desk-scroll .scroll-bar { -fx-background-color: transparent; -fx-padding: 0 2 0 2; }
+.byx-desk-scroll .scroll-bar .thumb { -fx-background-color: -byx-line; -fx-background-radius: 6; }
+.byx-desk-scroll .scroll-bar .track, .byx-desk-scroll .scroll-bar .track-background { -fx-background-color: transparent; }
+.byx-desk-scroll .scroll-bar .increment-button, .byx-desk-scroll .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
+.byx-desk-scroll .scroll-bar .increment-arrow, .byx-desk-scroll .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
+.byx-desk-scroll .corner { -fx-background-color: transparent; }

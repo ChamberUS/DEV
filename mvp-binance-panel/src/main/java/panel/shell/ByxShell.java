@@ -39,6 +39,8 @@ public final class ByxShell extends StackPane {
     private Runnable openSearch = () -> { };
     private ShellContext accent;
     private final StackPane main;
+    /** Conteúdo V2 (Views já portadas): fora do LegacyHost, sem folhas legadas. */
+    private final StackPane v2Content = new StackPane();
     private javafx.scene.Node mainOverlay;
 
     public ByxShell(ShellRouter router, MotionService motion, LegacyHost content) {
@@ -50,7 +52,11 @@ public final class ByxShell extends StackPane {
         switcher = new WorkspaceSwitcher(motion, this::pickWorkspace);
         topBar = new ShellTopBar(switcher, shortcutPrefix);
         dock = new StatusDock(motion, router::request);
-        main = new StackPane(content);
+        v2Content.getStyleClass().add("byx-v2-content");
+        v2Content.setMinSize(0, 0);
+        v2Content.setVisible(false);
+        v2Content.setManaged(false);
+        main = new StackPane(content, v2Content);
         main.getStyleClass().add("byx-main");
         main.setMinSize(0, 0);
         VBox center = new VBox(topBar, main, dock);
@@ -100,6 +106,23 @@ public final class ByxShell extends StackPane {
 
     public LegacyHost content() {
         return content;
+    }
+
+    /** Onde ficam as Views V2 (uma visível por vez, escolhida pelo roteador). */
+    public StackPane v2Content() {
+        return v2Content;
+    }
+
+    /** A View ativa é V2 (true) ou legada (false): só um dos dois hosts fica visível. */
+    public void showV2(boolean v2) {
+        if (v2Content.isVisible() != v2) {
+            v2Content.setVisible(v2);
+            v2Content.setManaged(v2);
+        }
+        if (content.isVisible() == v2) {
+            content.setVisible(!v2);
+            content.setManaged(!v2);
+        }
     }
 
     /**

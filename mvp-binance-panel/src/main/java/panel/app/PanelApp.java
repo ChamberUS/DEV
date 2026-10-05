@@ -40,12 +40,14 @@ import panel.ui.View;
 import panel.ui.auth.ProfileView;
 import panel.ui.auth.UsersView;
 import panel.ui.trader.TraderScreens;
-import panel.ui.trader.TradingDeskView;
+import panel.tradeview.TradingDesk;
 import panel.user.User;
 
 public class PanelApp extends Application {
     private final AppContext ctx = new AppContext();
     private final Map<String, View> views = new LinkedHashMap<>();
+    /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
+    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -241,7 +243,7 @@ public class PanelApp extends Application {
         router.reset();
         if (activeView != null) { activeView.onHide(); activeView = null; }
 
-        views.put("t-desk", new TradingDeskView(ctx));
+        views.put("t-desk", new TradingDesk(ctx.motion, ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone()));
         views.put("t-byx", new panel.ui.ByxNetworkView(ctx));
         views.put("t-wallet", new panel.ui.ByxWalletView(ctx));
         views.put("t-benefits", new panel.ui.ByxBenefitsView(ctx));
@@ -260,12 +262,13 @@ public class PanelApp extends Application {
         if (user.admin()) {
             registerResearchViews();
         }
-        views.values().forEach(v -> {
+        views.forEach((id, v) -> {
             v.node().setVisible(false);
-            content.getChildren().add(v.node());
+            if (!V2_VIEWS.contains(id)) content.getChildren().add(v.node());
         });
 
         buildShell(user);
+        views.forEach((id, v) -> { if (V2_VIEWS.contains(id)) shell.v2Content().getChildren().add(v.node()); });
         ctx.navigate = this::show;
         updateLock(false);
         if (!listening) {
@@ -560,6 +563,7 @@ public class PanelApp extends Application {
         View next = views.get(id);
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
+        if (shell != null) shell.showV2(V2_VIEWS.contains(id));
         if (activeView != next) {
             if (activeView != null) activeView.onHide();
             activeView = next;
@@ -612,7 +616,7 @@ public class PanelApp extends Application {
 
     private String crumb(String id) {
         TraderSnapshot t = ctx.trading.snapshot.get();
-        if (id.equals("t-desk")) return "Desk / " + (t.symbol == null ? "ETHUSDT" : t.symbol);
+        if (id.equals("t-desk")) return t.symbol == null || t.symbol.isBlank() ? "Desk" : "Desk / " + t.symbol;
         var route = panel.shell.ShellRoutes.get(id);
         // rótulo curto do rail quando existe (Research / Overview), senão o título (Research / Sessions)
         String title = route.map(r -> r.railLabel() != null ? r.railLabel() : r.title()).orElse(id);

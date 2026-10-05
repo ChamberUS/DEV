@@ -9,8 +9,9 @@ import panel.model.TraderSnapshot.Candle;
 
 /** Gráfico de candles simples em Canvas; só desenha dados recebidos. */
 public class CandleChart extends Pane {
+    private static final javafx.scene.text.Font AXIS_FONT = javafx.scene.text.Font.font("JetBrains Mono Medium", 12);
     private final Canvas canvas = new Canvas();
-    private final List<Candle> candles;
+    private List<Candle> candles;
     private final javafx.scene.layout.Region grid = ink("chart-grid-ink");
     private final javafx.scene.layout.Region text = ink("chart-text-ink");
     private final javafx.scene.layout.Region up = ink("chart-up-ink");
@@ -32,6 +33,14 @@ public class CandleChart extends Pane {
         getChildren().addAll(canvas, grid, text, up, down);
     }
 
+    /** Redesenha no lugar com os novos candles (o V2 não recria o gráfico a cada atualização). */
+    public void setCandles(List<Candle> next) {
+        if (!java.util.Objects.equals(candles, next)) {
+            candles = next;
+            requestLayout();
+        }
+    }
+
     @Override
     protected void layoutChildren() {
         canvas.setWidth(getWidth());
@@ -43,10 +52,11 @@ public class CandleChart extends Pane {
         }
         double hi = candles.stream().mapToDouble(Candle::high).max().orElse(1);
         double lo = candles.stream().mapToDouble(Candle::low).min().orElse(0);
-        double padR = 60, h = getHeight() - 16, w = getWidth() - padR;
+        double padR = 70, h = getHeight() - 16, w = getWidth() - padR;
         double step = w / candles.size();
         g.setStroke(paint(grid));
         g.setFill(paint(text));
+        g.setFont(AXIS_FONT);
         for (int i = 0; i <= 4; i++) {
             double y = 8 + h * i / 4;
             g.strokeLine(0, y, w, y);
