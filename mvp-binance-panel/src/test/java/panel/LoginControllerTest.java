@@ -97,7 +97,9 @@ class LoginControllerTest {
         assertEquals(Duration.ofSeconds(42), l.retryAfter());
         l.submit("qa", "y".toCharArray()); // bloqueado: ignorado
         assertTrue(worker.queue.isEmpty(), "no request while rate limited");
-        l.reset();
+        l.reset(); // Esc
+        assertEquals(State.RATE_LIMITED, l.state(), "Esc never bypasses the lockout");
+        l.lockoutEnded();
         assertEquals(State.DEFAULT, l.state());
     }
 

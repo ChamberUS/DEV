@@ -167,6 +167,41 @@ public class PanelApp extends Application {
         };
     }
 
+    /** Rota no instante em que a sessão expirou; consumida no próximo login. */
+    private panel.authview.SessionReturn pendingReturn;
+    private boolean sessionExpiredShown;
+
+    /**
+     * Sessão do usuário sumiu com o app aberto (P3.11): diálogo persistente (camada 70) com uma ação; Esc e fundo
+     * não fecham. O alvo de retorno é a rota deste instante. Nenhum timer navega enquanto o diálogo está aberto.
+     */
+    private void sessionExpired() {
+        if (sessionExpiredShown || shell == null) return;
+        sessionExpiredShown = true;
+        closeTwoFactor();
+        long userId = activeUserId;
+        pendingReturn = panel.authview.SessionReturn.capture(router.route(), userId);
+        router.cancelPending();
+        javafx.scene.control.Label title = new javafx.scene.control.Label("Session expired");
+        title.getStyleClass().add("byx-section-title");
+        javafx.scene.control.Label body = new javafx.scene.control.Label("Your session ended. Sign in again to continue where you were.");
+        body.getStyleClass().addAll("byx-body", "byx-secondary");
+        body.setWrapText(true);
+        panel.design.ByxButton again = new panel.design.ByxButton("Sign in again", panel.design.ByxButton.Variant.PRIMARY, ctx.motion);
+        javafx.scene.layout.VBox card = new javafx.scene.layout.VBox(12, title, body, again);
+        card.getStyleClass().add("byx-dialog");
+        card.setMaxSize(javafx.scene.layout.Region.USE_PREF_SIZE, javafx.scene.layout.Region.USE_PREF_SIZE);
+        card.setAccessibleRole(javafx.scene.AccessibleRole.DIALOG);
+        card.setAccessibleText("Session expired");
+        again.setOnAction(e -> {
+            sessionExpiredShown = false;
+            showEntry("Your session expired. Sign in again to continue.");
+        });
+        shell.overlay().openDialog(card, true, again, null);
+    }
+
+    private long activeUserId = -1;
+
     private void afterLogin(User user) {
         if (user.mustChangePassword()) {
             mustChangeUser = user;
@@ -190,6 +225,8 @@ public class PanelApp extends Application {
     // ---- aplicação principal ---------------------------------------------------
 
     private void enterApp(User user) {
+        activeUserId = user.id();
+        sessionExpiredShown = false;
         if (authScreens != null) {
             authScreens.dispose();
             authScreens = null;
@@ -247,7 +284,11 @@ public class PanelApp extends Application {
         lastView.put(true, "t-desk");
         lastView.put(false, "overview");
         mainActive = true;
-        show("t-desk");
+        // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
+        String start = pendingReturn == null ? panel.authview.SessionReturn.DEFAULT_ROUTE
+                : pendingReturn.resolve(user.id(), views::containsKey, id -> !id.startsWith("t-")); // Research exige verificação
+        pendingReturn = null;
+        show(start);
         render(ctx.research.snapshot.get());
         expiryWatch = new Timeline(new KeyFrame(Duration.seconds(10), e -> watchAdminSession()));
         expiryWatch.setCycleCount(Timeline.INDEFINITE);
@@ -282,6 +323,11 @@ public class PanelApp extends Application {
     }
 
     private void watchAdminSession() {
+        if (sessionExpiredShown) return; // diálogo de sessão expirada aberto: nada navega por trás
+        if (mainActive && ctx.sessions.user().isEmpty()) {
+            sessionExpired();
+            return;
+        }
         ctx.adminAccess.expireIfNeeded();
         boolean authorized = ctx.adminAccess.hasValidAdminSession();
         updateLock(false);
@@ -369,7 +415,7 @@ public class PanelApp extends Application {
                 return panel.shell.ShellRouter.Decision.DENY;
             }
             case SESSION_EXPIRED -> {
-                logout("Session expired. Please sign in again.");
+                if (shell != null) sessionExpired(); else logout("Session expired. Please sign in again.");
                 return panel.shell.ShellRouter.Decision.DENY;
             }
         }

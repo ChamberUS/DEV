@@ -172,6 +172,9 @@ public final class AuthScreens {
 
     private void renderLogin() {
         LoginController.State s = login.state();
+        if (s != LoginController.State.RATE_LIMITED) {
+            stopCountdown(); // a contagem só existe enquanto o bloqueio existe
+        }
         boolean busy = s == LoginController.State.LOADING || s == LoginController.State.RATE_LIMITED || s == LoginController.State.SUCCESS;
         identifier.setDisable(busy);
         password.setDisable(busy);
@@ -216,7 +219,7 @@ public final class AuthScreens {
         nodes.add(signIn);
         nodes.add(note("Accounts are created by an administrator."));
         layout.show("Sign in", nodes);
-        if (s == LoginController.State.RATE_LIMITED) {
+        if (s == LoginController.State.RATE_LIMITED && countdown == null) {
             startCountdown();
         }
         if (!busy) {
@@ -238,7 +241,7 @@ public final class AuthScreens {
             left[0] = left[0].minusSeconds(1);
             if (left[0].isNegative() || left[0].isZero()) {
                 stopCountdown();
-                login.reset();
+                login.lockoutEnded();
             } else {
                 signIn.setText("Try again in " + clock(left[0]));
             }

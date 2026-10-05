@@ -106,9 +106,17 @@ public final class LoginController {
         });
     }
 
-    /** Esc ou fim do bloqueio: volta ao estado padrão (sem apagar o identificador). */
+    /** Esc: limpa um erro (inválido, desativado, indisponível). Não fura o bloqueio nem interrompe o envio. */
     public void reset() {
-        if (state.get() != State.LOADING && state.get() != State.SUCCESS) {
+        State s = state.get();
+        if (s == State.INVALID || s == State.DISABLED || s == State.UNAVAILABLE) {
+            state.set(State.DEFAULT);
+        }
+    }
+
+    /** Fim do tempo de bloqueio informado pelo serviço (só a contagem chama). */
+    public void lockoutEnded() {
+        if (state.get() == State.RATE_LIMITED) {
             retryAfter = Duration.ZERO;
             state.set(State.DEFAULT);
         }
