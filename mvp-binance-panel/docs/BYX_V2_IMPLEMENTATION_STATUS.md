@@ -183,7 +183,7 @@ Nenhum feedback de tick: valores mudam sem animação, sem entrada de página, s
 
 ### QA
 - **Desk e Markets no app real** (`TradingDeskQa`, `docs/qa/step7/`): estado real (NO FEED) em 1440/1600/1920/1280; fixtures isolados de QA (marcados no `report.txt`; poll de 1 h para não serem sobrescritos): waiting, conta, stale, degraded, disconnected, error, abas de contexto e do blotter. Referências renderizadas em `reference-*`.
-- **Navegação** (`ShellNavigationQa`, idle de 60 s): FULL 37/37, REDUCED e OFF sem falhas. **Honestidade:** uma primeira execução de FULL, feita enquanto eu rodava suítes em paralelo, falhou 2 checagens do idle de `t-byx` ("rota virou t-desk"; `navigation-full-loaded-run-2-failures.txt`); a repetição isolada passou 37/37 e a causa daquela execução não foi identificada. Repetir isolado antes do passo 14.
+- **Navegação** (`ShellNavigationQa`, idle de 60 s): FULL 37/37, REDUCED e OFF sem falhas. Uma primeira execução FULL, feita com suítes rodando em paralelo, falhou 2 checagens do idle de `t-byx`; o fechamento está em "Stress de navegação (fechamento do Passo 7)" abaixo.
 - **Auth** (`AuthFlowQa`): FULL, REDUCED e OFF sem falhas.
 
 ### Diferenças
@@ -206,7 +206,22 @@ Nenhum feedback de tick: valores mudam sem animação, sem entrada de página, s
 ### Limitações conhecidas
 1. Sem feed/conta reais, tudo que depende deles só foi verificado com fixtures de QA.
 2. `TraderSnapshot` não tem horário de feed nem por candle; STALE por idade só existe quando um provider futuro preencher `feedUpdatedAt`.
-3. Recent trades e Trades compartilham `tradeRows`.
+3. **Recent Trades NÃO é um market tape verdadeiro.** Reutiliza `tradeRows`, os fills de conta do provider existente, a mesma fonte da aba Trades. INTENTIONALLY PRESERVED / DATA SOURCE LIMITATION até existir um feed real de market trades (nada foi mudado).
 4. Markets não tem relógio de idade (atualiza no poll de 3 s).
 5. Smokes legados (`FidelityProductionSmoke`, `RedesignVisualSmoke`, `MotionParitySmoke`) citam ids do Desk antigo; seguem na lista "REVIEW REQUIRED BEFORE STEP 14".
-6. A falha isolada de navegação em FULL sob carga (acima) não foi explicada.
+6. A falha isolada de navegação em FULL sob carga: UNREPRODUCED LOADED-RUN FAILURE (ver abaixo).
+
+### Stress de navegação (fechamento do Passo 7)
+Executado antes do freeze, sequencial e sem `mvn test` em paralelo, no app real, com `RouteTrace` registrando cada mudança de rota (instante, thread, ticket, pendente, de/para e pilha do app). Evidência em `docs/qa/step8/stress/`.
+
+| Cenário | Resultado |
+|---|---|
+| `ShellNavigationQa` FULL isolado × 10 | 10/10, 0 falhas |
+| BYX idle (60 s, updates de dados, rota == BYX o tempo todo) × 20 | 0 falhas |
+| A→B→C rápido (com B pendente) × 20 | 0 falhas |
+| Trading→BYX→idle→Trading→BYX→idle × 20 ciclos (30 s) | 0 falhas |
+| `ShellNavigationQa` FULL com 3 suítes `mvn test` não relacionadas em paralelo × 1 | 37/37, 0 falhas |
+
+Toda mudança de rota nos traços vem de `PanelApp.show → ShellRouter.request/commit` chamado pelo próprio roteiro do QA (nenhuma de timer, callback de gate ou animação). A execução original que falhou antecede o `RouteTrace`, então a sequência exata dela não foi capturada. Classificação: **UNREPRODUCED LOADED-RUN FAILURE**. Carga de CPU não muda a rota: sob contenção o app ficou estável. **Item para o Passo 14:** repetir este stress final (10 × `ShellNavigationQa`, 20 × BYX idle, 20 × A→B→C, 20 ciclos, 1 execução sob carga).
+
+**STEPS 1–7 = FROZEN** (403 testes, `mvn clean package` PASS). Trading não muda sem regressão comprovada.

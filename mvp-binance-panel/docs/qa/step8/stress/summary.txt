@@ -1,0 +1,14 @@
+RESULT scenario=abc n=20 failures=0
+RESULT scenario=byx-idle n=20 failures=0
+RESULT scenario=cycle n=20 failures=0
+nav run 1 exit=0 RESULT mode=FULL failures=0
+nav run 2 exit=0 RESULT mode=FULL failures=0
+nav run 3 exit=0 RESULT mode=FULL failures=0
+nav run 4 exit=0 RESULT mode=FULL failures=0
+nav run 5 exit=0 RESULT mode=FULL failures=0
+nav run 6 exit=0 RESULT mode=FULL failures=0
+nav run 7 exit=0 RESULT mode=FULL failures=0
+nav run 8 exit=0 RESULT mode=FULL failures=0
+nav run 9 exit=0 RESULT mode=FULL failures=0
+nav run 10 exit=0 RESULT mode=FULL failures=0
+done

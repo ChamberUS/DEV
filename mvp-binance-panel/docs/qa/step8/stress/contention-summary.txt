@@ -1,0 +1,2 @@
+nav exit=0 RESULT mode=FULL failures=0
+done

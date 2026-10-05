@@ -78,7 +78,7 @@ public final class ShellNavigationQa {
                 views = v;
                 ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "shell-qa-pass-1".toCharArray(), "+5511999991234");
                 invoke("showEntry", String.class, null);
-                router.routeProperty().addListener((o, a, b) -> routeLog.add(b));
+                RouteTrace.attach(router, routeLog, lines);
                 plan();
                 after(600, this::run);
             } catch (Throwable t) {
