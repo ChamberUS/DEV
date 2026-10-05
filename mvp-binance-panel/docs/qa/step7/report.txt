@@ -1,0 +1,28 @@
+REAL provider state
+SHOT trading-real-1440 scene=1440x900 mode=COMPACT route=t-desk
+SHOT trading-real-1600 scene=1600x1000 mode=STANDARD route=t-desk
+SHOT trading-real-1920 scene=1920x1080 mode=EXPANDED route=t-desk
+SHOT trading-real-1280 scene=1280x760 mode=COMPACT route=t-desk
+FIXTURE waiting (QA only, isolated)
+SHOT trading-waiting-1440 scene=1440x900 mode=COMPACT route=t-desk
+FIXTURE account (QA only, isolated)
+SHOT trading-account-fixture-1440 scene=1440x900 mode=COMPACT route=t-desk
+SHOT trading-account-fixture-1600 scene=1600x1000 mode=STANDARD route=t-desk
+SHOT trading-account-fixture-1920 scene=1920x1080 mode=EXPANDED route=t-desk
+SHOT trading-account-fixture-bot-tab-1440 scene=1440x900 mode=COMPACT route=t-desk
+SHOT trading-account-fixture-risk-tab-1440 scene=1440x900 mode=COMPACT route=t-desk
+FIXTURE stale (QA only, isolated)
+SHOT trading-stale-fixture-1440 scene=1440x900 mode=COMPACT route=t-desk
+SHOT trading-stale-fixture-1920 scene=1920x1080 mode=EXPANDED route=t-desk
+FIXTURE degraded (QA only, isolated)
+SHOT trading-degraded-fixture-1600 scene=1600x1000 mode=STANDARD route=t-desk
+FIXTURE disconnected (QA only, isolated)
+SHOT trading-disconnected-fixture-1440 scene=1440x900 mode=COMPACT route=t-desk
+FIXTURE error (QA only, isolated)
+SHOT trading-error-fixture-1440 scene=1440x900 mode=COMPACT route=t-desk
+REAL provider state
+SHOT trading-real-activity-tab-1440 scene=1440x900 mode=COMPACT route=t-desk
+SHOT markets-real-1440 scene=1440x900 mode=COMPACT route=t-markets
+SHOT markets-real-1920 scene=1920x1080 mode=EXPANDED route=t-markets
+FIXTURE account (QA only, isolated)
+SHOT markets-account-fixture-1440 scene=1440x900 mode=COMPACT route=t-markets

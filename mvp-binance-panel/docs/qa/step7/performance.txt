@@ -1,0 +1,9 @@
+1440x900 mode=COMPACT ticks=400 nodes=558->558 update p50=0,77ms p95=1,32ms max=1,76ms | css+layout p50=10,63ms p95=12,86ms max=15,49ms
+1440x900 unchanged poll update p50=0,067ms p95=0,102ms
+1440x900 loops=0 applied=451 skipped=400
+1600x1000 mode=STANDARD ticks=400 nodes=514->514 update p50=0,65ms p95=1,02ms max=1,50ms | css+layout p50=10,17ms p95=13,61ms max=21,22ms
+1600x1000 unchanged poll update p50=0,038ms p95=0,055ms
+1600x1000 loops=1 applied=451 skipped=400
+1920x1080 mode=EXPANDED ticks=400 nodes=778->778 update p50=0,70ms p95=0,84ms max=0,97ms | css+layout p50=12,99ms p95=15,20ms max=17,03ms
+1920x1080 unchanged poll update p50=0,037ms p95=0,050ms
+1920x1080 loops=1 applied=451 skipped=400

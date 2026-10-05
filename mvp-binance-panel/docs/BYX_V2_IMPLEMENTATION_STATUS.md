@@ -10,7 +10,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 4 | Design foundation (tokens, tipografia, componentes) | DONE | Pacote `panel.design`, tema `/panel/v2/*.css`, galeria `./run-gallery.sh` (DEV ONLY). Ver "Passo 4" abaixo |
 | 5 | Shell (rail, top bar, dock, breakpoints) | DONE | `panel.shell`; shell V2 é o shell real; Views legadas hospedadas em `LegacyHost`. Ver "Passo 5" abaixo |
 | 6 | Auth (Login, First run; demais BACKEND_REQUIRED/REFERENCE_ONLY) | DONE | `panel.authview`; auditoria em `docs/BYX_V2_AUTH_AUDIT.md`. Ver "Passo 6" abaixo |
-| 7 | Trading | IN PROGRESS | Live OFF. Auditoria em `docs/BYX_V2_TRADING_AUDIT.md`. Ver "Passo 7" abaixo |
+| 7 | Trading | DONE | Desk e Markets & Portfolio em V2; Live OFF. Auditoria em `docs/BYX_V2_TRADING_AUDIT.md`. Ver "Passo 7" abaixo |
 | 8 | Research + Capture | TODO | VALIDATION LOCKED / FINAL_HOLDOUT SEALED |
 | 9 | BYX | TODO | LOCALNET/TEST, sem fundos |
 | 10 | Account | TODO | |
@@ -140,8 +140,73 @@ Telas de entrada são rotas do mesmo `ShellRouter` (`auth:login`, `auth:forgot`,
 
 ## Passo 7 · Trading
 
-Auditoria: `docs/BYX_V2_TRADING_AUDIT.md`. Escopo: o Trading Desk. Live trading continua OFF; nenhum dado de demonstração entra.
+Auditoria e mapa de fontes: `docs/BYX_V2_TRADING_AUDIT.md`. Live trading continua OFF; nenhum dado de demonstração entra; nenhuma ordem, credencial, endpoint ou salvaguarda foi tocada.
 
 | Checkpoint | Conteúdo | Teste |
 |---|---|---|
-| 7.1 | Auditoria do Trading atual | — |
+| 7.1 `1feefc5` | Auditoria do Trading atual | — |
+| 7.2 `15283e4` | `DeskMode` (contrato 1440/1600/1920 lido do JSON) e `DeskModel` (estado do feed, métricas, bot, book, trades) | `DeskModeTest`, `DeskModelTest` |
+| 7.3 `693e0ee` | Desk V2: cabeçalho, métricas, gráfico, book, trades, blotter, bot; host V2 no shell; `TradingDeskView` removida | `DeskLayoutTest` |
+| 7.4 `2c88c16` | Ajustes contra os renders da referência | — |
+| 7.5 `d29dac6` | Estados, incremental, guarda de live trading, FULL/REDUCED/OFF, estilo só V2 | `DeskStateTest`, `DeskIncrementalTest`, `DeskGuardTest`, `DeskMotionAndStyleTest` |
+| 7.6 `a016beb` | Markets & Portfolio V2 | `MarketsPageTest` |
+
+### Escopo e fronteira legada (7.15)
+- **V2 CONTENT no V2 SHELL:** Trading Desk (`t-desk`) e Markets & Portfolio (`t-markets`). Vivem em `ByxShell.v2Content()`, fora do `LegacyHost`; a cena carrega só `/panel/v2/*.css` (`DeskMotionAndStyleTest` e `MarketsPageTest` verificam folhas, ancestrais e classes legadas).
+- **Ainda legadas (documentado, não é acidente):** Bot, Portfolio (rail "Wallet"), Orders, Positions, Signals, Strategies, Performance, Bot Activity e o Settings do Trader (`TraderScreens`). O handoff só tem tela de referência para Desk e Markets & Portfolio; as demais seguem os passos 10 (Account/Settings) e posteriores.
+
+### Fontes reais, estados reais
+- Real hoje: símbolo/mercado (captura), backend online, estratégia, modo, `trading = DISABLED`. **Não existem:** feed, preço, candles, book, trades, conta, equity, PnL, exposição, drawdown, horário do feed. Sem eles: "Waiting for market data", "—", N/A com razão ("No account", "No feed", "No positions"). `TraderSnapshot.feedUpdatedAt` (novo, opcional) é preenchido por nenhum provider real; só fixtures de QA o usam.
+- Feed: NO FEED (não configurado, ponto neutro), WAITING (conectando, pulsa), LIVE, MOCK, STALE, DEGRADED, RECONNECTING, DISCONNECTED, UNAVAILABLE, ERROR. Estado desconhecido nunca é "vivo"; só LIVE/MOCK/DEGRADED/STALE/RECONNECTING mostram valores; STALE mantém o último valor esmaecido com LAST UPDATE; queda/erro mostram "—" e mensagem, nunca o preço antigo.
+- Métricas: READY, N/A, STALE, UNAVAILABLE com razão. Bot: MONITORING, IDLE, UNAVAILABLE, ERROR (só o que o app declara; nunca "active trading").
+- Blotter (Positions, Orders, Trades, Signals, Activity): LOADING, EMPTY, READY, ERROR, UNAVAILABLE. Real: Positions/Orders/Trades ficam EMPTY (execução OFF: nenhuma pode existir); Signals/Activity ficam UNAVAILABLE se o backend está offline (derivam dele) e EMPTY caso contrário. ERROR existe no componente mas nenhuma fonte real o produz hoje.
+- Recent trades e a aba Trades leem o mesmo `tradeRows` (fills de conta, não fita de mercado): mantido, ver auditoria §4.1.
+
+### Layout (medido contra a referência)
+| | COMPACT 1440 | STANDARD 1600 | EXPANDED 1920 |
+|---|---|---|---|
+| Coluna(s) | 330, abas Market/Bot/Risk | 350, 3 painéis empilhados | 330 Market + 350 Context |
+| Book / trades | 3 níveis / 3 linhas | 6 / 4 | 10 / 9 |
+| Bot | faixa | painel, 4 linhas | painel próprio, 4 linhas |
+| Risk / Freshness / Activity | abas Bot e Risk | (não há; ver métricas e blotter) | painéis próprios |
+| Blotter | 214 px, 7 col. | 240 px, 8 col. | 300 px, 10 col. |
+`DeskLayoutTest` confere os retângulos de 1440 (cabeçalho 88,70,1332,60 · métricas 88,144,988,84 · gráfico 88,242,988,376 · contexto 1090,144,330,474 · blotter 88,632,1332,214) e os derivados de 1600/1920. Breakpoint pela largura de conteúdo (janela − rail): ≥1700 EXPANDED, ≥1480 STANDARD. 1280×760: COMPACT; a coluna de contexto rola em vez de sobrepor, estatísticas de 24h saem do cabeçalho (< 1300 px).
+
+### Movimento
+Nenhum feedback de tick: valores mudam sem animação, sem entrada de página, sem Timeline por tick (`aTickNeverMovesOrFadesAPanel`). Loops: ponto do bot e marca de espera, só em FULL e só com o estado (`loopsExistOnlyInFullAndNeverGrowWithTicks`). Um relógio de 1 s só existe com horário de feed conhecido e o Desk visível. `everyStateEndsIdenticallyInFullReducedAndOff`: mesmo estado final nos três modos para 9 estados em 1440 e 1920.
+
+### Performance (`docs/qa/step7/performance.txt`, `DeskPerfQa`)
+400 ticks com book/trades/candles/uPnL mudando: update 0,65–0,77 ms p50 (máx 1,8 ms), CSS+layout forçado ~10–13 ms (três passes manuais por tick, limite superior), nós constantes (558/514/778 em 1440/1600/1920), 0–1 loop. Poll idêntico: 0,04–0,07 ms. `a150TickStreamReusesEveryNodeAndNeverRebuilds`: 150 ticks nos três tamanhos com os mesmos nós, linhas, colunas, gráfico e sem acumular loop.
+
+### Guarda de live trading (7.11)
+`DeskGuardTest`: o Desk não tem campo, slider, menu, checkbox nem botão fora de timeframe e abas; só 1m habilitado; renderizar não escreve `trading` nem outro campo; varredura de fonte: nenhum código de execução/exchange/chave em `panel/tradeview` e `panel/ui/trader`, nenhum endpoint de ordem em `src/main`, nenhuma escrita em `.trading =`; o provider real continua `DISABLED` / `NOT_CONFIGURED`.
+
+### QA
+- **Desk e Markets no app real** (`TradingDeskQa`, `docs/qa/step7/`): estado real (NO FEED) em 1440/1600/1920/1280; fixtures isolados de QA (marcados no `report.txt`; poll de 1 h para não serem sobrescritos): waiting, conta, stale, degraded, disconnected, error, abas de contexto e do blotter. Referências renderizadas em `reference-*`.
+- **Navegação** (`ShellNavigationQa`, idle de 60 s): FULL 37/37, REDUCED e OFF sem falhas. **Honestidade:** uma primeira execução de FULL, feita enquanto eu rodava suítes em paralelo, falhou 2 checagens do idle de `t-byx` ("rota virou t-desk"; `navigation-full-loaded-run-2-failures.txt`); a repetição isolada passou 37/37 e a causa daquela execução não foi identificada. Repetir isolado antes do passo 14.
+- **Auth** (`AuthFlowQa`): FULL, REDUCED e OFF sem falhas.
+
+### Diferenças
+| Referência | JavaFX | Paridade | Motivo |
+|---|---|---|---|
+| Geometria 1440/1600/1920 | idêntica ao DOM | EXACT | `DeskLayoutTest` |
+| Esqueleto do book com barras de profundidade coloridas | esqueleto cinza sem barras | INTENTIONALLY PRESERVED | esqueleto não pode sugerir dado |
+| Esqueleto com shimmer | esqueleto estático | NEAR | sem 80+ animações no hot path; estado explicado pelo ponto/texto |
+| "Binance USD-M" no gráfico | "Binance USD-M Futures" | NEAR | texto vem do mercado real |
+| Cabeçalho sem Live badge nem 24h high/low/volume | `LIVE OFF` e estatísticas (se houver dado e largura) | NEAR | pedido 7.4 |
+| Eixo de tempo `--:--` com candles | só no estado de espera | NOT FEASIBLE | `Candle` não tem horário |
+| Timeframes 5m–4h habilitados | desabilitados com motivo | BACKEND UNAVAILABLE | backend só fornece 1m |
+| Latência no Data freshness | "—" | BACKEND UNAVAILABLE | sem fonte |
+| Risk limits | "Unavailable" | BACKEND UNAVAILABLE | sem fonte |
+| Mensagem vazia do blotter de Markets em 1 linha | ícone + título + texto (mesmo componente do Desk) | NEAR | reuso |
+| Contagem das 4 linhas do Bot em 1920 "completo" | 4 linhas, painel próprio | EXACT | a referência não tem linhas extras |
+| Tinta de PnL por sinal | verde/vermelho + texto | NEAR | texto sempre presente |
+| `ETHUSDT` no cabeçalho | símbolo da captura ou N/A | INTENTIONALLY PRESERVED | sem símbolo inventado (breadcrumb: "Desk") |
+
+### Limitações conhecidas
+1. Sem feed/conta reais, tudo que depende deles só foi verificado com fixtures de QA.
+2. `TraderSnapshot` não tem horário de feed nem por candle; STALE por idade só existe quando um provider futuro preencher `feedUpdatedAt`.
+3. Recent trades e Trades compartilham `tradeRows`.
+4. Markets não tem relógio de idade (atualiza no poll de 3 s).
+5. Smokes legados (`FidelityProductionSmoke`, `RedesignVisualSmoke`, `MotionParitySmoke`) citam ids do Desk antigo; seguem na lista "REVIEW REQUIRED BEFORE STEP 14".
+6. A falha isolada de navegação em FULL sob carga (acima) não foi explicada.

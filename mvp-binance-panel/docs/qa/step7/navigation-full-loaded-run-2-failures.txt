@@ -1,0 +1,39 @@
+PASS A>B(pending)>C ends in C: route=t-byx
+PASS late verification callback for cancelled B shows nothing
+PASS B never displayed: [t-byx]
+PASS one visible view (t-byx)
+PASS A>B(pending)>A ends in A: route=t-desk
+PASS no verification overlay after returning to A
+PASS B never displayed: [t-desk]
+PASS A>B>C ends in C with one visible view
+PASS A>B>C never passes through B again: [overview, t-byx]
+PASS rail and switcher follow C
+PASS A>B>A ends in A with one visible view
+PASS t-desk idle 60 s with 60 data updates never navigates: []
+PASS t-desk idle keeps one visible view
+PASS t-desk idle replays no page enter
+PASS overview idle 60 s with 60 data updates never navigates: []
+PASS overview idle keeps one visible view
+PASS overview idle replays no page enter
+FAIL t-byx idle 60 s with 60 data updates never navigates: [t-desk]
+FAIL t-byx idle keeps one visible view
+PASS t-byx idle replays no page enter
+PASS 20 round trips keep running loops at 0 (now 0)
+PASS 20 round trips replay no card entry (3 -> 3), P3.3
+PASS one visible view after 20 round trips
+PASS resize keeps the route
+PASS resize replays no page enter
+PASS background to foreground keeps the route
+PASS background to foreground replays no page enter
+PASS one visible view after foreground
+PASS 50 status refreshes keep the route
+PASS equal status never rebuilds the dock (2 -> 2)
+PASS status refresh replays no page enter
+PASS Esc closes the palette
+PASS Esc closes the notification panel
+PASS one visible view after overlays
+FINAL route=t-desk visible=1 rail=TRADING#0 switch=TRADING top=null popovers=0
+PASS palette (60) stays above popovers (40)
+PASS opening overlays keeps the route
+PASS overlays replay no page enter
+RESULT mode=FULL failures=2
