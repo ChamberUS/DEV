@@ -166,3 +166,25 @@
 .byx-badge.tone-neg .byx-icon { -fx-stroke: -byx-negative; }
 .byx-badge.tone-inf .byx-icon { -fx-stroke: -byx-info; }
 .byx-badge .byx-dot { -fx-fill: -byx-text-secondary; }
+
+/* ---------- status chip (statusStates.chip) and dot (dock 9 / chip 8) ---------- */
+.byx-chip { -fx-min-height: 28; -fx-pref-height: 28; -fx-max-height: 28; -fx-padding: 0 10; -fx-spacing: 6; -fx-background-radius: 6; -fx-border-radius: 6; }
+.byx-chip-text { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 12px; }
+.byx-chip.state-operational { -fx-background-color: #42D79B1A; }
+.byx-chip.state-operational .byx-chip-text { -fx-text-fill: #7FE6B8; }
+.byx-chip.state-connecting { -fx-background-color: #5CC8FF1A; }
+.byx-chip.state-connecting .byx-chip-text { -fx-text-fill: #8ED8FF; }
+.byx-chip.state-reconnecting, .byx-chip.state-degraded { -fx-background-color: #E9B44C1F; }
+.byx-chip.state-reconnecting .byx-chip-text, .byx-chip.state-degraded .byx-chip-text { -fx-text-fill: #F2CB7A; }
+.byx-chip.state-unavailable { -fx-background-color: #FF7A7A1A; }
+.byx-chip.state-unavailable .byx-chip-text { -fx-text-fill: #FF9B9B; }
+.byx-chip.state-unavailable-expected { -fx-background-color: #232A3D; }
+.byx-chip.state-unavailable-expected .byx-chip-text { -fx-text-fill: #AAB3C7; }
+.byx-chip.state-unknown { -fx-background-color: transparent; -fx-border-color: #2A3144; -fx-border-width: 1; }
+.byx-chip.state-unknown .byx-chip-text { -fx-text-fill: #AAB3C7; }
+/* dockDot: pos, inf+pulse, wrn+pulse, wrn, neg (dis when expected), dis */
+.byx-status-dot.state-operational { -fx-fill: -byx-positive; }
+.byx-status-dot.state-connecting { -fx-fill: -byx-info; }
+.byx-status-dot.state-reconnecting, .byx-status-dot.state-degraded { -fx-fill: -byx-warning; }
+.byx-status-dot.state-unavailable { -fx-fill: -byx-negative; }
+.byx-status-dot.state-unavailable-expected, .byx-status-dot.state-unknown { -fx-fill: -byx-disabled; }
