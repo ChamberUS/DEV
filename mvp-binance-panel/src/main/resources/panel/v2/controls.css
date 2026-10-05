@@ -188,3 +188,20 @@
 .byx-status-dot.state-reconnecting, .byx-status-dot.state-degraded { -fx-fill: -byx-warning; }
 .byx-status-dot.state-unavailable { -fx-fill: -byx-negative; }
 .byx-status-dot.state-unavailable-expected, .byx-status-dot.state-unknown { -fx-fill: -byx-disabled; }
+
+/* ---------- region states (P3.10) ---------- */
+.byx-region-message { -fx-padding: 8 0; }
+.byx-slow-note { -fx-padding: 12 14; -fx-background-color: -byx-bg2; -fx-background-radius: 10; }
+.byx-stale-bar { -fx-padding: 0 0 2 0; }
+/* stale-chip: bg3 + inset line, 12/600, text.secondary */
+.byx-stale-chip {
+    -fx-font-family: "Schibsted Grotesk SemiBold";
+    -fx-font-size: 12px;
+    -fx-text-fill: -byx-text-secondary;
+    -fx-padding: 3 10;
+    -fx-background-color: -byx-line, -byx-bg3;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 6, 5;
+}
+/* STALE never looks live: no live dot or pulse inside a stale region */
+.byx-region:stale .byx-status-dot.live { -fx-opacity: 0; }
