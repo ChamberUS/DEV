@@ -88,6 +88,23 @@ public final class ShellQaSmoke {
                 return;
             }
             String step = steps.get(index++);
+            if (step.startsWith("wait:")) { // espera extra antes do próximo passo
+                PauseTransition p = new PauseTransition(Duration.millis(Integer.parseInt(step.substring(5))));
+                p.setOnFinished(e -> {
+                    try {
+                        next();
+                    } catch (Throwable t) {
+                        fail(t);
+                    }
+                });
+                p.play();
+                return;
+            }
+            if (step.startsWith("shot:")) { // captura sem navegar
+                shot(step.substring(5));
+                next();
+                return;
+            }
             String[] parts = step.split("@");
             String route = parts[0];
             if (parts.length > 1) {

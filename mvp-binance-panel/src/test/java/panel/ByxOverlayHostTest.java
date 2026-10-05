@@ -254,6 +254,27 @@ class ByxOverlayHostTest {
     }
 
     @Test
+    void closingThePaletteReturnsFocusToItsOpenerInEveryMode() throws Exception {
+        for (MotionPreference p : MotionPreference.values()) {
+            boolean[] r = FxSupport.fx(() -> {
+                Fixture f = fixture(p);
+                f.opener().requestFocus();
+                Region panel = panel("Palette");
+                f.host().openPalette(panel, null);
+                ((Button) panel.getChildrenUnmodifiable().get(0)).requestFocus();
+                esc(f.stage().getScene().getFocusOwner());
+                Node owner = f.stage().getScene().getFocusOwner();
+                boolean back = owner == f.opener();
+                esc(owner); // a próxima tecla ainda chega ao host (foco não ficou órfão)
+                f.stage().close();
+                return new boolean[] {back, f.host().paletteOpen()};
+            });
+            assertTrue(r[0], p + " focus returns to the opener");
+            assertFalse(r[1], p.name());
+        }
+    }
+
+    @Test
     void closeIsLogicalImmediatelyEvenWhileAnimating() throws Exception {
         int[] r = FxSupport.fx(() -> {
             Fixture f = fixture(MotionPreference.FULL);

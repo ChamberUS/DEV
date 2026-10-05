@@ -91,6 +91,7 @@ public class ByxOverlayHost extends StackPane {
     private final VBox toastStack = new VBox(8);
     private final List<Node> toasts = new ArrayList<>();
     private Node palette;
+    private Node paletteOpener;
     private Region paletteBackdrop;
     private Runnable paletteOnClose;
     private Node saveBar;
@@ -241,6 +242,7 @@ public class ByxOverlayHost extends StackPane {
         closePopovers();
         closePalette();
         generation++;
+        paletteOpener = getScene() == null ? null : getScene().getFocusOwner();
         palette = panel;
         paletteOnClose = onClose;
         paletteBackdrop = backdrop(0.78);
@@ -259,9 +261,20 @@ public class ByxOverlayHost extends StackPane {
         Node p = palette;
         Region b = paletteBackdrop;
         Runnable cb = paletteOnClose;
+        Node opener = paletteOpener;
         palette = null;
         paletteBackdrop = null;
         paletteOnClose = null;
+        paletteOpener = null;
+        // foco volta ao abridor antes da saída: em OFF o painel sai da cena na hora e o foco ficaria órfão
+        Node focus = getScene() == null ? null : getScene().getFocusOwner();
+        boolean inside = focus == null || focus.getScene() == null;
+        for (Node x = focus; x != null && !inside; x = x.getParent()) {
+            inside = x == p;
+        }
+        if (inside && opener != null && opener.getScene() != null && !opener.isDisabled()) {
+            opener.requestFocus();
+        }
         exit(p, "paletteClose", layers.get(OverlayLayer.PALETTE));
         exit(b, "paletteClose", layers.get(OverlayLayer.PALETTE));
         if (cb != null) {
