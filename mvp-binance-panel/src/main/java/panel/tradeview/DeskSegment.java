@@ -51,6 +51,11 @@ final class DeskSegment extends HBox {
         silent = false;
     }
 
+    /** O que um clique do usuário faz: seleciona e notifica. */
+    void click(int i) {
+        buttons.get(i).fire();
+    }
+
     int selected() {
         Toggle t = group.getSelectedToggle();
         return t == null ? -1 : buttons.indexOf((ToggleButton) t);

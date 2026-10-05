@@ -88,6 +88,8 @@ public final class TradingDesk extends GridPane implements View {
         pageBot.getChildren().addAll(botRows, activity);
         pageRisk.getChildren().addAll(risk, freshness);
         VBox.setVgrow(activity, Priority.ALWAYS);
+        pageBot.setPadding(new Insets(6, 0, 0, 0));
+        pageRisk.setPadding(new Insets(6, 0, 0, 0));
         StackPane pages = new StackPane(pageMarket, pageBot, pageRisk);
         VBox compactContent = new VBox(10, contextTabs, pages);
         compactContent.setId("desk-context");
@@ -400,8 +402,12 @@ public final class TradingDesk extends GridPane implements View {
         return count(this);
     }
 
+    /** As células virtuais de um TableView são do controle (criadas ao exibir); a tabela conta como um nó. */
     private static int count(Node n) {
         int c = 1;
+        if (n instanceof javafx.scene.control.TableView<?>) {
+            return c;
+        }
         if (n instanceof javafx.scene.Parent p) {
             for (Node child : p.getChildrenUnmodifiable()) {
                 c += count(child);

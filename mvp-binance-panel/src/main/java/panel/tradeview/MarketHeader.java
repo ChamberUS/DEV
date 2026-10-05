@@ -33,6 +33,7 @@ final class MarketHeader extends HBox {
     private final ByxStatusDot dot;
     private final Label status = Fx.label(DeskModel.WAITING_TEXT, "byx-desk-status-text");
     private final Label update = Fx.label("", "byx-desk-update");
+    private boolean statsWanted;
     private final HBox pill;
     private final Tooltip feedTip = new Tooltip();
     private final DeskSegment timeframe = new DeskSegment("Timeframe", "1m", "5m", "15m", "1h", "4h");
@@ -48,7 +49,7 @@ final class MarketHeader extends HBox {
         setPrefHeight(60);
         setMaxHeight(60);
         dot = new ByxStatusDot(9, motion);
-        pill = Fx.row(8, dot, status, update);
+        pill = Fx.row(8, dot, new VBox(0, status, update));
         pill.setFillHeight(false);
         pill.getStyleClass().add("byx-desk-status");
         pill.setId("desk-feed-status");
@@ -62,8 +63,14 @@ final class MarketHeader extends HBox {
         }
         timeframe.setId("desk-timeframe");
         getChildren().addAll(symbol, contract, venue, Fx.spacer(), price, change, stats, liveBadge, pill, timeframe);
+        // o que identifica o mercado nunca é cortado: só o nome do mercado (venue) cede espaço; as estatísticas de 24h
+        // saem quando a faixa não comporta (janela mínima 1280)
+        for (var keep : new javafx.scene.Node[] {symbol, contract, price, change, stats, liveBadge, pill, timeframe}) {
+            ((javafx.scene.layout.Region) keep).setMinWidth(USE_PREF_SIZE);
+        }
         Fx.shown(stats, false);
         Fx.shown(update, false);
+        widthProperty().addListener((o, a, w) -> syncStats());
     }
 
     DeskSegment timeframe() {
@@ -96,7 +103,8 @@ final class MarketHeader extends HBox {
         Fx.tone(change, hasChange ? (t.change24hPct < 0 ? "neg" : t.change24hPct > 0 ? "pos" : null) : null, "neg", "pos");
         Fx.cls(change, "stale", hasChange && feed.looksStale());
         boolean day = data && DeskModel.hasDayStats(t);
-        Fx.shown(stats, day);
+        statsWanted = day;
+        syncStats();
         if (day) {
             high.set(t.high24h == null ? Fmt.NA : Fmt.price(t.high24h), feed.looksStale());
             low.set(t.low24h == null ? Fmt.NA : Fmt.price(t.low24h), feed.looksStale());
@@ -114,6 +122,17 @@ final class MarketHeader extends HBox {
         if (!tip.equals(feedTip.getText())) {
             feedTip.setText(tip);
         }
+    }
+
+    /** Largura mínima da faixa para as estatísticas de 24h (1440 → 1332 cabe; a janela mínima 1280 → 1172 não). */
+    static final double STATS_MIN_WIDTH = 1300;
+
+    private void syncStats() {
+        Fx.shown(stats, statsWanted && getWidth() >= STATS_MIN_WIDTH);
+    }
+
+    boolean statsShown() {
+        return stats.isManaged() && stats.isVisible();
     }
 
     private static final class Stat extends VBox {

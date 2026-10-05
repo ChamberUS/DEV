@@ -13,9 +13,10 @@ import panel.motion.MotionTokens;
 import panel.util.Fmt;
 
 /**
- * Adaptive Trader no Desk. STRIP (COMPACT): faixa com "Research · Live OFF". ROWS (STANDARD e aba Bot do COMPACT):
- * quatro linhas. FULL (EXPANDED): linhas extras reais (status da estratégia e conta). Só mostra os estados que o
- * app declara (MONITORING, IDLE, UNAVAILABLE, ERROR) e o live trading aparece sempre como texto, nunca como controle.
+ * Adaptive Trader no Desk. STRIP (COMPACT): faixa com "Research · Live OFF". ROWS (STANDARD, flex no fim da coluna, e
+ * aba Bot do COMPACT) e FULL (EXPANDED, painel próprio no topo da coluna de contexto): as quatro linhas da referência
+ * (Mode, Live trading, Strategy, Signal) com o selo de estado. Só mostra os estados que o app declara (MONITORING,
+ * IDLE, UNAVAILABLE, ERROR) e o live trading aparece sempre como texto, nunca como controle.
  */
 final class BotPanel extends VBox {
     enum Variant { STRIP, ROWS, FULL }
@@ -28,9 +29,7 @@ final class BotPanel extends VBox {
     private final KvRow mode = new KvRow("Mode");
     private final KvRow live = new KvRow("Live trading");
     private final KvRow strategy = new KvRow("Strategy");
-    private final KvRow status = new KvRow("Status");
     private final KvRow signal = new KvRow("Signal");
-    private final KvRow account = new KvRow("Account");
 
     BotPanel(MotionService motion, Variant variant, boolean inline) {
         this.motion = motion;
@@ -52,15 +51,8 @@ final class BotPanel extends VBox {
         }
         HBox head = new HBox(id, Fx.spacer(), state);
         head.setAlignment(Pos.CENTER_LEFT);
-        head.getStyleClass().add("byx-desk-panel-head");
-        getChildren().addAll(head, mode, live, strategy);
-        if (variant == Variant.FULL) {
-            getChildren().add(status);
-        }
-        getChildren().add(signal);
-        if (variant == Variant.FULL) {
-            getChildren().add(account);
-        }
+        head.getStyleClass().add("byx-desk-bot-head");
+        getChildren().addAll(head, mode, live, strategy, signal);
         setInline(inline);
     }
 
@@ -119,9 +111,7 @@ final class BotPanel extends VBox {
         mode.set(DeskModel.botMode(t), false, null);
         live.set(DeskModel.liveTrading(t), false, null);
         strategy.set(Fmt.text(t.strategy), false, null);
-        status.set(Fmt.text(t.strategyStatus), false, null);
         boolean noSignal = t.signal == null || t.signal.isBlank();
         signal.set(Fmt.text(t.signal), noSignal, null);
-        account.set(Fmt.text(t.account), t.account == null, null);
     }
 }

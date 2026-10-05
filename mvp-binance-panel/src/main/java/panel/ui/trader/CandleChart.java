@@ -60,7 +60,7 @@ public class CandleChart extends Pane {
         for (int i = 0; i <= 4; i++) {
             double y = 8 + h * i / 4;
             g.strokeLine(0, y, w, y);
-            g.fillText(String.format("%,.0f", hi - (hi - lo) * i / 4), w + 6, y + 4);
+            g.fillText(axis(hi - (hi - lo) * i / 4, hi - lo), w + 6, y + 4);
         }
         for (int i = 0; i < candles.size(); i++) {
             Candle c = candles.get(i);
@@ -72,6 +72,12 @@ public class CandleChart extends Pane {
             double top = y(Math.max(c.open(), c.close()), hi, lo, h);
             g.fillRect(x - step * 0.3, top, step * 0.6, Math.max(1, y(Math.min(c.open(), c.close()), hi, lo, h) - top));
         }
+    }
+
+    /** Rótulo do eixo de preço: casas decimais conforme a amplitude visível; sempre Locale.US (como o resto do app). */
+    private static String axis(double v, double range) {
+        int decimals = range >= 20 ? 0 : range >= 2 ? 1 : range >= 0.2 ? 2 : 4;
+        return String.format(java.util.Locale.US, "%,." + decimals + "f", v);
     }
 
     private static double y(double v, double hi, double lo, double h) {

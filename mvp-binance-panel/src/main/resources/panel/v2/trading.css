@@ -17,7 +17,7 @@
 .byx-desk-t3 { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-tertiary; }
 .byx-desk-secondary { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
 .byx-desk-body { -fx-line-spacing: 3px; }
-.byx-desk-panel-head { -fx-padding: 0 0 8 0; -fx-min-height: 28; }
+.byx-desk-panel-head { -fx-padding: 0 0 8 0; -fx-min-height: 28; -fx-pref-height: 28; -fx-max-height: 28; -fx-alignment: center-left; }
 .byx-desk-message { -fx-padding: 8 8 0 8; -fx-alignment: top-left; }
 .byx-desk-sk {
     -fx-background-color: -byx-bg3; -fx-background-radius: 4;
@@ -40,7 +40,7 @@
     -fx-background-color: -byx-bg2; -fx-background-radius: 8; -fx-padding: 6 12 6 12;
 }
 .byx-desk-status-text { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
-.byx-desk-update { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 12px; -fx-text-fill: -byx-warning; }
+.byx-desk-update { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 11px; -fx-min-height: 14; -fx-text-fill: -byx-warning; }
 
 /* ---------- segmented control (timeframe, context tabs) ---------- */
 .byx-desk-seg { -fx-background-color: -byx-bg2; -fx-background-radius: 9; -fx-padding: 3; -fx-spacing: 0; }
@@ -107,6 +107,7 @@
 .byx-desk-row-value.pos { -fx-text-fill: -byx-positive; }
 .byx-desk-row-value.neg { -fx-text-fill: -byx-negative; }
 .byx-desk-bot.strip { -fx-background-color: -byx-bg2; -fx-background-radius: 10; -fx-padding: 10 12 10 12; }
+.byx-desk-bot-head { -fx-padding: 0 0 6 0; }
 .byx-desk-bot-name { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
 .byx-desk-bot-dot { -fx-fill: -byx-warning; }
 .byx-desk-context { -fx-padding: 14; }
@@ -163,3 +164,6 @@
 .byx-desk-scroll .scroll-bar .increment-button, .byx-desk-scroll .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
 .byx-desk-scroll .scroll-bar .increment-arrow, .byx-desk-scroll .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
 .byx-desk-scroll .corner { -fx-background-color: transparent; }
+
+/* a chip dentro do título nunca muda a altura da linha (nenhum deslocamento ao entrar em STALE) */
+.byx-desk-panel-head .byx-stale-chip { -fx-padding: 1 8 1 8; }

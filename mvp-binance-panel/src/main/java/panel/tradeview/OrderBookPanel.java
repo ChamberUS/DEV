@@ -127,6 +127,7 @@ final class OrderBookPanel extends VBox {
     private static void clear(GridRow r, boolean skeleton) {
         r.text("", "", "");
         r.showSkeleton(skeleton);
+        r.showDepth(0, null);
         r.priceTone(null);
     }
 

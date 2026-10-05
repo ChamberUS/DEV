@@ -119,22 +119,46 @@ final class BlotterPanel extends VBox {
 
     private static void style(TableView<String[]> table, Tab tab) {
         table.getStyleClass().add("byx-desk-table");
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         table.setFixedCellSize(42);
         table.setMinHeight(0);
         table.setPrefHeight(0);
         table.setMaxHeight(Double.MAX_VALUE);
         table.setFocusTraversable(true);
         table.setAccessibleText(tab.label + " table");
+        table.widthProperty().addListener((o, a, w) -> fit(table, tab));
+        table.setUserData(tab);
         for (int i = 0; i < table.getColumns().size(); i++) {
             TableColumn<String[], String> c = (TableColumn<String[], String>) table.getColumns().get(i);
             c.setSortable(false);
             c.setReorderable(false);
             c.setResizable(false);
-            c.setPrefWidth(tab.weights[i] * 100);
             String h = tab.headers[i];
             if (h.equals("Side") || h.equals("uPnL") || h.equals("Signal")) {
                 c.setCellFactory(col -> new ToneCell());
+            }
+        }
+    }
+
+    /** Largura das colunas como frações da largura útil (grade 1.3fr 1fr…): igual à referência, sem depender da política do controle. */
+    private static void fit(TableView<String[]> table, Tab tab) {
+        double sum = 0;
+        for (int i = 0; i < table.getColumns().size(); i++) {
+            if (table.getColumns().get(i).isVisible()) {
+                sum += tab.weights[i];
+            }
+        }
+        double usable = table.getWidth() - 10; // 2 px de borda + a barra de rolagem fina
+        if (sum <= 0 || usable <= 0) {
+            return;
+        }
+        for (int i = 0; i < table.getColumns().size(); i++) {
+            var c = table.getColumns().get(i);
+            double w = Math.floor(usable * tab.weights[i] / sum);
+            if (c.isVisible() && c.getPrefWidth() != w) {
+                c.setMinWidth(0);
+                c.setPrefWidth(w);
+                c.setMaxWidth(w);
             }
         }
     }
@@ -238,6 +262,7 @@ final class BlotterPanel extends VBox {
         for (int i = 0; i < columns.size(); i++) {
             columns.get(i).setVisible(i < mode.blotterColumns);
         }
+        fit(tables.get(Tab.POSITIONS), Tab.POSITIONS);
     }
 
     /** Estado de uma aba a partir de dados reais (ver auditoria §3). Positions/Orders/Trades dependem da conta, que não existe. */
