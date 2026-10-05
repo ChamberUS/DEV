@@ -59,6 +59,30 @@ public class MotionService {
         return animatedIcons.get() && !off();
     }
 
+    /** Token V2 (BYX_MOTION_TOKENS.json) resolvido no modo atual. */
+    public MotionSpec.Resolved token(String name) {
+        return MotionSpec.get().token(name).resolve(preference.get());
+    }
+
+    /** Duração V2 no modo atual; zero quando o token não anima neste modo. */
+    public Duration duration(String name) {
+        MotionSpec.Resolved r = token(name);
+        return r.runs() ? r.duration() : Duration.ZERO;
+    }
+
+    public Interpolator easing(String name) {
+        return MotionSpec.get().token(name).interpolator();
+    }
+
+    /** Deslocamento e escala só existem em FULL (modes.REDUCED/OFF: translate=false, scale=false). */
+    public boolean translateAllowed() {
+        return full();
+    }
+
+    public boolean scaleAllowed() {
+        return full();
+    }
+
     public Duration scale(Duration d) {
         return switch (preference.get()) {
             case FULL -> d;
