@@ -26,6 +26,8 @@ public final class ShellIcons {
             Map.entry("keyboard", "M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M7 14h10"),
             Map.entry("info", "M12 3a9 9 0 100 18 9 9 0 000-18zM12 11v5M12 8v.4"),
             Map.entry("logout", "M9 4H5v16h4M16 8l4 4-4 4M20 12H9"),
+            Map.entry("support", "M4 13a8 8 0 0116 0M4 13v3a2 2 0 002 2h1v-5H4M20 13v3a2 2 0 01-2 2h-1v-5h3"),
+            Map.entry("pulse", "M3 12h4l3-7 4 14 3-7h4"),
             Map.entry("lock", "M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"));
 
     private ShellIcons() {

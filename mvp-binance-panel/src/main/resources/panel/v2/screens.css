@@ -44,3 +44,18 @@
 .byx-table-cell { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
 .byx-table-cell.mono { -fx-font-family: "JetBrains Mono Medium"; }
 .byx-table-row { -fx-border-color: -byx-line transparent transparent transparent; -fx-border-width: 1 0 0 0; -fx-padding: 10 0 10 0; }
+
+/* help */
+.byx-filter-chip.selected { -fx-background-color: -byx-accent-tint; -fx-text-fill: -byx-text-primary; -fx-border-color: -byx-accent; -fx-border-radius: 8; }
+.byx-faq-item { -fx-border-color: -byx-line transparent transparent transparent; -fx-border-width: 1 0 0 0; -fx-padding: 4 0 12 0; }
+.byx-faq-head {
+    -fx-background-color: transparent; -fx-padding: 10 0 6 0; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 15px;
+    -fx-text-fill: -byx-text-primary; -fx-cursor: hand; -fx-graphic-text-gap: 12;
+}
+.byx-faq-head:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 6; -fx-border-insets: -2; }
+.byx-ledger { -fx-background-color: -byx-byx; -fx-background-radius: 5; }
+.byx-pillar { -fx-padding: 18; }
+.byx-code { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 13px; -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-bg2; -fx-background-radius: 10; -fx-padding: 14; }
+.byx-key { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 12px; -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-bg3; -fx-background-radius: 6; -fx-padding: 3 8 3 8; }
+.byx-toc-link { -fx-background-color: transparent; -fx-padding: 6 10 6 10; -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; -fx-cursor: hand; -fx-alignment: center-left; }
+.byx-toc-link:hover, .byx-toc-link.current { -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-bg2; -fx-background-radius: 8; }

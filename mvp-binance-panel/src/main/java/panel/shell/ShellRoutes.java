@@ -70,6 +70,24 @@ public final class ShellRoutes {
         add("t-notifications", ShellContext.ACCOUNT, "Notifications", "Notifications", "bell", 3);
         add("t-account-activity", ShellContext.ACCOUNT, "Activity", "Activity", "activity", 4);
         add(SETTINGS, ShellContext.ACCOUNT, "Settings", "Settings", "settings", -1);
+        // Help (não é workspace): FAQ, Support, Diagnostics, About, Overview, What's new no rail; o resto por links
+        add("h-faq", ShellContext.HELP, "FAQ", "FAQ", "help", 0);
+        add("h-help", ShellContext.HELP, "Help and support", "Support", "support", 1);
+        add("h-diagnostics", ShellContext.HELP, "Diagnostics", "Diagnostics", "pulse", 2);
+        add("h-about", ShellContext.HELP, "About BYX", "About", "info", 3);
+        add("h-overview", ShellContext.HELP, "Product overview", "Overview", "desk", 4);
+        add("h-whats-new", ShellContext.HELP, "What's new", "What's new", "benefits", 5);
+        add("h-terms", ShellContext.HELP, "Terms of Use", null, null, -1);
+        add("h-privacy", ShellContext.HELP, "Privacy", null, null, -1);
+        add("h-shortcuts", ShellContext.HELP, "Keyboard shortcuts", null, null, -1);
+    }
+
+    /** Páginas que existem antes do login (modo público): o roteador recusa qualquer outra rota sem sessão. */
+    public static final java.util.Set<String> PUBLIC = java.util.Set.of("h-about", "h-faq", "h-help", "h-terms", "h-privacy");
+
+    /** Rotas de Research (exigem sessão de admin verificada): tudo que não é Trading/BYX/Account (t-) nem Help (h-). */
+    public static boolean isResearch(String id) {
+        return !id.startsWith("t-") && !id.startsWith("h-") && !id.startsWith("auth:");
     }
 
     private ShellRoutes() {
@@ -104,6 +122,7 @@ public final class ShellRoutes {
             case RESEARCH -> "overview";
             case BYX -> "t-byx";
             case ACCOUNT -> "t-profile";
+            case HELP -> "h-faq";
         };
     }
 

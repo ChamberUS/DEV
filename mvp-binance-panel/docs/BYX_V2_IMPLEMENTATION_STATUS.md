@@ -14,7 +14,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 8 | Research + Capture | DONE | Overview e Capture em V2; VALIDATION LOCKED / FINAL_HOLDOUT SEALED. Auditoria em `docs/BYX_V2_RESEARCH_CAPTURE_AUDIT.md`. Ver "Passo 8" abaixo |
 | 9 | BYX | DONE | Network, Wallet, Benefits e Treasury em V2, somente leitura. Ver "Passo 9" abaixo |
 | 10 | Account | DONE | Profile, Security, Sessions, Notifications, Activity e Settings em V2. Ver "Passo 10" abaixo |
-| 11 | Help | TODO | |
+| 11 | Help | DONE | FAQ, About, Overview, Support, Diagnostics, Terms, Privacy, Shortcuts e What's new em V2. Ver "Passo 11" abaixo |
 | 12 | System + onboarding | TODO | Diagnóstico com allow-list |
 | 13 | Motion + acessibilidade | TODO | FULL/REDUCED/OFF |
 | 14 | QA final | TODO | |
@@ -359,3 +359,36 @@ Rede: os anéis respiram só em AWAITING NODE e SYNCING (um loop); HEALTHY está
 ### Findings para o Passo 14
 1. Guard de saída testado no app real só por regressão de navegação; um QA dirigido do diálogo "Discard changes?" (Profile/Settings) fica para o Passo 14.
 2. Botões About / What's new de Settings apontam para rotas do Passo 11.
+
+## Passo 11 · Help
+
+`panel.helpview`, contexto `HELP` do shell (não é workspace; chip HELP no breadcrumb), rail Help com FAQ, Support, Diagnostics, About, Overview e What's new; Terms, Privacy e Shortcuts por links. Conteúdo em `/content/*.json` (faq, legal, whats-new, onboarding, system-messages copiados do handoff): trocar o arquivo muda a página sem código.
+
+| Tela | Classificação | Notas |
+|---|---|---|
+| FAQ | PLACEHOLDER_CONTENT (selo) | categorias, busca, acordeão por teclado (Enter/Space, ↑/↓, Home/End, ↓ da busca entra na lista), sem resultados com "Clear search" e "Report a problem"; resultados da busca global levam à pergunta (`open(id)`) |
+| About | PLACEHOLDER_CONTENT | só fatos da especificação (Cosmos SDK, ubyx → BYX 6 casas, LOCALNET); sem licenças, certificações, regulação, clientes, parcerias ou números; versão/build de `AppInfo`; "Copy version info" |
+| Product overview | UI_ONLY | pilares TRADING/RESEARCH/BYX com navegação real (Research segue atrás da verificação de admin) |
+| Help & Support | UI_ONLY | FAQ, Diagnostics, Shortcuts; Documentation UNAVAILABLE; Contact support NOT CONFIGURED; **Report a problem: UNAVAILABLE + DEMO ONLY · NOTHING IS SENT** (sem formulário, nada sai do app) |
+| Diagnostics | allow-list | `DiagnosticsReport.FIELDS` (versão, build, Java, JavaFX, SO, ambiente, backend, feed, captura, research, nó BYX, carteira, autenticação, motion, fonte de dados, densidade); campo fora da lista é recusado; valores com e-mail/telefone/palavras de segredo são redigidos; o texto copiado é exatamente o preview |
+| Terms / Privacy | **LEGAL_PLACEHOLDER** | selo + banner "not an approved legal document"; corpo vem de `legal.json`; sumário leva à seção |
+| Shortcuts | UI_ONLY | `ShortcutRegistry` (registro único); página e diálogo `?` (não abre digitando num campo nem com outra camada); só atalhos que existem |
+| What's new | PLACEHOLDER | changelog de design do handoff, selo do status |
+
+### Acesso público
+O roteador é a autoridade: sem sessão, `ShellRoutes.PUBLIC` = About, FAQ, Help, Terms, Privacy; qualquer outra rota (Trading, Research, BYX, Account, Security, Diagnostics, Overview, Shortcuts) é DENY. O rodapé do login deixou de ter itens "arrives in step 11" e abre essas páginas num `PublicHost` (sem rail, seletor, busca, notificações, menu, dock; botão Sign in). Rotas `h-*` não são Research (`ShellRoutes.isResearch`), então o bloqueio de sessão de admin não as afeta. Menu do usuário: Keyboard shortcuts (diálogo), Help, About BYX apontam para as telas V2; a busca ganhou entradas HELP e uma por pergunta do FAQ.
+
+### Testes e QA
+`HelpScreensTest` (10): conteúdo e filtro, legais placeholder, allow-list/segredos/preview exato, FAQ (busca, acordeão, sem resultados, deep link), Support sem envio, About sem afirmações extras, registro de atalhos × shell, contrato público e PublicHost sem chrome. Regressão (gate de rota e rodapé de auth tocados): `Shell*Test`, `Auth*Test`, `LoginControllerTest`, `SessionReturnTest`, `CommandPaletteTest` e QAs do app real (`ShellNavigationQa` idle 5 s FULL e `AuthFlowQa` FULL: 0 falhas). Capturas em `docs/qa/step11/`.
+
+### Diferenças
+| Referência | JavaFX | Paridade | Motivo |
+|---|---|---|---|
+| FAQ: destaque do termo buscado | só filtra | NEAR | sem texto rico no Label |
+| FAQ EXPANDED: lista de categorias 240 + "Still need help" | chips em todos os tamanhos | NEAR | reorganização responsiva fica para o Passo 14 |
+| Report a problem: formulário (demo) | UNAVAILABLE | INTENTIONALLY PRESERVED | pedido: nada é enviado, nada finge envio |
+| Terms/Privacy: realce do sumário pela rolagem | clique no sumário rola até a seção | NEAR | — |
+
+### Findings para o Passo 14
+1. O modo público foi validado por teste de contrato + `PublicHost`; um QA dirigido (login → FAQ → Sign in) no app real fica para o Passo 14.
+2. "Open-source notices" aparece como NOT CONFIGURED (sem texto).

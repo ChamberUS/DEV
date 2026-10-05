@@ -1,0 +1,159 @@
+{
+  "status": "PLACEHOLDER_CONTENT",
+  "categories": [
+    {
+      "id": "getting-started",
+      "title": "Getting started",
+      "items": [
+        {
+          "id": "what-is",
+          "q": "What is BYX-MVP?",
+          "a": "A desktop terminal with three workspaces: Trading for market observation, Research for the scientific pipeline, and BYX for the network, wallet, benefits and treasury."
+        },
+        {
+          "id": "live-off",
+          "q": "Why is live trading off?",
+          "a": "Live trading stays disabled while strategies are researched and validated. It cannot be turned on from Settings or any preference."
+        },
+        {
+          "id": "environments",
+          "q": "What do LOCALNET, TEST, PAPER and REAL mean?",
+          "a": "LOCALNET is a development network. TEST assets have no financial value. PAPER is simulated capital. REAL is only shown for verified sources, and none are configured yet."
+        }
+      ]
+    },
+    {
+      "id": "trading",
+      "title": "Trading",
+      "items": [
+        {
+          "id": "data-source",
+          "q": "Where does market data come from?",
+          "a": "ETHUSDT data comes from Binance USD-M Futures. Binance is the data source, not the operator of BYX-MVP."
+        },
+        {
+          "id": "waiting",
+          "q": "Why do I see \"Waiting for market data\"?",
+          "a": "The market feed is not connected yet. BYX-MVP never simulates prices, so values stay empty until real data arrives."
+        },
+        {
+          "id": "orders",
+          "q": "Can I place orders?",
+          "a": "No. With live trading off, Positions and Orders stay empty and no order is sent."
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "title": "Research",
+      "items": [
+        {
+          "id": "partitions",
+          "q": "What are TRAIN, VALIDATION and FINAL_HOLDOUT?",
+          "a": "They are separate data partitions. Hypotheses are developed on TRAIN, checked on VALIDATION and confirmed once on FINAL_HOLDOUT."
+        },
+        {
+          "id": "validation-locked",
+          "q": "Why is Validation locked?",
+          "a": "The research guard keeps VALIDATION locked until the TRAIN stage is complete. FINAL_HOLDOUT stays sealed. The interface never overrides these gates."
+        }
+      ]
+    },
+    {
+      "id": "capture",
+      "title": "Capture",
+      "items": [
+        {
+          "id": "capture-what",
+          "q": "What does Capture record?",
+          "a": "Capture records market microstructure sessions for ETHUSDT from Binance USD-M Futures for research."
+        },
+        {
+          "id": "capture-control",
+          "q": "Can I start or stop capture from the app?",
+          "a": "No. The app shows capture as read-only monitoring. Starting, stopping and recovery are handled outside the app."
+        }
+      ]
+    },
+    {
+      "id": "byx-network",
+      "title": "BYX Network",
+      "items": [
+        {
+          "id": "byx-what",
+          "q": "What is BYX?",
+          "a": "BYX is a blockchain built with Cosmos SDK. Its base denomination is ubyx, displayed as BYX with 6 decimals."
+        },
+        {
+          "id": "localnet",
+          "q": "Why does the network say LOCALNET?",
+          "a": "This build connects to a local development network. Everything on it is TEST and has no financial value."
+        }
+      ]
+    },
+    {
+      "id": "wallet",
+      "title": "Wallet",
+      "items": [
+        {
+          "id": "watch-vs-verified",
+          "q": "What is the difference between a watch address and a verified wallet?",
+          "a": "A watch address is read-only and anyone can add one. A verified wallet proves you control it by signing a challenge in your wallet. Verification moves nothing."
+        },
+        {
+          "id": "private-key",
+          "q": "Does BYX-MVP store my private key?",
+          "a": "No. Your private key and seed phrase stay in your wallet. BYX-MVP never asks for them, sees them or stores them."
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "title": "Account",
+      "items": [
+        {
+          "id": "change-password",
+          "q": "How do I change my password?",
+          "a": "Open Account, then Security, then Password."
+        },
+        {
+          "id": "sign-out-others",
+          "q": "How do I sign out other sessions?",
+          "a": "Open Account, then Sessions, and choose Sign out other sessions."
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Security",
+      "items": [
+        {
+          "id": "admin-verification",
+          "q": "What is admin verification?",
+          "a": "Research requires an admin session. You confirm it with an email or SMS code after signing in."
+        },
+        {
+          "id": "diagnostics-safe",
+          "q": "What do diagnostics include?",
+          "a": "Versions, environment and service status. Diagnostics never include passwords, tokens, session secrets, API keys, private keys, seed phrases or authorization headers."
+        }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting",
+      "items": [
+        {
+          "id": "backend-offline",
+          "q": "The status dock says Backend offline",
+          "a": "Other parts keep working. Wait for the dot to turn green, or open Help, then Diagnostics, to copy a report."
+        },
+        {
+          "id": "missing-notifs",
+          "q": "I am not receiving notifications",
+          "a": "Check Settings, then Notifications. Security notifications cannot be turned off."
+        }
+      ]
+    }
+  ]
+}

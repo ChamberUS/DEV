@@ -34,6 +34,7 @@ public final class ByxShell extends StackPane {
     private final Map<ShellContext, String> lastRoute = new EnumMap<>(ShellContext.class);
     private final ChangeListener<String> routeListener = (o, a, b) -> applyRoute(b);
     private final String shortcutPrefix;
+    private final MotionService motion;
     private Predicate<String> available = id -> true;
     private Function<String, String> crumb = id -> ShellRoutes.get(id).map(ShellRoutes.Route::title).orElse(id);
     private Runnable openSearch = () -> { };
@@ -45,6 +46,7 @@ public final class ByxShell extends StackPane {
 
     public ByxShell(ShellRouter router, MotionService motion, LegacyHost content) {
         this.router = router;
+        this.motion = motion;
         this.content = content;
         this.shortcutPrefix = isMac() ? "⌘" : "Ctrl+";
         getStyleClass().add("byx-shell");
@@ -69,6 +71,7 @@ public final class ByxShell extends StackPane {
         overlay.setToastMargin(new javafx.geometry.Insets(0, 0, 38 + 16, 68 + 16)); // acima do dock, ao lado do rail
         getChildren().add(overlay);
         addEventFilter(KeyEvent.KEY_PRESSED, this::onShortcut);
+        addEventFilter(KeyEvent.KEY_TYPED, this::onHelpKey);
         router.routeProperty().addListener(routeListener);
         topBar.search().setOnAction(e -> openSearch.run());
         if (router.route() != null) {
@@ -192,6 +195,42 @@ public final class ByxShell extends StackPane {
         rail.select(route);
         switcher.select(c);
         refreshCrumb();
+    }
+
+    /** "?" abre o diálogo de atalhos, nunca enquanto se digita num campo, nem com outra camada aberta. */
+    private void onHelpKey(javafx.scene.input.KeyEvent e) {
+        if (!"?".equals(e.getCharacter()) || e.isShortcutDown() || e.isAltDown() || overlay.openDialogs() > 0 || overlay.paletteOpen()) {
+            return;
+        }
+        javafx.scene.Node focus = getScene() == null ? null : getScene().getFocusOwner();
+        if (focus instanceof javafx.scene.control.TextInputControl) {
+            return;
+        }
+        openShortcuts();
+        e.consume();
+    }
+
+    /** Diálogo de atalhos (camada 70): gerado do registro único; Esc fecha e o foco volta ao abridor. */
+    public void openShortcuts() {
+        if (overlay.openDialogs() > 0) {
+            return;
+        }
+        javafx.scene.control.Label title = new javafx.scene.control.Label("Keyboard shortcuts");
+        title.getStyleClass().add("byx-section-title");
+        javafx.scene.control.ScrollPane body = new javafx.scene.control.ScrollPane(panel.helpview.ShortcutsScreen.content(shortcutPrefix.replace("Ctrl+", "Ctrl")));
+        body.setFitToWidth(true);
+        body.setPrefViewportHeight(420);
+        body.getStyleClass().add("byx-desk-scroll");
+        panel.design.ByxButton close = new panel.design.ByxButton("Close", panel.design.ByxButton.Variant.SECONDARY, motion);
+        javafx.scene.layout.VBox card = new javafx.scene.layout.VBox(12, title, body, close);
+        card.getStyleClass().add("byx-dialog");
+        card.setPrefWidth(560);
+        card.setMaxSize(560, javafx.scene.layout.Region.USE_PREF_SIZE);
+        card.setAccessibleRole(javafx.scene.AccessibleRole.DIALOG);
+        card.setAccessibleText("Keyboard shortcuts");
+        panel.design.ByxOverlayHost.DialogHandle[] h = new panel.design.ByxOverlayHost.DialogHandle[1];
+        close.setOnAction(x -> h[0].close());
+        h[0] = overlay.openDialog(card, false, close, null);
     }
 
     /** Cmd/Ctrl+1..5 = itens do rail do contexto atual; Cmd/Ctrl+, = Settings; Cmd/Ctrl+K = busca. */

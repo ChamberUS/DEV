@@ -25,7 +25,7 @@ public final class DockModel {
     }
 
     /** Estado do feed; o booleano do par indica "nada configurado" (neutro, não queda). */
-    static Object[] feed(String feed) {
+    public static Object[] feed(String feed) {
         if (feed == null) {
             return new Object[] {StatusState.UNKNOWN, false};
         }
@@ -40,7 +40,7 @@ public final class DockModel {
         };
     }
 
-    static Object[] capture(String recorder) {
+    public static Object[] capture(String recorder) {
         if (recorder == null) {
             return new Object[] {StatusState.UNKNOWN, false};
         }
@@ -51,7 +51,7 @@ public final class DockModel {
         };
     }
 
-    static StatusState network(String connection) {
+    public static StatusState network(String connection) {
         if (connection == null) {
             return StatusState.UNKNOWN;
         }

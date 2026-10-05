@@ -1,0 +1,67 @@
+{
+  "status": "DESIGN CHANGELOG · PLACEHOLDER FOR APP RELEASES",
+  "entries": [
+    {
+      "version": "V2 design · Phase 2",
+      "date": "2026-10-04",
+      "items": [
+        {
+          "kind": "NEW",
+          "text": "Account area: Profile, Security, Sessions, Notifications and Activity."
+        },
+        {
+          "kind": "NEW",
+          "text": "Help center: FAQ, About, Product overview, Support, Diagnostics, Terms and Privacy."
+        },
+        {
+          "kind": "NEW",
+          "text": "User menu and notification panel in the top bar."
+        },
+        {
+          "kind": "IMPROVED",
+          "text": "Search now finds account pages, help articles and commands."
+        },
+        {
+          "kind": "FIXED",
+          "text": "Sign-in checkboxes can now be reached and toggled with the keyboard."
+        }
+      ]
+    },
+    {
+      "version": "V2 design · Phase 1",
+      "date": "2026-10-04",
+      "items": [
+        {
+          "kind": "NEW",
+          "text": "Sign in, create account, email verification, password recovery and two-factor screens."
+        },
+        {
+          "kind": "NEW",
+          "text": "Motion modes FULL, REDUCED and OFF."
+        },
+        {
+          "kind": "IMPROVED",
+          "text": "Brand panel and form scale for 1440, 1600 and 1920 wide windows."
+        }
+      ]
+    },
+    {
+      "version": "V2 design · Density",
+      "date": "2026-10-03",
+      "items": [
+        {
+          "kind": "IMPROVED",
+          "text": "Trading desk adds context columns at larger window sizes instead of stretching the chart."
+        },
+        {
+          "kind": "IMPROVED",
+          "text": "Status dock groups system health, mode and environment."
+        },
+        {
+          "kind": "FIXED",
+          "text": "Rail labels and dock text are larger and easier to read."
+        }
+      ]
+    }
+  ]
+}

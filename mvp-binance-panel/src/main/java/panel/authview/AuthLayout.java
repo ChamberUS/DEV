@@ -54,6 +54,11 @@ public final class AuthLayout extends HBox {
 
     /** devBadge: selo real do ambiente (ex.: provedor de autenticação de desenvolvimento); null = nenhum. */
     public AuthLayout(MotionService motion, String devBadge, Runnable about) {
+        this(motion, devBadge, route -> about.run());
+    }
+
+    /** openPublic: pede ao roteador uma página pública (h-about, h-faq, h-help, h-terms, h-privacy). */
+    public AuthLayout(MotionService motion, String devBadge, java.util.function.Consumer<String> openPublic) {
         this.motion = motion;
         getStyleClass().add("byx-auth");
         brand = new BrandPanel(motion);
@@ -75,10 +80,12 @@ public final class AuthLayout extends HBox {
         formHost.setFillWidth(true);
         formHost.setMaxHeight(Region.USE_PREF_SIZE);
 
-        Button aboutLink = link("About");
-        aboutLink.setOnAction(e -> about.run());
-        footer = new HBox(18, aboutLink, pending("FAQ"), pending("Terms"), pending("Privacy"),
-                ByxBadge.availability(ByxBadge.Availability.COMING_SOON));
+        footer = new HBox(18);
+        for (String[] l : new String[][] {{"About", "h-about"}, {"FAQ", "h-faq"}, {"Help", "h-help"}, {"Terms", "h-terms"}, {"Privacy", "h-privacy"}}) {
+            Button b = link(l[0]);
+            b.setOnAction(e -> openPublic.accept(l[1]));
+            footer.getChildren().add(b);
+        }
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.getStyleClass().add("byx-auth-footer");
 

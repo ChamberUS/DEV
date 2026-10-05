@@ -73,13 +73,13 @@ public final class AuthScreens {
      * onPasswordChanged: troca obrigatória concluída; onSetupDone: primeiro admin criado (mensagem para o login).
      */
     public AuthScreens(MotionService motion, Services services, Consumer<String> request, Consumer<User> onLoggedIn,
-            Runnable onPasswordChanged, Consumer<String> onSetupDone, Runnable about, String devBadge) {
+            Runnable onPasswordChanged, Consumer<String> onSetupDone, Consumer<String> openPublic, String devBadge) {
         this.motion = motion;
         this.services = services;
         this.request = request;
         this.onPasswordChanged = onPasswordChanged;
         this.onSetupDone = onSetupDone;
-        layout = new AuthLayout(motion, devBadge, about);
+        layout = new AuthLayout(motion, devBadge, openPublic);
         worker = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "login");
             t.setDaemon(true);

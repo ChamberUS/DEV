@@ -46,7 +46,8 @@ public class PanelApp extends Application {
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
             "t-byx", "t-wallet", "t-benefits", "t-treasury",
-            "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings");
+            "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
+            "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -151,8 +152,9 @@ public class PanelApp extends Application {
         entryNotice = message;
         mustChangeUser = null;
         if (authScreens != null) authScreens.dispose();
+        disposePublic();
         authScreens = new panel.authview.AuthScreens(ctx.motion, authServices(), this::show, this::afterLogin,
-                this::afterPasswordChanged, this::showEntry, Credits::show,
+                this::afterPasswordChanged, this::showEntry, this::show,
                 ctx.devOtp != null ? panel.auth.DevOtpProvider.LABEL : null);
         rootStack.getChildren().setAll(authScreens.node());
         show(ctx.auth.firstRun() ? panel.authview.AuthScreens.SETUP : panel.authview.AuthScreens.LOGIN);
@@ -233,6 +235,7 @@ public class PanelApp extends Application {
             authScreens = null;
         }
         mustChangeUser = null;
+        disposePublic();
         ctx.byx.start();
         tfOverlay = null;
         views.clear();
@@ -268,6 +271,7 @@ public class PanelApp extends Application {
         views.put("t-notifications", new panel.accountview.NotificationsScreen(ctx.motion));
         views.put("t-account-activity", new panel.accountview.ActivityScreen(clock, accountData));
         views.put("t-settings", new panel.accountview.SettingsScreen(ctx.motion, accountData, this::show, overlayOf));
+        registerHelpViews();
         if (user.admin()) {
             registerResearchViews();
         }
@@ -298,7 +302,7 @@ public class PanelApp extends Application {
         mainActive = true;
         // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
         String start = pendingReturn == null ? panel.authview.SessionReturn.DEFAULT_ROUTE
-                : pendingReturn.resolve(user.id(), views::containsKey, id -> !id.startsWith("t-")); // Research exige verificação
+                : pendingReturn.resolve(user.id(), views::containsKey, panel.shell.ShellRoutes::isResearch); // Research exige verificação
         pendingReturn = null;
         show(start);
         render(ctx.research.snapshot.get());
@@ -371,14 +375,18 @@ public class PanelApp extends Application {
         if (id.startsWith("auth:")) {
             return authRouteAllowed(id) ? panel.shell.ShellRouter.Decision.ALLOW : panel.shell.ShellRouter.Decision.DENY;
         }
-        if (mainActive && ctx.sessions.user().isEmpty()) {
+        if (!mainActive) {
+            // sem sessão só as páginas públicas (lista no roteador): Trading, Research, BYX, Account e Security nunca abrem
+            return panel.shell.ShellRoutes.PUBLIC.contains(id) ? panel.shell.ShellRouter.Decision.ALLOW : panel.shell.ShellRouter.Decision.DENY;
+        }
+        if (ctx.sessions.user().isEmpty()) {
             return panel.shell.ShellRouter.Decision.DENY; // sem sessão nenhuma rota do app abre
         }
         if (activeView != null && shell != null && !id.equals(router.route()) && activeView.hasUnsavedChanges()) {
             confirmLeave(id, ticket);
             return panel.shell.ShellRouter.Decision.PENDING; // a rota só muda depois da confirmação
         }
-        boolean research = !id.startsWith("t-");
+        boolean research = panel.shell.ShellRoutes.isResearch(id);
         if (!views.containsKey(id)) {
             return research ? requestResearch(id, ticket) : panel.shell.ShellRouter.Decision.DENY;
         }
@@ -580,15 +588,19 @@ public class PanelApp extends Application {
             authScreens.show(id, entryNotice, mustChangeUser);
             return;
         }
+        if (!mainActive) {
+            showPublic(id);
+            return;
+        }
         if (palette != null) palette.close();
         closeTwoFactor();
-        boolean toTrader = id.startsWith("t-");
+        boolean toTrader = !panel.shell.ShellRoutes.isResearch(id);
         boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-wallet-verify").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
         byxWorkspace = toByx;
         trader = toTrader;
         lastView.put(toTrader, id);
-        stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : toTrader ? "Trading" : "Research"));
+        stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : id.startsWith("h-") ? "Help" : toTrader ? "Trading" : "Research"));
         View next = views.get(id);
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
@@ -603,9 +615,80 @@ public class PanelApp extends Application {
 
     private void render(Snapshot s) {
         views.forEach((id, view) -> {
-            if (id.startsWith("t-") || ctx.adminAccess.hasValidAdminSession()) view.onSnapshot(s);
+            if (!panel.shell.ShellRoutes.isResearch(id) || ctx.adminAccess.hasValidAdminSession()) view.onSnapshot(s);
         });
         chrome(s);
+    }
+
+    // ---- Help (sessão) e modo público ------------------------------------------------
+
+    private void registerHelpViews() {
+        String mod = shell == null ? (panel.shell.ByxShell.isMac() ? "⌘" : "Ctrl") : "Ctrl";
+        mod = panel.shell.ByxShell.isMac() ? "⌘" : "Ctrl";
+        java.util.function.Consumer<String> copy = text -> {
+            var c = new javafx.scene.input.ClipboardContent();
+            c.putString(text);
+            javafx.scene.input.Clipboard.getSystemClipboard().setContent(c);
+        };
+        views.put("h-faq", new panel.helpview.FaqScreen(ctx.motion, panel.helpview.HelpContent.faq(), this::show));
+        views.put("h-help", new panel.helpview.SupportScreen(ctx.motion, this::show, false));
+        views.put("h-diagnostics", new panel.helpview.DiagnosticsScreen(ctx.motion, this::diagnostics, copy));
+        views.put("h-about", new panel.helpview.AboutScreen(ctx.motion, this::show, copy, false));
+        views.put("h-overview", new panel.helpview.OverviewScreen(ctx.motion, this::show));
+        views.put("h-whats-new", new panel.helpview.WhatsNewScreen(panel.helpview.HelpContent.whatsNew()));
+        views.put("h-terms", new panel.helpview.LegalScreen("Terms of Use", panel.helpview.HelpContent.legal(), true));
+        views.put("h-privacy", new panel.helpview.LegalScreen("Privacy", panel.helpview.HelpContent.legal(), false));
+        views.put("h-shortcuts", new panel.helpview.ShortcutsScreen(mod));
+    }
+
+    /** Relatório por allow-list: só estados e versões do runtime; nenhuma credencial é lida. */
+    private panel.helpview.DiagnosticsReport diagnostics() {
+        Snapshot s = ctx.research.snapshot.get();
+        TraderSnapshot t = ctx.trading.snapshot.get();
+        var net = ctx.byx.snapshot();
+        boolean user = ctx.sessions.user().isPresent();
+        return new panel.helpview.DiagnosticsReport().set("Application", AppBranding.NAME).set("Version", AppInfo.VERSION).set("Build", AppInfo.build())
+                .set("Environment", AppInfo.ENVIRONMENT).set("Java", AppInfo.java()).set("JavaFX", AppInfo.javafx()).set("Operating system", AppInfo.os())
+                .set("Backend", panel.shell.DockModel.backend(s).name()).set("Market feed", ((panel.design.StatusState) panel.shell.DockModel.feed(t.feed)[0]).name())
+                .set("Capture", ((panel.design.StatusState) panel.shell.DockModel.capture(s.capture.recorder())[0]).name())
+                .set("Research", views.containsKey("overview") ? "Available to this account" : "Not available to this account")
+                .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Wallet", !"VERIFIED".equals(net.identity()) ? "Unavailable"
+                        : ctx.byxWallets.wallets().isEmpty() ? "Not linked" : "Linked")
+                .set("Authentication", !user ? "Signed out" : ctx.adminAccess.hasValidAdminSession() ? "Signed in · admin session active" : "Signed in")
+                .set("Motion mode", ctx.settings.motion).set("Data source", ctx.settings.dataSource.name()).set("Density", ctx.settings.density);
+    }
+
+    private panel.helpview.PublicHost publicHost;
+
+    private void disposePublic() {
+        if (publicHost != null) {
+            publicHost.dispose();
+            publicHost = null;
+        }
+    }
+
+    /** Página pública antes do login (o roteador já permitiu): About, FAQ, Help, Terms, Privacy, em um host sem rail nem dock. */
+    private void showPublic(String id) {
+        if (publicHost == null) {
+            java.util.function.Consumer<String> copy = text -> {
+                var c = new javafx.scene.input.ClipboardContent();
+                c.putString(text);
+                javafx.scene.input.Clipboard.getSystemClipboard().setContent(c);
+            };
+            java.util.Map<String, View> pages = new java.util.LinkedHashMap<>();
+            pages.put("h-about", new panel.helpview.AboutScreen(ctx.motion, this::show, copy, true));
+            pages.put("h-faq", new panel.helpview.FaqScreen(ctx.motion, panel.helpview.HelpContent.faq(), this::show));
+            pages.put("h-help", new panel.helpview.SupportScreen(ctx.motion, this::show, true));
+            var legal = panel.helpview.HelpContent.legal();
+            pages.put("h-terms", new panel.helpview.LegalScreen("Terms of Use", legal, true));
+            pages.put("h-privacy", new panel.helpview.LegalScreen("Privacy", legal, false));
+            publicHost = new panel.helpview.PublicHost(ctx.motion, pages, this::show, () -> showEntry(null));
+        }
+        if (rootStack.getChildren().size() != 1 || rootStack.getChildren().get(0) != publicHost) {
+            rootStack.getChildren().setAll(publicHost);
+        }
+        stage.setTitle(AppBranding.title("Help"));
+        publicHost.show(id);
     }
 
     // ---- shell V2 ----------------------------------------------------------------
@@ -661,9 +744,9 @@ public class PanelApp extends Application {
                 panel.shell.UserMenu.Item.route("Security", "security", null, "t-security"),
                 panel.shell.UserMenu.Item.action("Notifications", "bell", null, () -> notificationPanel.open()),
                 panel.shell.UserMenu.Item.route("Settings", "settings", k + ",", "t-settings"),
-                panel.shell.UserMenu.Item.pending("Keyboard shortcuts", "keyboard", "?", "Arrives in step 11"),
-                panel.shell.UserMenu.Item.pending("Help", "help", null, "Arrives in step 11"),
-                panel.shell.UserMenu.Item.action("About BYX", "info", null, Credits::show),
+                panel.shell.UserMenu.Item.action("Keyboard shortcuts", "keyboard", "?", () -> shell.openShortcuts()),
+                panel.shell.UserMenu.Item.route("Help", "help", null, "h-help"),
+                panel.shell.UserMenu.Item.route("About BYX", "info", null, "h-about"),
                 panel.shell.UserMenu.Item.action("Sign out", "logout", null, this::confirmSignOut).asDanger());
     }
 
@@ -685,9 +768,17 @@ public class PanelApp extends Application {
         out.add(panel.shell.ShellPalette.Entry.command("Refresh data", ctx::refresh));
         out.add(panel.shell.ShellPalette.Entry.command("Open notifications", () -> notificationPanel.open()));
         out.add(panel.shell.ShellPalette.Entry.command("Sign out", this::confirmSignOut));
-        out.add(new panel.shell.ShellPalette.Entry(panel.shell.ShellPalette.Group.HELP, "About BYX", null, Credits::show, null, null));
-        out.add(panel.shell.ShellPalette.Entry.gated(panel.shell.ShellPalette.Group.HELP, "Keyboard shortcuts", "Arrives in step 11"));
-        out.add(panel.shell.ShellPalette.Entry.gated(panel.shell.ShellPalette.Group.HELP, "Help and support", "Arrives in step 11"));
+        for (String[] h : new String[][] {{"About BYX", "h-about"}, {"Help and support", "h-help"}, {"FAQ", "h-faq"}, {"Diagnostics", "h-diagnostics"},
+                {"Product overview", "h-overview"}, {"What's new", "h-whats-new"}, {"Terms of Use", "h-terms"}, {"Privacy", "h-privacy"}}) {
+            out.add(new panel.shell.ShellPalette.Entry(panel.shell.ShellPalette.Group.HELP, h[0], h[1], null, null, null));
+        }
+        out.add(new panel.shell.ShellPalette.Entry(panel.shell.ShellPalette.Group.HELP, "Keyboard shortcuts", null, () -> shell.openShortcuts(), null, null));
+        var faq = (panel.helpview.FaqScreen) views.get("h-faq");
+        if (faq != null) {
+            for (var q : panel.helpview.HelpContent.faq().items()) {
+                out.add(new panel.shell.ShellPalette.Entry(panel.shell.ShellPalette.Group.HELP, "FAQ · " + q.question(), null, () -> { show("h-faq"); faq.open(q.id()); }, null, null));
+            }
+        }
         return out;
     }
 

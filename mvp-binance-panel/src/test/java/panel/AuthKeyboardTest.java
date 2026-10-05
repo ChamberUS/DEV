@@ -39,7 +39,7 @@ class AuthKeyboardTest {
                 @Override public void createInitialAdmin(String u, String e, char[] p, String ph) { }
                 @Override public void changeOwnPassword(long id, char[] c, char[] n) { }
                 @Override public void endSession() { }
-            }, routes::add, u -> { }, () -> { }, m -> { }, () -> { }, null);
+            }, routes::add, u -> { }, () -> { }, m -> { }, r -> { }, null);
             Scene s = new Scene((javafx.scene.Parent) screens.node(), 1440, 900);
             ByxTheme.apply(s);
             stage.setScene(s);
