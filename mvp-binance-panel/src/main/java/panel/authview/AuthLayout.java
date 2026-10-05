@@ -82,6 +82,9 @@ public final class AuthLayout extends HBox {
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.getStyleClass().add("byx-auth-footer");
 
+        // sem isso o HBox ocupa a altura toda do StackPane e centraliza o conteúdo
+        top.setMaxHeight(Region.USE_PREF_SIZE);
+        footer.setMaxHeight(Region.USE_PREF_SIZE);
         StackPane.setAlignment(top, Pos.TOP_LEFT);
         StackPane.setAlignment(footer, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(formHost, Pos.CENTER_LEFT);

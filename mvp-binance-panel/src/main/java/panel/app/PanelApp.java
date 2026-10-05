@@ -37,9 +37,6 @@ import panel.ui.EmptyState;
 import panel.ui.Ui;
 import panel.ui.toast.ToastType;
 import panel.ui.View;
-import panel.ui.auth.ChangePasswordView;
-import panel.ui.auth.InitialAdminSetupView;
-import panel.ui.auth.LoginView;
 import panel.ui.auth.ProfileView;
 import panel.ui.auth.TwoFactorView;
 import panel.ui.auth.UsersView;
@@ -55,11 +52,11 @@ public class PanelApp extends Application {
     private boolean byxWorkspace;
     private boolean adminChrome;
     private final Map<Boolean, String> lastView = new LinkedHashMap<>();
-    /** Telas de entrada legadas (login, setup, troca de senha) até o passo 6. */
-    private final StackPane holder = new StackPane();
+    /** Telas de entrada V2 (login, setup, troca obrigatória, esqueci a senha): uma instância por entrada. */
+    private panel.authview.AuthScreens authScreens;
+    private String entryNotice;
+    private User mustChangeUser;
     private final StackPane rootStack = new StackPane();
-    /** Telas e cromo legados (ainda não portados): folhas antigas presas aqui, nunca na cena. */
-    private final panel.shell.LegacyHost legacy = new panel.shell.LegacyHost();
     private final StackPane lockHolder = new StackPane();
     private boolean lockShown;
     /** Shell V2 da sessão atual (um por login); conteúdo legado hospedado num LegacyHost próprio. */
@@ -85,10 +82,7 @@ public class PanelApp extends Application {
         Ui.init(ctx.motion);
         panel.ui.Dialogs.init(ctx.motion);
         ctx.refreshDensity = this::applyDensity;
-        legacy.getChildren().addAll(holder, ctx.toasts);
-        StackPane.setAlignment(ctx.toasts, Pos.BOTTOM_RIGHT);
         rootStack.getStyleClass().add("byx-app");
-        rootStack.getChildren().add(legacy);
         ctx.motion.setActive(false);
         Scene scene = new Scene(rootStack, 1440, 900);
         // cena: só o tema V2; as folhas legadas valem apenas dentro de LegacyHost
@@ -139,7 +133,6 @@ public class PanelApp extends Application {
     public void stop() { ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
 
     private void applyDensity() {
-        legacy.setComfortable("COMFORTABLE".equals(ctx.settings.density));
         if (shell != null) shell.content().setComfortable("COMFORTABLE".equals(ctx.settings.density));
     }
 
@@ -154,26 +147,40 @@ public class PanelApp extends Application {
         if (expiryWatch != null) {
             expiryWatch.stop();
         }
-        legacy.setContext("trader");
-        rootStack.getChildren().setAll(legacy);
         stage.setTitle(AppBranding.title("Login"));
-        if (ctx.auth.firstRun()) {
-            holder.getChildren().setAll(new InitialAdminSetupView(ctx, this::showEntry).node());
-        } else {
-            holder.getChildren().setAll(new LoginView(ctx, message, this::afterLogin).node());
-        }
+        entryNotice = message;
+        mustChangeUser = null;
+        if (authScreens != null) authScreens.dispose();
+        authScreens = new panel.authview.AuthScreens(ctx.motion, authServices(), this::show, this::afterLogin,
+                this::afterPasswordChanged, this::showEntry, Credits::show,
+                ctx.devOtp != null ? panel.auth.DevOtpProvider.LABEL : null);
+        rootStack.getChildren().setAll(authScreens.node());
+        show(ctx.auth.firstRun() ? panel.authview.AuthScreens.SETUP : panel.authview.AuthScreens.LOGIN);
+    }
+
+    /** Operações reais por trás das telas de entrada. */
+    private panel.authview.AuthScreens.Services authServices() {
+        return new panel.authview.AuthScreens.Services() {
+            @Override public User login(String identifier, char[] password) { return ctx.auth.login(identifier, password); }
+            @Override public void createInitialAdmin(String u, String email, char[] pw, String phone) { ctx.userService.createInitialAdmin(u, email, pw, phone); }
+            @Override public void changeOwnPassword(long id, char[] current, char[] next) { ctx.userService.changeOwnPassword(id, current, next); }
+            @Override public void endSession() { ctx.auth.logout(); }
+        };
     }
 
     private void afterLogin(User user) {
         if (user.mustChangePassword()) {
-            holder.getChildren().setAll(new ChangePasswordView(ctx, user, () -> {
-                User fresh = ctx.users.findById(user.id()).orElse(user);
-                ctx.sessions.updateUser(fresh);
-                enterApp(fresh);
-            }, () -> logout(null)).node());
+            mustChangeUser = user;
+            show(panel.authview.AuthScreens.CHANGE_PASSWORD);
         } else {
             enterApp(user);
         }
+    }
+
+    private void afterPasswordChanged() {
+        User fresh = ctx.users.findById(mustChangeUser.id()).orElse(mustChangeUser);
+        ctx.sessions.updateUser(fresh);
+        enterApp(fresh);
     }
 
     private void logout(String message) {
@@ -184,6 +191,11 @@ public class PanelApp extends Application {
     // ---- aplicação principal ---------------------------------------------------
 
     private void enterApp(User user) {
+        if (authScreens != null) {
+            authScreens.dispose();
+            authScreens = null;
+        }
+        mustChangeUser = null;
         ctx.byx.start();
         tfOverlay = null;
         views.clear();
@@ -294,6 +306,12 @@ public class PanelApp extends Application {
 
     /** Gate real do roteador: trading/BYX livres na sessão; Research exige sessão de admin verificada. */
     private panel.shell.ShellRouter.Decision evaluateRoute(String id, panel.nav.Navigator.Ticket ticket) {
+        if (id.startsWith("auth:")) {
+            return authRouteAllowed(id) ? panel.shell.ShellRouter.Decision.ALLOW : panel.shell.ShellRouter.Decision.DENY;
+        }
+        if (mainActive && ctx.sessions.user().isEmpty()) {
+            return panel.shell.ShellRouter.Decision.DENY; // sem sessão nenhuma rota do app abre
+        }
         boolean research = !id.startsWith("t-");
         if (!views.containsKey(id)) {
             return research ? requestResearch(id, ticket) : panel.shell.ShellRouter.Decision.DENY;
@@ -398,8 +416,7 @@ public class PanelApp extends Application {
     /** Toast na camada 80 do shell; antes do login, no host legado da entrada. */
     private void toast(ToastType type, String message) {
         if (shell == null) {
-            ctx.toasts.show(type, message);
-            return;
+            return; // antes do login não há o que avisar por toast (as telas de entrada usam banners)
         }
         shell.overlay().toast(switch (type) {
             case SUCCESS -> panel.design.ByxOverlayHost.ToastKind.SUCCESS;
@@ -435,8 +452,24 @@ public class PanelApp extends Application {
         }
     }
 
+    /** Telas de entrada só sem sessão; setup só no primeiro uso; troca obrigatória só para quem precisa. */
+    private boolean authRouteAllowed(String id) {
+        if (authScreens == null) return false;
+        return switch (id) {
+            case panel.authview.AuthScreens.SETUP -> ctx.auth.firstRun();
+            case panel.authview.AuthScreens.CHANGE_PASSWORD -> mustChangeUser != null
+                    && ctx.sessions.user().filter(u -> u.user().id() == mustChangeUser.id()).isPresent();
+            case panel.authview.AuthScreens.LOGIN, panel.authview.AuthScreens.FORGOT -> ctx.sessions.user().isEmpty() && !ctx.auth.firstRun();
+            default -> false;
+        };
+    }
+
     /** Aplica a View da rota. Chamado só pelo roteador; rail, seletor e breadcrumb seguem a rota sozinhos. */
     private void display(String id) {
+        if (id.startsWith("auth:")) {
+            authScreens.show(id, entryNotice, mustChangeUser);
+            return;
+        }
         if (palette != null) palette.close();
         closeTwoFactor();
         boolean toTrader = id.startsWith("t-");

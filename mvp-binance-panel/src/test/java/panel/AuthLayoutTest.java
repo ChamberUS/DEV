@@ -113,6 +113,23 @@ class AuthLayoutTest {
     }
 
     @Test
+    void topRowAndFooterSitAtThePaneEdges() throws Exception {
+        double[] r = FxSupport.fx(() -> {
+            Fixture f = new Fixture(MotionPreference.OFF, 1440, 900, false);
+            var top = f.layout.lookup(".byx-auth-top");
+            var foot = f.layout.lookup(".byx-auth-footer");
+            Bounds t = top.localToScene(top.getLayoutBounds());
+            Bounds b = foot.localToScene(foot.getLayoutBounds());
+            f.close();
+            return new double[] {t.getMinY(), b.getMaxY(), t.getMinX(), b.getMinX()};
+        });
+        assertEquals(24, r[0], 2, ".ptop top 24");
+        assertEquals(900 - 22, r[1], 2, ".pfoot bottom 22");
+        assertEquals(920 + 64, r[2], 0.5, "top row at the pane padding");
+        assertEquals(920 + 64, r[3], 0.5, "footer at the pane padding");
+    }
+
+    @Test
     void brandFieldRunsPerModeAndStopsWhenHidden() throws Exception {
         for (MotionPreference p : MotionPreference.values()) {
             boolean[] r = FxSupport.fx(() -> {
