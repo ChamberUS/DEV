@@ -12,7 +12,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 6 | Auth (Login, First run; demais BACKEND_REQUIRED/REFERENCE_ONLY) | DONE | `panel.authview`; auditoria em `docs/BYX_V2_AUTH_AUDIT.md`. Ver "Passo 6" abaixo |
 | 7 | Trading | DONE | Desk e Markets & Portfolio em V2; Live OFF. Auditoria em `docs/BYX_V2_TRADING_AUDIT.md`. Ver "Passo 7" abaixo |
 | 8 | Research + Capture | DONE | Overview e Capture em V2; VALIDATION LOCKED / FINAL_HOLDOUT SEALED. Auditoria em `docs/BYX_V2_RESEARCH_CAPTURE_AUDIT.md`. Ver "Passo 8" abaixo |
-| 9 | BYX | TODO | LOCALNET/TEST, sem fundos |
+| 9 | BYX | DONE | Network, Wallet, Benefits e Treasury em V2, somente leitura. Ver "Passo 9" abaixo |
 | 10 | Account | TODO | |
 | 11 | Help | TODO | |
 | 12 | System + onboarding | TODO | Diagnóstico com allow-list |
@@ -289,3 +289,41 @@ Overview: update p50 0,2–0,4 ms (máx 2,8 ms), 264 nós constantes, 2 loops (R
 4. As células de sessão e a barra do pipeline navegam ao clicar (comportamento herdado); só abrem telas somente leitura.
 5. Smokes legados citam ids antigos (REVIEW REQUIRED BEFORE STEP 14).
 6. Repetir o stress de navegação final no Passo 14 (item aberto do Passo 7).
+
+## Passo 9 · BYX (modo implementação: validação direcionada)
+
+Auditoria curta: o fluxo do BYX já estava claro (4 Views legadas sobre `ctx.byx*`), então não houve documento de auditoria separado. Nenhuma DEVNET, nó, broadcast, assinatura, chave privada, transferência ou saldo inventado.
+
+| Peça | Conteúdo | Teste |
+|---|---|---|
+| `panel.v2.Kit` | blocos compartilhados dos passos 9–12 (página, painel, cabeçalho, linha, faixa de ambiente); `screens.css` | — |
+| `panel.byxview.ByxData` | fonte somente leitura; adaptador `panel.app.ByxDataAdapter` sobre os serviços existentes | `byxPackageIsReadOnly` (varredura de fonte) |
+| `NetworkScreen` + `NetworkModel` | AWAITING NODE, SYNCING, HEALTHY, STALE, DEGRADED, OFFLINE, IDENTITY MISMATCH; chain id, identidade, altura, bloco, frescor, sync, ambiente; "—" quando o nó não informa; hash/txs "Not reported" | `networkStatesFollowOnlyTheSnapshot`, `networkLoopOnlyExistsWithRealActivityAndVisibility` |
+| `WalletScreen` + `WalletModel` | NOT LINKED, CONNECTING, LINKED, LOADING, ERROR, UNAVAILABLE; saldo e tier só com carteira verificada e cadeia confiável | `walletStatesNeverInventALink` |
+| `BenefitsScreen` + `BenefitsModel` | tier real, recursos classificados (HOLD_TO_UNLOCK com política TEST real; REFERENCE ONLY para Bot Controls e Premium Research), "BYX never grants", pagamento e gás como estado lido | `benefitsClassifyDemonstrativeFeaturesAsReferenceOnly` |
+| `TreasuryScreen` + `TreasuryModel` | REAL VERIFIED / TEST / PAPER / MANUAL_UNVERIFIED em faixas separadas; nenhum total, nenhuma conversão BYX/USD | `treasuryKeepsTheFourClassesApartAndComputesNoTotal`, `treasuryLateResultAfterHideIsDiscarded` |
+
+### Movimento e ciclo de vida
+Rede: os anéis respiram só em AWAITING NODE e SYNCING (um loop); HEALTHY estável; OFFLINE/STALE/DEGRADED/IDENTITY MISMATCH sem movimento; escondida/descartada = 0 loops e 0 timers. Wallet/Benefits/Treasury: timer só visível; resposta tardia depois de esconder é descartada (geração).
+
+### Escopo somente leitura — decisões
+- **Fora do V2 (serviços e testes mantidos):** criar intenção de pagamento, confirmar pagamento, pedir/revogar gás (broadcast de feegrant). O V2 mostra só o estado lido. Reposicionado, não removido do código: `ByxPaymentService`, `GasSponsorshipService`.
+- **Vincular/desvincular posse da carteira** (prova externa; sem fundos, sem assinatura no app) segue na View legada `t-wallet-verify`, aberta por "Manage verification". **LEGACY / NO V2 REFERENCE.**
+- **Configuração LOCALNET** (nó de leitura, só admin, só sessão) vive no painel "LOCALNET connection" da Network; sem admin mostra PERMISSION REQUIRED.
+- Views legadas removidas: `ByxNetworkView`, `ByxBenefitsView`, `ByxTreasuryView`.
+
+### QA visual
+`ByxVisualQa` (manual; fixtures só em memória): `docs/qa/step9/` em 1440/1600/1920 (Network awaiting/healthy, Wallet sem vínculo/vinculada, Benefits, Treasury vazia/TEST+PAPER).
+
+### Diferenças
+| Referência | JavaFX | Paridade | Motivo |
+|---|---|---|---|
+| Recent blocks: 3 linhas | 1 linha (último bloco observado) | INTENTIONALLY PRESERVED | o nó só informa o último bloco; histórico seria inventado |
+| Hash/Txs | "Not reported" | BACKEND UNAVAILABLE | gateway não lê |
+| Botões Verify ownership / Unlink | "Manage verification" → fluxo legado | NEAR | ver acima |
+| Intent stepper do pagamento | estados fixos, "Active" só com pagamento TEST ativo | REFERENCE ONLY | criação fora do escopo |
+| Treasury: fonte esperada por categoria | "NOT CONFIGURED" sem ativo | INTENTIONALLY PRESERVED | não declarar fonte sem ativo |
+
+### Findings para o Passo 14
+1. Smokes legados (`RedesignVisualSmoke`, `FidelityProductionSmoke`, `MotionParitySmoke`, `ByxVisualSmoke`) ainda citam as Views BYX antigas por reflexão.
+2. A atualização de saldo da carteira usa o `ByxBenefitsService.refresh`, que exige o nó LOCALNET: sem nó, Wallet fica CONNECTING/UNAVAILABLE (verificado só com stubs).

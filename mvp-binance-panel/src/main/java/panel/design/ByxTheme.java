@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 /** Folhas do tema V2 na ordem de dependência (tokens antes de tudo). */
 public final class ByxTheme {
     public static final List<String> STYLESHEETS = List.of(DesignTokens.STYLESHEET, "/panel/v2/typography.css",
-            "/panel/v2/controls.css", "/panel/v2/shell.css", "/panel/v2/auth.css", "/panel/v2/trading.css", "/panel/v2/research.css");
+            "/panel/v2/controls.css", "/panel/v2/shell.css", "/panel/v2/auth.css", "/panel/v2/trading.css", "/panel/v2/research.css", "/panel/v2/screens.css");
 
     private ByxTheme() {
     }

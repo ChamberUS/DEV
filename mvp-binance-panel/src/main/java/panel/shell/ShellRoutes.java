@@ -62,6 +62,7 @@ public final class ShellRoutes {
         add("t-wallet", ShellContext.BYX, "Wallet", "Wallet", "wallet", 1);
         add("t-benefits", ShellContext.BYX, "Benefits", "Benefits", "benefits", 2);
         add("t-treasury", ShellContext.BYX, "Treasury", "Treasury", "treasury", 3);
+        add("t-wallet-verify", ShellContext.BYX, "Verify wallet ownership", null, null, -1);
         // Account (não é workspace): Profile existe; Settings fica no pé de todo rail
         add("t-profile", ShellContext.ACCOUNT, "Profile", "Profile", "profile", 0);
         add(SETTINGS, ShellContext.ACCOUNT, "Settings", "Settings", "settings", -1);

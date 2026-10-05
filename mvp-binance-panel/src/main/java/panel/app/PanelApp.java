@@ -45,7 +45,8 @@ public class PanelApp extends Application {
     private final AppContext ctx = new AppContext();
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
-    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture");
+    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
+            "t-byx", "t-wallet", "t-benefits", "t-treasury");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -242,10 +243,14 @@ public class PanelApp extends Application {
         if (activeView != null) { activeView.onHide(); activeView = null; }
 
         views.put("t-desk", new TradingDesk(ctx.motion, ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone()));
-        views.put("t-byx", new panel.ui.ByxNetworkView(ctx));
-        views.put("t-wallet", new panel.ui.ByxWalletView(ctx));
-        views.put("t-benefits", new panel.ui.ByxBenefitsView(ctx));
-        views.put("t-treasury", new panel.ui.ByxTreasuryView(ctx));
+        panel.byxview.ByxData byxData = new ByxDataAdapter(ctx);
+        java.time.Clock clock = java.time.Clock.systemUTC();
+        views.put("t-byx", new panel.byxview.NetworkScreen(ctx.motion, clock, byxData));
+        views.put("t-wallet", new panel.byxview.WalletScreen(ctx.motion, clock, byxData, this::show));
+        views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData));
+        views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
+        // LEGACY / NO V2 REFERENCE: vincular e revogar a posse (prova externa); o V2 de BYX é somente leitura
+        views.put("t-wallet-verify", new panel.ui.ByxWalletView(ctx));
         views.put("t-markets", new panel.tradeview.MarketsPage(ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone(), this::show));
         views.put("t-bot", new TraderScreens.Bot(ctx));
         views.put("t-strategies", new TraderScreens.Strategies(ctx));
@@ -557,7 +562,7 @@ public class PanelApp extends Application {
         if (palette != null) palette.close();
         closeTwoFactor();
         boolean toTrader = id.startsWith("t-");
-        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury").contains(id);
+        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-wallet-verify").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
         byxWorkspace = toByx;
         trader = toTrader;

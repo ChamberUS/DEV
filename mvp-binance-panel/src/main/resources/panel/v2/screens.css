@@ -1,0 +1,46 @@
+/*
+ * BYX-MVP V2 screens of steps 9-12 (BYX, Account, Help, System). Only .byx-* classes; no dependency on panel.css or byx.css.
+ * State is always text + icon/shape, never colour alone.
+ */
+.byx-screen { -fx-background-color: -byx-bg0; }
+.byx-env-banner { -fx-background-color: #FFFFFF0A, -byx-bg1; -fx-padding: 14 18 14 18; }
+
+/* byx / network */
+.byx-net-ring { -fx-fill: transparent; -fx-stroke: -byx-byx; -fx-stroke-width: 2; }
+.byx-net-ring.mid { -fx-stroke: -byx-disabled; }
+.byx-net-core { -fx-fill: -byx-byx; -fx-stroke: transparent; }
+.byx-net-off .byx-net-ring, .byx-net-off .byx-net-core { -fx-stroke: -byx-disabled; -fx-fill: transparent; }
+.byx-net-off .byx-net-core { -fx-fill: -byx-disabled; }
+.byx-net-bad .byx-net-ring, .byx-net-bad .byx-net-core { -fx-stroke: -byx-negative; }
+.byx-net-bad .byx-net-core { -fx-fill: -byx-negative; }
+.byx-net-warn .byx-net-ring, .byx-net-warn .byx-net-core { -fx-stroke: -byx-warning; }
+.byx-net-warn .byx-net-core { -fx-fill: -byx-warning; }
+.byx-net-state { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-legend-dim { -fx-opacity: 0.45; }
+
+/* byx / wallet steps */
+.byx-step { -fx-background-color: -byx-bg1; -fx-background-radius: 14; -fx-padding: 16; }
+.byx-step.dashed { -fx-background-color: transparent; -fx-border-color: -byx-line; -fx-border-style: segments(4, 4); -fx-border-radius: 14; }
+.byx-step-num { -fx-background-color: -byx-bg3; -fx-background-radius: 17; -fx-min-width: 34; -fx-min-height: 34; -fx-max-width: 34; -fx-max-height: 34; }
+.byx-step-num.on { -fx-background-color: -byx-byx; }
+.byx-step-num-text { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
+.byx-step-num.on .byx-step-num-text { -fx-text-fill: -byx-text-on-accent; }
+.byx-mono { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-mono.dim { -fx-text-fill: -byx-text-tertiary; }
+
+/* byx / benefits tiers */
+.byx-tier { -fx-background-color: -byx-bg2; -fx-background-radius: 8; -fx-padding: 6 14 6 14; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary; }
+.byx-tier.current { -fx-background-color: -byx-accent-tint; -fx-text-fill: -byx-text-primary; -fx-border-color: -byx-accent; -fx-border-radius: 8; }
+.byx-big { -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 30px; -fx-min-height: 36; -fx-text-fill: -byx-text-primary; }
+.byx-big.dim { -fx-text-fill: -byx-text-tertiary; }
+
+/* byx / treasury lanes */
+.byx-lane { -fx-background-color: -byx-bg1; -fx-background-radius: 14; -fx-padding: 18 20 18 20; -fx-border-width: 0 0 0 3; -fx-border-color: -byx-disabled; -fx-border-radius: 14; }
+.byx-lane.real { -fx-border-color: -byx-positive; }
+.byx-lane.test { -fx-border-color: -byx-warning; }
+.byx-lane.paper { -fx-border-color: -byx-info; }
+.byx-lane.manual { -fx-border-color: -byx-negative; }
+.byx-table-head { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; }
+.byx-table-cell { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-table-cell.mono { -fx-font-family: "JetBrains Mono Medium"; }
+.byx-table-row { -fx-border-color: -byx-line transparent transparent transparent; -fx-border-width: 1 0 0 0; -fx-padding: 10 0 10 0; }
