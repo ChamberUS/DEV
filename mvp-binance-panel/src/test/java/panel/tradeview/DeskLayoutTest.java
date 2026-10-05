@@ -90,7 +90,9 @@ class DeskLayoutTest {
             assertEquals(10, d.desk.book().bidRows().size());
             assertEquals(9, d.desk.trades().rows().size());
             assertEquals(10, d.desk.blotter().visiblePositionColumns());
-            assertTrue(d.desk.botFull().rowCount() > d.desk.botRows().rowCount(), "complete bot");
+            assertEquals(4, d.desk.botFull().rowCount(), "the reference bot panel: Mode, Live trading, Strategy, Signal");
+            assertTrue(d.desk.botFull().stateBadge().isVisible(), "own panel with the state badge");
+            assertTrue(d.desk.botFull().getStyleClass().contains("byx-panel"));
             assertTrue(d.rect(d.desk.risk()).getMinY() > bot.getMaxY(), "Risk, Freshness and Activity are their own panels");
             assertTrue(d.rect(d.desk.freshness()).getMinY() > d.rect(d.desk.risk()).getMaxY());
             assertTrue(d.rect(d.desk.activity()).getMinY() > d.rect(d.desk.freshness()).getMaxY());

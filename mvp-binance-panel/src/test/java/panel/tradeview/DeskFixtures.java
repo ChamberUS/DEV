@@ -58,8 +58,8 @@ final class DeskFixtures {
             t.bids.add(new Level(c - 0.05 * i, 0.2 + r.nextDouble() * 3));
         }
         for (int i = 0; i < 12; i++) {
-            t.tradeRows.add(new String[] {"12:00:" + String.format("%02d", 59 - i), "ETHUSDT", i % 3 == 0 ? "SELL" : "BUY",
-                    String.format("%.3f", 0.01 + r.nextDouble()), String.format("%,.2f", c + (r.nextDouble() - 0.5)), "0.02"});
+            t.tradeRows.add(new String[] {"12:00:" + String.format(java.util.Locale.US, "%02d", 59 - i), "ETHUSDT", i % 3 == 0 ? "SELL" : "BUY",
+                    String.format(java.util.Locale.US, "%.3f", 0.01 + r.nextDouble()), String.format(java.util.Locale.US, "%,.2f", c + (r.nextDouble() - 0.5)), "0.02"});
         }
         return t;
     }
