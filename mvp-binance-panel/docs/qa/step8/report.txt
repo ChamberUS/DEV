@@ -1,0 +1,33 @@
+SHOT research-overview-real-empty-1440 scene=1440x900 route=overview
+SHOT research-overview-real-empty-1920 scene=1920x1080 route=overview
+FIXTURE running (QA only, in-memory, no job, no file)
+SHOT research-overview-running-1440 scene=1440x900 route=overview
+SHOT research-overview-running-1600 scene=1600x1000 route=overview
+SHOT research-overview-running-1920 scene=1920x1080 route=overview
+SHOT research-overview-running-1280 scene=1280x760 route=overview
+FIXTURE ready (QA only, in-memory, no job, no file)
+SHOT research-overview-idle-1440 scene=1440x900 route=overview
+FIXTURE failed (QA only, in-memory, no job, no file)
+SHOT research-overview-failed-session-warning-1440 scene=1440x900 route=overview
+FIXTURE labels (QA only, in-memory, no job, no file)
+SHOT research-overview-labels-incomplete-1440 scene=1440x900 route=overview
+CAPTURE FIXTURE running (QA only, in-memory)
+CAPTURE FIXTURE running (QA only, in-memory)
+SHOT capture-running-1440 scene=1440x900 route=capture
+CAPTURE FIXTURE running (QA only, in-memory)
+SHOT capture-running-1600 scene=1600x1000 route=capture
+CAPTURE FIXTURE running (QA only, in-memory)
+SHOT capture-running-1920 scene=1920x1080 route=capture
+CAPTURE FIXTURE running (QA only, in-memory)
+SHOT capture-running-1280 scene=1280x760 route=capture
+CAPTURE FIXTURE stale (QA only, in-memory)
+CAPTURE FIXTURE stale (QA only, in-memory)
+SHOT capture-stale-1440 scene=1440x900 route=capture
+CAPTURE FIXTURE stopped (QA only, in-memory)
+CAPTURE FIXTURE stopped (QA only, in-memory)
+SHOT capture-stopped-1440 scene=1440x900 route=capture
+CAPTURE FIXTURE unknown (QA only, in-memory)
+CAPTURE FIXTURE unknown (QA only, in-memory)
+SHOT capture-unknown-1440 scene=1440x900 route=capture
+CAPTURE FIXTURE unknown (QA only, in-memory)
+SHOT capture-unknown-1920 scene=1920x1080 route=capture

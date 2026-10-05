@@ -1,0 +1,38 @@
+PASS first run opens the setup route: auth:setup
+PASS policy violation creates nothing
+PASS admin created, login route
+PASS real notice on the login screen
+PASS loading while the service runs
+PASS invalid credentials state
+PASS neutral error copy
+PASS no session after a failure
+PASS Esc returns to default
+PASS forgot is a route
+PASS forgot never claims an email was sent
+PASS back to login through the router
+PASS rate limited on the 6th attempt
+PASS countdown button disabled: Try again in 1:00
+PASS Esc does not bypass the lockout
+PASS app routes are denied without a session
+INFO rate-limit retryAfter=PT59.331444S
+PASS lockout ends after the real retryAfter
+PASS login opens the default workspace through the router
+PASS entry routes are denied with a session
+PASS on Wallet before expiry
+PASS session expired dialog is open
+PASS dialog title
+PASS Esc does nothing on the session dialog
+PASS nothing navigates behind the session dialog
+PASS sign in again opens login
+PASS expiry notice on login
+PASS returns to the route captured at expiry: t-wallet
+PASS sign out asks first
+PASS destructive confirm focuses Cancel
+PASS signed out to login
+PASS temporary password requires a change
+PASS mismatch keeps the change screen
+PASS password changed, workspace opens
+PASS trader has no Research workspace
+PASS Research denied for a trader (the UI grants nothing)
+FINAL route=t-desk user=qa-trader
+RESULT mode=FULL failures=0

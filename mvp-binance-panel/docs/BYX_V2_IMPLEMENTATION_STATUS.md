@@ -11,7 +11,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 5 | Shell (rail, top bar, dock, breakpoints) | DONE | `panel.shell`; shell V2 é o shell real; Views legadas hospedadas em `LegacyHost`. Ver "Passo 5" abaixo |
 | 6 | Auth (Login, First run; demais BACKEND_REQUIRED/REFERENCE_ONLY) | DONE | `panel.authview`; auditoria em `docs/BYX_V2_AUTH_AUDIT.md`. Ver "Passo 6" abaixo |
 | 7 | Trading | DONE | Desk e Markets & Portfolio em V2; Live OFF. Auditoria em `docs/BYX_V2_TRADING_AUDIT.md`. Ver "Passo 7" abaixo |
-| 8 | Research + Capture | TODO | VALIDATION LOCKED / FINAL_HOLDOUT SEALED |
+| 8 | Research + Capture | DONE | Overview e Capture em V2; VALIDATION LOCKED / FINAL_HOLDOUT SEALED. Auditoria em `docs/BYX_V2_RESEARCH_CAPTURE_AUDIT.md`. Ver "Passo 8" abaixo |
 | 9 | BYX | TODO | LOCALNET/TEST, sem fundos |
 | 10 | Account | TODO | |
 | 11 | Help | TODO | |
@@ -225,3 +225,67 @@ Executado antes do freeze, sequencial e sem `mvn test` em paralelo, no app real,
 Toda mudança de rota nos traços vem de `PanelApp.show → ShellRouter.request/commit` chamado pelo próprio roteiro do QA (nenhuma de timer, callback de gate ou animação). A execução original que falhou antecede o `RouteTrace`, então a sequência exata dela não foi capturada. Classificação: **UNREPRODUCED LOADED-RUN FAILURE**. Carga de CPU não muda a rota: sob contenção o app ficou estável. **Item para o Passo 14:** repetir este stress final (10 × `ShellNavigationQa`, 20 × BYX idle, 20 × A→B→C, 20 ciclos, 1 execução sob carga).
 
 **STEPS 1–7 = FROZEN** (403 testes, `mvn clean package` PASS). Trading não muda sem regressão comprovada.
+
+## Passo 8 · Research + Capture
+
+Auditoria: `docs/BYX_V2_RESEARCH_CAPTURE_AUDIT.md`. Os gates científicos não mudaram: VALIDATION continua LOCKED e FINAL_HOLDOUT continua SEALED (constantes `final` do `Snapshot`). Nenhum job, captura, dataset, feature, label ou hipótese foi executado para QA; fixtures são registros em memória.
+
+| Checkpoint | Conteúdo | Teste |
+|---|---|---|
+| 8.1 | Auditoria de Research Overview e Capture | — |
+| 8.2 | `ResearchModel`, `ResearchOverview`, `CapturePanel`, `CaptureScreen`, `research.css`; legados `OverviewView`, `CaptureView`, `CaptureMonitorCard` removidos | `ResearchModelTest`, `ResearchOverviewTest`, `CaptureScreenTest` |
+| 8.3 | Gates, ciclo de vida do JobsView, QA | `ResearchGateTest`, `JobsViewLifecycleTest` |
+
+### Escopo e fronteira legada (8.22)
+- **V2 CONTENT no V2 SHELL:** Research Overview (`overview`) e Capture (`capture`), em `ByxShell.v2Content()`; a cena carrega só `/panel/v2/*.css`.
+- **Ainda legadas (documentado):** Labels, Features, Hypotheses, Sessions, Dataset, Validation, Simulator, Paper/Shadow, Live, Jobs, Logs, Users e Research Settings. O handoff só tem tela de referência para Overview e Capture; o rail de Research (Overview, Capture, Labels, Features, Hypotheses) leva a páginas legadas nas três últimas.
+
+### Pipeline (8.3, 8.4)
+As oito etapas (Capture, Dataset, Features, Labels, Hypotheses, Validation, Execution, Live) vêm de `PipelineService`: READY→complete, RUNNING/PARTIAL→current, PENDING/MISSING/UNKNOWN→pending, LOCKED/BLOCKED→locked (hachurada), FAILED→failed. Nada é "complete" para combinar a referência: vazio completa zero etapas; Validation e Live são sempre locked. 1440/1600 mostram só os nomes; 1920 mostra o resumo real (`Running`, `34 sessions`, `34 / 34`, `0 / 4 completed`, `Locked`, `Pending`). Um recorder desconhecido não derruba a tela (`StageState.valueOf` era frágil).
+
+### Sessions (8.5)
+Uma célula por sessão real (`SessionInfo.overall()`): complete, capturing, failed ou pending. A sessão ativa é uma célula CAPTURING contada uma vez (substitui a sua entrada ou é acrescentada). Nenhum 34 fixo. Só a célula ativa tem movimento (uma animação que acompanha a célula).
+
+### Gates (8.11, 8.17)
+O guard mostra três tratamentos: TRAIN aberto (verde, só se a partição real é TRAIN), VALIDATION trancada (vermelho, cadeado), FINAL_HOLDOUT selada (hachura, escudo). Nenhum é botão. "Next allowed step" reflete `PipelineService.currentStage()` e o botão só navega (o roteador decide). `ResearchGateTest`: sem acesso a jobs/processos/arquivos no pacote, monitor só `start/stop/refresh`, fixtures em memória, nenhum clique abre gate nem altera o snapshot. `Snapshot.validationStatus/finalHoldout` são `final`.
+
+### Estados reais (8.6, 8.12)
+- Overview vazio (backend sem projeto): dataset N/A, KPIs N/A, "Session states unavailable", pipeline sem etapa completa. "No warnings" quando não há aviso (a tela antiga imprimia "0 WARNINGS"); avisos e jobs com falha vêm de dados reais.
+- Capture: só os estados do monitor (RUNNING, STALE, STOPPED, UNKNOWN). Eventos, arquivos, retry/recovery, continuidade de sequência, gaps, drift e schema são "Not reported", nunca zero. A timeline da referência diz "None recorded" para rotation/retry/failure/recovery; o monitor não tem histórico, então V2 diz "Not reported". O estado RECOVERING da referência não existe no monitor e não foi inventado.
+
+### Motion e atualizações (8.8, 8.9, 8.16)
+RUNNING = uma animação (barra do recorder no pipeline, célula ativa, marcador "now" do Capture). `ResearchOverviewTest`/`CaptureScreenTest`: 20 ciclos RUNNING/IDLE sem acumular, 0 fora de RUNNING, 0 ao parar; FULL/REDUCED/OFF terminam no mesmo estado; 150 atualizações reutilizam os mesmos nós (pipeline, faixa, painéis), poll idêntico não toca nada. O detalhe do Capture é construído uma vez (a tela antiga reconstruía a grade a cada 5 s).
+
+### Timers e Jobs (8.13)
+Capture: monitor e timer de 1 s só existem com a tela visível e admin autorizado (escondida, sem sessão ou descartada: zero; 20 ciclos sem acumular). `JobsViewLifecycleTest` (novo, `JobsView.dispose()`): nunca exibido/escondido = parado, visível = um, descartado = nenhum.
+
+### Responsivo e medidas (8.15)
+`ResearchOverviewTest`/`CaptureScreenTest` conferem a referência em 1440: header 88,70,1332,82 · guard 88,166,1332,92 · pipeline 88,272,1332,108 · coluna esquerda 88,394,958 · direita 1060,394,360; Capture: header 82 · process 88,166,462,116 · session 564,166,462,116 · growth 88,296,462 · storage 564,296,462 · coluna de integridade 1040,166,380 · timeline 88 de largura 938 (280 de altura). 1920: coluna lateral 420 (Overview) e 460 (Capture), faixas de sessões de 44 px, lanes da timeline de 60 px. 1280×760: as telas rolam em vez de cortar (ScrollPane V2). A timeline mantém a altura do conteúdo (não estica).
+
+### Performance (`docs/qa/step8/performance.txt`, `ResearchPerfQa`)
+Overview: update p50 0,2–0,4 ms (máx 2,8 ms), 264 nós constantes, 2 loops (RUNNING), poll idêntico 0,004–0,02 ms. Capture: show+timers p50 0,14–0,32 ms (p95 ≤ 1,1 ms), 218 nós constantes, 1 loop e 1 timer em RUNNING; 0 e 0 após `stop()`.
+
+### QA
+- App real (`ResearchQa`, `docs/qa/step8/`): Overview real vazio em 1440/1920; fixtures isoladas (running, ready/idle, failed session + warning, labels incompletos) em 1440/1600/1920/1280; Capture running/stale/stopped/unknown. Referências renderizadas em `reference-*`.
+- Regressões (cópia congelada das classes, sem outra carga): `ShellNavigationQa` 37/37 em FULL, REDUCED e OFF; `AuthFlowQa` sem falhas nos três modos; os testes de Trading e da fundação seguem verdes (439 no total).
+
+### Diferenças
+| Referência | JavaFX | Paridade | Motivo |
+|---|---|---|---|
+| Geometria 1440 (Overview e Capture) | idêntica | EXACT | testes de geometria |
+| 1600 (sem referência) | resumos de etapa ocultos, colunas laterais 360/420 | NEAR | a referência só define 1440 e 1920 |
+| Capture: 3 linhas em Growth | 4 (acrescenta Captured data real) | NEAR | dado real do monitor |
+| "None recorded" na timeline | "Not reported" | INTENTIONALLY PRESERVED | não há histórico: zero seria afirmação falsa |
+| Process state com RECOVERING | RUNNING, STALE, STOPPED, UNKNOWN | BACKEND UNAVAILABLE | o monitor não reporta RECOVERING |
+| Badges NOT REPORTED em caixa | texto simples em caixa alta | NEAR | reuso do componente de linha |
+| Tiles do guard com ícone check/cadeado | unlock/lock/shield do catálogo nativo | NEAR | catálogo de ícones existente |
+| "1 WARNING" fixo do mock | contagem real ("No warnings" quando 0) | INTENTIONALLY PRESERVED | sem dado inventado |
+| Uptime "1269 s" | `HH:MM:SS` do monitor | NEAR | formato já usado pelo app |
+
+### Limitações conhecidas
+1. Sem backend de projeto, Overview só mostra o estado vazio real; os demais estados foram verificados com fixtures de QA.
+2. Telas de Research fora de Overview/Capture continuam legadas (ver fronteira).
+3. A etapa "Dataset" usa o estado do checkpoint (como a tela antiga); não há estado de dataset separado.
+4. As células de sessão e a barra do pipeline navegam ao clicar (comportamento herdado); só abrem telas somente leitura.
+5. Smokes legados citam ids antigos (REVIEW REQUIRED BEFORE STEP 14).
+6. Repetir o stress de navegação final no Passo 14 (item aberto do Passo 7).

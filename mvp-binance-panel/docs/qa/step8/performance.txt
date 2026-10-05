@@ -1,0 +1,8 @@
+overview 1440x900 nodes=264->264 update p50=0,36ms p95=0,69ms max=2,81ms | css+layout p50=3,94ms p95=14,38ms loops=2
+overview 1440x900 unchanged poll p50=0,019ms p95=0,025ms applied=451 skipped=400
+capture 1440x900 nodes=218->218 show+timers p50=0,318ms p95=1,062ms max=3,245ms loops=1 timerRunning=true
+capture 1440x900 after stop: loops=0 timerRunning=false
+overview 1920x1080 nodes=264->264 update p50=0,23ms p95=0,39ms max=2,61ms | css+layout p50=2,69ms p95=5,31ms loops=2
+overview 1920x1080 unchanged poll p50=0,004ms p95=0,004ms applied=451 skipped=400
+capture 1920x1080 nodes=218->218 show+timers p50=0,138ms p95=0,691ms max=2,378ms loops=1 timerRunning=true
+capture 1920x1080 after stop: loops=0 timerRunning=false
