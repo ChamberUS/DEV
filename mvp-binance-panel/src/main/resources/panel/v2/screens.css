@@ -70,3 +70,6 @@
 .byx-step-dot { -fx-background-color: -byx-bg3; -fx-background-radius: 4; -fx-min-width: 8; -fx-min-height: 8; -fx-max-width: 8; -fx-max-height: 8; }
 .byx-step-dot.on { -fx-background-color: -byx-accent; }
 .byx-toc-link:focused, .byx-filter-chip:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 8; -fx-border-insets: -2; }
+.byx-faq-q { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 15px; -fx-fill: -byx-text-primary; }
+.byx-faq-a { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-fill: -byx-text-secondary; }
+.byx-hit { -fx-fill: -byx-accent; -fx-underline: true; }

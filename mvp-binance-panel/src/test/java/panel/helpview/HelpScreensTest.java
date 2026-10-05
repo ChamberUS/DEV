@@ -141,6 +141,27 @@ class HelpScreensTest {
     }
 
     @Test
+    void faqSearchHighlightsTheMatchedTerm() throws Exception {
+        var seg = Highlight.split("Why is Live Trading off? live trading!", "live trading");
+        assertEquals(List.of("Why is ", "Live Trading", " off? ", "live trading", "!"), seg.stream().map(x -> (String) x[0]).toList());
+        assertEquals(List.of(false, true, false, true, false), seg.stream().map(x -> (Boolean) x[1]).toList());
+        assertEquals(1, Highlight.split("abc", "").size());
+        assertEquals(1, Highlight.split("abc", "zzz").size());
+        DeskHarness.fx(() -> {
+            FaqScreen faq = new FaqScreen(new MotionService(), HelpContent.faq(), id -> { });
+            show(faq.node());
+            assertTrue(faq.node().lookupAll(".byx-hit").isEmpty(), "no query, no highlight");
+            faq.setQuery("live trading");
+            faq.node().applyCss();
+            var hits = faq.node().lookupAll(".byx-hit");
+            assertFalse(hits.isEmpty());
+            assertTrue(hits.stream().allMatch(n -> ((javafx.scene.text.Text) n).getText().equalsIgnoreCase("live trading")));
+            faq.setQuery("");
+            assertTrue(faq.node().lookupAll(".byx-hit").isEmpty(), "clearing the search clears the highlight");
+        });
+    }
+
+    @Test
     void supportNeverPretendsToSend() throws Exception {
         DeskHarness.fx(() -> {
             SupportScreen s = new SupportScreen(new MotionService(), id -> { }, false);

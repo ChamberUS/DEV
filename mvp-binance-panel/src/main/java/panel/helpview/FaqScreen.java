@@ -141,16 +141,18 @@ public final class FaqScreen implements View {
 
     private Node item(HelpContent.Faq f) {
         boolean open = f.id().equals(openId);
-        Button head = new Button(f.question());
+        String q = search.input().getText();
+        Button head = new Button();
         head.getStyleClass().add("byx-faq-head");
         head.setMaxWidth(Double.MAX_VALUE);
         head.setAlignment(Pos.CENTER_LEFT);
-        head.setGraphic(ByxIcon.path(open ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6", 14, "t3"));
-        head.setContentDisplay(ContentDisplay.RIGHT);
+        HBox label = new HBox(12, Highlight.flow(f.question(), q, "byx-faq-q"), ByxIcon.path(open ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6", 14, "t3"));
+        label.setAlignment(Pos.CENTER_LEFT);
+        head.setGraphic(label);
+        head.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         head.setAccessibleText(f.question() + (open ? ", expanded" : ", collapsed"));
         head.setId("q-" + f.id());
-        Label answer = Fx.label(f.answer(), "byx-body", "byx-secondary");
-        answer.setWrapText(true);
+        javafx.scene.text.TextFlow answer = Highlight.flow(f.answer(), q, "byx-faq-a");
         answer.setMaxWidth(760);
         answer.setMinHeight(Region.USE_PREF_SIZE);
         Fx.shown(answer, open);
