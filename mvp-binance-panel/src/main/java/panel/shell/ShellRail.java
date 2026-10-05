@@ -151,11 +151,6 @@ public final class ShellRail extends VBox {
             buttons.add(b);
             items.getChildren().add(b);
         }
-        if (c == ShellContext.ACCOUNT) {
-            for (ShellRoutes.Pending p : ShellRoutes.ACCOUNT_PENDING) {
-                items.getChildren().add(pending(p));
-            }
-        }
         selectedIndex = -1;
     }
 

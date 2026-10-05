@@ -317,6 +317,11 @@ public class ByxOverlayHost extends StackPane {
      * Confirmação padrão (components.dialog 440 / 24 / 14). Destrutiva: botão negativo e foco em Cancel.
      */
     public DialogHandle confirm(String title, String text, String confirmLabel, boolean destructive, Runnable onConfirm) {
+        return confirm(title, text, confirmLabel, destructive, onConfirm, null);
+    }
+
+    /** onCancel roda quando o diálogo é cancelado (botão, Esc ou fundo). */
+    public DialogHandle confirm(String title, String text, String confirmLabel, boolean destructive, Runnable onConfirm, Runnable onCancel) {
         Label t = new Label(title);
         t.getStyleClass().add("byx-section-title");
         t.setWrapText(true);
@@ -341,7 +346,7 @@ public class ByxOverlayHost extends StackPane {
                 onConfirm.run();
             }
         });
-        ref[0] = openDialog(panel, false, destructive ? cancel : ok, null);
+        ref[0] = openDialog(panel, false, destructive ? cancel : ok, onCancel);
         return ref[0];
     }
 

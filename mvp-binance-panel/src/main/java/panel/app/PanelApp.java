@@ -35,7 +35,6 @@ import panel.ui.EmptyState;
 import panel.ui.Ui;
 import panel.ui.toast.ToastType;
 import panel.ui.View;
-import panel.ui.auth.ProfileView;
 import panel.ui.auth.UsersView;
 import panel.ui.trader.TraderScreens;
 import panel.tradeview.TradingDesk;
@@ -46,7 +45,8 @@ public class PanelApp extends Application {
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
-            "t-byx", "t-wallet", "t-benefits", "t-treasury");
+            "t-byx", "t-wallet", "t-benefits", "t-treasury",
+            "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -260,8 +260,14 @@ public class PanelApp extends Application {
         views.put("t-orders", new TraderScreens.Orders(ctx));
         views.put("t-performance", new TraderScreens.Performance(ctx));
         views.put("t-activity", new TraderScreens.Activity(ctx));
-        views.put("t-settings", new TraderScreens.Settings(ctx));
-        views.put("t-profile", new ProfileView(ctx));
+        panel.accountview.AccountData accountData = new AccountDataAdapter(ctx);
+        java.util.function.Supplier<panel.design.ByxOverlayHost> overlayOf = () -> shell == null ? null : shell.overlay();
+        views.put("t-profile", new panel.accountview.ProfileScreen(ctx.motion, accountData, this::show, this::confirmSignOut));
+        views.put("t-security", new panel.accountview.SecurityScreen(ctx.motion, clock, accountData, this::show, overlayOf));
+        views.put("t-sessions", new panel.accountview.SessionsScreen(ctx.motion, clock, accountData, overlayOf));
+        views.put("t-notifications", new panel.accountview.NotificationsScreen(ctx.motion));
+        views.put("t-account-activity", new panel.accountview.ActivityScreen(clock, accountData));
+        views.put("t-settings", new panel.accountview.SettingsScreen(ctx.motion, accountData, this::show, overlayOf));
         if (user.admin()) {
             registerResearchViews();
         }
@@ -368,6 +374,10 @@ public class PanelApp extends Application {
         if (mainActive && ctx.sessions.user().isEmpty()) {
             return panel.shell.ShellRouter.Decision.DENY; // sem sessão nenhuma rota do app abre
         }
+        if (activeView != null && shell != null && !id.equals(router.route()) && activeView.hasUnsavedChanges()) {
+            confirmLeave(id, ticket);
+            return panel.shell.ShellRouter.Decision.PENDING; // a rota só muda depois da confirmação
+        }
         boolean research = !id.startsWith("t-");
         if (!views.containsKey(id)) {
             return research ? requestResearch(id, ticket) : panel.shell.ShellRouter.Decision.DENY;
@@ -379,6 +389,17 @@ public class PanelApp extends Application {
             ctx.adminAccess.touch();
         }
         return panel.shell.ShellRouter.Decision.ALLOW;
+    }
+
+    /** Edição não salva (Profile, Settings): pergunta antes de sair; cancelar mantém a rota e limpa o pedido pendente. */
+    private void confirmLeave(String target, panel.nav.Navigator.Ticket ticket) {
+        View leaving = activeView;
+        shell.overlay().confirm("Discard changes?", "You have unsaved changes. If you leave now they are lost.", "Discard", true, () -> {
+            leaving.discardChanges();
+            show(target);
+        }, () -> {
+            if (router.pending() == ticket) router.cancelPending();
+        });
     }
 
     private boolean checkingTrustedDevice;
@@ -637,7 +658,7 @@ public class PanelApp extends Application {
         String k = shell.shortcutPrefix();
         return java.util.List.of(
                 panel.shell.UserMenu.Item.route("Profile", "profile", null, "t-profile"),
-                panel.shell.UserMenu.Item.route("Security", "security", null, "t-profile"),
+                panel.shell.UserMenu.Item.route("Security", "security", null, "t-security"),
                 panel.shell.UserMenu.Item.action("Notifications", "bell", null, () -> notificationPanel.open()),
                 panel.shell.UserMenu.Item.route("Settings", "settings", k + ",", "t-settings"),
                 panel.shell.UserMenu.Item.pending("Keyboard shortcuts", "keyboard", "?", "Arrives in step 11"),

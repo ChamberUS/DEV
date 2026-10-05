@@ -13,7 +13,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 7 | Trading | DONE | Desk e Markets & Portfolio em V2; Live OFF. Auditoria em `docs/BYX_V2_TRADING_AUDIT.md`. Ver "Passo 7" abaixo |
 | 8 | Research + Capture | DONE | Overview e Capture em V2; VALIDATION LOCKED / FINAL_HOLDOUT SEALED. Auditoria em `docs/BYX_V2_RESEARCH_CAPTURE_AUDIT.md`. Ver "Passo 8" abaixo |
 | 9 | BYX | DONE | Network, Wallet, Benefits e Treasury em V2, somente leitura. Ver "Passo 9" abaixo |
-| 10 | Account | TODO | |
+| 10 | Account | DONE | Profile, Security, Sessions, Notifications, Activity e Settings em V2. Ver "Passo 10" abaixo |
 | 11 | Help | TODO | |
 | 12 | System + onboarding | TODO | Diagnóstico com allow-list |
 | 13 | Motion + acessibilidade | TODO | FULL/REDUCED/OFF |
@@ -327,3 +327,35 @@ Rede: os anéis respiram só em AWAITING NODE e SYNCING (um loop); HEALTHY está
 ### Findings para o Passo 14
 1. Smokes legados (`RedesignVisualSmoke`, `FidelityProductionSmoke`, `MotionParitySmoke`, `ByxVisualSmoke`) ainda citam as Views BYX antigas por reflexão.
 2. A atualização de saldo da carteira usa o `ByxBenefitsService.refresh`, que exige o nó LOCALNET: sem nó, Wallet fica CONNECTING/UNAVAILABLE (verificado só com stubs).
+
+## Passo 10 · Account
+
+`panel.accountview` (+ `AccountDataAdapter`, `AppInfo`). Rail Account agora tem as cinco rotas reais (`t-profile`, `t-security`, `t-sessions`, `t-notifications`, `t-account-activity`) e Settings no pé; os itens "arrives in step 10" foram removidos. Views legadas removidas: `ProfileView`, `TraderScreens.Settings`.
+
+| Tela | Fonte real | Sem backend |
+|---|---|---|
+| Profile | usuário, e-mail/telefone mascarados, papel, criação, último acesso, status | nome de exibição: "Not provided by the API". Edição real = contatos (e-mail e telefone, senha atual, revoga confiança/sessão admin); erro mantém o texto e mostra banner; nunca "salvo" fingido |
+| Security | troca de senha (serviço real, diálogo camada 70, senha nunca retida), verificação de admin (estado real dos provedores), dispositivos confiáveis, auditoria local | Authenticator app, Recovery: NOT CONFIGURED. Nenhum segundo fluxo de 2FA |
+| Sessions | sessão local atual (início, método) e dispositivos confiáveis reais (só admin; revogar pergunta e só atualiza após o serviço confirmar) | outras sessões: UNAVAILABLE (sem serviço de sessões) |
+| Notifications | — | UNAVAILABLE (e não EMPTY): INTENTIONALLY PRESERVED, sem itens demo |
+| Activity | auditoria de segurança local (agrupada por dia; resultado só quando o nome do evento o diz, senão "Recorded") | categorias Account/Research/BYX não existem |
+| Settings | motion FULL/REDUCED/OFF, densidade, ícones animados (o sistema de motion real; persistem em `settings.properties`) | General, Trading (só 1m), Research, BYX, Notifications, Accessibility, About: linhas informativas ou LOCKED/UNAVAILABLE/PERMISSION REQUIRED, sem controle |
+
+### Edição, barra de salvar e navegação
+`View.hasUnsavedChanges()/discardChanges()` (novo, padrão falso). O gate do `PanelApp` pergunta ("Discard changes?", foco em Cancel) antes de sair de Profile (edição) ou Settings (rascunho ≠ salvo); a rota só muda depois da confirmação e cancelar limpa o pedido pendente (`ByxOverlayHost.confirm` ganhou `onCancel`). Settings usa rascunho separado do salvo, "UNSAVED" por linha, barra de salvar na camada 30 e falha de gravação mantém o rascunho. Live trading é linha LOCKED sem controle; DEVNET aparece indisponível; Light é COMING SOON.
+
+### Testes e QA
+`AccountScreensTest` (9): resultado de auditoria, agrupamento, Profile sem fake-save e edição suja, falha de salvar, Notifications UNAVAILABLE, Sessions sem dispositivos fictícios, Activity real/vazia/indisponível, rascunho/salvar/descartar de Settings, nenhuma chave de live trading em nenhuma categoria, Security sem segundo fator. Regressão de navegação (tocado): `ShellRouterTest`, `Shell*Test`, `CommandPaletteTest`, `ViewEnterLifecycleTest`, `SessionReturnTest`, `ByxOverlayHostTest` e uma execução curta do `ShellNavigationQa` no app real (idle de 5 s, FULL: 0 falhas). Capturas: `docs/qa/step10/` (1440/1600/1920).
+
+### Diferenças
+| Referência | JavaFX | Paridade | Motivo |
+|---|---|---|---|
+| Edit profile: display name | contatos reais | NEAR | não há display name na API |
+| Motion como seção própria | dentro de Appearance (Accessibility aponta para ela) | NEAR | lista de categorias do passo |
+| Language / datas / fuso | linhas informativas | BACKEND UNAVAILABLE | sem mecanismo de preferência |
+| Sessions: 5/6/7 colunas | sessão atual + painel UNAVAILABLE | BACKEND UNAVAILABLE | sem serviço de sessões |
+| Follow system motion, focus ring, contrast | Passo 13 | — | — |
+
+### Findings para o Passo 14
+1. Guard de saída testado no app real só por regressão de navegação; um QA dirigido do diálogo "Discard changes?" (Profile/Settings) fica para o Passo 14.
+2. Botões About / What's new de Settings apontam para rotas do Passo 11.

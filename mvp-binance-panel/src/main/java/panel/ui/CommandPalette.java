@@ -36,7 +36,11 @@ public final class CommandPalette {
         }
         result.add(new Command(null, "Switch to MAINNET", "Environment unavailable"));
         result.add(new Command("t-settings", "Open Settings", ""));
-        result.add(new Command("t-profile", "Open Profile / Security", ""));
+        result.add(new Command("t-profile", "Open Profile", ""));
+        result.add(new Command("t-security", "Open Security", ""));
+        result.add(new Command("t-sessions", "Open Sessions and devices", ""));
+        result.add(new Command("t-notifications", "Open Notifications", "Unavailable · no service"));
+        result.add(new Command("t-account-activity", "Open Account activity", ""));
         for (String id : List.of("bot", "strategies", "signals", "positions", "orders", "performance", "activity"))
             result.add(new Command("t-" + id, "Open " + id, ""));
         if (admin) {

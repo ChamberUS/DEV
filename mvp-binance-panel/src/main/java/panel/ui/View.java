@@ -9,6 +9,12 @@ public interface View {
 
     void onSnapshot(Snapshot s);
 
+    /** Edição não salva: o roteador pergunta antes de sair (a rota só muda depois da confirmação). */
+    default boolean hasUnsavedChanges() { return false; }
+
+    /** Descarta a edição pendente (chamado depois que o usuário confirmou sair). */
+    default void discardChanges() { }
+
     /** A view passou a ser a visível: inicie timers/animações próprias aqui. */
     default void onShow() { }
 

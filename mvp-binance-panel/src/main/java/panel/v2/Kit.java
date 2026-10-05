@@ -124,4 +124,66 @@ public final class Kit {
         HBox.setHgrow(n, Priority.ALWAYS);
         VBox.setVgrow(n, Priority.ALWAYS);
     }
+
+    /** Controle segmentado (referência .byx-desk-seg): uma opção selecionada; notifica só quando muda. */
+    public static final class Segmented extends HBox {
+        private final java.util.List<javafx.scene.control.ToggleButton> buttons = new java.util.ArrayList<>();
+        private final javafx.scene.control.ToggleGroup group = new javafx.scene.control.ToggleGroup();
+        private final java.util.function.Consumer<String> onChange;
+
+        public Segmented(java.util.List<String> options, String selected, java.util.function.Consumer<String> onChange) {
+            super(0);
+            this.onChange = onChange;
+            getStyleClass().add("byx-desk-seg");
+            for (String o : options) {
+                javafx.scene.control.ToggleButton b = new javafx.scene.control.ToggleButton(o);
+                b.getStyleClass().add("byx-desk-seg-btn");
+                b.setToggleGroup(group);
+                b.setSelected(o.equals(selected));
+                b.setUserData(o);
+                buttons.add(b);
+                getChildren().add(b);
+            }
+            group.selectedToggleProperty().addListener((obs, a, b) -> {
+                if (b == null) {
+                    a.setSelected(true); // sempre uma opção
+                } else if (!suppress) {
+                    onChange.accept((String) b.getUserData());
+                }
+            });
+        }
+
+        private boolean suppress;
+
+        public String selected() {
+            return group.getSelectedToggle() == null ? null : (String) group.getSelectedToggle().getUserData();
+        }
+
+        /** Define sem notificar (descartar edição). */
+        public void select(String value) {
+            suppress = true;
+            for (javafx.scene.control.ToggleButton b : buttons) {
+                b.setSelected(value.equals(b.getUserData()));
+            }
+            suppress = false;
+        }
+
+        public void disable(String option, boolean off) {
+            buttons.stream().filter(b -> option.equals(b.getUserData())).forEach(b -> b.setDisable(off));
+        }
+
+        public java.util.List<javafx.scene.control.ToggleButton> buttons() {
+            return buttons;
+        }
+    }
+
+    /** Linha de configuração: título + descrição à esquerda, controle à direita. */
+    public static HBox setting(String title, String description, Node control) {
+        VBox copy = new VBox(2, Fx.label(title, "byx-section-title-sm"), muted(description));
+        HBox.setHgrow(copy, Priority.ALWAYS);
+        HBox row = new HBox(16, copy, control);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("byx-desk-row");
+        return row;
+    }
 }

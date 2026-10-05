@@ -65,15 +65,12 @@ public final class ShellRoutes {
         add("t-wallet-verify", ShellContext.BYX, "Verify wallet ownership", null, null, -1);
         // Account (não é workspace): Profile existe; Settings fica no pé de todo rail
         add("t-profile", ShellContext.ACCOUNT, "Profile", "Profile", "profile", 0);
+        add("t-security", ShellContext.ACCOUNT, "Security", "Security", "security", 1);
+        add("t-sessions", ShellContext.ACCOUNT, "Sessions and devices", "Sessions", "sessions", 2);
+        add("t-notifications", ShellContext.ACCOUNT, "Notifications", "Notifications", "bell", 3);
+        add("t-account-activity", ShellContext.ACCOUNT, "Activity", "Activity", "activity", 4);
         add(SETTINGS, ShellContext.ACCOUNT, "Settings", "Settings", "settings", -1);
     }
-
-    /** Rail Account da referência: telas que chegam no passo 10. */
-    public static final List<Pending> ACCOUNT_PENDING = List.of(
-            new Pending("Security", "security", "Security arrives in step 10"),
-            new Pending("Sessions", "sessions", "Sessions and devices arrive in step 10"),
-            new Pending("Notifications", "bell", "The notification center arrives in step 10"),
-            new Pending("Activity", "activity", "Account activity arrives in step 10"));
 
     private ShellRoutes() {
     }
