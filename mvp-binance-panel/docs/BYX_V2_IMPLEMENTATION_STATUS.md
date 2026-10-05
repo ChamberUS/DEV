@@ -9,7 +9,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 3 | Congelar fundação de roteamento | FROZEN | `0440d35`. `NavigatorTest` + `FoundationLifecycleTest` verdes antes de cada checkpoint seguinte |
 | 4 | Design foundation (tokens, tipografia, componentes) | DONE | Pacote `panel.design`, tema `/panel/v2/*.css`, galeria `./run-gallery.sh` (DEV ONLY). Ver "Passo 4" abaixo |
 | 5 | Shell (rail, top bar, dock, breakpoints) | DONE | `panel.shell`; shell V2 é o shell real; Views legadas hospedadas em `LegacyHost`. Ver "Passo 5" abaixo |
-| 6 | Auth (Login, First run; demais BACKEND_REQUIRED/REFERENCE_ONLY) | TODO | Sem endpoint inventado |
+| 6 | Auth (Login, First run; demais BACKEND_REQUIRED/REFERENCE_ONLY) | DONE | `panel.authview`; auditoria em `docs/BYX_V2_AUTH_AUDIT.md`. Ver "Passo 6" abaixo |
 | 7 | Trading | TODO | Live OFF |
 | 8 | Research + Capture | TODO | VALIDATION LOCKED / FINAL_HOLDOUT SEALED |
 | 9 | BYX | TODO | LOCALNET/TEST, sem fundos |
@@ -103,3 +103,37 @@ Destinos V2 sem tela ainda aparecem desabilitados com motivo (COMING SOON): Keyb
 5. **Cores sem transição** (hover, seleção, chip): limite do CSS JavaFX, já registrado no passo 4. Indicadores do rail e do seletor deslizam com os tokens só em FULL.
 6. **LEGACY QA — REVIEW REQUIRED BEFORE STEP 14.** `FidelityProductionSmoke`, `RedesignVisualSmoke`, `MotionParitySmoke` e `ByxVisualSmoke` (fora do `mvn test`) medem o cromo antigo e acessam o `PanelApp` por reflexão (o campo `palette` mudou de tipo). Não valem como evidência de layout V2 até serem atualizados. Evidência V2: `ShellQaSmoke`, `ShellNavigationQa` e os testes `Shell*`.
 7. `ToastHost` e `panel.ui.CommandPalette` permanecem: o primeiro só para a entrada legada; do segundo só `commands(admin, verified)` é usado (fonte dos gates da busca).
+
+## Passo 6 · Auth
+
+Auditoria e mapeamento V2 → capacidade real: `docs/BYX_V2_AUTH_AUDIT.md`. Nenhum backend inventado.
+
+| Checkpoint | Conteúdo | Teste |
+|---|---|---|
+| 6.1 `27c2644` | Auditoria do auth existente | — |
+| 6.2 `8a79638` | `AuthLayout` (520/560/640, 64/64/96, 392/432/448) + brand field P3.20 (geometria idêntica à referência) | `AuthLayoutTest` |
+| 6.3 `de635d5` | `ByxOtpInput`, acessório no rótulo do `ByxField` | `ByxOtpInputTest` |
+| 6.4 `5c8f43e` | Login, primeiro uso, troca obrigatória, "esqueci a senha" como rotas `auth:*` do roteador | `LoginControllerTest`, `AuthLayoutTest` |
+| 6.5 `183cb77` | Verificação de admin V2 (e-mail → SMS → trust opcional; NOT CONFIGURED real) | `AdminVerificationViewTest` |
+| 6.6 `083e376` | Sessão expirada (P3.11) + retorno; correção do bloqueio furado por Esc | `SessionReturnTest`, `AuthFlowQa` |
+| 6.7 | Teclado, QA visual e evidências | `AuthKeyboardTest`, `AuthFlowQa` |
+
+### Real × sem backend
+- **Real:** login no repositório local de contas (erros neutros, conta desativada, repositório ilegível, bloqueio com o tempo real do serviço), primeiro administrador, troca obrigatória de senha, verificação de admin por e-mail + SMS (ou dispositivo confiável), "Trust this Mac" opcional, logout com confirmação, sessão expirada.
+- **Sem backend (nunca finge sucesso):** cadastro e verificação de e-mail (inalcançáveis; o login diz que contas são criadas por um administrador), recuperação por e-mail (tela "Not available in this build", aponta o caminho real do administrador), reset por token e configuração de 2FA (inalcançáveis). Rodapé: About real; FAQ, Terms e Privacy desabilitados até o passo 11.
+
+### Navegação
+Telas de entrada são rotas do mesmo `ShellRouter` (`auth:login`, `auth:forgot`, `auth:setup`, `auth:change-password`); o gate só as permite sem sessão (troca obrigatória só para a sessão que precisa) e nega rotas do app sem sessão. Sucesso de login chama o roteador; nenhuma animação decide. Uma tentativa de login descartada não muda estado, não navega e encerra a sessão que tenha aberto. A verificação de admin só aplica a rota Research pelo ticket do roteador; fechada, cancela o desafio e ignora resultados tardios.
+
+### QA
+`AuthFlowQa` (app real, dirigido pela UI): 35/35 em FULL, REDUCED e OFF. `ShellNavigationQa`: 37/37 nos três modos depois do passo 6. Capturas em `docs/qa/step6/`.
+
+### Achados e desvios
+1. **Corrigidos no passo:** Esc limpava o bloqueio por tentativas na UI; a contagem continuava reescrevendo o botão depois do bloqueio (ambos achados pelo `AuthFlowQa`).
+2. **SMS:** campo único de dígitos (4–10) em vez de 6 caixas: o comprimento do código é do serviço Twilio Verify e não é exposto ao cliente. E-mail usa 6 caixas (código gerado localmente com 6 dígitos).
+3. **2FA não é etapa do login:** no app real ele é a elevação para Research; o estado "2FA required" do login V2 virou a tela de verificação de admin.
+4. **"Server unavailable"** virou "Sign-in unavailable · The local account store could not be read": não há servidor remoto de auth.
+5. **Sucesso:** o estado "Signed in" é renderizado, mas o workspace abre na hora (sem atraso artificial).
+6. **Política de senha:** a real (10+ caracteres, diferente do usuário) substitui o painel DEMO_POLICY de 4 regras; não há barra de força.
+7. **A sessão de usuário não expira no backend;** o contrato P3.11 vale quando ela some com o app aberto. A expiração da autorização de admin mantém o comportamento existente (aviso e volta para Trading).
+8. **Brand field** usa a cor Ion (#7C96FF) fixa da referência; o desenho roda a ≤ 30 fps em FULL e para com a janela oculta.

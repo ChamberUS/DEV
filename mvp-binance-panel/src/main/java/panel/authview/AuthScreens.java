@@ -181,8 +181,7 @@ public final class AuthScreens {
         signIn.setLoading(s == LoginController.State.LOADING);
         signIn.setDisable(s == LoginController.State.RATE_LIMITED || s == LoginController.State.SUCCESS);
         boolean invalid = s == LoginController.State.INVALID;
-        password.input().pseudoClassStateChanged(ERROR, invalid);
-        identifier.input().pseudoClassStateChanged(ERROR, invalid);
+        password.input().pseudoClassStateChanged(ERROR, invalid); // como a referência: só a senha marcada
         signIn.setText(switch (s) {
             case LOADING -> "Signing in…";
             case UNAVAILABLE -> "Retry";

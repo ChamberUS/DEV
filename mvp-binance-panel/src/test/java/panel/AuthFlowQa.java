@@ -129,6 +129,26 @@ public final class AuthFlowQa {
             Event.fireEvent(target, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", code, false, false, false, false));
         }
 
+        /** Captura opcional (-Dbyx.qa.shots=dir): raiz real numa cena fora da tela do tamanho exato. */
+        private void shot(String name, int w, int h) throws Exception {
+            String dir = System.getProperty("byx.qa.shots");
+            if (dir == null) {
+                return;
+            }
+            var window = stage.getScene();
+            var rootNode = window.getRoot();
+            window.setRoot(new javafx.scene.layout.Pane());
+            javafx.scene.Scene off = new javafx.scene.Scene(rootNode, w, h);
+            off.getStylesheets().setAll(window.getStylesheets());
+            rootNode.applyCss();
+            rootNode.layout();
+            var image = off.snapshot(null);
+            off.setRoot(new javafx.scene.layout.Pane());
+            window.setRoot(rootNode);
+            Files.createDirectories(Path.of(dir));
+            javax.imageio.ImageIO.write(ControlGalleryTest.toAwt(image), "png", Path.of(dir, name + ".png").toFile());
+        }
+
         private void after(long ms, Step s) {
             PauseTransition p = new PauseTransition(Duration.millis(ms));
             p.setOnFinished(e -> {
@@ -162,6 +182,7 @@ public final class AuthFlowQa {
         private void plan() {
             plan.add(() -> {
                 check(AuthScreens.SETUP.equals(router.route()), "first run opens the setup route: " + router.route());
+                shot("auth-setup-1440x900", 1440, 900);
                 type("Username", "qa-admin");
                 type("Email", "qa@example.invalid");
                 type("Phone (optional)", "+5511999991234");
@@ -184,6 +205,9 @@ public final class AuthFlowQa {
             plan.add(() -> {
                 check(screens().loginController().state() == LoginController.State.INVALID, "invalid credentials state");
                 check(hasText("Email, username or password is incorrect."), "neutral error copy");
+                shot("auth-login-invalid-1440x900", 1440, 900);
+                shot("auth-login-invalid-1600x1000", 1600, 1000);
+                shot("auth-login-invalid-1920x1080", 1920, 1080);
                 check(ctx.sessions.user().isEmpty(), "no session after a failure");
                 key(KeyCode.ESCAPE);
                 check(screens().loginController().state() == LoginController.State.DEFAULT, "Esc returns to default");
@@ -191,6 +215,7 @@ public final class AuthFlowQa {
                 check(AuthScreens.FORGOT.equals(router.route()), "forgot is a route");
                 check(root().lookupAll(".byx-banner").stream().anyMatch(n -> n.getAccessibleText().contains("Nothing was sent")),
                         "forgot never claims an email was sent");
+                shot("auth-forgot-1440x900", 1440, 900);
                 button("Back to sign in").fire();
                 check(AuthScreens.LOGIN.equals(router.route()), "back to login through the router");
                 attempts = 0; // bloqueio real a seguir: falhas pela UI para outro identificador
@@ -202,6 +227,7 @@ public final class AuthFlowQa {
                 Button countdown = root().lookupAll(".byx-btn").stream().map(n -> (Button) n)
                         .filter(b -> b.getText().startsWith("Try again in")).findFirst().orElseThrow();
                 check(countdown.isDisabled(), "countdown button disabled: " + countdown.getText());
+                shot("auth-login-rate-limited-1440x900", 1440, 900);
                 key(KeyCode.ESCAPE); // Esc não fura o bloqueio
                 check(screens().loginController().state() == LoginController.State.RATE_LIMITED, "Esc does not bypass the lockout");
                 // gate: rota do app sem sessão é negada
@@ -231,6 +257,7 @@ public final class AuthFlowQa {
             plan.add(() -> {
                 check(shell().overlay().openDialogs() == 1, "session expired dialog is open");
                 check(hasText("Session expired"), "dialog title");
+                shot("auth-session-expired-1440x900", 1440, 900);
                 key(KeyCode.ESCAPE);
                 check(shell().overlay().openDialogs() == 1, "Esc does nothing on the session dialog");
                 next(2500);
@@ -273,6 +300,7 @@ public final class AuthFlowQa {
             });
             plan.add(() -> {
                 check(AuthScreens.CHANGE_PASSWORD.equals(router.route()), "temporary password requires a change");
+                shot("auth-change-password-1440x900", 1440, 900);
                 type("Temporary password", "temporary-pass-1");
                 type("New password", "trader-new-pass-1");
                 type("Confirm new password", "trader-new-pass-2");
