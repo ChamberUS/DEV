@@ -29,9 +29,8 @@ public final class ByxBenefitsView implements View {
             refresh();
         });
         var refresh = Ui.button("Refresh benefits", "ghost"); refresh.setOnAction(e -> refresh());
-        var timer = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(30), e -> refresh()));
+        timer = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(30), e -> refresh()));
         timer.setCycleCount(javafx.animation.Timeline.INDEFINITE);
-        root.visibleProperty().addListener((o,a,b) -> { if (b) { refresh(); timer.play(); } else timer.stop(); });
         root.sceneProperty().addListener((o,a,b) -> { if (b == null) timer.stop(); });
         VBox methods = new VBox(8);
         benefits.payments().methods().forEach(method -> methods.getChildren().add(
@@ -130,7 +129,10 @@ public final class ByxBenefitsView implements View {
     private static String format(java.math.BigInteger amount) {
         return amount == null ? "UNKNOWN / NOT APPLICABLE" : new java.math.BigDecimal(amount, 6).toPlainString() + " BYX";
     }
+    private final javafx.animation.Timeline timer;
     public Node node() { return root; }
+    @Override public void onShow() { refresh(); timer.play(); }
+    @Override public void onHide() { timer.stop(); }
     public void onSnapshot(Snapshot ignored) {
         try {
             var wallets = ctx.byxWallets.wallets();

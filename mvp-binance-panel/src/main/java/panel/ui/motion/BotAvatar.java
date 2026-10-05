@@ -63,6 +63,14 @@ public class BotAvatar extends StackPane {
         };
         getProperties().put("bot.motion.preference", listener);
         motion.preference.addListener(new javafx.beans.value.WeakChangeListener<>(listener));
+        // loops são removidos ao sair da cena; ao voltar, o pulso é recriado
+        sceneProperty().addListener((o, was, scene) -> {
+            if (scene != null && pulse != null && !motion.isLooping(pulse)) {
+                State previous = this.state;
+                this.state = null;
+                setState(previous);
+            }
+        });
     }
 
     public void setState(State s) {

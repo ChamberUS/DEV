@@ -41,9 +41,8 @@ public final class ByxTreasuryView implements View {
         balances.setOnContextMenuRequested(e -> new javafx.scene.control.ContextMenu(refreshItem).show(balances,e.getScreenX(),e.getScreenY()));
         balances.setFocusTraversable(true);
         balances.setOnKeyPressed(e -> {if(e.getCode()==javafx.scene.input.KeyCode.F5)refresh();});
-        var timer=new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(30),e -> refresh()));
+        timer=new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(30),e -> refresh()));
         timer.setCycleCount(javafx.animation.Timeline.INDEFINITE);
-        root.visibleProperty().addListener((o,a,b) -> {if(b){refresh();timer.play();}else timer.stop();});
         root.sceneProperty().addListener((o,a,b) -> {if(b==null)timer.stop();});
         render(null);
     }
@@ -74,6 +73,9 @@ public final class ByxTreasuryView implements View {
                 Ui.label("Manual entries are unverified. Application fees, network gas and exchange fees remain separate. No backing, redemption or yield promise.","muted"));
     }
 
+    private final javafx.animation.Timeline timer;
+    @Override public void onShow() { refresh(); timer.play(); }
+    @Override public void onHide() { timer.stop(); }
     public Node node(){return root;}
     public void onSnapshot(Snapshot s) { }
 }

@@ -55,7 +55,6 @@ public final class ByxNetworkView implements View {
         body.getChildren().addAll(Ui.testEnvironment(), columns);
         timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> render()));
         timer.setCycleCount(Timeline.INDEFINITE);
-        root.visibleProperty().addListener((o, a, visible) -> { if (visible) { render(); timer.play(); } else timer.stop(); });
         root.sceneProperty().addListener((o, a, scene) -> { if (scene == null) timer.stop(); });
         render();
     }
@@ -113,5 +112,7 @@ public final class ByxNetworkView implements View {
                 Ui.kvNode("Observed address", address), Ui.kv("Asset / decimal source", "ubyx → BYX / 6 / BANK_METADATA"), apply, error));
     }
     public Node node() { return root; }
+    @Override public void onShow() { render(); timer.play(); }
+    @Override public void onHide() { timer.stop(); }
     public void onSnapshot(Snapshot ignored) { render(); }
 }

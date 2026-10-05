@@ -32,6 +32,9 @@ public class JobsView implements View {
     private final javafx.scene.control.Label detail = Ui.label("No active jobs", "muted");
     private final javafx.scene.control.ProgressBar bar = new javafx.scene.control.ProgressBar(0);
     private final javafx.scene.layout.StackPane resultIcon = new javafx.scene.layout.StackPane();
+    private final Timeline tick = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+        if (table.getScene() != null) table.refresh();
+    }));
     private JobState lastState;
     private Snapshot lastSnapshot;
 
@@ -55,9 +58,7 @@ public class JobsView implements View {
                 ctx.jobs.cancel(j);
             }
         });
-        Timeline tick = new Timeline(new KeyFrame(Duration.seconds(1), e -> table.refresh()));
-        tick.setCycleCount(Timeline.INDEFINITE);
-        tick.play();
+        tick.setCycleCount(Timeline.INDEFINITE); // só roda enquanto a view está visível (onShow/onHide)
         ctx.jobs.externals.addListener((javafx.collections.ListChangeListener<ExternalProcessDetector.External>) c -> renderExternal());
         root.setPadding(new Insets(24, 28, 24, 28));
         bar.setPrefWidth(220);
@@ -169,6 +170,17 @@ public class JobsView implements View {
             }
             lastState = now;
         }
+    }
+
+    @Override
+    public void onShow() {
+        table.refresh();
+        tick.play();
+    }
+
+    @Override
+    public void onHide() {
+        tick.stop();
     }
 
     @Override

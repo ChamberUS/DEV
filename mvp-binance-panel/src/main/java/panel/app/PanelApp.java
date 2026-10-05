@@ -185,6 +185,8 @@ public class PanelApp extends Application {
     private void showEntry(String message) {
         mainActive = false;
         palette.close();
+        if (activeView != null) { activeView.onHide(); activeView = null; }
+        navigator.reset();
         chromeWatch.stop();
         if (expiryWatch != null) {
             expiryWatch.stop();
@@ -233,6 +235,8 @@ public class PanelApp extends Application {
         indicatorPlaced = false;
         lockShown = false;
         ctx.transitions.forget();
+        navigator.reset();
+        if (activeView != null) { activeView.onHide(); activeView = null; }
 
         views.put("t-desk", new TradingDeskView(ctx));
         views.put("t-byx", new panel.ui.ByxNetworkView(ctx));
@@ -357,12 +361,16 @@ public class PanelApp extends Application {
     }
 
     private boolean checkingTrustedDevice;
+    private final panel.nav.Navigator navigator = new panel.nav.Navigator();
+    private View activeView;
+    private String dockSignature = "";
 
     private void requestResearch(String target) {
+        navigator.begin(target);
         switch (ctx.adminAccess.evaluate()) {
             case ALREADY_AUTHORIZED -> display(views.containsKey(target) ? target : "overview");
             case REQUIRES_2FA -> {
-                if (checkingTrustedDevice) return;
+                if (checkingTrustedDevice) return; // verificação em andamento; o ticket mais recente decide o destino
                 checkingTrustedDevice = true;
                 var sessionId = ctx.sessions.user().orElseThrow().id();
                 Thread check = new Thread(() -> {
@@ -373,9 +381,12 @@ public class PanelApp extends Application {
                     javafx.application.Platform.runLater(() -> {
                         checkingTrustedDevice = false;
                         if (ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
+                        panel.nav.Navigator.Ticket latest = navigator.consumePending();
+                        if (latest == null) return; // o usuário navegou para outro lugar enquanto a verificação rodava
+                        String destination = latest.target();
                         if (trusted && ctx.adminAccess.hasValidAdminSession()) {
-                            updateLock(true); display(views.containsKey(target) ? target : "overview");
-                        } else showTwoFactor(target);
+                            updateLock(true); display(views.containsKey(destination) ? destination : "overview");
+                        } else showTwoFactor(destination);
                     });
                 }, "trusted-device-check");
                 check.setDaemon(true); check.start();
@@ -398,6 +409,7 @@ public class PanelApp extends Application {
             display(views.containsKey(target) ? target : "overview");
         }, () -> {
             close.run();
+            navigator.cancelPending();
             syncTabs();
         });
         tfOverlay = new StackPane(ref[0].node());
@@ -455,6 +467,7 @@ public class PanelApp extends Application {
     private void display(String id) {
         palette.close();
         closeTwoFactor();
+        navigator.displayed(id);
         boolean toTrader = id.startsWith("t-");
         boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
@@ -471,8 +484,14 @@ public class PanelApp extends Application {
         if (toTrader) {
             cls.add("trader");
         }
-        views.get(id).onSnapshot(ctx.research.snapshot.get());
-        ctx.transitions.show(views.values().stream().map(View::node).toList(), views.get(id).node(), changedWorkspace);
+        View next = views.get(id);
+        next.onSnapshot(ctx.research.snapshot.get());
+        ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
+        if (activeView != next) {
+            if (activeView != null) activeView.onHide();
+            activeView = next;
+            next.onShow();
+        }
         navButtons.forEach((k, b) -> {
             b.getStyleClass().remove("selected");
             if (k.equals(id)) {
@@ -646,16 +665,24 @@ public class PanelApp extends Application {
     private void updateStatusDock(Snapshot s) {
         TraderSnapshot t = ctx.trading.snapshot.get();
         var network = ctx.byx.snapshot();
+        String[][] items = {
+            {"SYSTEM HEALTH", "dock-group"},
+            {"Backend · " + (s.backendOnline ? "Online" : "Offline"), s.backendOnline ? "status-ok" : "status-bad"},
+            {"Feed · " + Fmt.text(t.feed), "muted"},
+            {"Capture · " + Fmt.text(s.capture.recorder()), "muted"},
+            {"Network · " + network.connection(), "muted"},
+            {"MODE", "dock-group"}, {t.mode + " · " + t.source, "muted"},
+            {"Paper locked · Live OFF", "status-bad"}, {"ENVIRONMENT", "dock-group"},
+            {network.environment(), "status-byx"},
+            {!"VERIFIED".equals(network.identity()) ? "Wallet unavailable" : ctx.byxWallets.wallets().isEmpty() ? "Wallet unlinked" : "Wallet linked", "muted"}};
+        // só reconstrói o dock quando algum texto/estilo muda (evita recriar nós a cada segundo)
+        String signature = java.util.Arrays.deepToString(items);
+        if (signature.equals(dockSignature) && !footer.getChildren().isEmpty()) return;
+        dockSignature = signature;
         footer.setAlignment(Pos.CENTER_LEFT);
-        footer.getChildren().setAll(Ui.label("SYSTEM HEALTH", "dock-group"),
-                Ui.label("Backend · " + (s.backendOnline ? "Online" : "Offline"), s.backendOnline ? "status-ok" : "status-bad"),
-                Ui.label("Feed · " + Fmt.text(t.feed), "muted"),
-                Ui.label("Capture · " + Fmt.text(s.capture.recorder()), "muted"),
-                Ui.label("Network · " + network.connection(), "muted"),
-                Ui.label("MODE", "dock-group"), Ui.label(t.mode + " · " + t.source, "muted"),
-                Ui.label("Paper locked · Live OFF", "status-bad"), Ui.label("ENVIRONMENT", "dock-group"),
-                Ui.label(network.environment(), "status-byx"),
-                Ui.label(!"VERIFIED".equals(network.identity()) ? "Wallet unavailable" : ctx.byxWallets.wallets().isEmpty() ? "Wallet unlinked" : "Wallet linked", "muted"));
+        var labels = new java.util.ArrayList<Node>();
+        for (String[] item : items) labels.add(Ui.label(item[0], item[1]));
+        footer.getChildren().setAll(labels);
     }
 
     private void chrome(Snapshot s) {

@@ -52,7 +52,7 @@ public class AnimatedSvgIcon extends SvgIcon {
     @Override
     public void stop() {
         if (loopAnim != null) {
-            loopAnim.stop();
+            motion.removeLoop(loopAnim);
             loopAnim = null;
         }
         showStatic();

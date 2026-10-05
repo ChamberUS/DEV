@@ -74,7 +74,14 @@ public class MotionService {
             p.stop();
         }
         owner.getProperties().put(KEY, a);
-        a.setOnFinished(e -> owner.getProperties().remove(KEY, a));
+        // preserva o onFinished do chamador (ex.: spinOnce zera a rotação, flash remove o efeito)
+        javafx.event.EventHandler<javafx.event.ActionEvent> prior = a.getOnFinished();
+        a.setOnFinished(e -> {
+            owner.getProperties().remove(KEY, a);
+            if (prior != null) {
+                prior.handle(e);
+            }
+        });
         a.play();
         return a;
     }
@@ -306,6 +313,13 @@ public class MotionService {
                     a.pause();
                 }
             }
+        }
+    }
+
+    /** True se a animação ainda está registrada como loop (não foi removida por saída de cena/stopLoops). */
+    public boolean isLooping(Animation animation) {
+        synchronized (loops) {
+            return animation != null && owners.containsKey(animation);
         }
     }
 

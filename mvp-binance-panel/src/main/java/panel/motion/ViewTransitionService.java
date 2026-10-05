@@ -7,6 +7,7 @@ import javafx.scene.Node;
 public class ViewTransitionService {
     private final MotionService motion;
     private Node current;
+    private int entries;
 
     public ViewTransitionService(MotionService motion) { this.motion = motion; }
 
@@ -19,8 +20,9 @@ public class ViewTransitionService {
         }
         current = target;
         target.setVisible(true);
-        motion.reset(target);
         if (changed) {
+            motion.reset(target);
+            entries++;
             if (target instanceof javafx.scene.Parent parent) parent.applyCss();
             motion.reference.enterCards(target);
         }
@@ -28,4 +30,7 @@ public class ViewTransitionService {
     }
 
     public void forget() { current = null; }
+
+    /** Quantas vezes a entrada de cards foi disparada (reexibir a mesma view não conta). */
+    public int entries() { return entries; }
 }

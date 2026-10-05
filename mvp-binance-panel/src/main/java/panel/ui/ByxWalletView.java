@@ -21,6 +21,7 @@ public final class ByxWalletView implements View {
     private final ObjectMapper json = new ObjectMapper();
     private WalletChallenge challenge;
     private int ticks;
+    private final Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> { render(); if (++ticks % 30 == 0) refresh(); }));
     private boolean verificationRequired;
     public ByxWalletView(AppContext ctx) {
         this.ctx = ctx;
@@ -75,9 +76,7 @@ public final class ByxWalletView implements View {
         body.getChildren().addAll(Ui.pageHeader("BYX Wallet", "Watch address · verified ownership · signer outside app"),
                 Ui.testEnvironment(), Ui.columns(watch, ownership),
                 Ui.card("Private key outside app", Ui.label("BYX-MVP stores public proof only. Never enter a seed or private key.", "muted")));
-        Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> { render(); if (++ticks % 30 == 0) refresh(); }));
         timer.setCycleCount(Timeline.INDEFINITE);
-        root.visibleProperty().addListener((o,a,b) -> { if (b) { render(); timer.play(); } else timer.stop(); });
         root.sceneProperty().addListener((o,a,b) -> { if (b == null) timer.stop(); });
     }
     private void refresh() {
@@ -102,5 +101,7 @@ public final class ByxWalletView implements View {
         } catch (RuntimeException error) { status.setText("NO WALLET · ADMIN must configure LOCALNET in BYX Network"); summary.getChildren().setAll(Ui.kv("Balance", "N/A"), Ui.kv("Verified ownership", "Unavailable"), Ui.kv("Private key", "OUTSIDE APP")); }
     }
     public Node node() { return root; }
+    @Override public void onShow() { render(); timer.play(); }
+    @Override public void onHide() { timer.stop(); }
     public void onSnapshot(Snapshot ignored) { render(); }
 }
