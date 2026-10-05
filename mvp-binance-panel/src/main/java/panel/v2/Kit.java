@@ -24,7 +24,15 @@ public final class Kit {
 
     /** Rolagem V2: ocupa a largura, só rola quando a janela é menor que o conteúdo. */
     public static ScrollPane scroll(Node content) {
-        ScrollPane s = new ScrollPane(content);
+        Node shown = content;
+        if (Boolean.TRUE.equals(content.getProperties().get("byx.reading"))) {
+            // páginas de leitura (Settings, About, Terms, Shortcuts, What's new): coluna de 1240 centralizada (P2.6)
+            javafx.scene.layout.StackPane centered = new javafx.scene.layout.StackPane(content);
+            centered.setAlignment(Pos.TOP_CENTER);
+            centered.getStyleClass().addAll("byx-desk", "byx-screen");
+            shown = centered;
+        }
+        ScrollPane s = new ScrollPane(shown);
         s.getStyleClass().add("byx-desk-scroll");
         s.setFitToWidth(true);
         s.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -47,6 +55,7 @@ public final class Kit {
     public static VBox reading(double spacing, double maxWidth) {
         VBox v = page(spacing);
         v.setMaxWidth(maxWidth);
+        v.getProperties().put("byx.reading", true);
         return v;
     }
 

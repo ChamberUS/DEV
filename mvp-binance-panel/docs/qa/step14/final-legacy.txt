@@ -1,0 +1,165 @@
+TRACE +659ms thread=JavaFX Application Thread seq=2 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:257 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$legacy$42:585 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+TRACE +1057ms thread=JavaFX Application Thread seq=3 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.enterApp:323 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$legacy$42:585 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy sheets live on the LegacyHost only
+PASS the scene loads only V2 sheets
+TRACE +3609ms thread=JavaFX Application Thread seq=4 pending=null t-desk -> t-bot via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-bot
+PASS legacy view t-bot is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-bot
+TRACE +3712ms thread=JavaFX Application Thread seq=5 pending=null t-bot -> t-strategies via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-strategies
+PASS legacy view t-strategies is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-strategies
+TRACE +3836ms thread=JavaFX Application Thread seq=6 pending=null t-strategies -> t-signals via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-signals
+PASS legacy view t-signals is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-signals
+TRACE +3929ms thread=JavaFX Application Thread seq=7 pending=null t-signals -> t-portfolio via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-portfolio
+PASS legacy view t-portfolio is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-portfolio
+TRACE +4025ms thread=JavaFX Application Thread seq=8 pending=null t-portfolio -> t-positions via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-positions
+PASS legacy view t-positions is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-positions
+TRACE +4115ms thread=JavaFX Application Thread seq=9 pending=null t-positions -> t-orders via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-orders
+PASS legacy view t-orders is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-orders
+TRACE +4258ms thread=JavaFX Application Thread seq=10 pending=null t-orders -> t-performance via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-performance
+PASS legacy view t-performance is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-performance
+TRACE +4369ms thread=JavaFX Application Thread seq=11 pending=null t-performance -> t-activity via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-activity
+PASS legacy view t-activity is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-activity
+TRACE +4466ms thread=JavaFX Application Thread seq=12 pending=null t-activity -> t-wallet-verify via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: t-wallet-verify
+PASS legacy view t-wallet-verify is inside the LegacyHost (CSS boundary)
+PASS one visible view after t-wallet-verify
+TRACE +4684ms thread=JavaFX Application Thread seq=13 pending=null t-wallet-verify -> sessions via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: sessions
+PASS legacy view sessions is inside the LegacyHost (CSS boundary)
+PASS one visible view after sessions
+TRACE +4873ms thread=JavaFX Application Thread seq=14 pending=null sessions -> dataset via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: dataset
+PASS legacy view dataset is inside the LegacyHost (CSS boundary)
+PASS one visible view after dataset
+TRACE +4924ms thread=JavaFX Application Thread seq=15 pending=null dataset -> labels via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: labels
+PASS legacy view labels is inside the LegacyHost (CSS boundary)
+PASS one visible view after labels
+TRACE +5038ms thread=JavaFX Application Thread seq=16 pending=null labels -> features via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: features
+PASS legacy view features is inside the LegacyHost (CSS boundary)
+PASS one visible view after features
+TRACE +5089ms thread=JavaFX Application Thread seq=17 pending=null features -> hypotheses via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: hypotheses
+PASS legacy view hypotheses is inside the LegacyHost (CSS boundary)
+PASS one visible view after hypotheses
+TRACE +5143ms thread=JavaFX Application Thread seq=18 pending=null hypotheses -> validation via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: validation
+PASS legacy view validation is inside the LegacyHost (CSS boundary)
+PASS one visible view after validation
+TRACE +5211ms thread=JavaFX Application Thread seq=19 pending=null validation -> execution via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: execution
+PASS legacy view execution is inside the LegacyHost (CSS boundary)
+PASS one visible view after execution
+TRACE +5293ms thread=JavaFX Application Thread seq=20 pending=null execution -> paper via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: paper
+PASS legacy view paper is inside the LegacyHost (CSS boundary)
+PASS one visible view after paper
+TRACE +5350ms thread=JavaFX Application Thread seq=21 pending=null paper -> live via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: live
+PASS legacy view live is inside the LegacyHost (CSS boundary)
+PASS one visible view after live
+TRACE +5407ms thread=JavaFX Application Thread seq=22 pending=null live -> jobs via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: jobs
+PASS legacy view jobs is inside the LegacyHost (CSS boundary)
+PASS one visible view after jobs
+TRACE +5462ms thread=JavaFX Application Thread seq=23 pending=null jobs -> logs via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: logs
+PASS legacy view logs is inside the LegacyHost (CSS boundary)
+PASS one visible view after logs
+TRACE +5579ms thread=JavaFX Application Thread seq=24 pending=null logs -> users via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: users
+PASS legacy view users is inside the LegacyHost (CSS boundary)
+PASS one visible view after users
+TRACE +5691ms thread=JavaFX Application Thread seq=25 pending=null users -> settings via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:601 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS legacy view opens: settings
+PASS legacy view settings is inside the LegacyHost (CSS boundary)
+PASS one visible view after settings
+TRACE +5872ms thread=JavaFX Application Thread seq=26 pending=null settings -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-desk opens outside the LegacyHost
+PASS V2 view t-desk uses no legacy classes
+TRACE +5882ms thread=JavaFX Application Thread seq=27 pending=null t-desk -> t-markets via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-markets opens outside the LegacyHost
+PASS V2 view t-markets uses no legacy classes
+TRACE +6054ms thread=JavaFX Application Thread seq=28 pending=null t-markets -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view overview opens outside the LegacyHost
+PASS V2 view overview uses no legacy classes
+TRACE +6359ms thread=JavaFX Application Thread seq=29 pending=null overview -> capture via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view capture opens outside the LegacyHost
+PASS V2 view capture uses no legacy classes
+TRACE +6417ms thread=JavaFX Application Thread seq=30 pending=null capture -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-byx opens outside the LegacyHost
+PASS V2 view t-byx uses no legacy classes
+TRACE +6594ms thread=JavaFX Application Thread seq=31 pending=null t-byx -> t-wallet via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-wallet opens outside the LegacyHost
+PASS V2 view t-wallet uses no legacy classes
+TRACE +6663ms thread=JavaFX Application Thread seq=32 pending=null t-wallet -> t-benefits via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-benefits opens outside the LegacyHost
+PASS V2 view t-benefits uses no legacy classes
+TRACE +6670ms thread=JavaFX Application Thread seq=33 pending=null t-benefits -> t-treasury via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-treasury opens outside the LegacyHost
+PASS V2 view t-treasury uses no legacy classes
+TRACE +6678ms thread=JavaFX Application Thread seq=34 pending=null t-treasury -> t-profile via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-profile opens outside the LegacyHost
+PASS V2 view t-profile uses no legacy classes
+TRACE +6865ms thread=JavaFX Application Thread seq=35 pending=null t-profile -> t-security via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-security opens outside the LegacyHost
+PASS V2 view t-security uses no legacy classes
+TRACE +6926ms thread=JavaFX Application Thread seq=36 pending=null t-security -> t-sessions via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-sessions opens outside the LegacyHost
+PASS V2 view t-sessions uses no legacy classes
+TRACE +6932ms thread=JavaFX Application Thread seq=37 pending=null t-sessions -> t-notifications via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-notifications opens outside the LegacyHost
+PASS V2 view t-notifications uses no legacy classes
+TRACE +6935ms thread=JavaFX Application Thread seq=38 pending=null t-notifications -> t-account-activity via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-account-activity opens outside the LegacyHost
+PASS V2 view t-account-activity uses no legacy classes
+TRACE +6940ms thread=JavaFX Application Thread seq=39 pending=null t-account-activity -> t-settings via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view t-settings opens outside the LegacyHost
+PASS V2 view t-settings uses no legacy classes
+TRACE +6947ms thread=JavaFX Application Thread seq=40 pending=null t-settings -> h-faq via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-faq opens outside the LegacyHost
+PASS V2 view h-faq uses no legacy classes
+TRACE +7087ms thread=JavaFX Application Thread seq=41 pending=null h-faq -> h-help via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-help opens outside the LegacyHost
+PASS V2 view h-help uses no legacy classes
+TRACE +7142ms thread=JavaFX Application Thread seq=42 pending=null h-help -> h-diagnostics via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-diagnostics opens outside the LegacyHost
+PASS V2 view h-diagnostics uses no legacy classes
+TRACE +7150ms thread=JavaFX Application Thread seq=43 pending=null h-diagnostics -> h-about via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-about opens outside the LegacyHost
+PASS V2 view h-about uses no legacy classes
+TRACE +7155ms thread=JavaFX Application Thread seq=44 pending=null h-about -> h-overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-overview opens outside the LegacyHost
+PASS V2 view h-overview uses no legacy classes
+TRACE +7159ms thread=JavaFX Application Thread seq=45 pending=null h-overview -> h-whats-new via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-whats-new opens outside the LegacyHost
+PASS V2 view h-whats-new uses no legacy classes
+TRACE +7163ms thread=JavaFX Application Thread seq=46 pending=null h-whats-new -> h-terms via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-terms opens outside the LegacyHost
+PASS V2 view h-terms uses no legacy classes
+TRACE +7167ms thread=JavaFX Application Thread seq=47 pending=null h-terms -> h-privacy via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-privacy opens outside the LegacyHost
+PASS V2 view h-privacy uses no legacy classes
+TRACE +7171ms thread=JavaFX Application Thread seq=48 pending=null h-privacy -> h-shortcuts via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view h-shortcuts opens outside the LegacyHost
+PASS V2 view h-shortcuts uses no legacy classes
+TRACE +7174ms thread=JavaFX Application Thread seq=49 pending=null h-shortcuts -> sys-status via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$legacy$46:612 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS V2 view sys-status opens outside the LegacyHost
+PASS V2 view sys-status uses no legacy classes
+RESULT mode=legacy failures=0

@@ -92,11 +92,11 @@ public final class FaqScreen implements View {
         return search.input().getText();
     }
 
-    void setQuery(String q) {
+    public void setQuery(String q) {
         search.input().setText(q);
     }
 
-    List<Button> heads() {
+    public List<Button> heads() {
         return heads;
     }
 
@@ -134,6 +134,7 @@ public final class FaqScreen implements View {
             list.getChildren().add(empty);
             return;
         }
+        list.getChildren().add(Fx.label(items.size() + (items.size() == 1 ? " question" : " questions"), "byx-desk-t3"));
         for (HelpContent.Faq f : items) {
             list.getChildren().add(item(f));
         }
@@ -146,17 +147,21 @@ public final class FaqScreen implements View {
         head.getStyleClass().add("byx-faq-head");
         head.setMaxWidth(Double.MAX_VALUE);
         head.setAlignment(Pos.CENTER_LEFT);
-        HBox label = new HBox(12, Highlight.flow(f.question(), q, "byx-faq-q"), ByxIcon.path(open ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6", 14, "t3"));
-        label.setAlignment(Pos.CENTER_LEFT);
-        head.setGraphic(label);
+        head.setGraphic(Highlight.flow(f.question(), q, "byx-faq-q"));
         head.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        // chevron à direita (referência), fora do botão: não captura o mouse e acompanha a largura
+        javafx.scene.Node chevron = ByxIcon.path(open ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6", 14, "t3");
+        javafx.scene.layout.StackPane.setAlignment(chevron, Pos.CENTER_RIGHT);
+        chevron.setMouseTransparent(true);
         head.setAccessibleText(f.question() + (open ? ", expanded" : ", collapsed"));
         head.setId("q-" + f.id());
         javafx.scene.text.TextFlow answer = Highlight.flow(f.answer(), q, "byx-faq-a");
         answer.setMaxWidth(760);
         answer.setMinHeight(Region.USE_PREF_SIZE);
         Fx.shown(answer, open);
-        VBox box = new VBox(8, head, answer);
+        javafx.scene.layout.StackPane headRow = new javafx.scene.layout.StackPane(head, chevron);
+        headRow.setAlignment(Pos.CENTER_LEFT);
+        VBox box = new VBox(8, headRow, answer);
         box.getStyleClass().add("byx-faq-item");
         head.setOnAction(e -> toggle(f.id()));
         head.setOnKeyPressed(e -> {
@@ -196,7 +201,7 @@ public final class FaqScreen implements View {
         heads.stream().filter(h -> h.getId().equals("q-" + id)).findFirst().ifPresent(h -> {
             h.requestFocus();
             if (opening) {
-                motion.fadeIn(((VBox) h.getParent()).getChildren().get(1), motion.duration("accordionExpand"));
+                motion.fadeIn(((VBox) h.getParent().getParent()).getChildren().get(1), motion.duration("accordionExpand"));
             }
         });
     }

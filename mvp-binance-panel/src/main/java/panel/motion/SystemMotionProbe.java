@@ -12,20 +12,29 @@ public interface SystemMotionProbe {
         if (!System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac")) {
             return NONE;
         }
-        return () -> {
-            try {
-                Process p = new ProcessBuilder("/usr/bin/defaults", "read", "com.apple.universalaccess", "reduceMotion").redirectErrorStream(true).start();
-                if (!p.waitFor(2, TimeUnit.SECONDS)) {
-                    p.destroyForcibly();
-                    return false;
-                }
-                return new String(p.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim().equals("1");
-            } catch (java.io.IOException e) {
-                return false;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        // macOS recente guarda a chave em com.apple.Accessibility; versões anteriores, em com.apple.universalaccess. Qualquer uma ligada = reduzido.
+        return () -> read("com.apple.Accessibility", "ReduceMotionEnabled") || read("com.apple.universalaccess", "reduceMotion");
+    }
+
+    /** Valor de "1"/"true" (saída do defaults); chave ausente ou qualquer outra coisa = falso. */
+    static boolean isOn(String output) {
+        String t = output == null ? "" : output.trim();
+        return t.equals("1") || t.equalsIgnoreCase("true");
+    }
+
+    private static boolean read(String domain, String key) {
+        try {
+            Process p = new ProcessBuilder("/usr/bin/defaults", "read", domain, key).redirectErrorStream(true).start();
+            if (!p.waitFor(2, TimeUnit.SECONDS)) {
+                p.destroyForcibly();
                 return false;
             }
-        };
+            return isOn(new String(p.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+        } catch (java.io.IOException e) {
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 }

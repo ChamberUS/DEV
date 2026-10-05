@@ -1,0 +1,1 @@
+RESULT scenario=cycle n=10 failures=0

@@ -41,6 +41,10 @@ public final class SystemStatusScreen implements View {
     private final VBox rows = new VBox(0);
     private final Label updated = Fx.label("", "byx-desk-t3");
     private final List<Row> list = new ArrayList<>();
+    private final Label operational = Fx.label("0", "byx-big");
+    private final Label attention = Fx.label("0", "byx-big");
+    private final Label unknown = Fx.label("0", "byx-big");
+    private final Label checked = Fx.label("—", "byx-big");
     private final Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> render()));
     private int rebuilds;
 
@@ -83,10 +87,21 @@ public final class SystemStatusScreen implements View {
         VBox panel = Kit.panel(null, Kit.titled("Components", updated), rows);
         panel.setId("status-components");
         VBox page = Kit.page(14);
-        page.getChildren().addAll(Kit.header("System Status", "The detail behind the status dock. A component that can not be read is UNKNOWN, never OPERATIONAL."), panel,
+        HBox tiles = new HBox(14, tile("Operational", operational), tile("Needs attention", attention), tile("Unknown", unknown), tile("Checked", checked));
+        tiles.setId("status-summary");
+        page.getChildren().addAll(Kit.header("System Status", "The detail behind the status dock. A component that can not be read is UNKNOWN, never OPERATIONAL."), tiles, panel,
                 Kit.dim("Retry appears only where a real new attempt exists. Recovery states mirror what each service reports; no attempts are simulated."));
         scroll = Kit.scroll(page);
         render();
+    }
+
+    private static VBox tile(String title, Label value) {
+        VBox v = new VBox(4, Kit.label(title), value);
+        v.getStyleClass().add("byx-panel");
+        HBox.setHgrow(v, Priority.ALWAYS);
+        v.setMaxWidth(Double.MAX_VALUE);
+        v.setPrefWidth(1);
+        return v;
     }
 
     boolean timerRunning() {
@@ -130,6 +145,13 @@ public final class SystemStatusScreen implements View {
             Fx.shown(r.retryButton, c.retry() && c.state() != StatusState.OPERATIONAL);
             r.setAccessibleText(c.name() + ": " + c.state() + ". " + c.reason());
         }
+        long ok = comps.stream().filter(c -> c.state() == StatusState.OPERATIONAL).count();
+        long unk = comps.stream().filter(c -> c.state() == StatusState.UNKNOWN).count();
+        long att = comps.stream().filter(c -> c.state() != StatusState.OPERATIONAL && c.state() != StatusState.UNKNOWN && !c.expected()).count();
+        Fx.text(operational, Long.toString(ok));
+        Fx.text(attention, Long.toString(att));
+        Fx.text(unknown, Long.toString(unk));
+        Fx.text(checked, java.time.LocalTime.ofInstant(clock.instant(), java.time.ZoneId.systemDefault()).withNano(0).toString());
         Fx.text(updated, "Checked " + java.time.LocalTime.ofInstant(clock.instant(), java.time.ZoneId.systemDefault()).withNano(0));
     }
 

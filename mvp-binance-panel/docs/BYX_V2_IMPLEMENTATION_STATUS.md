@@ -17,7 +17,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 11 | Help | DONE | FAQ, About, Overview, Support, Diagnostics, Terms, Privacy, Shortcuts e What's new em V2. Ver "Passo 11" abaixo |
 | 12 | System + onboarding | DONE | Welcome, Onboarding, System Status, recuperação, erros, Page unavailable, fallback e startup. Ver "Passo 12" abaixo |
 | 13 | Motion + acessibilidade | DONE | Consolidação técnica, política de motion do sistema, teclado, foco, contraste e fronteira legada. Ver "Passo 13" abaixo |
-| 14 | QA final | TODO | |
+| 14 | QA final | DONE | READY WITH KNOWN LIMITATIONS. Ver `docs/BYX_V2_FINAL_QA.md` |
 
 ## Critérios de aceite da fundação
 Dependem de execução no Mac (`mvn test`, `./run.sh`). Cobertos por testes: último pedido vence, navegação assíncrona cancelável, entrada de cards uma vez, uma única view visível, loops reiniciáveis, `onFinished` preservado. Pendente de verificação manual: ausência de navegação automática em uso real, timers parados em views ocultas.
@@ -457,3 +457,6 @@ Também legados, sem tela própria: o diálogo Credits, `ToastHost` (toasts da e
 
 ## Fechamento da implementação 9–13
 `mvn test`: 483 testes, 0 falhas. `mvn clean package`: BUILD SUCCESS. Nenhum stress longo foi executado (reservado ao Passo 14). **STEPS 1–13 = IMPLEMENTED; Final QA (Passo 14) NÃO executado.**
+
+## Passo 14 · QA final
+Relatório completo em `docs/BYX_V2_FINAL_QA.md` (status: READY WITH KNOWN LIMITATIONS). 492 testes, `mvn test` e `mvn clean package` em sucesso; QAs dirigidos no app real em `docs/qa/step14/`.

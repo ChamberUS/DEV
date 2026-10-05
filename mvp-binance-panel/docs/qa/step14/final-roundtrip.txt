@@ -1,0 +1,83 @@
+TRACE +690ms thread=JavaFX Application Thread seq=2 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:257 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$roundtrip$35:526 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+TRACE +1088ms thread=JavaFX Application Thread seq=3 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.enterApp:323 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$roundtrip$35:526 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS first pass reaches t-desk
+TRACE +3655ms thread=JavaFX Application Thread seq=5 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:535 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS first pass reaches overview
+TRACE +3982ms thread=JavaFX Application Thread seq=6 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:535 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS first pass reaches t-byx
+TRACE +4291ms thread=JavaFX Application Thread seq=7 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:535 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS first pass reaches t-desk
+PASS first display of each View enters once: 3
+TRACE +4347ms thread=JavaFX Application Thread seq=8 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 1 reaches overview
+TRACE +4355ms thread=JavaFX Application Thread seq=9 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 1 reaches t-byx
+TRACE +4362ms thread=JavaFX Application Thread seq=10 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 1 reaches t-desk
+TRACE +4370ms thread=JavaFX Application Thread seq=11 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 2 reaches overview
+TRACE +4378ms thread=JavaFX Application Thread seq=12 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 2 reaches t-byx
+TRACE +4385ms thread=JavaFX Application Thread seq=13 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 2 reaches t-desk
+TRACE +4393ms thread=JavaFX Application Thread seq=14 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 3 reaches overview
+TRACE +4401ms thread=JavaFX Application Thread seq=15 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 3 reaches t-byx
+TRACE +4408ms thread=JavaFX Application Thread seq=16 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 3 reaches t-desk
+TRACE +4415ms thread=JavaFX Application Thread seq=17 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 4 reaches overview
+TRACE +4422ms thread=JavaFX Application Thread seq=18 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 4 reaches t-byx
+TRACE +4429ms thread=JavaFX Application Thread seq=19 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 4 reaches t-desk
+TRACE +4436ms thread=JavaFX Application Thread seq=20 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 5 reaches overview
+TRACE +4443ms thread=JavaFX Application Thread seq=21 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 5 reaches t-byx
+TRACE +4450ms thread=JavaFX Application Thread seq=22 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 5 reaches t-desk
+TRACE +4457ms thread=JavaFX Application Thread seq=23 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 6 reaches overview
+TRACE +4464ms thread=JavaFX Application Thread seq=24 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 6 reaches t-byx
+TRACE +4470ms thread=JavaFX Application Thread seq=25 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 6 reaches t-desk
+TRACE +4477ms thread=JavaFX Application Thread seq=26 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 7 reaches overview
+TRACE +4484ms thread=JavaFX Application Thread seq=27 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 7 reaches t-byx
+TRACE +4491ms thread=JavaFX Application Thread seq=28 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 7 reaches t-desk
+TRACE +4498ms thread=JavaFX Application Thread seq=29 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 8 reaches overview
+TRACE +4505ms thread=JavaFX Application Thread seq=30 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 8 reaches t-byx
+TRACE +4512ms thread=JavaFX Application Thread seq=31 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 8 reaches t-desk
+TRACE +4519ms thread=JavaFX Application Thread seq=32 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 9 reaches overview
+TRACE +4525ms thread=JavaFX Application Thread seq=33 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 9 reaches t-byx
+TRACE +4532ms thread=JavaFX Application Thread seq=34 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 9 reaches t-desk
+TRACE +4539ms thread=JavaFX Application Thread seq=35 pending=null t-desk -> overview via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 10 reaches overview
+TRACE +4547ms thread=JavaFX Application Thread seq=36 pending=null overview -> t-byx via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 10 reaches t-byx
+TRACE +4553ms thread=JavaFX Application Thread seq=37 pending=null t-byx -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$roundtrip$38:544 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS round trip 10 reaches t-desk
+PASS 10 round trips: exactly the requested routes were committed (30)
+PASS returning to the same View never replays the heavy enter (3 -> 3)
+PASS one visible view after the round trips
+PASS no loop accumulation after 30 navigations: 1
+TRACE +4881ms thread=JavaFX Application Thread seq=37 pending=null t-desk -> null via ShellRouter.reset:84 < PanelApp.showEntry:152 < PanelApp.logout:237 < FinalQa$App.invoke:118 < FinalQa$App.lambda$roundtrip$39:557 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+TRACE +4896ms thread=JavaFX Application Thread seq=38 pending=null null -> auth:login via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.showEntry:171 < PanelApp.logout:237 < FinalQa$App.invoke:118 < FinalQa$App.lambda$roundtrip$39:557 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS logout reaches the login: auth:login
+PASS after logout only the login brand loop can run: 0
+TRACE +5569ms thread=JavaFX Application Thread seq=38 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:257 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$roundtrip$40:563 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+TRACE +5638ms thread=JavaFX Application Thread seq=39 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.enterApp:323 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$roundtrip$40:563 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS a new session builds new instances: a new first enter is allowed (3 -> 4)
+PASS new session opens the default workspace
+RESULT mode=roundtrip failures=0

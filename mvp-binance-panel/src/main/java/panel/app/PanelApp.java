@@ -131,7 +131,9 @@ public class PanelApp extends Application {
         scene.getRoot().applyCss();
         scene.getRoot().lookupAll(".label").stream().filter(n -> n instanceof Label).findFirst()
                 .ifPresent(n -> diagnostic.append(" font=").append(((Label)n).getFont()));
-        System.out.println(diagnostic);
+        if (Boolean.getBoolean("byx.runtime.diagnostics")) { // só sob demanda: contém caminhos locais e hashes das folhas
+            System.out.println(diagnostic);
+        }
     }
 
     @Override

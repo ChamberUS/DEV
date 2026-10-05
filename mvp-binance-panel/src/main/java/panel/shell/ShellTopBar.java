@@ -88,6 +88,7 @@ public final class ShellTopBar extends HBox {
         mockBadge.setManaged(false);
 
         avatar.getStyleClass().add("byx-avatar");
+        avatar.setAccessibleText("Account menu"); // nome padrão; setUser() acrescenta o nome da conta
         avatar.setMinSize(36, 36);
         avatar.setPrefSize(36, 36);
         avatar.setMaxSize(36, 36);

@@ -101,6 +101,25 @@ class HelpScreensTest {
     }
 
     @Test
+    void everyForbiddenFieldAndValueIsRefusedOrRedacted() {
+        for (String field : List.of("password", "Password", "token", "OTP", "otp code", "API key", "api_key", "private key", "seed", "seed phrase", "authorization",
+                "Authorization header", "session secret", "Session secret", "wallet seed", "mnemonic")) {
+            assertThrows(IllegalArgumentException.class, () -> new DiagnosticsReport().set(field, "x"), field + " is not an allowed field");
+        }
+        DiagnosticsReport r = new DiagnosticsReport();
+        int i = 0;
+        for (String hostile : List.of("password=hunter2", "token abc.def.ghi", "OTP 123456", "api key sk-live-123", "private key MIIE...", "seed phrase: one two three",
+                "Authorization: Bearer eyJ", "session secret 0xdeadbeef")) {
+            r.set(DiagnosticsReport.FIELDS.get(7 + i++), hostile);
+        }
+        String text = r.text().toLowerCase();
+        for (String leaked : List.of("hunter2", "abc.def", "123456", "sk-live", "miie", "one two", "eyj", "deadbeef")) {
+            assertFalse(text.contains(leaked), "value leaked: " + leaked);
+        }
+        assertEquals(8, r.values().values().stream().filter("[redacted]"::equals).count());
+    }
+
+    @Test
     void diagnosticsScreenCopiesExactlyThePreview() throws Exception {
         DeskHarness.fx(() -> {
             List<String> copied = new ArrayList<>();

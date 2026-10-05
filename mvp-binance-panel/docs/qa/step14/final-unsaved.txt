@@ -1,0 +1,30 @@
+TRACE +671ms thread=JavaFX Application Thread seq=2 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:257 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$unsaved$14:353 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+TRACE +1070ms thread=JavaFX Application Thread seq=3 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.enterApp:323 < PanelApp.afterLogin:225 < FinalQa$App.invoke:118 < FinalQa$App.login:161 < FinalQa$App.lambda$unsaved$14:353 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+TRACE +3309ms thread=JavaFX Application Thread seq=4 pending=null t-desk -> t-settings via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$unsaved$17:357 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS Settings opens
+PASS Settings is dirty
+PASS the save bar appears on a change
+PASS leaving a dirty Settings keeps the route until confirmed: t-settings
+PASS confirmation dialog is open
+PASS destructive dialog focuses Cancel
+PASS Cancel stays and clears the pending request
+PASS Cancel preserves the draft
+PASS nothing was saved
+TRACE +4928ms thread=JavaFX Application Thread seq=7 pending=null t-settings -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.lambda$confirmLeave$19:435 < ByxOverlayHost.lambda$confirm$5:346 < FinalQa$App.lambda$unsaved$20:385 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS Discard leaves: t-desk
+PASS Discard removed the draft and saved nothing
+PASS save bar gone after Discard
+TRACE +5494ms thread=JavaFX Application Thread seq=8 pending=null t-desk -> t-settings via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$unsaved$22:392 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS draft is not on disk yet
+PASS Save persisted the preference on disk (real persistence)
+PASS the real motion system applied it
+PASS clean after Save
+TRACE +6144ms thread=JavaFX Application Thread seq=9 pending=null t-settings -> t-profile via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < FinalQa$App.invoke:118 < FinalQa$App.show:122 < FinalQa$App.lambda$unsaved$23:405 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS Profile offers the real contact edit
+PASS Profile is dirty
+PASS Profile asks before leaving
+PASS Cancel preserves the Profile draft
+TRACE +7010ms thread=JavaFX Application Thread seq=12 pending=null t-profile -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:395 < PanelApp.lambda$confirmLeave$19:435 < ByxOverlayHost.lambda$confirm$5:346 < FinalQa$App.lambda$unsaved$25:424 < FinalQa$App.run:146 < FinalQa$App.lambda$after$0:133 < 
+PASS Discard leaves Profile and clears the edit
+PASS contacts unchanged in the account store
+RESULT mode=unsaved failures=0

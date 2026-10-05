@@ -121,6 +121,26 @@ class MotionAccessibilityTest {
         }
     }
 
+    @Test
+    void reducedModeFollowsTheOfficialMatrixNotABlindRule() throws Exception {
+        JsonNode t = tokens();
+        JsonNode modes = new ObjectMapper().readTree(Files.readString(Path.of("src/main/resources/design/BYX_MOTION_TOKENS.json"))).path("modes");
+        assertEquals("spinner only", modes.path("REDUCED").path("loops").asText(), "the matrix allows only the spinner as a loop in REDUCED");
+        assertEquals(800, t.path("loading").path("reducedMs").asInt(), "the spinner keeps its 800 ms in REDUCED (essential feedback)");
+        for (String loop : List.of("shimmer", "breathing", "statePulse")) {
+            assertEquals("none", t.path(loop).path("reducedMs").asText(), loop + " has no REDUCED motion");
+        }
+        MotionService m = new MotionService();
+        m.preference.set(MotionPreference.REDUCED);
+        assertTrue(m.token("loading").runs(), "REDUCED: the spinner runs");
+        assertFalse(m.token("breathing").runs() || m.token("statePulse").runs() || m.token("shimmer").runs(), "REDUCED: breathing, pulse and shimmer do not");
+        m.preference.set(MotionPreference.OFF);
+        assertFalse(m.token("loading").runs(), "OFF: static glyph");
+        // Brand field (matriz P3.20): em REDUCED só o brilho respira (8 s, 12 fps); em OFF nada
+        assertEquals(8000, (int) panel.authview.BrandFieldModel.REDUCED_GLOW_PERIOD_MS);
+        assertEquals(12, panel.authview.BrandFieldModel.REDUCED_FPS);
+    }
+
     private static ByxData byx() {
         return (ByxData) Proxy.newProxyInstance(ByxData.class.getClassLoader(), new Class<?>[] {ByxData.class}, (p, m, a) -> switch (m.getName()) {
             case "network" -> ByxSnapshot.unknown("LIVE_NODE", "UNKNOWN", "UNKNOWN", "Not configured");
