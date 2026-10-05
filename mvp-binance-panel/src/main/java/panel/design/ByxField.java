@@ -19,6 +19,7 @@ public class ByxField extends VBox {
     private static final PseudoClass ERROR = PseudoClass.getPseudoClass("error");
 
     private final Label label;
+    private final HBox labelRow;
     private final TextField input;
     private final TextField plain;
     private final Button reveal;
@@ -32,6 +33,11 @@ public class ByxField extends VBox {
         input = secret ? new PasswordField() : new TextField();
         input.getStyleClass().add("byx-input");
         label.setLabelFor(input);
+        javafx.scene.layout.Region labelGap = new javafx.scene.layout.Region();
+        HBox.setHgrow(labelGap, javafx.scene.layout.Priority.ALWAYS);
+        labelRow = new HBox(label, labelGap);
+        labelRow.setAlignment(Pos.BASELINE_LEFT);
+        labelRow.getStyleClass().add("byx-field-label-row");
         input.setAccessibleText(labelText);
         errorRow.getStyleClass().add("byx-field-error");
         errorRow.setAlignment(Pos.CENTER_LEFT);
@@ -52,11 +58,11 @@ public class ByxField extends VBox {
             StackPane stack = new StackPane(input, plain, reveal);
             StackPane.setAlignment(reveal, Pos.CENTER_RIGHT);
             StackPane.setMargin(reveal, new javafx.geometry.Insets(0, 8, 0, 0));
-            getChildren().addAll(label, stack, errorRow);
+            getChildren().addAll(labelRow, stack, errorRow);
         } else {
             plain = null;
             reveal = null;
-            getChildren().addAll(label, input, errorRow);
+            getChildren().addAll(labelRow, input, errorRow);
         }
     }
 
@@ -66,6 +72,22 @@ public class ByxField extends VBox {
 
     public static ByxField password(String label) {
         return new ByxField(label, true);
+    }
+
+    /** Nó à direita do rótulo (ex.: link "Forgot password?" da referência). */
+    public ByxField setAccessory(javafx.scene.Node node) {
+        if (labelRow.getChildren().size() > 2) {
+            labelRow.getChildren().remove(2);
+        }
+        if (node != null) {
+            labelRow.getChildren().add(node);
+        }
+        return this;
+    }
+
+    /** Campo revelado do Show/Hide (null em campos comuns). */
+    public TextField revealedInput() {
+        return plain;
     }
 
     public TextField input() {
