@@ -186,7 +186,7 @@ public class PanelApp extends Application {
         mainActive = false;
         palette.close();
         if (activeView != null) { activeView.onHide(); activeView = null; }
-        navigator.reset();
+        router.reset();
         chromeWatch.stop();
         if (expiryWatch != null) {
             expiryWatch.stop();
@@ -234,7 +234,7 @@ public class PanelApp extends Application {
         indicatorPlaced = false;
         lockShown = false;
         ctx.transitions.forget();
-        navigator.reset();
+        router.reset();
         if (activeView != null) { activeView.onHide(); activeView = null; }
 
         views.put("t-desk", new TradingDeskView(ctx));
@@ -341,35 +341,44 @@ public class PanelApp extends Application {
 
     // ---- navegação e autorização ----------------------------------------------
 
+    /** Pedido de navegação (rail, switcher, busca, menu, dock, Views). Só o roteador troca a tela. */
     private void show(String id) {
+        router.request(id);
+    }
+
+    /** Gate real do roteador: trading/BYX livres na sessão; Research exige sessão de admin verificada. */
+    private panel.shell.ShellRouter.Decision evaluateRoute(String id, panel.nav.Navigator.Ticket ticket) {
         boolean research = !id.startsWith("t-");
         if (!views.containsKey(id)) {
-            if (research) {
-                requestResearch(id);
-            }
-            return;
+            return research ? requestResearch(id, ticket) : panel.shell.ShellRouter.Decision.DENY;
         }
         if (research) {
             if (!ctx.adminAccess.hasValidAdminSession()) {
-                requestResearch(id);
-                return;
+                return requestResearch(id, ticket);
             }
             ctx.adminAccess.touch();
         }
-        display(id);
+        return panel.shell.ShellRouter.Decision.ALLOW;
     }
 
     private boolean checkingTrustedDevice;
     private final panel.nav.Navigator navigator = new panel.nav.Navigator();
+    private final panel.shell.ShellRouter router = new panel.shell.ShellRouter(navigator, this::evaluateRoute, this::display);
     private View activeView;
     private String dockSignature = "";
 
-    private void requestResearch(String target) {
-        navigator.begin(target);
+    private panel.shell.ShellRouter.Decision requestResearch(String target, panel.nav.Navigator.Ticket ticket) {
+        String destination = views.containsKey(target) ? target : "overview";
         switch (ctx.adminAccess.evaluate()) {
-            case ALREADY_AUTHORIZED -> display(views.containsKey(target) ? target : "overview");
+            case ALREADY_AUTHORIZED -> {
+                if (!views.containsKey(target)) {
+                    router.complete(ticket, destination); // destino desconhecido: Overview
+                    return panel.shell.ShellRouter.Decision.PENDING;
+                }
+                return panel.shell.ShellRouter.Decision.ALLOW;
+            }
             case REQUIRES_2FA -> {
-                if (checkingTrustedDevice) return; // verificação em andamento; o ticket mais recente decide o destino
+                if (checkingTrustedDevice) return panel.shell.ShellRouter.Decision.PENDING; // o ticket mais recente decide
                 checkingTrustedDevice = true;
                 var sessionId = ctx.sessions.user().orElseThrow().id();
                 Thread check = new Thread(() -> {
@@ -380,35 +389,48 @@ public class PanelApp extends Application {
                     javafx.application.Platform.runLater(() -> {
                         checkingTrustedDevice = false;
                         if (ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
-                        panel.nav.Navigator.Ticket latest = navigator.consumePending();
+                        panel.nav.Navigator.Ticket latest = router.pending();
                         if (latest == null) return; // o usuário navegou para outro lugar enquanto a verificação rodava
-                        String destination = latest.target();
+                        String latestDestination = views.containsKey(latest.target()) ? latest.target() : "overview";
                         if (trusted && ctx.adminAccess.hasValidAdminSession()) {
-                            updateLock(true); display(views.containsKey(destination) ? destination : "overview");
-                        } else showTwoFactor(destination);
+                            updateLock(true);
+                            router.complete(latest, latestDestination);
+                        } else showTwoFactor(latest, latestDestination);
                     });
                 }, "trusted-device-check");
                 check.setDaemon(true); check.start();
+                return panel.shell.ShellRouter.Decision.PENDING;
             }
             case FORBIDDEN_NOT_ADMIN -> {
                 ctx.adminAccess.noteDenied("research workspace requested");
                 deny("Access restricted to administrators.");
+                return panel.shell.ShellRouter.Decision.DENY;
             }
-            case SESSION_EXPIRED -> logout("Session expired. Please sign in again.");
+            case SESSION_EXPIRED -> {
+                logout("Session expired. Please sign in again.");
+                return panel.shell.ShellRouter.Decision.DENY;
+            }
         }
+        return panel.shell.ShellRouter.Decision.DENY;
     }
 
+    /** Compatibilidade com os harnesses de QA: verificação para o pedido pendente atual. */
     private void showTwoFactor(String target) {
+        panel.nav.Navigator.Ticket t = router.pending();
+        if (t != null) showTwoFactor(t, target);
+    }
+
+    private void showTwoFactor(panel.nav.Navigator.Ticket ticket, String target) {
         closeTwoFactor();
         TwoFactorView[] ref = new TwoFactorView[1];
         Runnable close = this::closeTwoFactor;
         ref[0] = new TwoFactorView(ctx, () -> {
             close.run();
             updateLock(true);
-            display(views.containsKey(target) ? target : "overview");
+            router.complete(ticket, views.containsKey(target) ? target : "overview");
         }, () -> {
             close.run();
-            navigator.cancelPending();
+            router.cancelPending();
             syncTabs();
         });
         tfOverlay = new StackPane(ref[0].node());
@@ -466,7 +488,6 @@ public class PanelApp extends Application {
     private void display(String id) {
         palette.close();
         closeTwoFactor();
-        navigator.displayed(id);
         boolean toTrader = id.startsWith("t-");
         boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
