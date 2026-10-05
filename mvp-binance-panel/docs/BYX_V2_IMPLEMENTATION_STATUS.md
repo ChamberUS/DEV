@@ -10,7 +10,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 4 | Design foundation (tokens, tipografia, componentes) | DONE | Pacote `panel.design`, tema `/panel/v2/*.css`, galeria `./run-gallery.sh` (DEV ONLY). Ver "Passo 4" abaixo |
 | 5 | Shell (rail, top bar, dock, breakpoints) | DONE | `panel.shell`; shell V2 é o shell real; Views legadas hospedadas em `LegacyHost`. Ver "Passo 5" abaixo |
 | 6 | Auth (Login, First run; demais BACKEND_REQUIRED/REFERENCE_ONLY) | DONE | `panel.authview`; auditoria em `docs/BYX_V2_AUTH_AUDIT.md`. Ver "Passo 6" abaixo |
-| 7 | Trading | TODO | Live OFF |
+| 7 | Trading | IN PROGRESS | Live OFF. Auditoria em `docs/BYX_V2_TRADING_AUDIT.md`. Ver "Passo 7" abaixo |
 | 8 | Research + Capture | TODO | VALIDATION LOCKED / FINAL_HOLDOUT SEALED |
 | 9 | BYX | TODO | LOCALNET/TEST, sem fundos |
 | 10 | Account | TODO | |
@@ -137,3 +137,11 @@ Telas de entrada são rotas do mesmo `ShellRouter` (`auth:login`, `auth:forgot`,
 6. **Política de senha:** a real (10+ caracteres, diferente do usuário) substitui o painel DEMO_POLICY de 4 regras; não há barra de força.
 7. **A sessão de usuário não expira no backend;** o contrato P3.11 vale quando ela some com o app aberto. A expiração da autorização de admin mantém o comportamento existente (aviso e volta para Trading).
 8. **Brand field** usa a cor Ion (#7C96FF) fixa da referência; o desenho roda a ≤ 30 fps em FULL e para com a janela oculta.
+
+## Passo 7 · Trading
+
+Auditoria: `docs/BYX_V2_TRADING_AUDIT.md`. Escopo: o Trading Desk. Live trading continua OFF; nenhum dado de demonstração entra.
+
+| Checkpoint | Conteúdo | Teste |
+|---|---|---|
+| 7.1 | Auditoria do Trading atual | — |
