@@ -37,6 +37,12 @@ Saída: a galeria (`ControlGallery`, `./run-gallery.sh` ou `Main --gallery`) ren
 | 4.7 | `ByxOverlayHost`: camadas 30–80, Esc no topo, foco, persistentes, toasts | `ByxOverlayHostTest` |
 | 4.8 | `ControlGallery`, `GalleryApp`, `run-gallery.sh` | `ControlGalleryTest` |
 
+### Contagem de motion tokens
+- REFERENCE TOKENS: 79 = 74 das fases 1–3 + 5 `brandField*` do P3.20 (painel de marca de auth/welcome). O README do handoff final declara 79; a contagem 74 era anterior ao P3.20.
+- DERIVED/INTERNAL TOKENS: 0. `MotionSpec` resolve só as chaves do JSON; `REDUCED_FALLBACK_CAP` é constante, não token.
+- TOTAL RESOLVED: 79.
+- `ReferenceTokensGuardTest` fixa o SHA-256 dos dois JSONs da referência e a lista exata dos 79 nomes.
+
 ### Desvios conhecidos (JavaFX)
 1. **letter-spacing** (`label` .06em, dock .1em): JavaFX CSS não tem. Caixa alta via `ByxFonts.upper()`; o espaçamento fica como desvio.
 2. **line-height**: aplicado como `-fx-min-height` em texto de uma linha e `-fx-line-spacing` no body; texto multilinha pode diferir alguns px da referência.
