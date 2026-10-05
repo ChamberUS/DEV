@@ -33,7 +33,7 @@ public final class MotionSpec {
     }
 
     public record Timing(String name, Duration full, Duration fullMax, Duration delay, String easing, boolean loop,
-            JsonNode reduced, JsonNode off) {
+            JsonNode reduced, JsonNode off, JsonNode raw) {
 
         public Interpolator interpolator() {
             return switch (easing) {
@@ -120,7 +120,7 @@ public final class MotionSpec {
             max = Duration.millis(Double.parseDouble(range[1].trim()));
         }
         return new Timing(name, min, max, Duration.millis(t.path("delayMs").asDouble(0)), t.path("easing").asText("standard"),
-                t.path("loop").asBoolean(false), t.path("reducedMs"), t.path("offMs"));
+                t.path("loop").asBoolean(false), t.path("reducedMs"), t.path("offMs"), t);
     }
 
     public String version() {

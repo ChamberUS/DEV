@@ -205,3 +205,41 @@
 }
 /* STALE never looks live: no live dot or pulse inside a stale region */
 .byx-region:stale .byx-status-dot.live { -fx-opacity: 0; }
+
+/* ---------- overlays (layers 30-80, P3.13) ---------- */
+/* backdrop fill is the scrim base; its opacity (0.82 dialog, 0.78 palette) comes from the motion tokens */
+.byx-backdrop { -fx-background-color: #05070B; }
+.byx-dialog {
+    -fx-background-color: -byx-bg1;
+    -fx-background-radius: 14;
+    -fx-padding: 24;
+    -fx-pref-width: 440;
+    -fx-max-width: 440;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 60, 0, 0, 24);
+}
+.byx-toast {
+    -fx-background-color: -byx-bg3;
+    -fx-background-radius: 12;
+    -fx-padding: 12 12 12 14;
+    -fx-pref-width: 360;
+    -fx-max-width: 360;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 32, 0, 0, 12);
+}
+.byx-toast-text { -fx-text-fill: -byx-text-primary; }
+.toast-success .byx-toast-type { -fx-text-fill: -byx-positive; }
+.toast-info .byx-toast-type { -fx-text-fill: -byx-info; }
+.toast-warning .byx-toast-type { -fx-text-fill: -byx-warning; }
+.toast-error .byx-toast-type { -fx-text-fill: -byx-negative; }
+.byx-popover {
+    -fx-background-color: -byx-bg3;
+    -fx-background-radius: 12;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 32, 0, 0, 12);
+}
+.byx-savebar {
+    -fx-background-color: -byx-bg3;
+    -fx-background-radius: 12;
+    -fx-padding: 12 16;
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
