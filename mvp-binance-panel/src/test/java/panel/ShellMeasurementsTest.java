@@ -32,12 +32,11 @@ class ShellMeasurementsTest {
         P24.put("dock", new double[] {68, 862, 1372, 38}); // §4: Status dock
     }
 
-    @Test
-    void shellMatchesP24At1440() throws Exception {
-        Map<String, Bounds> got = FxSupport.fx(() -> {
+    private static Map<String, Bounds> measure(int w, int h) throws Exception {
+        return FxSupport.fx(() -> {
             ShellRouter router = new ShellRouter(new Navigator(), (t, k) -> ShellRouter.Decision.ALLOW, id -> { });
             ByxShell shell = new ByxShell(router, new MotionService(), new LegacyHost());
-            Scene scene = new Scene(shell, 1440, 900);
+            Scene scene = new Scene(shell, w, h);
             ByxTheme.apply(scene);
             router.request("t-desk");
             shell.setCrumb(id -> "Desk / ETHUSDT");
@@ -55,6 +54,11 @@ class ShellMeasurementsTest {
             shell.dispose();
             return out;
         });
+    }
+
+    @Test
+    void shellMatchesP24At1440() throws Exception {
+        Map<String, Bounds> got = measure(1440, 900);
         P24.forEach((k, ref) -> {
             Bounds b = got.get(k);
             double[] v = {b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight()};
@@ -64,5 +68,29 @@ class ShellMeasurementsTest {
                 assertEquals(ref[i], v[i], tol, k + " " + axis[i]);
             }
         });
+    }
+
+    /**
+     * STANDARD e EXPANDED (referência trading-desk-1600/1920 medida no navegador): nada escala. Alturas fixas,
+     * seletor ancorado em x=88, busca/sino/selo/avatar ancorados à direita com os mesmos deslocamentos de 1440.
+     */
+    @Test
+    void shellAddsSpaceInsteadOfScaling() throws Exception {
+        for (int[] s : new int[][] {{1600, 1000}, {1920, 1080}}) {
+            Map<String, Bounds> got = measure(s[0], s[1]);
+            int w = s[0];
+            String at = w + "x" + s[1];
+            assertEquals(88, got.get("switcher").getMinX(), 0.5, at + " switcher x");
+            assertEquals(40, got.get("switcher").getHeight(), 0.5, at + " switcher h");
+            assertEquals(w - 584, got.get("search").getMinX(), 1, at + " search anchored right");
+            assertEquals(320, got.get("search").getWidth(), 0.5, at + " search width");
+            assertEquals(w - 248, got.get("bell").getMinX(), 1, at + " bell anchored right");
+            assertEquals(w - 194, got.get("admin").getMinX(), 1, at + " admin anchored right");
+            assertEquals(w - 56, got.get("avatar").getMinX(), 0.5, at + " avatar anchored right");
+            assertEquals(68, got.get("rail").getWidth(), 0.5, at + " rail");
+            assertEquals(s[1] - 38, got.get("dock").getMinY(), 0.5, at + " dock y");
+            assertEquals(38, got.get("dock").getHeight(), 0.5, at + " dock h");
+            assertEquals(w - 68, got.get("dock").getWidth(), 0.5, at + " dock w");
+        }
     }
 }
