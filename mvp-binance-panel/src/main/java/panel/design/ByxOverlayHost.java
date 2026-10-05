@@ -117,6 +117,7 @@ public class ByxOverlayHost extends StackPane {
         StackPane.setAlignment(toastStack, Pos.BOTTOM_LEFT);
         StackPane.setMargin(toastStack, new Insets(16));
         addEventFilter(KeyEvent.KEY_PRESSED, this::onKey);
+        addEventFilter(MouseEvent.MOUSE_PRESSED, this::onPressOutside);
         sceneProperty().addListener((o, a, b) -> {
             if (a != null) {
                 a.focusOwnerProperty().removeListener(focusGuard);
@@ -191,7 +192,15 @@ public class ByxOverlayHost extends StackPane {
 
     /** Popover posicionado pelo chamador (x, y no host). Abrir qualquer camada fecha os popovers anteriores. */
     public void openPopover(Node popover, double x, double y) {
+        openPopover(popover, x, y, null);
+    }
+
+    /** onClosed roda uma vez quando o popover fecha por qualquer motivo (Esc, outra camada, fechamento explícito). */
+    public void openPopover(Node popover, double x, double y, Runnable onClosed) {
         closePopovers();
+        if (onClosed != null) {
+            popover.getProperties().put("byx.popover.onClosed", onClosed);
+        }
         generation++;
         popover.setManaged(false);
         popover.relocate(x, y);
@@ -206,9 +215,24 @@ public class ByxOverlayHost extends StackPane {
 
     public void closePopovers() {
         for (Node p : List.copyOf(popovers)) {
-            popovers.remove(p);
-            exit(p, "menuClose", layers.get(OverlayLayer.POPOVER));
+            closePopover(p);
         }
+    }
+
+    /** Fecha um popover específico (idempotente). */
+    public void closePopover(Node p) {
+        if (!popovers.remove(p)) {
+            return;
+        }
+        // callback antes da saída: em OFF o nó sai da cena na hora e o foco que estava nele se perderia
+        if (p.getProperties().remove("byx.popover.onClosed") instanceof Runnable r) {
+            r.run();
+        }
+        exit(p, "menuClose", layers.get(OverlayLayer.POPOVER));
+    }
+
+    public boolean isPopoverOpen(Node p) {
+        return popovers.contains(p);
     }
 
     // ---------------------------------------------------------------- palette (60)
@@ -388,6 +412,28 @@ public class ByxOverlayHost extends StackPane {
         if (t.getProperties().remove("byx.toast.timer") instanceof PauseTransition p) {
             p.stop();
         }
+    }
+
+    /** Clique fora fecha popovers. O dono (ex.: avatar) é exceção: ele mesmo alterna o popover. */
+    private void onPressOutside(MouseEvent e) {
+        if (popovers.isEmpty() || !(e.getTarget() instanceof Node target)) {
+            return;
+        }
+        for (Node p : List.copyOf(popovers)) {
+            Object owner = p.getProperties().get("byx.popover.owner");
+            if (!isInside(target, p) && !(owner instanceof Node o && isInside(target, o))) {
+                closePopover(p);
+            }
+        }
+    }
+
+    private static boolean isInside(Node n, Node ancestor) {
+        for (Node x = n; x != null; x = x.getParent()) {
+            if (x == ancestor) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- keyboard and focus

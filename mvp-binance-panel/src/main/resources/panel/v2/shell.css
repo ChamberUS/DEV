@@ -111,3 +111,41 @@
     -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 24, 0, 0, 8);
 }
+
+/* ---------- palette (layer 60) ---------- */
+.byx-palette { -fx-spacing: 10; -fx-padding: 12; }
+.byx-palette-scroll, .byx-palette-scroll > .viewport { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.byx-palette-group { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 11px; -fx-text-fill: -byx-text-tertiary; -fx-padding: 8 10 4 10; }
+.byx-palette-row { -fx-padding: 9 10 9 10; -fx-background-radius: 8; -fx-cursor: hand; }
+.byx-palette-row:selected { -fx-background-color: -byx-bg3; }
+.byx-palette-row.blocked { -fx-opacity: 0.55; -fx-cursor: default; }
+.byx-palette-row .byx-icon { -fx-stroke: -byx-text-tertiary; }
+.byx-palette-title { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-palette-hint { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; }
+.byx-palette-type { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 11px; -fx-text-fill: -byx-text-tertiary; }
+.byx-palette-footer { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; -fx-padding: 4 10 0 10; }
+
+/* ---------- user menu / notification panel (layer 40) ---------- */
+.byx-user-menu { -fx-padding: 6; }
+.byx-menu-header { -fx-padding: 10 10 10 10; }
+.byx-avatar-static {
+    -fx-background-color: #FFFFFF1A, -byx-bg2; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
+    -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;
+}
+.byx-menu-name { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-menu-email { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; }
+.byx-menu-sep { -fx-background-color: -byx-line; -fx-min-height: 1; -fx-pref-height: 1; -fx-max-height: 1; }
+.byx-menu-item {
+    -fx-background-color: transparent; -fx-background-radius: 8; -fx-padding: 9 10 9 10;
+    -fx-min-height: 38; -fx-pref-height: 38; -fx-alignment: center-left; -fx-cursor: hand;
+}
+.byx-menu-item .byx-icon { -fx-stroke: -byx-text-secondary; }
+.byx-menu-label { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
+.byx-menu-key { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 12px; -fx-text-fill: -byx-text-tertiary; }
+.byx-menu-item:hover, .byx-menu-item:focused { -fx-background-color: -byx-hover; }
+.byx-menu-item.current { -fx-background-color: #7C96FF14; }
+.byx-menu-current-dot { -fx-fill: -byx-accent; }
+.byx-menu-item.danger .byx-menu-label { -fx-text-fill: #FF9B9B; }
+.byx-menu-item.danger .byx-icon { -fx-stroke: #FF9B9B; }
+.byx-menu-item:disabled { -fx-opacity: 0.55; }
+.byx-notification-panel { -fx-padding: 14; }
