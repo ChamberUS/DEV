@@ -123,6 +123,15 @@ class DesignTokensTest {
     }
 
     @Test
+    void everyV2StylesheetParsesWithoutErrors() throws Exception {
+        javafx.css.CssParser.errorsProperty().clear();
+        for (String sheet : panel.design.ByxTheme.STYLESHEETS) {
+            new javafx.css.CssParser().parse(DesignTokens.class.getResource(sheet));
+        }
+        assertEquals(List.of(), List.copyOf(javafx.css.CssParser.errorsProperty()).stream().map(Object::toString).toList());
+    }
+
+    @Test
     void layersAndStateListsAreExposed() {
         DesignTokens t = DesignTokens.get();
         assertEquals(30, t.layer("savebar"));
