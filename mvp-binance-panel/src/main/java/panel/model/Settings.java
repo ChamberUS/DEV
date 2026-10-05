@@ -22,6 +22,8 @@ public class Settings {
     /** Preferências de UX do onboarding (só isto é guardado): conclusão e workspace de abertura. */
     public boolean onboardingCompleted;
     public String primaryWorkspace = "TRADING";
+    /** "Follow system setting": REDUCED quando o macOS pede redução de movimento (só reduz, nunca afrouxa). */
+    public boolean followSystemMotion = true;
 
     public Path project() {
         return Path.of(projectPath);
@@ -48,6 +50,7 @@ public class Settings {
                 s.animatedIcons = Boolean.parseBoolean(p.getProperty("animatedIcons", "true"));
                 s.density = p.getProperty("density", "COMPACT");
                 s.onboardingCompleted = Boolean.parseBoolean(p.getProperty("onboardingCompleted", "false"));
+                s.followSystemMotion = Boolean.parseBoolean(p.getProperty("followSystemMotion", "true"));
                 String pw = p.getProperty("primaryWorkspace", "TRADING");
                 s.primaryWorkspace = java.util.Set.of("TRADING", "RESEARCH", "BYX").contains(pw) ? pw : "TRADING";
             } catch (IOException | IllegalArgumentException e) {
@@ -70,6 +73,7 @@ public class Settings {
         p.setProperty("density", density);
         p.setProperty("onboardingCompleted", Boolean.toString(onboardingCompleted));
         p.setProperty("primaryWorkspace", primaryWorkspace);
+        p.setProperty("followSystemMotion", Boolean.toString(followSystemMotion));
         Files.createDirectories(FILE.getParent());
         try (OutputStream out = Files.newOutputStream(FILE)) {
             p.store(out, "MVP Binance panel");

@@ -97,6 +97,8 @@ public class PanelApp extends Application {
         });
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> ctx.adminAccess.touch());
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> ctx.adminAccess.touch());
+        stage.focusedProperty().addListener((o, a, focused) -> { if (focused) ctx.refreshSystemMotion(); });
+        ctx.refreshSystemMotion();
         stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(stage.isShowing() && !iconified));
         stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing && !stage.isIconified()));
         ctx.motion.reference.bind(rootStack);
@@ -785,7 +787,7 @@ public class PanelApp extends Application {
                 .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Wallet", !"VERIFIED".equals(net.identity()) ? "Unavailable"
                         : ctx.byxWallets.wallets().isEmpty() ? "Not linked" : "Linked")
                 .set("Authentication", !user ? "Signed out" : ctx.adminAccess.hasValidAdminSession() ? "Signed in · admin session active" : "Signed in")
-                .set("Motion mode", ctx.settings.motion).set("Data source", ctx.settings.dataSource.name()).set("Density", ctx.settings.density);
+                .set("Motion mode", ctx.motion.preference.get().name() + (ctx.motionReducedBySystem() ? " (system)" : "")).set("Data source", ctx.settings.dataSource.name()).set("Density", ctx.settings.density);
     }
 
     private panel.helpview.PublicHost publicHost;

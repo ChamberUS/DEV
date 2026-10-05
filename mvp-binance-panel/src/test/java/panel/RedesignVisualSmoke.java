@@ -24,6 +24,10 @@ public final class RedesignVisualSmoke {
     private RedesignVisualSmoke() { }
 
     public static void main(String[] args) throws Exception {
+        if (!Boolean.getBoolean("byx.legacy.qa")) { // LEGACY QA: mede o cromo anterior ao V2 e acessa o PanelApp por reflexão; não vale como evidência do V2
+            System.err.println("LEGACY QA (pre-V2 chrome): not valid V2 evidence. Use ShellQaSmoke/ShellNavigationQa/AuthFlowQa and the step QAs. Pass -Dbyx.legacy.qa=true to run anyway.");
+            return;
+        }
         evidence = args.length == 0 ? Files.createTempDirectory("byx-ui-qa-") : Path.of(args[0]);
         Files.createDirectories(evidence);
         Path home = Files.createTempDirectory("byx-ui-home-");

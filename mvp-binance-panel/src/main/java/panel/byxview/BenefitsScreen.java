@@ -185,7 +185,9 @@ public final class BenefitsScreen implements View {
         Fx.text(balanceValue, verified ? b.formattedBalance() : NetworkModel.NONE);
         Fx.cls(balanceValue, "dim", !verified);
         for (Label l : track) {
-            Fx.cls(l, "current", l.getText().equals(tier));
+            boolean current = l.getText().equals(tier);
+            Fx.cls(l, "current", current);
+            l.setAccessibleText(l.getText() + (current ? ", current tier" : ""));
         }
         Fx.text(progressText, !verified ? "Verify a wallet to see how much BYX remains for the next tier."
                 : progress == null || progress.remainingUbyx() == null ? "No higher tier in this test policy."

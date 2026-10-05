@@ -155,6 +155,7 @@ public final class ByxShell extends StackPane {
         globalBar = bar;
         if (bar != null) {
             center.getChildren().add(1, bar);
+            motion.fadeIn(bar, motion.duration("globalBarShow")); // só apresentação; a faixa existe com a condição
         }
     }
 

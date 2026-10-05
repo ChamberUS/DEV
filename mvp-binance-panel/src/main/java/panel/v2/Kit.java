@@ -144,6 +144,27 @@ public final class Kit {
                 buttons.add(b);
                 getChildren().add(b);
             }
+            setOnKeyPressed(e -> {
+                int dir = e.getCode() == javafx.scene.input.KeyCode.RIGHT ? 1 : e.getCode() == javafx.scene.input.KeyCode.LEFT ? -1 : 0;
+                if (dir == 0) {
+                    return;
+                }
+                int i = 0;
+                for (int k = 0; k < buttons.size(); k++) {
+                    if (buttons.get(k).isFocused() || buttons.get(k).isSelected() && !anyFocused()) {
+                        i = k;
+                    }
+                }
+                for (int step = 1; step <= buttons.size(); step++) {
+                    javafx.scene.control.ToggleButton b = buttons.get(Math.floorMod(i + dir * step, buttons.size()));
+                    if (!b.isDisabled()) {
+                        b.setSelected(true);
+                        b.requestFocus();
+                        break;
+                    }
+                }
+                e.consume();
+            });
             group.selectedToggleProperty().addListener((obs, a, b) -> {
                 if (b == null) {
                     a.setSelected(true); // sempre uma opção
@@ -154,6 +175,10 @@ public final class Kit {
         }
 
         private boolean suppress;
+
+        private boolean anyFocused() {
+            return buttons.stream().anyMatch(javafx.scene.control.ToggleButton::isFocused);
+        }
 
         public String selected() {
             return group.getSelectedToggle() == null ? null : (String) group.getSelectedToggle().getUserData();

@@ -40,7 +40,7 @@ class AccountScreensTest {
         volatile boolean devicesAvailable = true;
         final List<String> contactCalls = new ArrayList<>();
         final List<Prefs> saves = new ArrayList<>();
-        volatile Prefs prefs = new Prefs("FULL", "COMPACT", true, "TRADING");
+        volatile Prefs prefs = new Prefs("FULL", "COMPACT", true, "TRADING", true);
         volatile List<SecurityAuditService.Entry> audit = List.of();
         volatile boolean auditFails;
 
@@ -69,6 +69,7 @@ class AccountScreensTest {
             return audit;
         }
         @Override public Prefs prefs() { return prefs; }
+        @Override public String effectiveMotion() { return prefs.motion(); }
         @Override public void savePrefs(Prefs p) {
             if (saveFails) {
                 throw new IllegalStateException("disk");
@@ -239,7 +240,7 @@ class AccountScreensTest {
             assertTrue(s.hasUnsavedChanges(), "a failed save keeps the draft");
             data.saveFails = false;
             s.save();
-            assertEquals(List.of(new AccountData.Prefs("OFF", "COMPACT", true, "TRADING")), data.saves);
+            assertEquals(List.of(new AccountData.Prefs("OFF", "COMPACT", true, "TRADING", true)), data.saves);
             assertFalse(s.hasUnsavedChanges());
         });
     }

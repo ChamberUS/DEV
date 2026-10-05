@@ -48,7 +48,10 @@ final class AccountDataAdapter implements AccountData {
         return ctx.audit.recentFor(ctx.sessions.user().orElseThrow().user().username(), limit);
     }
 
-    @Override public Prefs prefs() { return new Prefs(ctx.settings.motion, ctx.settings.density, ctx.settings.animatedIcons, ctx.settings.primaryWorkspace); }
+    @Override public Prefs prefs() { return new Prefs(ctx.settings.motion, ctx.settings.density, ctx.settings.animatedIcons, ctx.settings.primaryWorkspace,
+            ctx.settings.followSystemMotion); }
+
+    @Override public String effectiveMotion() { return ctx.motion.preference.get() + (ctx.motionReducedBySystem() ? " (system setting)" : ""); }
 
     @Override
     public void savePrefs(Prefs p) {
@@ -56,10 +59,12 @@ final class AccountDataAdapter implements AccountData {
         String oldMotion = st.motion, oldDensity = st.density;
         boolean oldIcons = st.animatedIcons;
         String oldWorkspace = st.primaryWorkspace;
+        boolean oldFollow = st.followSystemMotion;
         st.motion = p.motion();
         st.density = p.density();
         st.animatedIcons = p.animatedIcons();
         st.primaryWorkspace = p.primaryWorkspace();
+        st.followSystemMotion = p.followSystemMotion();
         try {
             st.save();
         } catch (java.io.IOException e) {
@@ -67,6 +72,7 @@ final class AccountDataAdapter implements AccountData {
             st.density = oldDensity;
             st.animatedIcons = oldIcons;
             st.primaryWorkspace = oldWorkspace;
+            st.followSystemMotion = oldFollow;
             throw new IllegalStateException("settings not saved", e);
         }
         ctx.applyMotionSettings();

@@ -108,15 +108,15 @@ public final class OnboardingDialog extends VBox {
         return (int) dots.stream().filter(d -> d.getStyleClass().contains("on")).count();
     }
 
-    ByxButton nextButton() {
+    public ByxButton nextButton() {
         return next;
     }
 
-    ByxButton backButton() {
+    public ByxButton backButton() {
         return back;
     }
 
-    ByxButton skipButton() {
+    public ByxButton skipButton() {
         return skip;
     }
 
@@ -124,9 +124,13 @@ public final class OnboardingDialog extends VBox {
         if (done) {
             return;
         }
+        int previous = step;
         step = Math.max(0, Math.min(content.steps().size() - 1, target));
         render();
-        motion.fadeIn(body, motion.duration("accordionExpand"));
+        if (step != previous) {
+            // onboardingStepEnter: direção +1 ao avançar, -1 ao voltar (REDUCED/OFF: sem deslocamento, via MotionService)
+            motion.fadeSlideIn(body, 16 * (step > previous ? 1 : -1), 0, motion.duration("onboardingStepEnter"));
+        }
     }
 
     private void finish(boolean completed) {

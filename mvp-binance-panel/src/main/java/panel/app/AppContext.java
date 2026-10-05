@@ -105,12 +105,42 @@ public class AppContext {
         trading.update(research.snapshot.get());
     }
 
-    public void applyMotionSettings() {
+    private final panel.motion.SystemMotionProbe systemMotion = panel.motion.SystemMotionProbe.macOs();
+    private volatile boolean systemReduced;
+
+    /** Preferência do app (Settings), sem o ajuste do sistema. */
+    public MotionPreference appMotion() {
         try {
-            motion.preference.set(MotionPreference.valueOf(settings.motion));
+            return MotionPreference.valueOf(settings.motion);
         } catch (IllegalArgumentException e) {
-            motion.preference.set(MotionPreference.FULL);
+            return MotionPreference.FULL;
         }
+    }
+
+    /** O valor efetivo (app + sistema) difere do escolhido: o sistema reduziu. */
+    public boolean motionReducedBySystem() {
+        return panel.motion.MotionPolicy.systemApplied(appMotion(), settings.followSystemMotion, systemReduced);
+    }
+
+    /** Relê a configuração do macOS fora da thread FX e reaplica só se mudou. Chamar com o app aberto e ao ganhar o foco. */
+    public void refreshSystemMotion() {
+        Thread t = new Thread(() -> {
+            boolean now = systemMotion.reduced();
+            if (now != systemReduced) {
+                systemReduced = now;
+                try {
+                    javafx.application.Platform.runLater(this::applyMotionSettings);
+                } catch (IllegalStateException noToolkit) {
+                    // sem toolkit (testes): o próximo applyMotionSettings já usa o valor novo
+                }
+            }
+        }, "system-motion");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    public void applyMotionSettings() {
+        motion.preference.set(panel.motion.MotionPolicy.effective(appMotion(), settings.followSystemMotion, systemReduced));
         motion.animatedIcons.set(settings.animatedIcons);
         icons.setLottieEnabled(settings.animatedIcons);
     }

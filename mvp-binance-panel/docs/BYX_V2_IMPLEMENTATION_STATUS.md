@@ -16,7 +16,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 10 | Account | DONE | Profile, Security, Sessions, Notifications, Activity e Settings em V2. Ver "Passo 10" abaixo |
 | 11 | Help | DONE | FAQ, About, Overview, Support, Diagnostics, Terms, Privacy, Shortcuts e What's new em V2. Ver "Passo 11" abaixo |
 | 12 | System + onboarding | DONE | Welcome, Onboarding, System Status, recuperação, erros, Page unavailable, fallback e startup. Ver "Passo 12" abaixo |
-| 13 | Motion + acessibilidade | TODO | FULL/REDUCED/OFF |
+| 13 | Motion + acessibilidade | DONE | Consolidação técnica, política de motion do sistema, teclado, foco, contraste e fronteira legada. Ver "Passo 13" abaixo |
 | 14 | QA final | TODO | |
 
 ## Critérios de aceite da fundação
@@ -422,3 +422,38 @@ O roteador é a autoridade: sem sessão, `ShellRoutes.PUBLIC` = About, FAQ, Help
 1. Onboarding, fallback inesperado e faixa global foram verificados por componente/teste; um QA dirigido no app real (primeiro login → onboarding → rota inicial; falha forçada do backend → faixa e restauração) fica para o Passo 14.
 2. Welcome/First Run depende de `firstRun()` verdadeiro: só exercitado manualmente com um home limpo.
 3. Dock: o realce da linha do componente clicado em System Status (âncora #id) não existe; o dock só pede a rota.
+
+## Passo 13 · Motion + acessibilidade (consolidação técnica, não é o QA final)
+
+### Motion (13.1–13.4)
+- **Tokens:** nenhuma View V2 nova cria duração própria (`MotionAccessibilityTest` varre `byxview`, `accountview`, `helpview` e `systemview`: nenhum `FadeTransition`/`TranslateTransition`/`KeyValue` fora do `MotionService`). Onde faltava token usado: Onboarding passou de `accordionExpand` para `onboardingStepEnter` (com direção ±16, só FULL translada) e a faixa global usa `globalBarShow`. Os tempos lógicos `RecoveryTracker.RESTORED_HOLD` (3000 ms) e `StartupModel.FADE_OUT` (160 ms) são conferidos contra `restoredChipHold` e `startupExit` do JSON. Sobram constantes que NÃO são movimento: polls (1 s, 5 s, 30 s), `DeskModel.STALE_AFTER`, o rótulo "Copied" de 1500 ms (sem token no handoff) e os tempos do brand field e do stagger do login (Passo 6, documentados lá).
+- **FULL / REDUCED / OFF:** `fullReducedAndOffEndInTheSameLogicalState` monta 8 telas + o onboarding nos três modos: o texto final é idêntico; loops: FULL 1 (anel da rede aguardando nó), REDUCED 0, OFF 0. Onboarding em REDUCED/OFF não deixa deslocamento.
+- **Contrato de entrada de View:** inalterado e coberto por `ViewEnterLifecycleTest` (as Views novas passam pelo mesmo `ViewTransitionService`); nenhuma tela nova anima em `onShow`/`onSnapshot`.
+- **Loops:** só existem com o estado e a tela visível; escondida/descartada = 0 (Network, System Status, Capture, Desk; testes dos passos 7–9 e 12).
+
+### Motion do sistema (13.9)
+Antes não havia nenhuma leitura do macOS. Agora `MotionPolicy`: preferência efetiva = app combinado com o sistema; **o sistema só reduz** (FULL → REDUCED com "Follow system setting" ligado, padrão); REDUCED e OFF explícitos nunca são afrouxados. `MotionService.preference` é o único valor lido pela UI (Auth, shell e Views), então não há dois caminhos. `SystemMotionProbe.macOs()` lê `defaults read com.apple.universalaccess reduceMotion` em thread própria (2 s de timeout, falha = não reduzido), no início e ao ganhar o foco. Settings › Accessibility mostra o interruptor e "Motion in effect" (ex.: `REDUCED (system setting)`); Diagnostics mostra o modo efetivo. Teste: tabela completa de `MotionPolicy` e regressão do app real (Auth e navegação nos três modos, abaixo).
+
+### Teclado e foco (13.5, 13.6)
+Controle segmentado (Sessions, density, motion…): ←/→ movem a seleção, pulando opções desabilitadas e dando a volta; Settings: ↑/↓ entre categorias; FAQ/menu/paleta já tinham setas, Home/End, Enter, Space. `?` abre o diálogo de atalhos (não digitando num campo, nem sobre outra camada), com foco preso no diálogo, Esc fecha só a camada do topo e o foco volta ao abridor. Foco visível ganhou anel nos links do sumário e nos chips. Diálogo novo de senha, descarte e atalhos usam o host de camadas (trap e retorno de foco já testados no Passo 4).
+
+### Contraste e semântica (13.7, 13.8)
+Só os pares novos, a partir dos tokens (AA ≥ 4,5): secundário/terciário em bg1/bg2, primário sobre seleção, banners de aviso e erro, quatro badges. Nada importante depende só de cor: faixas do Treasury, anéis da rede, chips e legenda sempre têm texto; a tier atual ganhou texto acessível ("current tier").
+
+### Fronteira legada (13.10)
+`legacyViewInventoryIsExactlyTheDocumentedOne` fixa o inventário. Views que ainda dependem de `panel.css`/`byx.css` (todas **LEGACY / NO V2 REFERENCE**: o handoff não tem tela para elas):
+- **Trading:** Bot (`t-bot`), Strategies, Signals, Portfolio (rail "Wallet"), Positions, Orders (rail), Performance, Bot Activity.
+- **BYX:** Verify wallet ownership (`t-wallet-verify`, aberta por "Manage verification").
+- **Research (admin):** Sessions, Dataset, Labels (rail), Features (rail), Hypotheses (rail), Validation (LockedView), Simulator, Paper/Shadow (LockedView), Live (LockedView), Jobs, Logs, Users, Research Settings.
+Também legados, sem tela própria: o diálogo Credits, `ToastHost` (toasts da entrada antiga) e `panel.ui.CommandPalette.commands` (só a lista de gates da busca).
+
+### Harness de QA legado (13.11)
+`RedesignVisualSmoke`, `FidelityProductionSmoke`, `MotionParitySmoke` e `ByxVisualSmoke` agora terminam com um aviso ("LEGACY QA: not valid V2 evidence") a menos que se passe `-Dbyx.legacy.qa=true`, para não gerar resultado falso. Os harnesses do app real passaram a gravar `onboardingCompleted=true`. A modernização completa fica no Passo 14.
+
+### Findings para o Passo 14
+1. Medir `reduceMotion` real do macOS ligando/desligando a configuração do sistema com o app aberto (só a política e o probe foram testados; o probe é por `defaults`, que pode mudar entre versões do macOS).
+2. Auditoria de teclado por tela (Tab/Shift+Tab em todas as Views V2 novas) e de leitores de tela: revisados só os gaps óbvios.
+3. Contraste dos 23 pares originais não foi refeito (nenhum token mudou).
+
+## Fechamento da implementação 9–13
+`mvn test`: 483 testes, 0 falhas. `mvn clean package`: BUILD SUCCESS. Nenhum stress longo foi executado (reservado ao Passo 14). **STEPS 1–13 = IMPLEMENTED; Final QA (Passo 14) NÃO executado.**

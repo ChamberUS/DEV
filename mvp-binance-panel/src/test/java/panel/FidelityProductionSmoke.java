@@ -27,6 +27,10 @@ public final class FidelityProductionSmoke {
     private static final List<String> trace = new ArrayList<>();
     private static final List<java.util.concurrent.CompletableFuture<Void>> writes = new ArrayList<>();
     public static void main(String[] args) throws Exception {
+        if (!Boolean.getBoolean("byx.legacy.qa")) { // LEGACY QA: mede o cromo anterior ao V2 e acessa o PanelApp por reflexão; não vale como evidência do V2
+            System.err.println("LEGACY QA (pre-V2 chrome): not valid V2 evidence. Use ShellQaSmoke/ShellNavigationQa/AuthFlowQa and the step QAs. Pass -Dbyx.legacy.qa=true to run anyway.");
+            return;
+        }
         output = Path.of(args[0]); Files.createDirectories(output);
         Path home = Files.createTempDirectory("byx-fidelity-home-");
         Path settings = Files.createDirectories(home.resolve(".mvp-binance-panel"));
