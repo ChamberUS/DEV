@@ -81,10 +81,22 @@ public final class TradingDeskQa {
             }
         }
 
+        private panel.shell.ShellRouter router() throws Exception {
+            return (panel.shell.ShellRouter) field("router");
+        }
+
         private TradingDesk desk() throws Exception {
             @SuppressWarnings("unchecked")
             Map<String, View> views = (Map<String, View>) field("views");
             return (TradingDesk) views.get("t-desk");
+        }
+
+        private void refreshViews() throws Exception {
+            @SuppressWarnings("unchecked")
+            Map<String, View> views = (Map<String, View>) field("views");
+            for (String id : List.of("t-desk", "t-markets")) {
+                views.get(id).onSnapshot(null);
+            }
         }
 
         private void apply(String name) throws Exception {
@@ -105,7 +117,7 @@ public final class TradingDeskQa {
                 t.feedUpdatedAt = name.equals("stale") ? Instant.now().minusSeconds(95) : Instant.now();
             }
             ctx.trading.snapshot.set(t);
-            desk().onSnapshot(null);
+            refreshViews();
             report.add("FIXTURE " + name + " (QA only, isolated)");
         }
 
@@ -117,8 +129,10 @@ public final class TradingDeskQa {
             String step = steps.get(index++);
             if (step.equals("real")) {
                 ctx.trading.update(ctx.research.snapshot.get()); // o provider REAL: sem feed, sem conta
-                desk().onSnapshot(null);
+                refreshViews();
                 report.add("REAL provider state");
+            } else if (step.startsWith("route:")) {
+                invoke("show", String.class, step.substring(6));
             } else if (step.startsWith("fx:")) {
                 apply(step.substring(3));
             } else if (step.startsWith("tab:")) {
@@ -159,7 +173,7 @@ public final class TradingDeskQa {
             off.getStylesheets().setAll(window.getStylesheets());
             root.applyCss();
             root.layout();
-            desk().onSnapshot(null);
+            refreshViews();
             root.applyCss();
             root.layout();
             var image = off.snapshot(null);
@@ -167,7 +181,7 @@ public final class TradingDeskQa {
             window.setRoot(root);
             Path file = output.resolve(name + ".png");
             javax.imageio.ImageIO.write(panel.ControlGalleryTestAccess.toAwt(image), "png", file.toFile());
-            report.add("SHOT " + name + " scene=" + (int) image.getWidth() + "x" + (int) image.getHeight() + " mode=" + desk().mode());
+            report.add("SHOT " + name + " scene=" + (int) image.getWidth() + "x" + (int) image.getHeight() + " mode=" + desk().mode() + " route=" + router().route());
         }
 
         private Object field(String name) throws Exception {

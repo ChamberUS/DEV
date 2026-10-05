@@ -28,11 +28,11 @@ final class KvRow extends HBox {
         return key.getText();
     }
 
-    /** mono = valor numérico/ID (JetBrains Mono); tone: "neg", "pos", "warn", "muted" ou null. */
+    /** mono = valor numérico/ID (JetBrains Mono); tone: "neg", "pos", "warn", "dim" ou null. */
     void set(String text, boolean mono, String tone) {
         Fx.text(value, text);
         Fx.cls(value, "mono", mono);
-        Fx.tone(value, tone, "neg", "pos", "warn", "muted");
+        Fx.tone(value, tone, "neg", "pos", "warn", "dim");
         setAccessibleText(key.getText() + ": " + text);
     }
 }

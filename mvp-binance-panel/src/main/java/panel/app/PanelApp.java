@@ -47,7 +47,7 @@ public class PanelApp extends Application {
     private final AppContext ctx = new AppContext();
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
-    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk");
+    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -248,7 +248,7 @@ public class PanelApp extends Application {
         views.put("t-wallet", new panel.ui.ByxWalletView(ctx));
         views.put("t-benefits", new panel.ui.ByxBenefitsView(ctx));
         views.put("t-treasury", new panel.ui.ByxTreasuryView(ctx));
-        views.put("t-markets", new TraderScreens.Markets(ctx));
+        views.put("t-markets", new panel.tradeview.MarketsPage(ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone(), this::show));
         views.put("t-bot", new TraderScreens.Bot(ctx));
         views.put("t-strategies", new TraderScreens.Strategies(ctx));
         views.put("t-signals", new TraderScreens.Signals(ctx));

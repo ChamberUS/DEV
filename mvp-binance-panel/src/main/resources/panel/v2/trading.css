@@ -102,7 +102,7 @@
 .byx-desk-row-key { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
 .byx-desk-row-value { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; }
 .byx-desk-row-value.mono { -fx-font-family: "JetBrains Mono Medium"; }
-.byx-desk-row-value.muted { -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-row-value.dim { -fx-text-fill: -byx-text-tertiary; }
 .byx-desk-row-value.warn { -fx-text-fill: -byx-warning; }
 .byx-desk-row-value.pos { -fx-text-fill: -byx-positive; }
 .byx-desk-row-value.neg { -fx-text-fill: -byx-negative; }
@@ -167,3 +167,16 @@
 
 /* a chip dentro do título nunca muda a altura da linha (nenhum deslocamento ao entrar em STALE) */
 .byx-desk-panel-head .byx-stale-chip { -fx-padding: 1 8 1 8; }
+
+/* ---------- Markets & Portfolio ---------- */
+.byx-markets-table { -fx-padding: 0 0 0 0; }
+.byx-markets-head { -fx-padding: 11 6 11 6; }
+.byx-markets-symbol { -fx-font-family: "Schibsted Grotesk SemiBold"; }
+.byx-desk-cell-text { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; -fx-padding: 0 6 0 6; }
+.byx-desk-cell-mono { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 14px; -fx-text-fill: -byx-text-primary; -fx-padding: 0 6 0 6; }
+.byx-desk-cell-mono.pos { -fx-text-fill: -byx-positive; }
+.byx-desk-cell-mono.neg { -fx-text-fill: -byx-negative; }
+.byx-desk-cell-mono.stale { -fx-opacity: 0.6; }
+.byx-markets-big { -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 30px; -fx-min-height: 36; -fx-text-fill: -byx-text-primary; }
+.byx-markets-big.na { -fx-text-fill: -byx-text-tertiary; }
+.byx-desk-tab.selected-label { -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-accent; -fx-background-insets: 37 0 -1 0; -fx-padding: 10 0 10 0; }

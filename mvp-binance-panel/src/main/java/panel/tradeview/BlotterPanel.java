@@ -62,13 +62,24 @@ final class BlotterPanel extends VBox {
     private final Map<Tab, Page> pages = new EnumMap<>(Tab.class);
     private final Map<Tab, TabState> states = new EnumMap<>(Tab.class);
     private final Label guard = Fx.label("Live trading is disabled", "byx-desk-t3");
+    private final List<Tab> tabs;
+    private final Map<Tab, String> labels;
     private DeskMode mode = DeskMode.COMPACT;
-    private Tab selected = Tab.POSITIONS;
+    private Tab selected;
     private int lastKey = Integer.MIN_VALUE;
 
+    /** O blotter do Desk: as cinco abas, altura e colunas pelo breakpoint. */
     BlotterPanel() {
+        this(List.of(Tab.values()), Map.of(), true);
+    }
+
+    /** tabs/labels: Markets usa Positions, Orders e History (os mesmos dados de Trades); desk=false não segue o breakpoint. */
+    BlotterPanel(List<Tab> tabs, Map<Tab, String> labels, boolean desk) {
+        this.tabs = tabs;
+        this.labels = labels;
+        this.selected = tabs.getFirst();
         getStyleClass().addAll("byx-panel", "byx-desk-blotter");
-        setId("desk-blotter");
+        setId(desk ? "desk-blotter" : "markets-blotter");
         setPadding(new Insets(0, 16, 8, 16));
         HBox bar = new HBox(24);
         bar.getStyleClass().add("byx-desk-tabs");
@@ -77,7 +88,10 @@ final class BlotterPanel extends VBox {
         body.setMinHeight(0);
         VBox.setVgrow(body, Priority.ALWAYS);
         for (Tab tab : Tab.values()) {
-            ToggleButton b = new ToggleButton(tab.label);
+            if (!tabs.contains(tab)) {
+                continue;
+            }
+            ToggleButton b = new ToggleButton(labels.getOrDefault(tab, tab.label));
             b.getStyleClass().add("byx-desk-tab");
             b.setToggleGroup(group);
             b.setUserData(tab);
@@ -91,6 +105,13 @@ final class BlotterPanel extends VBox {
             states.put(tab, TabState.EMPTY);
             body.getChildren().add(page);
         }
+        for (Tab tab : Tab.values()) { // abas fora desta instância: tabela existe (os mapas ficam completos) mas não entra na cena
+            if (!tabs.contains(tab)) {
+                TableView<String[]> table = TTable.of(upper(tab.headers), List.of(), new Label(), 0);
+                tables.put(tab, table);
+                states.put(tab, TabState.EMPTY);
+            }
+        }
         bar.getChildren().addAll(Fx.spacer(), guard);
         group.selectedToggleProperty().addListener((o, was, now) -> {
             if (now == null) {
@@ -102,10 +123,12 @@ final class BlotterPanel extends VBox {
             selected = (Tab) now.getUserData();
             showSelected();
         });
-        buttons.get(Tab.POSITIONS).setSelected(true);
+        buttons.get(tabs.getFirst()).setSelected(true);
         getChildren().addAll(bar, body);
         setMinSize(0, 0);
-        setMode(DeskMode.COMPACT);
+        if (desk) {
+            setMode(DeskMode.COMPACT);
+        }
         showSelected();
     }
 
@@ -252,17 +275,29 @@ final class BlotterPanel extends VBox {
         return (int) tables.get(Tab.POSITIONS).getColumns().stream().filter(c -> c.isVisible()).count();
     }
 
+    /** Altura fixa fora do Desk (Markets & Portfolio) e quantidade de colunas de Positions. */
+    void setFixedHeight(double h, int positionColumns) {
+        setMinHeight(h);
+        setPrefHeight(h);
+        setMaxHeight(h);
+        showPositionColumns(positionColumns);
+    }
+
+    private void showPositionColumns(int n) {
+        var columns = tables.get(Tab.POSITIONS).getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            columns.get(i).setVisible(i < n);
+        }
+        fit(tables.get(Tab.POSITIONS), Tab.POSITIONS);
+    }
+
     /** Altura e colunas do breakpoint (a altura é fixa: 214, 240, 300). */
     void setMode(DeskMode mode) {
         this.mode = mode;
         setMinHeight(mode.blotterHeight);
         setPrefHeight(mode.blotterHeight);
         setMaxHeight(mode.blotterHeight);
-        var columns = tables.get(Tab.POSITIONS).getColumns();
-        for (int i = 0; i < columns.size(); i++) {
-            columns.get(i).setVisible(i < mode.blotterColumns);
-        }
-        fit(tables.get(Tab.POSITIONS), Tab.POSITIONS);
+        showPositionColumns(mode.blotterColumns);
     }
 
     /** Estado de uma aba a partir de dados reais (ver auditoria §3). Positions/Orders/Trades dependem da conta, que não existe. */
@@ -327,7 +362,7 @@ final class BlotterPanel extends VBox {
         Fx.text(buttons.get(Tab.ORDERS), "Orders " + t.orders);
         Fx.text(guard, DeskModel.liveOff(t) ? "Live trading is disabled" : "");
         List<List<String[]>> data = List.of(t.positionRows, t.orderRows, t.tradeRows, t.signalRows, t.activityRows);
-        for (Tab tab : Tab.values()) {
+        for (Tab tab : tabs) {
             List<String[]> rows = data.get(tab.ordinal());
             TTable.update(tables.get(tab), rows);
             setState(tab, stateOf(tab, t, rows));
@@ -335,7 +370,7 @@ final class BlotterPanel extends VBox {
     }
 
     private void showSelected() {
-        for (Tab tab : Tab.values()) {
+        for (Tab tab : tabs) {
             boolean on = tab == selected;
             Fx.shown(pages.get(tab), on);
         }

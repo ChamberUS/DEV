@@ -292,18 +292,18 @@ public final class TradingDesk extends GridPane implements View {
 
     private void applyRisk(TraderSnapshot t, DeskModel.Feed feed, Instant now) {
         var cells = DeskModel.metrics(t, feed, now);
-        risk.row(0).set(cells.get(2).value(), true, cells.get(2).state() == DeskModel.CellState.NA ? "muted" : null);
-        risk.row(1).set(cells.get(3).value(), true, cells.get(3).state() == DeskModel.CellState.NA ? "muted" : null);
-        risk.row(2).set("Unavailable", false, "muted"); // não existe fonte de limites de risco
+        risk.row(0).set(cells.get(2).value(), true, cells.get(2).state() == DeskModel.CellState.NA ? "dim" : null);
+        risk.row(1).set(cells.get(3).value(), true, cells.get(3).state() == DeskModel.CellState.NA ? "dim" : null);
+        risk.row(2).set("Unavailable", false, "dim"); // não existe fonte de limites de risco
     }
 
     private void applyFreshness(TraderSnapshot t, DeskModel.Feed feed, Instant now) {
-        freshness.row(0).set(feed.freshnessText, false, feed.waiting() ? "muted" : feed.looksStale() ? "warn" : null);
+        freshness.row(0).set(feed.freshnessText, false, feed.waiting() ? "dim" : feed.looksStale() ? "warn" : null);
         boolean known = t.feedUpdatedAt != null && feed.showsMarketData();
-        freshness.row(1).set(known ? panel.util.Fmt.time(t.feedUpdatedAt) : "—", true, known ? null : "muted");
-        freshness.row(2).set("—", true, "muted"); // latência: sem fonte
+        freshness.row(1).set(known ? panel.util.Fmt.time(t.feedUpdatedAt) : "—", true, known ? null : "dim");
+        freshness.row(2).set("—", true, "dim"); // latência: sem fonte
         freshness.row(3).set(known ? DeskModel.age(Duration.between(t.feedUpdatedAt, now)) : "N/A", true,
-                known ? (feed.looksStale() ? "warn" : null) : "muted");
+                known ? (feed.looksStale() ? "warn" : null) : "dim");
     }
 
     /** Um relógio de 1 s só existe enquanto o Desk está visível E há horário de feed para envelhecer. */
