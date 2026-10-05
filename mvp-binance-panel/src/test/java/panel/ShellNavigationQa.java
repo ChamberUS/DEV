@@ -223,10 +223,8 @@ public final class ShellNavigationQa {
                 }
                 after(1500, () -> {
                     check(ctx.motion.runningLoops() == loops, "20 round trips keep running loops at " + loops + " (now " + ctx.motion.runningLoops() + ")");
-                    // Fundação (passo 2, congelada): toda troca de View reexecuta a entrada de cards. O P3.3 pede que
-                    // voltar a uma View existente não tenha intro pesada: registrado como achado para decisão.
-                    lines.add("FINDING round trips replay card entry on every return (" + entries + " -> "
-                            + ctx.transitions.entries() + "); pre-existing step-2 ViewTransitionService, P3.3 says no heavy intro on return");
+                    check(ctx.transitions.entries() == entries, "20 round trips replay no card entry (" + entries + " -> "
+                            + ctx.transitions.entries() + "), P3.3");
                     check(only("t-desk"), "one visible view after 20 round trips");
                     run();
                 });

@@ -19,7 +19,7 @@ PASS t-byx idle 60 s with 60 data updates never navigates: []
 PASS t-byx idle keeps one visible view
 PASS t-byx idle replays no page enter
 PASS 20 round trips keep running loops at 0 (now 0)
-FINDING round trips replay card entry on every return (13 -> 53); pre-existing step-2 ViewTransitionService, P3.3 says no heavy intro on return
+PASS 20 round trips replay no card entry (3 -> 3), P3.3
 PASS one visible view after 20 round trips
 PASS resize keeps the route
 PASS resize replays no page enter
