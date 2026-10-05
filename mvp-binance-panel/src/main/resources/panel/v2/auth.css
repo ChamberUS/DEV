@@ -1,0 +1,53 @@
+/* BYX-MVP V2 auth (handoff css/layout.css .au, P3.20 brand field). */
+.byx-auth { -fx-background-color: -byx-bg0; }
+.byx-brand { -fx-background-color: -byx-bg1; }
+.byx-brand-content { -fx-padding: 64; }
+.byx-brand.expanded .byx-brand-content { -fx-padding: 96; }
+.byx-brand-name { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 30px; -fx-text-fill: -byx-text-primary; }
+.byx-brand-bar { -fx-background-color: -byx-trading; -fx-background-radius: 17; }
+.byx-tagline { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 40px; }
+.byx-brand.expanded .byx-tagline { -fx-font-size: 52px; }
+.byx-tagline-flow { -fx-line-spacing: 6px; }
+.byx-brand.expanded .byx-tagline-flow { -fx-line-spacing: 6px; }
+
+.byx-auth-pane { -fx-background-color: -byx-bg0; }
+.byx-auth-step { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary; }
+.byx-auth-form { -fx-spacing: 16; }
+.byx-auth-footer-link {
+    -fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand;
+    -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary;
+}
+.byx-auth-footer-link:hover { -fx-text-fill: -byx-text-primary; -fx-underline: true; }
+.byx-auth-footer-link:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 4; }
+.byx-auth-footer-link:disabled { -fx-opacity: 0.55; }
+.byx-auth-footer .byx-badge { -fx-font-size: 10px; -fx-padding: 2 6 2 6; }
+
+.byx-auth-title { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 28px; -fx-text-fill: -byx-text-primary; }
+.byx-auth-sub { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; -fx-wrap-text: true; }
+/* .lk: accent link, 600 */
+.byx-link {
+    -fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand;
+    -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px; -fx-text-fill: -byx-trading;
+}
+.byx-link:hover { -fx-underline: true; }
+.byx-link:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 4; }
+.byx-link:disabled { -fx-opacity: 0.55; }
+
+/* OTP: boxes 40x50, mono 20, radius 10 */
+.byx-otp { -fx-spacing: 8; }
+.byx-otp-box, .byx-otp-box:focused {
+    -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 20px; -fx-alignment: center; -fx-text-fill: -byx-text-primary;
+    -fx-min-width: 40; -fx-pref-width: 40; -fx-max-width: 40; -fx-min-height: 50; -fx-pref-height: 50; -fx-max-height: 50;
+    -fx-padding: 0; -fx-background-color: -byx-line, -byx-bg2; -fx-background-insets: 0, 1; -fx-background-radius: 10, 9;
+    -fx-highlight-fill: transparent; -fx-highlight-text-fill: -byx-text-primary;
+}
+.byx-otp-box:focused { -fx-background-color: -byx-focus-ring, -byx-trading, -byx-bg2; -fx-background-insets: -3, 0, 1; -fx-background-radius: 13, 10, 9; }
+.byx-otp:error .byx-otp-box { -fx-background-color: -byx-negative, -byx-bg2; }
+.byx-otp:disabled .byx-otp-box { -fx-opacity: 0.55; }
+.byx-code-input { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 20px; }
+
+/* success (okc 64, pbar 4) */
+.byx-auth-okc { -fx-min-width: 64; -fx-min-height: 64; -fx-max-width: 64; -fx-max-height: 64; -fx-background-color: #42D79B22; -fx-background-radius: 32; }
+.byx-auth-okc .byx-icon { -fx-stroke: -byx-positive; }
+.byx-pbar { -fx-background-color: -byx-bg3; -fx-background-radius: 2; -fx-min-height: 4; -fx-max-height: 4; }
+.byx-pbar-fill { -fx-background-color: -byx-trading; -fx-background-radius: 2; }
