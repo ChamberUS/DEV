@@ -94,6 +94,8 @@ public class PanelApp extends Application {
     private final SegmentedSwitch workspaceSwitch = new SegmentedSwitch(ctx.motion);
     private final StackPane holder = new StackPane();
     private final StackPane rootStack = new StackPane();
+    /** Telas e cromo legados (ainda não portados): folhas antigas presas aqui, nunca na cena. */
+    private final panel.shell.LegacyHost legacy = new panel.shell.LegacyHost();
     private final Map<String, StackPane> navWrappers = new LinkedHashMap<>();
     private final Map<VBox, Region> indicators = new LinkedHashMap<>();
     private final Map<VBox, StackPane> navStacks = new LinkedHashMap<>();
@@ -121,12 +123,14 @@ public class PanelApp extends Application {
         Ui.init(ctx.motion);
         panel.ui.Dialogs.init(ctx.motion);
         ctx.refreshDensity = this::applyDensity;
-        rootStack.getChildren().addAll(holder, ctx.toasts);
+        legacy.getChildren().addAll(holder, ctx.toasts);
         StackPane.setAlignment(ctx.toasts, Pos.BOTTOM_RIGHT);
+        rootStack.getStyleClass().add("byx-app");
+        rootStack.getChildren().add(legacy);
         ctx.motion.setActive(false);
         Scene scene = new Scene(rootStack, 1440, 900);
-        scene.getStylesheets().add(getClass().getResource("/panel/panel.css").toExternalForm());
-        scene.getStylesheets().add(getClass().getResource("/panel/byx.css").toExternalForm());
+        // cena: só o tema V2; as folhas legadas valem apenas dentro de LegacyHost
+        panel.design.ByxTheme.apply(scene);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (mainActive && new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K,
                     javafx.scene.input.KeyCombination.SHORTCUT_DOWN).match(e)) {
@@ -173,11 +177,7 @@ public class PanelApp extends Application {
     public void stop() { ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
 
     private void applyDensity() {
-        var cls = rootStack.getStyleClass();
-        cls.remove("comfortable");
-        if ("COMFORTABLE".equals(ctx.settings.density)) {
-            cls.add("comfortable");
-        }
+        legacy.setComfortable("COMFORTABLE".equals(ctx.settings.density));
     }
 
     // ---- fluxo de autenticação -------------------------------------------------
@@ -191,8 +191,7 @@ public class PanelApp extends Application {
         if (expiryWatch != null) {
             expiryWatch.stop();
         }
-        rootStack.getStyleClass().removeAll("trader", "byx", "research");
-        rootStack.getStyleClass().add("trader");
+        legacy.setContext("trader");
         stage.setTitle(AppBranding.title("Login"));
         if (ctx.auth.firstRun()) {
             holder.getChildren().setAll(new InitialAdminSetupView(ctx, this::showEntry).node());
@@ -478,12 +477,7 @@ public class PanelApp extends Application {
         syncTabs();
         brand.setAccessibleText(AppBranding.NAME + " " + AppBranding.ATTRIBUTION);
         stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : toTrader ? "Trading" : "Research"));
-        var cls = rootStack.getStyleClass();
-        cls.removeAll("trader", "byx", "research");
-        cls.add(toByx ? "byx" : toTrader ? "trader" : "research");
-        if (toTrader) {
-            cls.add("trader");
-        }
+        legacy.setContext(toByx ? "byx" : toTrader ? "trader" : "research");
         View next = views.get(id);
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
@@ -710,7 +704,7 @@ public class PanelApp extends Application {
     }
 
     private void openPalette() {
-        palette.open(rootStack, ctx.sessions.user().map(u -> u.user().admin()).orElse(false),
+        palette.open(legacy, ctx.sessions.user().map(u -> u.user().admin()).orElse(false),
                 ctx.adminAccess.hasValidAdminSession());
     }
 
