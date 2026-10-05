@@ -1,0 +1,1099 @@
+{
+  "version": "3.0.0-final",
+  "easings": {
+    "standard": "cubic-bezier(0.2,0.8,0.2,1)",
+    "accelerate": "cubic-bezier(0.4,0,1,1)",
+    "linear": "linear",
+    "javafx": "Interpolator.SPLINE(0.2,0.8,0.2,1) for standard; SPLINE(0.4,0,1,1) for accelerate"
+  },
+  "modes": {
+    "FULL": {
+      "durationScale": 1,
+      "translate": true,
+      "scale": true,
+      "loops": true
+    },
+    "REDUCED": {
+      "durationScale": "see reducedMs fields",
+      "translate": false,
+      "scale": false,
+      "loops": "spinner only",
+      "note": "keep essential feedback (focus, color, opacity)"
+    },
+    "OFF": {
+      "durationScale": 0,
+      "translate": false,
+      "scale": false,
+      "loops": false,
+      "note": "state changes are instant; spinner may show a static glyph"
+    },
+    "devOnlyControl": true
+  },
+  "tokens": {
+    "hover": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": 1,
+      "translateY": -1,
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "press": {
+      "durationMs": 80,
+      "delayMs": 0,
+      "easing": "standard",
+      "scale": 0.98,
+      "translateY": 0,
+      "reducedMs": 40,
+      "offMs": 0
+    },
+    "focus": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "ring 3px, no translate",
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "tooltip": {
+      "durationMs": 120,
+      "delayMs": 300,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateX": [
+        -4,
+        0
+      ],
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "pageEnter": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "stagger": 30,
+      "staggerMax": 4,
+      "reducedMs": 120,
+      "reducedTranslateY": 0,
+      "offMs": 0,
+      "note": "animates the form pane content only; brand region animates once per session"
+    },
+    "pageExit": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "none. Route state changes immediately; the old screen is removed, never faded over the new one",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "authTransition": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "stagger": 30,
+      "reducedMs": 120,
+      "reducedTranslateY": 0,
+      "offMs": 0,
+      "note": "panel swap inside the same route; previous panel removed instantly"
+    },
+    "workspaceChange": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "indicator translateX to the new tab; content swaps immediately",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "railIndicator": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "3px bar translateY",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "overlayOpen": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "scale": [
+        0.98,
+        1
+      ],
+      "reducedMs": 100,
+      "reducedScale": 1,
+      "offMs": 0
+    },
+    "overlayClose": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "scale": [
+        1,
+        0.98
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "menuOpen": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        -4,
+        0
+      ],
+      "reducedMs": 80,
+      "reducedTranslateY": 0,
+      "offMs": 0
+    },
+    "menuClose": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "modalOpen": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "scale": [
+        0.98,
+        1
+      ],
+      "backdropOpacity": [
+        0,
+        0.82
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "modalClose": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "backdropOpacity": [
+        0.82,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "toastEnter": {
+      "durationMs": 240,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "reducedMs": 100,
+      "offMs": 0,
+      "duration": "auto-dismiss 4000ms, paused on hover"
+    },
+    "toastExit": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "loading": {
+      "durationMs": 800,
+      "delayMs": 0,
+      "easing": "linear",
+      "loop": true,
+      "rotateDeg": 360,
+      "reducedMs": 800,
+      "offMs": "static",
+      "note": "spinner stays in REDUCED because it is essential feedback"
+    },
+    "shimmer": {
+      "durationMs": 2200,
+      "delayMs": 0,
+      "easing": "linear",
+      "loop": true,
+      "backgroundShiftPercent": 200,
+      "reducedMs": "none",
+      "offMs": "none"
+    },
+    "breathing": {
+      "durationMs": 2600,
+      "delayMs": 0,
+      "easing": "standard",
+      "loop": true,
+      "opacity": [
+        1,
+        0.45,
+        1
+      ],
+      "reducedMs": "none",
+      "offMs": "none",
+      "note": "live status indicators only"
+    },
+    "errorFeedback": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "translateX": [
+        0,
+        -4,
+        4,
+        -3,
+        2,
+        0
+      ],
+      "note": "OTP boxes shake once; error ring and text appear regardless of mode",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "successFeedback": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "scale": [
+        0.6,
+        1
+      ],
+      "reducedMs": 120,
+      "reducedScale": 1,
+      "offMs": 0
+    },
+    "progressFill": {
+      "durationMs": 1400,
+      "delayMs": 0,
+      "easing": "standard",
+      "widthPercent": [
+        0,
+        100
+      ],
+      "reducedMs": 1400,
+      "offMs": "instant 100%"
+    },
+    "fieldValidation": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "border color + helper text; icon always accompanies color",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "dockStatusChange": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "dot color crossfade. No flash, no scale",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "cardEnter": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "reducedMs": 120,
+      "reducedTranslateY": 0,
+      "offMs": 0,
+      "note": "region content (ready/empty/error) when a region changes state; never on data refresh"
+    },
+    "userMenuOpen": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        -4,
+        0
+      ],
+      "reducedMs": 80,
+      "reducedTranslateY": 0,
+      "offMs": 0,
+      "note": "focus moves to first item (or last with ArrowUp) after the open class is applied"
+    },
+    "userMenuClose": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "translateY": [
+        0,
+        -4
+      ],
+      "reducedMs": 60,
+      "offMs": 0,
+      "note": "visibility hidden after the fade so items leave the tab order"
+    },
+    "notificationPanelOpen": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        -4,
+        0
+      ],
+      "reducedMs": 80,
+      "reducedTranslateY": 0,
+      "offMs": 0,
+      "note": "same popover component as the user menu; one popover at a time"
+    },
+    "notificationPanelClose": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "notificationMarkRead": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        1,
+        0
+      ],
+      "scale": [
+        1,
+        0.4
+      ],
+      "target": "unread dot",
+      "reducedMs": 100,
+      "offMs": 0,
+      "note": "title weight 600 -> 400 and background tint removed in the same frame; the row does not move"
+    },
+    "badgeCountChange": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "linear",
+      "note": "count text swaps instantly; badge hides at 0. No bounce, no pulse"
+    },
+    "accordionExpand": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "height": "grid-template-rows 0fr -> 1fr",
+      "chevronRotateDeg": [
+        0,
+        180
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "accordionCollapse": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "height": "grid-template-rows 1fr -> 0fr",
+      "chevronRotateDeg": [
+        180,
+        0
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "settingsSectionChange": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "linear",
+      "scroll": "smooth in FULL, instant in REDUCED/OFF",
+      "note": "section nav highlights the section in view; content never re-animates"
+    },
+    "settingsSaveBarShow": {
+      "durationMs": 240,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        "100% + 24px",
+        0
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "settingsSaveBarHide": {
+      "durationMs": 240,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        1,
+        0
+      ],
+      "translateY": [
+        0,
+        "100% + 24px"
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "toggleSwitch": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "thumbTranslateX": [
+        0,
+        18
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "profileEditEnter": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "reducedMs": 120,
+      "reducedTranslateY": 0,
+      "offMs": 0,
+      "note": "view and edit panels swap; first field focused immediately (no deferred focus)"
+    },
+    "profileSaved": {
+      "durationMs": 240,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "returns to view state + success toast; saved value shown without animation"
+    },
+    "searchResultsUpdate": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "linear",
+      "note": "results re-render on every keystroke without animation; selection highlight moves instantly; never animate list height"
+    },
+    "paletteOpen": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "scale": [
+        0.98,
+        1
+      ],
+      "backdropOpacity": [
+        0,
+        0.78
+      ],
+      "reducedMs": 100,
+      "reducedScale": 1,
+      "offMs": 0
+    },
+    "paletteClose": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "dialogOpen": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "scale": [
+        0.98,
+        1
+      ],
+      "backdropOpacity": [
+        0,
+        0.82
+      ],
+      "reducedMs": 100,
+      "reducedScale": 1,
+      "offMs": 0,
+      "note": "destructive dialogs focus Cancel first"
+    },
+    "dialogClose": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0,
+      "note": "focus returns to the element that opened the dialog"
+    },
+    "rowRemove": {
+      "durationMs": 200,
+      "delayMs": 700,
+      "easing": "standard",
+      "opacity": [
+        1,
+        0
+      ],
+      "note": "session/device sign-out: 700 ms demo latency, then fade, then the row is removed and counts update",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "toastStack": {
+      "durationMs": 240,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "reducedMs": 100,
+      "offMs": 0,
+      "maxVisible": 3,
+      "autoDismissMs": {
+        "success": 4000,
+        "info": 4000,
+        "warning": 6000,
+        "error": "never (dismiss button)"
+      },
+      "hoverPausesTimer": true,
+      "note": "a 4th toast removes the oldest immediately"
+    },
+    "regionLoading": {
+      "durationMs": 2200,
+      "delayMs": 0,
+      "easing": "linear",
+      "loop": true,
+      "note": "skeleton shimmer; every loading region resolves to ready, empty, error or unavailable. Never an infinite skeleton",
+      "reducedMs": "static",
+      "offMs": "static"
+    },
+    "systemChipChange": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Chip colour crossfade. Scale .98 to 1 in FULL only",
+      "scale": [
+        0.98,
+        1
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "statePulse": {
+      "durationMs": 1400,
+      "delayMs": 0,
+      "easing": "linear",
+      "loop": true,
+      "opacity": [
+        1,
+        0.35,
+        1
+      ],
+      "note": "Exists only while CONNECTING or RECONNECTING. Removed with the state. Never accumulates",
+      "reducedMs": "none",
+      "offMs": "none"
+    },
+    "restoredChipHold": {
+      "durationMs": 3000,
+      "delayMs": 0,
+      "easing": "none",
+      "note": "Logical hold, not an animation. Chip shows RESTORED then returns to CONNECTED",
+      "reducedMs": 3000,
+      "offMs": 3000
+    },
+    "globalBarShow": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        -8,
+        0
+      ],
+      "height": [
+        0,
+        36
+      ],
+      "note": "Slim bar under the top bar",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "globalBarHide": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "warningBannerEnter": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        -8,
+        0
+      ],
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "warningBannerExit": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "inlineFieldError": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Message height and opacity; border colour. No shake outside OTP",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "regionStateSwap": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "note": "New state fades in. Old state is removed first. Applies to all ten region states",
+      "reducedMs": 120,
+      "offMs": 0
+    },
+    "staleDim": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        1,
+        0.6
+      ],
+      "note": "Value keeps its number. No live dot, no pulse",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "loadingSlowNote": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "note": "Shown at 8 s of LOADING with Retry and Keep waiting",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "sessionDialogEnter": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "scale": [
+        0.98,
+        1
+      ],
+      "backdropOpacity": [
+        0,
+        0.82
+      ],
+      "note": "alertdialog. Esc and backdrop do nothing",
+      "reducedMs": 100,
+      "reducedScale": 1,
+      "offMs": 0
+    },
+    "sessionDialogExit": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "sessionFlowStep": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Flow chip background and underline",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "onboardingStepEnter": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateX": [
+        "16*dir",
+        0
+      ],
+      "note": "dir is +1 forward and -1 back. Interruptible by a step token",
+      "reducedMs": 100,
+      "reducedTranslate": false,
+      "offMs": 0
+    },
+    "onboardingStepExit": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "translateX": [
+        0,
+        "-12*dir"
+      ],
+      "reducedMs": 80,
+      "reducedTranslate": false,
+      "offMs": 0
+    },
+    "onboardingProgress": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Segment fill colour",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "onboardingOption": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Selected ring box-shadow and background",
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "startupStep": {
+      "durationMs": 200,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Step dot to check. Current step pulses at 1200 ms only while it is current",
+      "reducedMs": 100,
+      "offMs": 0
+    },
+    "startupExit": {
+      "durationMs": 160,
+      "delayMs": 0,
+      "easing": "accelerate",
+      "opacity": [
+        1,
+        0
+      ],
+      "note": "Only when the minimal startup screen was shown. A fast start has no startup screen",
+      "reducedMs": 80,
+      "offMs": 0
+    },
+    "dockLinkHover": {
+      "durationMs": 120,
+      "delayMs": 0,
+      "easing": "standard",
+      "note": "Background bg2",
+      "reducedMs": 60,
+      "offMs": 0
+    },
+    "welcomeEnter": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "staggerMs": 30,
+      "reducedMs": 120,
+      "offMs": 0
+    },
+    "firstMountPageEnter": {
+      "durationMs": 320,
+      "delayMs": 0,
+      "easing": "standard",
+      "opacity": [
+        0,
+        1
+      ],
+      "translateY": [
+        8,
+        0
+      ],
+      "note": "Once per view, on its first VISIBLE only",
+      "reducedMs": 120,
+      "offMs": 0
+    },
+    "returnToExistingView": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "none",
+      "note": "No intro. The view is shown as it was",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "navigationInterrupt": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "none",
+      "note": "A new request stops the running transition at once and applies the target. A to B to C ends in C",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "dataUpdateResizeRefresh": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "none",
+      "note": "Data update, resize, refresh and background to foreground never play a page enter",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "brandFieldCycle": {
+      "durationMs": 9000,
+      "delayMs": 0,
+      "easing": "linear",
+      "note": "Master phase 0..1 loops continuously while the auth/welcome panel is visible. It drives the mesh light front (x = -0.2 + 1.4 p), the bar cascade (bar n peaks at p = 0.50 + 0.06 n) and the tagline sweep. Loading state: 4500 ms. Phase is accumulated, so a period change never jumps.",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "brandFieldDrift": {
+      "durationMs": "18000..40000",
+      "delayMs": 0,
+      "easing": "sine (x = cos, y = sin 0.83)",
+      "note": "Each of the 42 mesh nodes orbits its base point with radius 0.015..0.036 of the panel (normalised), own period and phase, seed 7. Topology is fixed: 60 triangles, 101 edges. No per-frame triangulation. Capped at 30 fps.",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "brandFieldTagline": {
+      "durationMs": 9000,
+      "delayMs": 0,
+      "easing": "linear",
+      "note": "Highlight band (width about 36% of the line) moves left to right with the master phase. FULL only. Base colours stay AA (line 1 #CBD3E8, line 2 var(--t2)).",
+      "reducedMs": 0,
+      "offMs": 0
+    },
+    "brandFieldGlow": {
+      "durationMs": 8000,
+      "delayMs": 0,
+      "easing": "sine",
+      "note": "REDUCED only. The glow behind the bars breathes by +/-0.03 alpha. No spatial movement, 12 fps cap. Mesh, bars and tagline are static.",
+      "reducedMs": 8000,
+      "offMs": 0
+    },
+    "brandFieldStatic": {
+      "durationMs": 0,
+      "delayMs": 0,
+      "easing": "none",
+      "note": "OFF. One frame is drawn at phase 0.62 (bars at their resting brightness, no front). Nothing runs. Also used for hidden window, pagehide and boards.",
+      "reducedMs": 0,
+      "offMs": 0
+    }
+  },
+  "rules": [
+    "Route state is the authority for navigation. Motion is presentation only.",
+    "An animation never restores an old route, triggers navigation, or decides the destination.",
+    "Every transition is cancellable: a new navigation intent stops any running transition and the target state is applied.",
+    "Loops (shimmer, breathing) pause or stop in REDUCED and OFF.",
+    "Data updates never replay enter animations.",
+    "Deferred focus (setTimeout/Platform.runLater) must check that no layer opened in the meantime; otherwise focus can land behind a dialog.",
+    "Search results and badge counts update without animation.",
+    "A save bar or a confirmation guards navigation away from unsaved edits; the route does not change until the user confirms.",
+    "A continuous animation (shimmer, breathing, spinner, pulse) is created with its state and stopped when the state ends. Animations never accumulate.",
+    "Every callback belongs to a token. A callback whose token is no longer current does nothing.",
+    "First mount of a view may play pageEnter. Returning to an existing view, data updates, resize, refresh and background to foreground do not.",
+    "Timers that are logical (reconnect attempts, restored hold, loading thresholds) behave the same in FULL, REDUCED and OFF.",
+    "Brand field: one continuous loop exists only while the panel is visible and the motion mode is FULL (or the 8 s glow breath in REDUCED). It stops on hidden window and pagehide. It is decorative, aria-hidden, never receives input and never delays a flow."
+  ],
+  "cssVariables": {
+    "--m-hover": [
+      120,
+      60,
+      0
+    ],
+    "--m-press": [
+      80,
+      40,
+      0
+    ],
+    "--m-base": [
+      200,
+      100,
+      0
+    ],
+    "--m-enter": [
+      320,
+      120,
+      0
+    ],
+    "--m-exit": [
+      160,
+      80,
+      0
+    ],
+    "--m-menu": [
+      160,
+      80,
+      0
+    ],
+    "--m-menu-out": [
+      120,
+      60,
+      0
+    ],
+    "--m-panel": [
+      200,
+      100,
+      0
+    ],
+    "--m-acc": [
+      200,
+      100,
+      0
+    ],
+    "--m-toast": [
+      240,
+      100,
+      0
+    ],
+    "--m-row": [
+      200,
+      100,
+      0
+    ],
+    "--ty (px)": [
+      8,
+      0,
+      0
+    ],
+    "--dsc (dialog/palette start scale)": [
+      0.98,
+      1,
+      1
+    ],
+    "--sb (scroll-behavior)": [
+      "smooth",
+      "auto",
+      "auto"
+    ],
+    "_order": "[FULL, REDUCED, OFF]"
+  },
+  "layersRef": "BYX_DESIGN_TOKENS.json#layers"
+}

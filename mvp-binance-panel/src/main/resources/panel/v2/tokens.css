@@ -1,0 +1,67 @@
+/*
+ * BYX-MVP V2 design tokens as JavaFX looked-up colors.
+ * Source of truth: /design/BYX_DESIGN_TOKENS.json (3.0.0-final). DesignTokensTest keeps both in sync.
+ * Every name is prefixed -byx- so the V2 theme can coexist with panel.css / byx.css until the shell is ported.
+ */
+.root {
+    /* colors.surface */
+    -byx-bg0: #0B0E16;
+    -byx-bg1: #121723;
+    -byx-bg2: #1A2030;
+    -byx-bg3: #232A3D;
+    -byx-hover: #2C3550;
+    -byx-line: #2A3144;
+    -byx-scrim: #05070BD1; /* scrim #05070B at scrimOpacity 0.82 */
+
+    /* colors.text */
+    -byx-text-primary: #EEF1F8;
+    -byx-text-secondary: #AAB3C7;
+    -byx-text-tertiary: #8791A8;
+    -byx-text-on-accent: #0A0C14;
+
+    /* colors.accent */
+    -byx-trading: #7C96FF;
+    -byx-research: #B896FF;
+    -byx-byx: #5ED6C4;
+    -byx-accent: -byx-trading;
+
+    /* colors.semantic */
+    -byx-positive: #42D79B;
+    -byx-negative: #FF7A7A;
+    -byx-warning: #E9B44C;
+    -byx-info: #5CC8FF;
+    -byx-disabled: #566079;
+
+    /* colors.semanticTint: 12% (1F) for badges, 9% (18) for banners */
+    -byx-positive-tint: #42D79B1F;
+    -byx-negative-tint: #FF7A7A1F;
+    -byx-warning-tint: #E9B44C1F;
+    -byx-info-tint: #5CC8FF1F;
+    -byx-accent-tint: #7C96FF1F;
+    -byx-positive-banner: #42D79B18;
+    -byx-negative-banner: #FF7A7A18;
+    -byx-warning-banner: #E9B44C18;
+    -byx-info-banner: #5CC8FF18;
+
+    /* colors.bannerText */
+    -byx-banner-error: #FFB0B0;
+    -byx-banner-warning: #F2CB7A;
+    -byx-banner-success: #7FE6B8;
+    -byx-banner-info: #8ED8FF;
+
+    /* shadows.focusRing / errorRing */
+    -byx-focus-ring: #7C96FF21;
+    -byx-error-ring: #FF7A7A1A;
+}
+
+/* contexts: trading / research / byx (same root classes PanelApp already toggles) */
+.root.trader { -byx-accent: -byx-trading; -byx-accent-tint: #7C96FF1F; }
+.root.research { -byx-accent: -byx-research; -byx-accent-tint: #B896FF1F; }
+.root.byx { -byx-accent: -byx-byx; -byx-accent-tint: #5ED6C41F; }
+
+/* accessibility.highContrast */
+.root.hc {
+    -byx-text-secondary: #C3CADB;
+    -byx-text-tertiary: #A3ACC2;
+    -byx-line: #3A4460;
+}
