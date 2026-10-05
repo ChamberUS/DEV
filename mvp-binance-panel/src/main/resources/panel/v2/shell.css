@@ -36,6 +36,7 @@
     -fx-background-color: transparent;
     -fx-background-radius: 8;
     -fx-padding: 7 16 7 16;
+    -fx-min-height: 34; /* line 20 + padding 7/7 (P2.4: switcher 244x40 with the 3 px frame) */
     -fx-font-family: "Schibsted Grotesk SemiBold";
     -fx-font-size: 14px;
     -fx-text-fill: -byx-text-secondary;
@@ -78,7 +79,7 @@
     -fx-background-color: -byx-bg0, -byx-trading; -fx-background-insets: -2, 0;
     -fx-text-fill: -byx-text-on-accent; -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 11px; -fx-alignment: center;
 }
-.byx-admin-badge { -fx-font-size: 12px; -fx-padding: 5 10 5 10; }
+.byx-admin-badge { -fx-font-size: 12px; -fx-padding: 5 12 5 12; -fx-min-height: 26; } /* P2.4: 122x26 */
 .byx-avatar {
     -fx-background-color: #FFFFFF1A, -byx-bg3; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
     -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;

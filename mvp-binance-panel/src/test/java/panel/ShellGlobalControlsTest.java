@@ -268,14 +268,18 @@ class ShellGlobalControlsTest {
                 f.shell.topBar().notifications().fire();
                 f.menu.open(true);
                 f.palette.open();
+                Node focusBefore = f.focus();
+                f.shell.overlay().toast(panel.design.ByxOverlayHost.ToastKind.INFO, "Refreshed");
+                boolean toastKeptFocus = f.focus() == focusBefore;
                 String s = f.shell.overlay().topLayer() + " popovers=" + f.shell.overlay().openPopovers()
-                        + " palette=" + f.palette.isOpen() + " menu=" + f.menu.isOpen() + " route=" + f.router.route();
+                        + " palette=" + f.palette.isOpen() + " menu=" + f.menu.isOpen() + " route=" + f.router.route()
+                        + " toasts=" + f.shell.overlay().visibleToasts() + " toastKeptFocus=" + toastKeptFocus;
                 f.close();
                 return s;
             }));
         }
         assertEquals(states.get(0), states.get(1), "FULL vs REDUCED");
         assertEquals(states.get(0), states.get(2), "FULL vs OFF");
-        assertEquals("PALETTE popovers=0 palette=true menu=false route=t-desk", states.get(0));
+        assertEquals("PALETTE popovers=0 palette=true menu=false route=t-desk toasts=1 toastKeptFocus=true", states.get(0));
     }
 }
