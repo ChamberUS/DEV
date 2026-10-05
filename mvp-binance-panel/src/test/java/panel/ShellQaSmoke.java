@@ -51,6 +51,8 @@ public final class ShellQaSmoke {
         private AppContext ctx;
         private int index;
         private boolean entered;
+        private int width = 1440;
+        private int height = 900;
 
         @Override
         public void start(Stage stage) {
@@ -90,7 +92,8 @@ public final class ShellQaSmoke {
             String route = parts[0];
             if (parts.length > 1) {
                 String[] wh = parts[1].split("x");
-                resize(Integer.parseInt(wh[0]), Integer.parseInt(wh[1]));
+                width = Integer.parseInt(wh[0]);
+                height = Integer.parseInt(wh[1]);
             }
             if (!route.equals("login")) {
                 if (!entered) {
@@ -104,18 +107,24 @@ public final class ShellQaSmoke {
             });
         }
 
-        private void resize(int w, int h) {
-            double dw = stage.getWidth() - stage.getScene().getWidth();
-            double dh = stage.getHeight() - stage.getScene().getHeight();
-            stage.setWidth(w + (Double.isNaN(dw) ? 0 : dw));
-            stage.setHeight(h + (Double.isNaN(dh) ? 0 : dh));
-        }
-
+        /**
+         * A tela deste Mac (1536x960 lógicos) não comporta janelas de 1600x1000 e 1920x1080: a raiz real do app
+         * vai para uma cena fora da tela do tamanho exato, é renderizada e volta para a janela.
+         */
         private void shot(String name) throws Exception {
-            var image = stage.getScene().snapshot(null);
+            var window = stage.getScene();
+            var root = window.getRoot();
+            window.setRoot(new javafx.scene.layout.Pane());
+            javafx.scene.Scene off = new javafx.scene.Scene(root, width, height);
+            off.getStylesheets().setAll(window.getStylesheets());
+            root.applyCss();
+            root.layout();
+            var image = off.snapshot(null);
+            off.setRoot(new javafx.scene.layout.Pane());
+            window.setRoot(root);
             Path file = output.resolve(name + ".png");
             javax.imageio.ImageIO.write(ControlGalleryTest.toAwt(image), "png", file.toFile());
-            report.add("SHOT " + name + " scene=" + (int) stage.getScene().getWidth() + "x" + (int) stage.getScene().getHeight());
+            report.add("SHOT " + name + " scene=" + (int) image.getWidth() + "x" + (int) image.getHeight());
         }
 
         private void invoke(String name, Class<?> type, Object arg) throws Exception {

@@ -160,10 +160,10 @@ public final class ShellRail extends VBox {
     }
 
     private Button item(ShellRoutes.Route r, String tip) {
-        Label label = new Label(r.railLabel());
-        label.getStyleClass().add("byx-rail-label");
+        Label label = railLabel(r.railLabel());
         VBox graphic = new VBox(4, ByxIcon.path(ShellIcons.path(r.icon()), 22, null), label);
         graphic.setAlignment(Pos.CENTER);
+        graphic.setMinWidth(Region.USE_PREF_SIZE);
         Button b = new Button();
         b.setGraphic(graphic);
         b.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -180,10 +180,10 @@ public final class ShellRail extends VBox {
 
     /** Destino sem tela ainda: desabilitado, com o motivo no tooltip (o tooltip fica no invólucro). */
     private Node pending(ShellRoutes.Pending p) {
-        Label label = new Label(p.label());
-        label.getStyleClass().add("byx-rail-label");
+        Label label = railLabel(p.label());
         VBox graphic = new VBox(4, ByxIcon.path(ShellIcons.path(p.icon()), 22, null), label);
         graphic.setAlignment(Pos.CENTER);
+        graphic.setMinWidth(Region.USE_PREF_SIZE);
         Button b = new Button();
         b.setGraphic(graphic);
         b.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -197,6 +197,14 @@ public final class ShellRail extends VBox {
         wrap.setMaxSize(ITEM_W, ITEM_H);
         Tooltip.install(wrap, tooltip(p.label() + " · " + p.reason()));
         return wrap;
+    }
+
+    /** Rótulo 11 px nunca reticenciado: como na referência, palavras longas (Hypotheses) passam do item centralizadas. */
+    private static Label railLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("byx-rail-label");
+        label.setMinWidth(Region.USE_PREF_SIZE);
+        return label;
     }
 
     private static Tooltip tooltip(String text) {

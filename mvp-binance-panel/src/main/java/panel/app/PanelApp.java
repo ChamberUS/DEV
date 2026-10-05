@@ -5,30 +5,21 @@ import java.util.Map;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
-import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import panel.auth.AuthMethod;
 import panel.model.DataSource;
 import panel.model.Snapshot;
 import panel.model.TraderSnapshot;
-import panel.security.AccessDeniedException;
 import panel.ui.CaptureView;
 import panel.ui.DatasetView;
 import panel.ui.ExecutionView;
@@ -41,13 +32,9 @@ import panel.ui.LogsView;
 import panel.ui.OverviewView;
 import panel.ui.SessionsView;
 import panel.ui.SettingsView;
-import panel.motion.MotionTokens;
-import panel.motion.icon.AnimatedIcon;
 import panel.ui.Credits;
 import panel.ui.EmptyState;
 import panel.ui.Ui;
-import panel.ui.motion.SegmentedSwitch;
-import panel.ui.motion.UserMenu;
 import panel.ui.toast.ToastType;
 import panel.ui.View;
 import panel.ui.auth.ChangePasswordView;
@@ -59,52 +46,27 @@ import panel.ui.auth.UsersView;
 import panel.ui.trader.TraderScreens;
 import panel.ui.trader.TradingDeskView;
 import panel.user.User;
-import panel.util.Fmt;
 
 public class PanelApp extends Application {
-    private static final Map<String, String> NAV_ICONS = Map.ofEntries(
-            Map.entry("t-treasury", "treasury"), Map.entry("t-wallet", "wallet"), Map.entry("t-benefits", "benefits"), Map.entry("t-byx", "network"), Map.entry("t-desk", "dashboard"), Map.entry("t-markets", "chart"), Map.entry("t-bot", "bot"), Map.entry("t-strategies", "settings"),
-            Map.entry("t-signals", "signal"), Map.entry("t-portfolio", "dashboard"), Map.entry("t-positions", "positions"), Map.entry("t-orders", "orders"),
-            Map.entry("t-performance", "chart"), Map.entry("t-activity", "clock"), Map.entry("t-profile", "user"), Map.entry("t-settings", "settings"),
-            Map.entry("overview", "dashboard"), Map.entry("capture", "capture"), Map.entry("sessions", "clock"), Map.entry("dataset", "positions"),
-            Map.entry("labels", "orders"), Map.entry("features", "chart"), Map.entry("hypotheses", "hypotheses"), Map.entry("validation", "lock"),
-            Map.entry("execution", "chart"), Map.entry("paper", "lock"), Map.entry("live", "lock"), Map.entry("jobs", "refresh"),
-            Map.entry("logs", "orders"), Map.entry("users", "user"), Map.entry("settings", "settings"));
-
     private final AppContext ctx = new AppContext();
     private final Map<String, View> views = new LinkedHashMap<>();
-    private final Map<String, Button> navButtons = new LinkedHashMap<>();
     private final StackPane content = new StackPane();
-    private final HBox footer = new HBox(14);
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
-    private final VBox byxNav = new VBox(2);
-    private final Button byxSwitch = Ui.button("BYX", "ghost");
     private boolean byxWorkspace;
     private boolean adminChrome;
-    private final panel.ui.CommandPalette palette = new panel.ui.CommandPalette(this::show);
-    private final HBox topBar = new HBox(10);
-    private final Button commandSearch = Ui.button("", "ghost");
-    private final Label breadcrumb = Ui.label("", "breadcrumb");
-    private final Label mockBadge = Ui.badge("MOCK", "warn");
-    private final VBox researchNav = new VBox(2);
-    private final VBox traderNav = new VBox(2);
-    private final VBox brand = new VBox();
-    private final ScrollPane navHolder = new ScrollPane();
     private final Map<Boolean, String> lastView = new LinkedHashMap<>();
-    private final SegmentedSwitch workspaceSwitch = new SegmentedSwitch(ctx.motion);
+    /** Telas de entrada legadas (login, setup, troca de senha) até o passo 6. */
     private final StackPane holder = new StackPane();
     private final StackPane rootStack = new StackPane();
     /** Telas e cromo legados (ainda não portados): folhas antigas presas aqui, nunca na cena. */
     private final panel.shell.LegacyHost legacy = new panel.shell.LegacyHost();
-    private final Map<String, StackPane> navWrappers = new LinkedHashMap<>();
-    private final Map<VBox, Region> indicators = new LinkedHashMap<>();
-    private final Map<VBox, StackPane> navStacks = new LinkedHashMap<>();
-    private final Button refreshBtn = Ui.button("", "ghost");
-    private final AnimatedIcon refreshIcon = ctx.icons.icon("refresh", 16, "text");
-    private final UserMenu userMenu = new UserMenu(ctx.motion, ctx.icons);
     private final StackPane lockHolder = new StackPane();
     private boolean lockShown;
-    private boolean indicatorPlaced;
+    /** Shell V2 da sessão atual (um por login); conteúdo legado hospedado num LegacyHost próprio. */
+    private panel.shell.ByxShell shell;
+    private panel.shell.ShellPalette palette;
+    private panel.shell.UserMenu userMenu;
+    private panel.shell.NotificationPanel notificationPanel;
     private boolean trader = true;
     private boolean mainActive;
     private boolean researchStarted;
@@ -178,13 +140,14 @@ public class PanelApp extends Application {
 
     private void applyDensity() {
         legacy.setComfortable("COMFORTABLE".equals(ctx.settings.density));
+        if (shell != null) shell.content().setComfortable("COMFORTABLE".equals(ctx.settings.density));
     }
 
     // ---- fluxo de autenticação -------------------------------------------------
 
     private void showEntry(String message) {
         mainActive = false;
-        palette.close();
+        closeShell();
         if (activeView != null) { activeView.onHide(); activeView = null; }
         router.reset();
         chromeWatch.stop();
@@ -192,6 +155,7 @@ public class PanelApp extends Application {
             expiryWatch.stop();
         }
         legacy.setContext("trader");
+        rootStack.getChildren().setAll(legacy);
         stage.setTitle(AppBranding.title("Login"));
         if (ctx.auth.firstRun()) {
             holder.getChildren().setAll(new InitialAdminSetupView(ctx, this::showEntry).node());
@@ -223,15 +187,7 @@ public class PanelApp extends Application {
         ctx.byx.start();
         tfOverlay = null;
         views.clear();
-        navButtons.clear();
         content.getChildren().clear();
-        researchNav.getChildren().clear();
-        traderNav.getChildren().clear();
-        byxNav.getChildren().clear();
-        navWrappers.clear();
-        indicators.clear();
-        navStacks.clear();
-        indicatorPlaced = false;
         lockShown = false;
         ctx.transitions.forget();
         router.reset();
@@ -261,18 +217,8 @@ public class PanelApp extends Application {
             content.getChildren().add(v.node());
         });
 
-        BorderPane root = new BorderPane();
-        root.setLeft(sidebar(user));
-        VBox right = new VBox(topBar, content, footer);
-        VBox.setVgrow(content, javafx.scene.layout.Priority.ALWAYS);
-        topBar.getStyleClass().add("topbar");
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        root.setCenter(right);
-
-        holder.getChildren().setAll(root);
-
+        buildShell(user);
         ctx.navigate = this::show;
-        setupTopBar(user);
         updateLock(false);
         if (!listening) {
             listening = true;
@@ -329,7 +275,7 @@ public class PanelApp extends Application {
         boolean authorized = ctx.adminAccess.hasValidAdminSession();
         updateLock(false);
         if (!authorized && !trader) {
-            ctx.toasts.show(ToastType.WARNING, "Admin session expired. Re-authorize to open Research.");
+            toast(ToastType.WARNING, "Admin session expired. Re-authorize to open Research.");
             show(lastView.get(true));
         }
         if (authorized != adminChrome) {
@@ -365,7 +311,6 @@ public class PanelApp extends Application {
     private final panel.nav.Navigator navigator = new panel.nav.Navigator();
     private final panel.shell.ShellRouter router = new panel.shell.ShellRouter(navigator, this::evaluateRoute, this::display);
     private View activeView;
-    private String dockSignature = "";
 
     private panel.shell.ShellRouter.Decision requestResearch(String target, panel.nav.Navigator.Ticket ticket) {
         String destination = views.containsKey(target) ? target : "overview";
@@ -431,7 +376,6 @@ public class PanelApp extends Application {
         }, () -> {
             close.run();
             router.cancelPending();
-            syncTabs();
         });
         tfOverlay = new StackPane(ref[0].node());
         tfOverlay.getStyleClass().add("page");
@@ -446,32 +390,38 @@ public class PanelApp extends Application {
         }
     }
 
+    /** Negado: a rota não muda, então rail e seletor (derivados dela) já estão certos. */
     private void deny(String message) {
-        ctx.toasts.show(ToastType.WARNING, message);
-        syncTabs();
+        toast(ToastType.WARNING, message);
     }
 
-    private void syncTabs() {
-        workspaceSwitch.select(trader && !byxWorkspace);
-        workspaceSwitch.left.getStyleClass().remove("selected");
-        workspaceSwitch.right.getStyleClass().remove("selected");
-        byxSwitch.getStyleClass().remove("selected");
-        (byxWorkspace ? byxSwitch : trader ? workspaceSwitch.left : workspaceSwitch.right).getStyleClass().add("selected");
+    /** Toast na camada 80 do shell; antes do login, no host legado da entrada. */
+    private void toast(ToastType type, String message) {
+        if (shell == null) {
+            ctx.toasts.show(type, message);
+            return;
+        }
+        shell.overlay().toast(switch (type) {
+            case SUCCESS -> panel.design.ByxOverlayHost.ToastKind.SUCCESS;
+            case WARNING -> panel.design.ByxOverlayHost.ToastKind.WARNING;
+            case ERROR -> panel.design.ByxOverlayHost.ToastKind.ERROR;
+            default -> panel.design.ByxOverlayHost.ToastKind.INFO;
+        }, message);
     }
 
-    private final AnimatedIcon lockIcon = ctx.icons.icon("lock", 13, "muted");
+    /** Cadeado no seletor V2 (fora do LegacyHost: ícone V2, não o AnimatedIcon legado). */
+    private final Node lockIcon = panel.design.ByxIcon.of("lock", 13, "t3");
 
     /** Cadeado no seletor: aparece enquanto Research está bloqueado; ao liberar, abre uma vez e some. */
     private void updateLock(boolean unlockedNow) {
         boolean unlocked = ctx.adminAccess.hasValidAdminSession();
         if (!unlocked && !lockShown) {
-            lockHolder.getChildren().setAll(lockIcon.node());
+            lockHolder.getChildren().setAll(lockIcon);
             lockShown = true;
         } else if (unlocked && lockShown) {
             lockShown = false;
             if (unlockedNow) {
-                AnimatedIcon open = ctx.icons.icon("unlock", 13, "ok");
-                lockHolder.getChildren().setAll(open.node());
+                lockHolder.getChildren().setAll(panel.design.ByxIcon.of("unlock", 13, "pos"));
                 PauseTransition p = new PauseTransition(javafx.util.Duration.millis(900));
                 p.setOnFinished(e -> {
                     if (!lockShown) {
@@ -485,8 +435,9 @@ public class PanelApp extends Application {
         }
     }
 
+    /** Aplica a View da rota. Chamado só pelo roteador; rail, seletor e breadcrumb seguem a rota sozinhos. */
     private void display(String id) {
-        palette.close();
+        if (palette != null) palette.close();
         closeTwoFactor();
         boolean toTrader = id.startsWith("t-");
         boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury").contains(id);
@@ -494,11 +445,7 @@ public class PanelApp extends Application {
         byxWorkspace = toByx;
         trader = toTrader;
         lastView.put(toTrader, id);
-        navHolder.setContent(navStacks.get(toByx ? byxNav : toTrader ? traderNav : researchNav));
-        syncTabs();
-        brand.setAccessibleText(AppBranding.NAME + " " + AppBranding.ATTRIBUTION);
         stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : toTrader ? "Trading" : "Research"));
-        legacy.setContext(toByx ? "byx" : toTrader ? "trader" : "research");
         View next = views.get(id);
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
@@ -507,167 +454,7 @@ public class PanelApp extends Application {
             activeView = next;
             next.onShow();
         }
-        navButtons.forEach((k, b) -> {
-            b.getStyleClass().remove("selected");
-            if (k.equals(id)) {
-                b.getStyleClass().add("selected");
-            }
-        });
-        moveIndicator(toByx ? byxNav : toTrader ? traderNav : researchNav, id);
         chrome(ctx.research.snapshot.get());
-    }
-
-    private Node sidebar(User user) {
-        brand.getChildren().setAll(panel.ui.LedgerMark.create());
-        brand.setAlignment(Pos.CENTER);
-        brand.getStyleClass().add("rail-brand");
-        workspaceSwitch.left.setText("Trading");
-        workspaceSwitch.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-        workspaceSwitch.right.setText("Research");
-        if (byxSwitch.getParent() == null) workspaceSwitch.addOption(byxSwitch);
-        workspaceSwitch.right.setVisible(user.admin());
-        workspaceSwitch.right.setManaged(user.admin());
-        byxSwitch.setOnAction(e -> show("t-byx"));
-        byxSwitch.getStyleClass().add("ws-tab");
-        workspaceSwitch.right.setGraphic(lockHolder);
-        workspaceSwitch.right.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
-        workspaceSwitch.right.setGraphicTextGap(6);
-        workspaceSwitch.right.setTooltip(new javafx.scene.control.Tooltip(user.admin() ? "Research / Admin workspace (requires admin authorization)" : "Restricted to administrators"));
-        workspaceSwitch.left.setOnAction(e -> show("t-desk"));
-        workspaceSwitch.right.setOnAction(e -> {
-            show(lastView.get(false));
-            syncTabs();
-        });
-
-        item(traderNav, "t-desk", "▦  Trading Desk");
-        item(traderNav, "t-markets", "Markets");
-
-        item(byxNav, "t-byx", "BYX Network");
-        item(byxNav, "t-wallet", "Wallet");
-        item(byxNav, "t-benefits", "Benefits");
-        item(byxNav, "t-treasury", "Treasury");
-        group(traderNav, "AUTOMATION");
-        item(traderNav, "t-bot", "Bot");
-        item(traderNav, "t-wallet", "Wallet");
-        item(traderNav, "t-strategies", "Strategies");
-        item(traderNav, "t-signals", "Signals");
-        group(traderNav, "PORTFOLIO");
-        item(traderNav, "t-portfolio", "Overview");
-        item(traderNav, "t-positions", "Positions");
-        item(traderNav, "t-orders", "Orders");
-        item(traderNav, "t-performance", "Performance");
-        group(traderNav, "SYSTEM");
-        item(traderNav, "t-activity", "Activity");
-        item(traderNav, "t-profile", "Profile");
-        item(traderNav, "t-settings", "Settings");
-
-        if (user.admin()) {
-            VBox nav = researchNav;
-            item(nav, "overview", "◈  Overview");
-            group(nav, "DATA");
-            item(nav, "capture", "Capture");
-            item(nav, "sessions", "Sessions");
-            item(nav, "dataset", "Dataset");
-            group(nav, "RESEARCH");
-            item(nav, "labels", "Labels");
-            item(nav, "features", "Features");
-            item(nav, "hypotheses", "Hypotheses");
-            group(nav, "VALIDATION");
-            item(nav, "validation", "🔒  Validation");
-            group(nav, "EXECUTION");
-            item(nav, "execution", "Simulator");
-            item(nav, "paper", "🔒  Paper / Shadow");
-            item(nav, "live", "🔒  Live");
-            group(nav, "SYSTEM");
-            item(nav, "jobs", "Jobs");
-            item(nav, "logs", "Logs");
-            item(nav, "users", "Users");
-            item(nav, "settings", "Settings");
-        }
-        navStack(traderNav);
-        navStack(researchNav);
-        navStack(byxNav);
-        BorderPane side = new BorderPane();
-        side.getStyleClass().add("sidebar");
-        side.setPrefWidth(60);
-        side.setMinWidth(60);
-        side.setMaxWidth(60);
-        navHolder.setFitToWidth(true);
-        navHolder.getStyleClass().add("page-scroll");
-        side.setTop(brand);
-        side.setCenter(navHolder);
-        Button settings = Ui.button("Settings", "ghost");
-        settings.getStyleClass().add("rail-settings");
-        settings.setGraphic(ctx.icons.svg("settings", 20, "muted").node());
-        settings.setContentDisplay(javafx.scene.control.ContentDisplay.TOP);
-        settings.setOnAction(e -> show("t-settings"));
-        settings.setTooltip(new javafx.scene.control.Tooltip("Settings · ⌘K"));
-        side.setBottom(settings);
-        footer.getStyleClass().add("status-dock");
-        return side;
-    }
-
-    private void group(VBox nav, String name) {
-
-    }
-
-    private void item(VBox nav, String id, String text) {
-        Button b = new Button(railLabel(id, text));
-
-        b.setAccessibleText(text);
-        b.getStyleClass().add("nav-item");
-        b.setMaxWidth(Double.MAX_VALUE);
-        b.setAlignment(Pos.CENTER);
-        b.setContentDisplay(javafx.scene.control.ContentDisplay.TOP);
-        b.setGraphicTextGap(3);
-        b.setWrapText(false);
-        b.setMinWidth(60);
-        b.setMaxWidth(60);
-        b.setOnAction(e -> show(id));
-        AnimatedIcon navIcon = ctx.icons.svg(NAV_ICONS.getOrDefault(id, "dashboard"), 20, "muted");
-        b.setGraphic(navIcon.node());
-        StackPane wrap = new StackPane(b);
-        wrap.setMaxWidth(60);
-        nav.setAlignment(Pos.TOP_CENTER);
-        nav.setSpacing(6);
-        ctx.motion.reference.tooltip(b, wrap, text.replaceAll("^[^\\p{L}]+", ""));
-        navButtons.put(id, b);
-        navWrappers.put(id, wrap);
-        boolean primary = nav == traderNav ? java.util.Set.of("t-desk", "t-markets", "t-bot", "t-wallet", "t-orders").contains(id)
-                : nav == byxNav || java.util.Set.of("overview", "capture", "labels", "features", "hypotheses").contains(id);
-        if (primary) nav.getChildren().add(wrap);
-    }
-
-    private void navStack(VBox nav) {
-        Region ind = new Region();
-        ind.getStyleClass().add("nav-indicator");
-        ind.setPrefSize(2, 52);
-        ind.setMaxSize(2, 52);
-        ind.setTranslateX(4);
-        ind.setMouseTransparent(true);
-        StackPane st = new StackPane(nav, ind);
-        StackPane.setAlignment(ind, Pos.TOP_LEFT);
-        indicators.put(nav, ind);
-        navStacks.put(nav, st);
-    }
-
-    private void moveIndicator(VBox nav, String id) {
-        Region ind = indicators.get(nav);
-        StackPane wrap = navWrappers.get(id);
-        if (ind == null || wrap == null || !nav.getChildren().contains(wrap)) {
-            return;
-        }
-        Platform.runLater(() -> {
-            navHolder.applyCss();
-            navHolder.layout();
-            double y = wrap.getBoundsInParent().getMinY() + (wrap.getHeight() - 52) / 2;
-            if (!indicatorPlaced || wrap.getHeight() == 0) {
-                ind.setTranslateY(y);
-                indicatorPlaced = wrap.getHeight() > 0;
-            } else {
-                ind.setTranslateY(y);
-            }
-        });
     }
 
     private void render(Snapshot s) {
@@ -677,97 +464,109 @@ public class PanelApp extends Application {
         chrome(s);
     }
 
-    private void updateStatusDock(Snapshot s) {
+    // ---- shell V2 ----------------------------------------------------------------
+
+    private void buildShell(User user) {
+        closeShell();
+        panel.shell.LegacyHost contentHost = new panel.shell.LegacyHost(content);
+        contentHost.setComfortable("COMFORTABLE".equals(ctx.settings.density));
+        shell = new panel.shell.ByxShell(router, ctx.motion, contentHost);
+        shell.setAvailable(views::containsKey);
+        shell.switcher().setBadge(panel.shell.ShellContext.RESEARCH, lockHolder);
+        shell.setCrumb(this::crumb);
+        shell.topBar().setUser(user.username());
+        palette = new panel.shell.ShellPalette(shell.overlay(), this::show, this::paletteIndex);
+        shell.setOnOpenSearch(palette::open);
+        userMenu = new panel.shell.UserMenu(shell.overlay(), shell.topBar().avatar(), router);
+        userMenu.setIdentity(new panel.shell.UserMenu.Identity(user.username(), blankToNull(user.email()),
+                user.admin() ? "Administrator" : "Trader"));
+        notificationPanel = new panel.shell.NotificationPanel(shell.overlay(), shell.topBar().notifications(), ctx.motion);
+        userMenu.setItems(userMenuItems());
+        rootStack.getChildren().setAll(shell);
+    }
+
+    private void closeShell() {
+        if (shell != null) {
+            shell.dispose();
+            shell = null;
+            palette = null;
+            userMenu = null;
+            notificationPanel = null;
+        }
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s;
+    }
+
+    private String crumb(String id) {
         TraderSnapshot t = ctx.trading.snapshot.get();
-        var network = ctx.byx.snapshot();
-        String[][] items = {
-            {"SYSTEM HEALTH", "dock-group"},
-            {"Backend · " + (s.backendOnline ? "Online" : "Offline"), s.backendOnline ? "status-ok" : "status-bad"},
-            {"Feed · " + Fmt.text(t.feed), "muted"},
-            {"Capture · " + Fmt.text(s.capture.recorder()), "muted"},
-            {"Network · " + network.connection(), "muted"},
-            {"MODE", "dock-group"}, {t.mode + " · " + t.source, "muted"},
-            {"Paper locked · Live OFF", "status-bad"}, {"ENVIRONMENT", "dock-group"},
-            {network.environment(), "status-byx"},
-            {!"VERIFIED".equals(network.identity()) ? "Wallet unavailable" : ctx.byxWallets.wallets().isEmpty() ? "Wallet unlinked" : "Wallet linked", "muted"}};
-        // só reconstrói o dock quando algum texto/estilo muda (evita recriar nós a cada segundo)
-        String signature = java.util.Arrays.deepToString(items);
-        if (signature.equals(dockSignature) && !footer.getChildren().isEmpty()) return;
-        dockSignature = signature;
-        footer.setAlignment(Pos.CENTER_LEFT);
-        var labels = new java.util.ArrayList<Node>();
-        for (String[] item : items) labels.add(Ui.label(item[0], item[1]));
-        footer.getChildren().setAll(labels);
+        if (id.equals("t-desk")) return "Desk / " + (t.symbol == null ? "ETHUSDT" : t.symbol);
+        var route = panel.shell.ShellRoutes.get(id);
+        // rótulo curto do rail quando existe (Research / Overview), senão o título (Research / Sessions)
+        String title = route.map(r -> r.railLabel() != null ? r.railLabel() : r.title()).orElse(id);
+        var context = panel.shell.ShellRoutes.contextOf(id);
+        return context.workspace ? context.label + " / " + title : title;
+    }
+
+    /** Destinos V2 do menu. Sem tela ainda: COMING SOON; Security fica no Profile legado (senha, acesso admin, eventos). */
+    private java.util.List<panel.shell.UserMenu.Item> userMenuItems() {
+        String k = shell.shortcutPrefix();
+        return java.util.List.of(
+                panel.shell.UserMenu.Item.route("Profile", "profile", null, "t-profile"),
+                panel.shell.UserMenu.Item.route("Security", "security", null, "t-profile"),
+                panel.shell.UserMenu.Item.action("Notifications", "bell", null, () -> notificationPanel.open()),
+                panel.shell.UserMenu.Item.route("Settings", "settings", k + ",", "t-settings"),
+                panel.shell.UserMenu.Item.pending("Keyboard shortcuts", "keyboard", "?", "Arrives in step 11"),
+                panel.shell.UserMenu.Item.pending("Help", "help", null, "Arrives in step 11"),
+                panel.shell.UserMenu.Item.action("About BYX", "info", null, Credits::show),
+                panel.shell.UserMenu.Item.action("Sign out", "logout", null, this::confirmSignOut).asDanger());
+    }
+
+    /** Sair sempre pergunta antes (handoff: user menu). */
+    private void confirmSignOut() {
+        if (shell == null) return;
+        shell.overlay().confirm("Sign out", "You will need to sign in again to use BYX-MVP.", "Sign out", true, () -> logout(null));
+    }
+
+    /** Índice da busca: navegação com os gates reais (CommandPalette.commands) + comandos reais + ajuda. */
+    private java.util.List<panel.shell.ShellPalette.Entry> paletteIndex() {
+        boolean admin = ctx.sessions.user().map(u -> u.user().admin()).orElse(false);
+        java.util.List<panel.shell.ShellPalette.Entry> out = new java.util.ArrayList<>();
+        for (var c : panel.ui.CommandPalette.commands(admin, ctx.adminAccess.hasValidAdminSession())) {
+            out.add(c.target() == null
+                    ? panel.shell.ShellPalette.Entry.gated(panel.shell.ShellPalette.Group.NAVIGATION, c.title(), c.state())
+                    : panel.shell.ShellPalette.Entry.nav(c.title(), c.target(), c.state().isEmpty() ? null : c.state()));
+        }
+        out.add(panel.shell.ShellPalette.Entry.command("Refresh data", ctx::refresh));
+        out.add(panel.shell.ShellPalette.Entry.command("Open notifications", () -> notificationPanel.open()));
+        out.add(panel.shell.ShellPalette.Entry.command("Sign out", this::confirmSignOut));
+        out.add(new panel.shell.ShellPalette.Entry(panel.shell.ShellPalette.Group.HELP, "About BYX", null, Credits::show, null, null));
+        out.add(panel.shell.ShellPalette.Entry.gated(panel.shell.ShellPalette.Group.HELP, "Keyboard shortcuts", "Arrives in step 11"));
+        out.add(panel.shell.ShellPalette.Entry.gated(panel.shell.ShellPalette.Group.HELP, "Help and support", "Arrives in step 11"));
+        return out;
+    }
+
+    /** Dock só com estado real; o que não pode ser lido é UNKNOWN. Igual ao anterior: o dock não toca em nada. */
+    private void updateStatusDock(Snapshot s) {
+        if (shell == null) return;
+        shell.dock().setModel(panel.shell.DockModel.build(s, ctx.trading.snapshot.get(), ctx.byx.snapshot(),
+                !"VERIFIED".equals(ctx.byx.snapshot().identity()) ? "Wallet unavailable"
+                        : ctx.byxWallets.wallets().isEmpty() ? "Wallet not linked" : "Wallet linked",
+                ctx.adminAccess.hasValidAdminSession(), views.containsKey("capture")));
     }
 
     private void chrome(Snapshot s) {
+        if (shell == null) return;
         updateStatusDock(s);
         adminChrome = ctx.adminAccess.hasValidAdminSession();
         TraderSnapshot t = ctx.trading.snapshot.get();
-        boolean mock = (trader ? t.source : s.source) == DataSource.MOCK;
-        String current = lastView.get(trader);
-        String title = navButtons.containsKey(current) ? navButtons.get(current).getAccessibleText() : "Overview";
-        if (commandSearch.getGraphic() == null) {
-            HBox graphic = new HBox(8, ctx.icons.staticIcon("search", 16, "muted").node(),
-                    Ui.label("Search or jump to…", "muted"), Ui.spacer(), Ui.label("⌘K", "muted"));
-            graphic.setAlignment(Pos.CENTER_LEFT); graphic.setPrefWidth(276);
-            commandSearch.setGraphic(graphic); commandSearch.setGraphicTextGap(0);
-            commandSearch.getStyleClass().add("command-search");
-            commandSearch.setAccessibleText("Search or jump to · Command K");
-            commandSearch.setOnAction(e -> openPalette());
-        }
-        breadcrumb.setText(current.equals("t-desk") ? "Desk / " + (t.symbol == null ? "ETHUSDT" : t.symbol)
-                : (byxWorkspace ? "BYX" : trader ? "Trading" : "Research") + " / " + title.replaceAll("^[^\\p{L}]+", ""));
-        mockBadge.setVisible(mock); mockBadge.setManaged(mock);
-        userMenu.setText(adminChrome ? "ADMIN SESSION" : "ACCOUNT");
-        if (!topBar.getChildren().contains(commandSearch))
-            topBar.getChildren().setAll(workspaceSwitch, breadcrumb, Ui.spacer(), commandSearch, mockBadge, userMenu);
+        shell.topBar().setMockData((trader ? t.source : s.source) == DataSource.MOCK);
+        shell.topBar().setAdminSession(adminChrome);
+        shell.refreshCrumb();
     }
 
     private void openPalette() {
-        palette.open(legacy, ctx.sessions.user().map(u -> u.user().admin()).orElse(false),
-                ctx.adminAccess.hasValidAdminSession());
-    }
-
-    private static String railLabel(String id, String fallback) {
-        return switch (id) {
-            case "t-desk" -> "Desk";
-            case "t-byx" -> "Network";
-            case "t-benefits" -> "Benefits";
-            case "t-portfolio" -> "Portfolio";
-            case "t-performance" -> "Results";
-            case "t-strategies" -> "Strategy";
-            case "hypotheses" -> "Hypotheses";
-            case "validation" -> "Locked";
-            default -> fallback.replaceAll("^[^\\p{L}]+", "");
-        };
-    }
-
-    private void setupTopBar(User u) {
-        refreshBtn.setGraphic(refreshIcon.node());
-        refreshBtn.setText("Refresh");
-        refreshBtn.setGraphicTextGap(6);
-        refreshBtn.setOnAction(e -> {
-            ctx.refresh();
-        });
-        java.util.List<UserMenu.Item> items = new java.util.ArrayList<>();
-        items.add(new UserMenu.Item("Refresh", "refresh", ctx::refresh));
-        items.add(new UserMenu.Item("Profile", "user", () -> show("t-profile")));
-        items.add(new UserMenu.Item("Security", "shield", () -> show("t-profile")));
-        if (u.admin()) {
-            items.add(UserMenu.Item.SEPARATOR);
-            items.add(new UserMenu.Item("Switch Workspace", "dashboard", () -> show(trader ? lastView.get(false) : lastView.get(true))));
-            items.add(new UserMenu.Item("Admin / Research", "settings", () -> show(lastView.get(false))));
-        }
-        items.add(UserMenu.Item.SEPARATOR);
-        items.add(new UserMenu.Item("About / Credits", "info", Credits::show));
-        items.add(new UserMenu.Item("Logout", "logout", () -> logout(null)));
-        userMenu.setUser(u.username(), u.admin() ? "Administrator" : "Trader", items);
-    }
-
-    private HBox row(String k, Node v) {
-        HBox h = new HBox(8, Ui.label(k, "muted"), Ui.spacer(), v);
-        h.setAlignment(Pos.CENTER_LEFT);
-        return h;
+        if (palette != null) palette.open();
     }
 }

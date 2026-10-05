@@ -50,6 +50,8 @@ public final class StatusDock extends HBox {
         final ByxStatusDot dot;
         Item item;
 
+        String group = "";
+
         ItemView(Item item) {
             dot = item.dot() == null ? null : new ByxStatusDot(9, motion);
             HBox g = dot == null ? new HBox(label) : new HBox(6, dot, label);
@@ -58,6 +60,9 @@ public final class StatusDock extends HBox {
             node.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             node.getStyleClass().add("byx-dock-item");
             label.getStyleClass().add("byx-dock-text");
+            label.setMinWidth(0); // 1280: texto termina em "…" em vez de cortar o dock
+            label.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
+            node.setMinWidth(0);
             node.setOnAction(e -> {
                 if (this.item.target() != null) {
                     request.accept(this.item.target());
@@ -78,14 +83,15 @@ public final class StatusDock extends HBox {
             }
             boolean link = i.target() != null;
             node.setFocusTraversable(link);
-            node.setMouseTransparent(!link && i.hint() == null);
+            node.setMouseTransparent(false);
             node.getStyleClass().remove("link");
             if (link) {
                 node.getStyleClass().add("link");
             }
-            String a11y = i.text() + (i.dot() == null ? "" : ", " + i.dot().name().toLowerCase(java.util.Locale.ROOT));
+            String a11y = group + i.text() + (i.dot() == null ? "" : ", " + i.dot().name().toLowerCase(java.util.Locale.ROOT));
             node.setAccessibleText(a11y);
-            if (i.hint() != null) {
+            String tip = i.hint() != null ? i.text() + " · " + i.hint() : i.text();
+            {
                 Tooltip t = node.getTooltip();
                 if (t == null) {
                     t = new Tooltip();
@@ -93,9 +99,7 @@ public final class StatusDock extends HBox {
                     t.setShowDelay(Duration.millis(300));
                     node.setTooltip(t);
                 }
-                t.setText(i.hint());
-            } else {
-                node.setTooltip(null);
+                t.setText(tip); // texto completo mesmo quando reticenciado
             }
         }
     }
@@ -148,9 +152,16 @@ public final class StatusDock extends HBox {
         return true;
     }
 
+    private final List<HBox> groups = new ArrayList<>();
+    private final List<Region> separators = new ArrayList<>();
+    private boolean compact;
+
     private void rebuild() {
         rebuilds++;
         views.clear();
+        groups.clear();
+        separators.clear();
+        compact = false;
         List<Node> children = new ArrayList<>();
         for (int g = 0; g < model.size(); g++) {
             if (g > 0) {
@@ -160,6 +171,7 @@ public final class StatusDock extends HBox {
                 vl.setPrefSize(1, 18);
                 vl.setMaxSize(1, 18);
                 HBox.setMargin(vl, new javafx.geometry.Insets(0, 22, 0, 22)); // .dock .vl margin 0 22
+                separators.add(vl);
                 children.add(vl);
             }
             Group group = model.get(g);
@@ -169,15 +181,60 @@ public final class StatusDock extends HBox {
             HBox box = new HBox(16, name);
             box.setAlignment(Pos.CENTER_LEFT);
             box.getStyleClass().add("byx-dock-grp");
-            box.setMinWidth(Region.USE_PREF_SIZE);
+            box.setMinWidth(0);
+            groups.add(box);
             for (Item i : group.items()) {
                 ItemView v = new ItemView(i);
+                v.group = group.label() + ": ";
+                v.apply(i);
                 views.add(v);
+                // .dock a.di: padding 0 8 com margin 0 -8 (área de hover maior sem mudar o espaçamento do texto)
+                HBox.setMargin(v.node, new javafx.geometry.Insets(0, -8, 0, -8));
                 box.getChildren().add(v.node);
             }
             children.add(box);
         }
         getChildren().setAll(children);
+    }
+
+    /**
+     * Nunca quebra linha. Abaixo da largura natural (só abaixo de 1440): espaçamentos menores e os títulos dos
+     * grupos saem (cada item segue autoexplicativo e leva o grupo no nome acessível); se ainda faltar, reticências.
+     */
+    @Override
+    protected void layoutChildren() {
+        boolean need = getWidth() > 0 && naturalWidth() > getWidth() - snappedLeftInset() - snappedRightInset();
+        if (need != compact) {
+            compact = need;
+            double sep = compact ? 12 : 22;
+            double gap = compact ? 10 : 16;
+            separators.forEach(v -> HBox.setMargin(v, new javafx.geometry.Insets(0, sep, 0, sep)));
+            for (HBox g : groups) {
+                g.setSpacing(gap);
+                javafx.scene.Node title = g.getChildren().get(0);
+                title.setVisible(!compact);
+                title.setManaged(!compact);
+            }
+        }
+        super.layoutChildren();
+    }
+
+    /** Largura com espaçamento normal (independe do modo compacto atual). */
+    private double naturalWidth() {
+        double w = 0;
+        for (HBox g : groups) {
+            var children = g.getChildren();
+            w += children.get(0).prefWidth(-1); // rótulo do grupo
+            for (int k = 1; k < children.size(); k++) {
+                w += children.get(k).prefWidth(-1) - 16; // margens -8/-8 devolvem o padding do item
+            }
+            w += 16 * (children.size() - 1);
+        }
+        return w + separators.size() * (1 + 2 * 22);
+    }
+
+    public boolean compact() {
+        return compact;
     }
 
     public List<Group> model() {

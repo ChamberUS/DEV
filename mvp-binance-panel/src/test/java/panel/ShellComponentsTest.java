@@ -136,6 +136,35 @@ class ShellComponentsTest {
     }
 
     @Test
+    void realDockModelNeverOverflowsOrWraps() throws Exception {
+        int[][] sizes = {{1280, 760}, {1440, 900}, {1600, 1000}, {1920, 1080}};
+        for (int[] s : sizes) {
+            Object[] r = FxSupport.fx(() -> {
+                Fixture f = new Fixture(MotionPreference.OFF, s[0], s[1], false);
+                panel.model.Snapshot snap = new panel.model.Snapshot();
+                panel.model.TraderSnapshot trader = new panel.model.TraderSnapshot();
+                trader.feed = "NOT_CONFIGURED";
+                var network = panel.model.ByxSnapshot.unknown("cosmos", "UNKNOWN", "UNKNOWN", "Awaiting identity verification");
+                f.shell.dock().setModel(panel.shell.DockModel.build(snap, trader, network, "Wallet unavailable", true, true));
+                f.layout();
+                f.layout(); // a compactação reaplica espaçamentos no passe seguinte
+                Bounds dock = inScene(f.shell.dock());
+                boolean truncated = f.shell.dock().lookupAll(".byx-dock-text").stream()
+                        .map(n -> (javafx.scene.control.Label) n)
+                        .anyMatch(l -> l.prefWidth(-1) > l.getWidth() + 0.5);
+                Object[] out = {lastChildMaxX(f.shell.dock()), dock.getMaxX(), dock.getHeight(), f.shell.dock().compact(), truncated};
+                f.close();
+                return out;
+            });
+            String at = s[0] + "x" + s[1];
+            assertTrue((double) r[0] <= (double) r[1] - 20 + 0.5, at + " dock content ends at " + r[0] + ", limit " + ((double) r[1] - 20));
+            assertEquals(38, (double) r[2], 0.5, at + " dock stays one row");
+            assertEquals(s[0] < 1440, r[3], at + " compact only below COMPACT (1440)");
+            assertEquals(false, r[4], at + " no dock text is truncated with the real model");
+        }
+    }
+
+    @Test
     void railAndSwitcherFollowTheRouteOnly() throws Exception {
         Object[] r = FxSupport.fx(() -> {
             Fixture f = new Fixture(MotionPreference.OFF, 1440, 900);
