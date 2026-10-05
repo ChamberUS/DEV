@@ -19,7 +19,8 @@ import panel.motion.MotionService;
 
 /**
  * Interruptor V2 (components.toggle: 44x26, polegar 20). Clique ou Espaço alterna. O polegar desliza
- * com o token toggleSwitch só em FULL; em REDUCED/OFF (translate=false) vai direto à posição.
+ * com o token toggleSwitch só em FULL e só por ação do usuário; em REDUCED/OFF (translate=false) e em
+ * mudanças de estado vindas de dados vai direto à posição.
  */
 public class ByxToggle extends StackPane {
     private static final PseudoClass SELECTED = PseudoClass.getPseudoClass("selected");
@@ -29,6 +30,7 @@ public class ByxToggle extends StackPane {
     private final Region thumb = new Region();
     private final MotionService motion;
     private Timeline slide;
+    private boolean userChange;
 
     public ByxToggle(MotionService motion, String accessibleName) {
         this.motion = motion;
@@ -69,8 +71,14 @@ public class ByxToggle extends StackPane {
         });
     }
 
+    /** Alternância do usuário (clique/Espaço): o polegar desliza em FULL. setSelected é estado e vai direto. */
     public void toggle() {
-        selected.set(!selected.get());
+        userChange = true;
+        try {
+            selected.set(!selected.get());
+        } finally {
+            userChange = false;
+        }
     }
 
     public BooleanProperty selectedProperty() {
@@ -103,7 +111,7 @@ public class ByxToggle extends StackPane {
             slide.stop();
             slide = null;
         }
-        Duration d = motion == null || !motion.translateAllowed() ? Duration.ZERO : motion.duration("toggleSwitch");
+        Duration d = !userChange || motion == null || !motion.translateAllowed() ? Duration.ZERO : motion.duration("toggleSwitch");
         if (d.equals(Duration.ZERO)) {
             thumb.setTranslateX(target);
             return;

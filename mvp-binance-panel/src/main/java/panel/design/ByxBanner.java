@@ -31,7 +31,9 @@ public class ByxBanner extends HBox {
         text = new Label(bodyText);
         text.getStyleClass().add("byx-banner-text");
         text.setWrapText(true);
+        text.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE); // texto quebrado não é truncado
         VBox copy = new VBox(2, title, text);
+        copy.setMinWidth(0);
         HBox.setHgrow(copy, Priority.ALWAYS);
         getChildren().addAll(ByxIcon.of(kind.icon, 18, null), copy);
         setAccessibleText(kind.name() + ": " + titleText + ". " + bodyText);

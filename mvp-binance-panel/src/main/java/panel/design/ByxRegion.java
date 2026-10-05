@@ -258,9 +258,9 @@ public class ByxRegion extends StackPane {
     private Node loadingLayer() {
         VBox skel = new VBox(10);
         skel.getStyleClass().add("byx-skeleton");
-        double[] widths = {0.42, 0.9, 0.75, 0.6};
+        double[] widths = {0.70, 0.55, 0.65}; // referência .sk: 8 px, raio 4, 70/55/65%
         for (double w : widths) {
-            Rectangle r = new Rectangle(0, 14);
+            Rectangle r = new Rectangle(0, 8);
             r.setArcWidth(8);
             r.setArcHeight(8);
             r.widthProperty().bind(widthProperty().subtract(32).multiply(w));
@@ -293,8 +293,8 @@ public class ByxRegion extends StackPane {
     }
 
     private LinearGradient skeletonFill() {
-        Color base = DesignTokens.get().color("colors.surface.bg2");
-        Color hi = DesignTokens.get().color("colors.surface.bg3");
+        Color base = DesignTokens.get().color("colors.surface.bg3");
+        Color hi = Color.web("#303958"); // destaque da referência (.sk)
         double p = shimmerPhase.get();
         if (p <= 0) {
             return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, base), new Stop(1, base));

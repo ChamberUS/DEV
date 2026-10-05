@@ -36,16 +36,23 @@
 .byx-btn.secondary:hover { -fx-background-color: -byx-hover; }
 .byx-btn.danger { -fx-background-color: -byx-negative; -fx-text-fill: -byx-text-on-accent; }
 .byx-btn.danger:hover { -fx-background-color: derive(-byx-negative, 10%); }
-.byx-btn.danger-outline { -fx-background-color: #FF7A7A55, -byx-bg0; -fx-background-insets: 0, 1; -fx-background-radius: 9, 8; -fx-text-fill: #FF9B9B; }
-.byx-btn.danger-outline:hover { -fx-background-color: #FF7A7A55, #FF7A7A14; }
+/* danger-outline: transparent interior with a 1px inset ring (border, so the card shows through) */
+.byx-btn.danger-outline { -fx-background-color: transparent; -fx-border-color: #FF7A7A55; -fx-border-width: 1; -fx-border-radius: 9; -fx-text-fill: #FF9B9B; }
+.byx-btn.danger-outline:hover { -fx-background-color: #FF7A7A14; }
 .byx-btn.ghost { -fx-background-color: transparent; -fx-text-fill: -byx-text-secondary; }
 .byx-btn.ghost:hover { -fx-background-color: -byx-bg2; -fx-text-fill: -byx-text-primary; }
-/* disabled and loading: bg3 + tertiary text, never the JavaFX 0.4 fade */
-.byx-btn:disabled, .byx-btn:loading {
+/* disabled and loading: bg3 + tertiary text, never the JavaFX 0.4 fade.
+   JavaFX ranks .byx-btn.danger above .byx-btn:disabled, so every variant is listed. */
+.byx-btn:disabled, .byx-btn:loading,
+.byx-btn.secondary:disabled, .byx-btn.secondary:loading,
+.byx-btn.danger:disabled, .byx-btn.danger:loading,
+.byx-btn.danger-outline:disabled, .byx-btn.danger-outline:loading,
+.byx-btn.ghost:disabled, .byx-btn.ghost:loading {
     -fx-opacity: 1;
     -fx-background-color: -byx-bg3;
     -fx-background-insets: 0;
     -fx-text-fill: -byx-text-tertiary;
+    -fx-border-width: 0;
     -fx-cursor: default;
 }
 .byx-btn:focus-visible, .root.focusall .byx-btn:focused {
@@ -53,6 +60,12 @@
     -fx-border-width: 2;
     -fx-border-insets: -4;
     -fx-border-radius: 13;
+}
+.byx-btn.danger-outline:focus-visible, .root.focusall .byx-btn.danger-outline:focused {
+    -fx-border-color: -byx-text-primary, #FF7A7A55;
+    -fx-border-width: 2, 1;
+    -fx-border-insets: -4, 0;
+    -fx-border-radius: 13, 9;
 }
 
 /* spinner: 16px arc */
@@ -89,6 +102,8 @@
     -fx-background-radius: 13, 10, 9;
 }
 .byx-input:disabled, .byx-field:disabled { -fx-opacity: 0.55; }
+/* disabled propagates to children: the field fades once, not field x input */
+.byx-field:disabled .byx-input, .byx-field:disabled .byx-reveal { -fx-opacity: 1; }
 .byx-input.with-reveal { -fx-padding: 13 64 13 14; }
 .byx-reveal {
     -fx-background-color: transparent;
@@ -243,3 +258,11 @@
     -fx-spacing: 12;
     -fx-alignment: center-left;
 }
+
+/* ---------- control gallery (DEV ONLY) ---------- */
+.byx-gallery { -fx-background-color: -byx-bg0; }
+.byx-gallery-toolbar { -fx-background-color: -byx-bg1; -fx-border-color: -byx-line; -fx-border-width: 0 0 1 0; }
+.byx-gallery-scroll, .byx-gallery-scroll > .viewport { -fx-background-color: -byx-bg0; -fx-background-insets: 0; -fx-padding: 0; }
+.byx-gallery-section { -fx-background-color: -byx-bg1; -fx-background-radius: 14; -fx-padding: 16; }
+.byx-gallery-region { -fx-background-color: -byx-bg2; -fx-background-radius: 12; -fx-padding: 16; }
+.byx-seg:selected { -fx-background-color: -byx-hover; -fx-border-color: -byx-accent; -fx-border-width: 0 0 2 0; -fx-border-radius: 9; }

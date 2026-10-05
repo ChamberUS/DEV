@@ -83,17 +83,37 @@ class ByxControlsTest {
     }
 
     @Test
-    void disabledButtonUsesTokensNotFade() throws Exception {
-        Object[] r = FxSupport.fx(() -> {
-            ByxButton b = new ByxButton("Save", ByxButton.Variant.PRIMARY, null);
-            b.setDisable(true);
-            themed(b);
-            return new Object[] {b.getOpacity(), b.getBackground().getFills().get(0).getFill(), b.getTextFill()};
-        });
+    void disabledAndLoadingUseTokensForEveryVariant() throws Exception {
         DesignTokens t = DesignTokens.get();
-        assertEquals(1.0, (double) r[0], 0.001);
-        assertEquals(t.color("colors.surface.bg3"), r[1]);
-        assertEquals(t.color("colors.text.tertiary"), r[2]);
+        for (ByxButton.Variant v : ByxButton.Variant.values()) {
+            for (boolean loading : new boolean[] {false, true}) {
+                Object[] r = FxSupport.fx(() -> {
+                    ByxButton b = new ByxButton("Save", v, motion(MotionPreference.OFF));
+                    if (loading) {
+                        b.setLoading(true);
+                    } else {
+                        b.setDisable(true);
+                    }
+                    themed(b);
+                    return new Object[] {b.getOpacity(), b.getBackground().getFills().get(0).getFill(), b.getTextFill()};
+                });
+                String what = v + (loading ? " loading" : " disabled");
+                assertEquals(1.0, (double) r[0], 0.001, what);
+                assertEquals(t.color("colors.surface.bg3"), r[1], what);
+                assertEquals(t.color("colors.text.tertiary"), r[2], what);
+            }
+        }
+    }
+
+    @Test
+    void dangerOutlineHasTransparentInterior() throws Exception {
+        Object[] r = FxSupport.fx(() -> {
+            ByxButton b = new ByxButton("Sign out device", ByxButton.Variant.DANGER_OUTLINE, null);
+            themed(b);
+            return new Object[] {b.getBackground().getFills().get(0).getFill(), b.getBorder().getStrokes().get(0).getTopStroke()};
+        });
+        assertEquals(Color.TRANSPARENT, r[0]);
+        assertEquals(Color.web("#FF7A7A55"), r[1]);
     }
 
     @Test
@@ -185,6 +205,29 @@ class ByxControlsTest {
                 assertEquals(18, r[1], 0.001, p + " jumps (translate=false)");
             }
         }
+    }
+
+    @Test
+    void programmaticToggleStateJumpsEvenInFull() throws Exception {
+        double offset = FxSupport.fx(() -> {
+            ByxToggle t = new ByxToggle(motion(MotionPreference.FULL), "Loaded from settings");
+            themed(t);
+            t.setSelected(true); // dado, não interação: não anima
+            return t.thumbOffset();
+        });
+        assertEquals(18, offset, 0.001);
+    }
+
+    @Test
+    void disabledFieldFadesOnce() throws Exception {
+        double[] r = FxSupport.fx(() -> {
+            ByxField f = ByxField.text("Organisation");
+            f.setDisable(true);
+            themed(f);
+            return new double[] {f.getOpacity(), f.input().getOpacity()};
+        });
+        assertEquals(0.55, r[0], 0.001);
+        assertEquals(1.0, r[1], 0.001, "input must not compound the field fade");
     }
 
     @Test
