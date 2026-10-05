@@ -15,7 +15,8 @@ import panel.model.TraderSnapshot;
  * para ela; os demais esperam a System Status (passo 12) e não navegam.
  */
 public final class DockModel {
-    static final String STATUS_LATER = "System Status arrives in step 12";
+    /** Rota do detalhe: o dock resume, System Status explica. */
+    public static final String STATUS_ROUTE = "sys-status";
 
     private DockModel() {
     }
@@ -81,16 +82,16 @@ public final class DockModel {
         Object[] feed = feed(t.feed);
         Object[] cap = capture(s.capture.recorder());
         List<StatusDock.Item> health = List.of(
-                StatusDock.Item.status("backend", "Backend", backend(s), false, null, STATUS_LATER),
+                StatusDock.Item.status("backend", "Backend", backend(s), false, STATUS_ROUTE, null),
                 StatusDock.Item.status("feed", "Market feed", (StatusState) feed[0], (boolean) feed[1], "t-markets", null),
                 StatusDock.Item.status("capture", "Capture", (StatusState) cap[0], (boolean) cap[1],
-                        captureRoute ? "capture" : null, captureRoute ? null : STATUS_LATER),
+                        captureRoute ? "capture" : STATUS_ROUTE, null),
                 StatusDock.Item.status("network", "Network", network(network.connection()), false, "t-byx", null));
         boolean liveOff = !"ENABLED".equalsIgnoreCase(t.trading);
         List<StatusDock.Item> mode = List.of(
-                StatusDock.Item.text("mode", title(t.mode), null, null, STATUS_LATER),
-                StatusDock.Item.text("paper", "Paper/Shadow locked", "tertiary", null, STATUS_LATER),
-                StatusDock.Item.text("live", liveOff ? "Live trading OFF" : "Live trading " + t.trading, "primary", null, STATUS_LATER));
+                StatusDock.Item.text("mode", title(t.mode), null, STATUS_ROUTE, null),
+                StatusDock.Item.text("paper", "Paper/Shadow locked", "tertiary", STATUS_ROUTE, null),
+                StatusDock.Item.text("live", liveOff ? "Live trading OFF" : "Live trading " + t.trading, "primary", STATUS_ROUTE, null));
         List<StatusDock.Item> env = new ArrayList<>();
         env.add(StatusDock.Item.text("environment", network.environment() == null ? "Unknown" : network.environment(), null, "t-byx", null));
         env.add(StatusDock.Item.text("wallet", walletText, null, "t-wallet", null));

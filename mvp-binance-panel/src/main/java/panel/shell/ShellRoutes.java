@@ -77,6 +77,8 @@ public final class ShellRoutes {
         add("h-about", ShellContext.HELP, "About BYX", "About", "info", 3);
         add("h-overview", ShellContext.HELP, "Product overview", "Overview", "desk", 4);
         add("h-whats-new", ShellContext.HELP, "What's new", "What's new", "benefits", 5);
+        add("sys-status", ShellContext.SYSTEM, "System Status", null, null, -1);
+        add("sys-unavailable", ShellContext.SYSTEM, "Page unavailable", null, null, -1);
         add("h-terms", ShellContext.HELP, "Terms of Use", null, null, -1);
         add("h-privacy", ShellContext.HELP, "Privacy", null, null, -1);
         add("h-shortcuts", ShellContext.HELP, "Keyboard shortcuts", null, null, -1);
@@ -87,7 +89,7 @@ public final class ShellRoutes {
 
     /** Rotas de Research (exigem sessão de admin verificada): tudo que não é Trading/BYX/Account (t-) nem Help (h-). */
     public static boolean isResearch(String id) {
-        return !id.startsWith("t-") && !id.startsWith("h-") && !id.startsWith("auth:");
+        return !id.startsWith("t-") && !id.startsWith("h-") && !id.startsWith("sys-") && !id.startsWith("auth:");
     }
 
     private ShellRoutes() {
@@ -123,6 +125,7 @@ public final class ShellRoutes {
             case BYX -> "t-byx";
             case ACCOUNT -> "t-profile";
             case HELP -> "h-faq";
+            case SYSTEM -> "sys-status";
         };
     }
 

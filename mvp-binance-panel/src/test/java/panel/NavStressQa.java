@@ -43,7 +43,7 @@ public final class NavStressQa {
         Path settings = Files.createDirectories(home.resolve(".mvp-binance-panel"));
         Files.writeString(settings.resolve("security.properties"), "security.dev.mode=true\n");
         Files.writeString(settings.resolve("settings.properties"), "dataSource=REAL\nprojectPath=" + home.resolve("empty-project")
-                + "\ncliPath=/usr/bin/false\nmotion=" + System.getProperty("byx.qa.motion", "FULL") + "\ndensity=COMPACT\n");
+                + "\ncliPath=/usr/bin/false\nmotion=" + System.getProperty("byx.qa.motion", "FULL") + "\ndensity=COMPACT\nonboardingCompleted=true\n");
         System.setProperty("user.home", home.toString());
         Application.launch(App.class, args);
         lines.add("RESULT scenario=" + scenario + " n=" + count + " failures=" + failures);

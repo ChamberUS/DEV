@@ -40,7 +40,7 @@ public final class TradingDeskQa {
         Path settings = Files.createDirectories(home.resolve(".mvp-binance-panel"));
         Files.writeString(settings.resolve("security.properties"), "security.dev.mode=true\n");
         Files.writeString(settings.resolve("settings.properties"), "dataSource=REAL\nprojectPath=" + home.resolve("empty-project")
-                + "\ncliPath=/usr/bin/false\npollSeconds=3600\nmotion=" + System.getProperty("byx.qa.motion", "FULL") + "\ndensity=COMPACT\n");
+                + "\ncliPath=/usr/bin/false\npollSeconds=3600\nmotion=" + System.getProperty("byx.qa.motion", "FULL") + "\ndensity=COMPACT\nonboardingCompleted=true\n");
         System.setProperty("user.home", home.toString());
         Application.launch(App.class, args);
         Files.write(output.resolve("report.txt"), report);

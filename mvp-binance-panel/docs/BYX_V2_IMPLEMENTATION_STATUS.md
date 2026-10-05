@@ -15,7 +15,7 @@ Legenda: DONE · CODED (escrito, aguardando `mvn test` no Mac) · TODO
 | 9 | BYX | DONE | Network, Wallet, Benefits e Treasury em V2, somente leitura. Ver "Passo 9" abaixo |
 | 10 | Account | DONE | Profile, Security, Sessions, Notifications, Activity e Settings em V2. Ver "Passo 10" abaixo |
 | 11 | Help | DONE | FAQ, About, Overview, Support, Diagnostics, Terms, Privacy, Shortcuts e What's new em V2. Ver "Passo 11" abaixo |
-| 12 | System + onboarding | TODO | Diagnóstico com allow-list |
+| 12 | System + onboarding | DONE | Welcome, Onboarding, System Status, recuperação, erros, Page unavailable, fallback e startup. Ver "Passo 12" abaixo |
 | 13 | Motion + acessibilidade | TODO | FULL/REDUCED/OFF |
 | 14 | QA final | TODO | |
 
@@ -392,3 +392,33 @@ O roteador é a autoridade: sem sessão, `ShellRoutes.PUBLIC` = About, FAQ, Help
 ### Findings para o Passo 14
 1. O modo público foi validado por teste de contrato + `PublicHost`; um QA dirigido (login → FAQ → Sign in) no app real fica para o Passo 14.
 2. "Open-source notices" aparece como NOT CONFIGURED (sem texto).
+
+## Passo 12 · System + onboarding
+
+`panel.systemview` (+ `SystemStatusModel`, `RecoveryTracker`, `FirstRunModel`, `StartupModel`, `RegionMatrix`, `ErrorArchitecture`), contexto `SYSTEM` (não é workspace; rail só com Settings). Nenhum session manager novo: o fluxo de sessão expirada do Passo 6 foi reutilizado sem mudança.
+
+| Peça | O que faz | Real × inventado |
+|---|---|---|
+| First Run | `FirstRunModel`: FIRST_INSTALL, RETURNING_USER, VALID_SESSION, NO_SESSION, SESSION_EXPIRED, a partir de `auth.firstRun()` + `onboardingCompleted` + sessão real | só leitura de estado real |
+| Welcome | `auth:welcome` (só na primeira instalação, antes de criar o administrador): três linhas objetivas (Trading, Research, BYX), sem alegações comerciais | rota do mesmo `ShellRouter` (permitida só com `firstRun()`) |
+| Onboarding | diálogo persistente (camada 70) de 6 passos com conteúdo de `onboarding.json` (PLACEHOLDER_CONTENT); Back/Next/Skip/Finish, Esc = Skip, fundo não fecha; cinco Next rápidos terminam no passo 6 com um passo ativo | grava só `onboardingCompleted` e `primaryWorkspace` em `settings.properties` (o mecanismo local que já existia); a classe nem referencia trading, carteira, DEVNET, gates ou fundos (varredura de fonte no teste). Reabrir: Settings › General › "Replay onboarding" e a busca |
+| System Status | `sys-status`: Backend, Market feed, Capture, Research, BYX node, Wallet, Authentication com estado, razão e idade; ilegível = UNKNOWN; nada configurado = UNAVAILABLE esperado (neutro); linhas atualizadas no lugar, timer só visível | Retry só para Backend (refresh) e nó BYX (leitura real) |
+| Status dock | continua resumo; Backend, Capture (sem admin) e MODE agora abrem System Status; atualizar status não navega nem recria | — |
+| Connection recovery | `RecoveryTracker`: CONNECTED, DISCONNECTED, RECONNECTING (só quando o serviço reporta), RESTORED (3 s, um toast), RETRY FAILED (após retry real). Perda do backend levanta a faixa global de 36 px (`ByxShell.setGlobalBar`); um serviço que nunca esteve de pé não "caiu" | sem "tentativa n de 3" (nenhum serviço informa) |
+| Error architecture | `ErrorArchitecture` (9 padrões; só AUTH e UNEXPECTED bloqueiam) + `ErrorPatterns` (erro inline de componente, faixa global, permissão); erro de campo = `ByxField`, região = `ByxRegion`, aviso = `ByxBanner` | nada de modal para todo erro |
+| Region states | `RegionMatrix` lida de `system-messages.json` (19 regiões) | Notifications: a matriz de referência não tem UNAVAILABLE; o produto mantém UNAVAILABLE de propósito (sem backend ≠ vazio) |
+| Page unavailable | `sys-unavailable`: rota interna desconhecida mostra a tela (Return só com rota anterior; Go to default workspace via roteador); nunca redireciona sozinha. Antes uma rota t-/h- desconhecida era descartada em silêncio | — |
+| Permission required | padrão `ErrorPatterns.permissionRequired` (nunca concede). Pedidos de Research sem admin continuam DENY + toast com a rota intacta (INTENTIONALLY PRESERVED: Passo 5/6) | — |
+| Unexpected error | handler só da thread FX: detalhe no log; a UI mostra o fallback (Something went wrong, código `ERR-XXXXXX` derivado da classe e da hora, Retry só quando seguro, Open diagnostics, Return); nunca stack trace, token ou caminho | — |
+| Startup | `StartupModel` (800 ms, 160 ms de fade, token: o pedido mais novo vence) e `StartupScreen` mínima. Não há espera real hoje (a composição é síncrona): o app abre normal, sem splash | componente e contrato prontos e testados, não exibidos |
+
+### Gate e navegação
+`ShellRoutes.isResearch` agora exclui `sys-`; abrir a rota de onboarding (`sys-onboarding`) é diálogo, não rota. A rota inicial vem do workspace principal escolhido (Trading por padrão; Research só para admin, com a verificação normal; BYX), e a sessão expirada continua voltando à rota capturada.
+
+### Testes e QA
+`SystemScreensTest` (9): estados sem inventar saúde, recuperação só com transições reais, First Run/Startup, matriz de regiões, erros sem vazamento, onboarding (6 passos, Esc, sem efeitos colaterais), Page unavailable/fallback seguros, System Status no lugar e sem loops escondidos. Regressão (gate, dock, entrada de auth e rotas tocados): 157 testes direcionados (`Shell*`, `Auth*`, `Dock*`, `SessionReturn`, `CommandPalette`, `ByxOverlayHost`, `Account/Byx/Help`), `ShellNavigationQa` (idle 5 s, FULL) e `AuthFlowQa` (FULL): 0 falhas. Os harnesses de QA do app real passaram a gravar `onboardingCompleted=true` para o onboarding não abrir por cima do roteiro. Capturas em `docs/qa/step12/`.
+
+### Findings para o Passo 14
+1. Onboarding, fallback inesperado e faixa global foram verificados por componente/teste; um QA dirigido no app real (primeiro login → onboarding → rota inicial; falha forçada do backend → faixa e restauração) fica para o Passo 14.
+2. Welcome/First Run depende de `firstRun()` verdadeiro: só exercitado manualmente com um home limpo.
+3. Dock: o realce da linha do componente clicado em System Status (âncora #id) não existe; o dock só pede a rota.

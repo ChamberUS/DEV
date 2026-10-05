@@ -12,7 +12,7 @@ import panel.user.User;
  * auditoria local, preferências de UX). Nada de sessões remotas, notificações ou histórico fictício.
  */
 public interface AccountData {
-    record Prefs(String motion, String density, boolean animatedIcons) {
+    record Prefs(String motion, String density, boolean animatedIcons, String primaryWorkspace) {
     }
 
     record ProviderLine(String name, String state, String detail) {

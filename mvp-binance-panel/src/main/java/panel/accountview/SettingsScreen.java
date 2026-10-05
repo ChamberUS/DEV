@@ -130,6 +130,11 @@ public final class SettingsScreen implements View {
         switch (section) {
             case "General" -> {
                 panel.getChildren().add(Kit.setting("Language", "Interface language. English is the only language in this build.", ByxBadge.of("ENGLISH", ByxBadge.Tone.NEUTRAL)));
+                panel.getChildren().add(Kit.setting("Primary workspace", "Where the app opens. This only sets the opening page; it changes nothing else.",
+                        row("Primary workspace", new Kit.Segmented(List.of("Trading", "Research", "BYX"), pretty2(draft.primaryWorkspace()),
+                                v -> edit(new AccountData.Prefs(draft.motion(), draft.density(), draft.animatedIcons(), v.toUpperCase()))),
+                                !draft.primaryWorkspace().equals(saved.primaryWorkspace()))));
+                panel.getChildren().add(Kit.setting("Onboarding tour", "Replay the short introduction. It never changes your account.", go("Replay onboarding", "sys-onboarding")));
                 panel.getChildren().add(Kit.setting("Time zone display", "Times are shown in your local time zone.", ByxBadge.of("LOCAL TIME", ByxBadge.Tone.NEUTRAL)));
             }
             case "Appearance" -> {
@@ -138,16 +143,16 @@ public final class SettingsScreen implements View {
                 panel.getChildren().add(Kit.setting("Theme", "Dark is the only theme in this version.", new HBox(8, theme,
                         ByxBadge.availability(ByxBadge.Availability.COMING_SOON))));
                 panel.getChildren().add(Kit.setting("Density", "Compact fits more rows. Trading always stays dense.", row("Density", new Kit.Segmented(
-                        List.of("Comfortable", "Compact"), pretty(draft.density()), v -> edit(new AccountData.Prefs(draft.motion(), v.toUpperCase(), draft.animatedIcons()))),
+                        List.of("Comfortable", "Compact"), pretty(draft.density()), v -> edit(new AccountData.Prefs(draft.motion(), v.toUpperCase(), draft.animatedIcons(), draft.primaryWorkspace()))),
                         !draft.density().equals(saved.density()))));
                 panel.getChildren().add(Kit.setting("Motion", "FULL plays every transition. REDUCED removes movement and keeps feedback. OFF changes instantly.",
                         row("Motion", new Kit.Segmented(List.of("FULL", "REDUCED", "OFF"), draft.motion(),
-                                v -> edit(new AccountData.Prefs(v, draft.density(), draft.animatedIcons()))), !draft.motion().equals(saved.motion()))));
+                                v -> edit(new AccountData.Prefs(v, draft.density(), draft.animatedIcons(), draft.primaryWorkspace()))), !draft.motion().equals(saved.motion()))));
                 ByxToggle icons = new ByxToggle(motion, "Animated icons");
                 icons.setSelected(draft.animatedIcons());
                 icons.selectedProperty().addListener((o, a, b) -> {
                     if (b != draft.animatedIcons()) {
-                        edit(new AccountData.Prefs(draft.motion(), draft.density(), b));
+                        edit(new AccountData.Prefs(draft.motion(), draft.density(), b, draft.primaryWorkspace()));
                     }
                 });
                 panel.getChildren().add(Kit.setting("Animated icons", "Play icon animations. They follow the motion mode.",
@@ -201,6 +206,10 @@ public final class SettingsScreen implements View {
         return h;
     }
 
+    private static String pretty2(String v) {
+        return "BYX".equals(v) ? "BYX" : pretty(v);
+    }
+
     private static String pretty(String v) {
         return v.charAt(0) + v.substring(1).toLowerCase(java.util.Locale.ROOT);
     }
@@ -246,7 +255,7 @@ public final class SettingsScreen implements View {
             host.showSaveBar(saveBar);
         }
         int n = (draft.motion().equals(saved.motion()) ? 0 : 1) + (draft.density().equals(saved.density()) ? 0 : 1)
-                + (draft.animatedIcons() == saved.animatedIcons() ? 0 : 1);
+                + (draft.animatedIcons() == saved.animatedIcons() ? 0 : 1) + (draft.primaryWorkspace().equals(saved.primaryWorkspace()) ? 0 : 1);
         saveCount.setText(saveError != null ? saveError : n + " unsaved change" + (n == 1 ? "" : "s"));
     }
 

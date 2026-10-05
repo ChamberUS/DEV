@@ -32,6 +32,7 @@ import panel.user.User;
 public final class AuthScreens {
     public static final String LOGIN = "auth:login";
     public static final String FORGOT = "auth:forgot";
+    public static final String WELCOME = "auth:welcome";
     public static final String SETUP = "auth:setup";
     public static final String CHANGE_PASSWORD = "auth:change-password";
     public static final String POLICY_HINT = "At least " + PasswordPolicy.MIN_LENGTH + " characters, different from your username.";
@@ -132,6 +133,7 @@ public final class AuthScreens {
         switch (id) {
             case LOGIN -> renderLogin();
             case FORGOT -> renderForgot();
+            case WELCOME -> renderWelcome();
             case SETUP -> renderSetup();
             case CHANGE_PASSWORD -> renderChangePassword();
             default -> throw new IllegalArgumentException(id);
@@ -254,6 +256,20 @@ public final class AuthScreens {
             countdown.stop();
             countdown = null;
         }
+    }
+
+    // ---------------------------------------------------------------- welcome (primeira instalação)
+
+    /** Entrada técnica e sóbria da primeira instalação: o que o app tem, sem alegações comerciais; segue para criar o administrador. */
+    private void renderWelcome() {
+        ByxButton start = new ByxButton("Create the administrator account", ByxButton.Variant.PRIMARY, motion).wide();
+        start.setDefaultButton(true);
+        start.setOnAction(e -> request.accept(SETUP));
+        VBox pillars = new VBox(8, note("Trading · market observation. Live trading stays off."), note("Research · the scientific pipeline and capture."),
+                note("BYX · network, wallet, benefits and treasury on LOCALNET."));
+        layout.show("Welcome", List.of(heading("Welcome to BYX-MVP", "A desktop terminal for market observation, scientific research and the BYX ecosystem."), pillars,
+                note("No account exists on this computer yet. The first account becomes the administrator."), start));
+        start.requestFocus();
     }
 
     // ---------------------------------------------------------------- forgot (sem backend)

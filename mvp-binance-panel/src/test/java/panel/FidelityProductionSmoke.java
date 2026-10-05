@@ -32,7 +32,7 @@ public final class FidelityProductionSmoke {
         Path settings = Files.createDirectories(home.resolve(".mvp-binance-panel"));
         Files.writeString(settings.resolve("security.properties"), "security.dev.mode=true\n");
         Files.writeString(settings.resolve("settings.properties"), "dataSource=REAL\nprojectPath=" + home.resolve("empty-project")
-                + "\ncliPath=/usr/bin/false\nmotion=FULL\ndensity=COMPACT\n");
+                + "\ncliPath=/usr/bin/false\nmotion=FULL\ndensity=COMPACT\nonboardingCompleted=true\n");
         System.setProperty("user.home", home.toString());
         measurements.add("view,selector,x,y,width,height,font,background,opacity");
         trace.add("case,elapsed_ms,node,opacity,translate_x,translate_y,loop_ms,status,paint");

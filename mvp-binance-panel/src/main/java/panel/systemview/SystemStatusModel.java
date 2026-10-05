@@ -1,0 +1,86 @@
+package panel.systemview;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import panel.byxview.NetworkModel;
+import panel.design.StatusState;
+import panel.model.ByxSnapshot;
+import panel.model.Snapshot;
+import panel.model.TraderSnapshot;
+import panel.shell.DockModel;
+
+/**
+ * Estado detalhado dos sete componentes (Backend, Market feed, Capture, Research, BYX node, Wallet, Authentication) a partir
+ * de leituras reais. O que não pode ser lido é UNKNOWN, nunca OPERATIONAL; "nada configurado" é UNAVAILABLE esperado (neutro).
+ * O dock é o resumo; esta é a mesma fonte com a razão e a idade do dado.
+ */
+public final class SystemStatusModel {
+    private SystemStatusModel() {
+    }
+
+    /** retry: existe uma ação real de nova tentativa para o componente (nunca inventada). */
+    public record Component(String id, String name, StatusState state, boolean expected, String reason, Instant lastUpdate, boolean retry) {
+    }
+
+    public record Inputs(Snapshot research, TraderSnapshot trading, ByxSnapshot network, boolean sessionActive, boolean adminSession,
+            boolean walletLinked, boolean researchAvailable) {
+    }
+
+    public static List<Component> components(Inputs in) {
+        List<Component> out = new ArrayList<>();
+        Snapshot s = in.research();
+        StatusState backend = DockModel.backend(s);
+        out.add(new Component("backend", "Backend", backend, false, backend == StatusState.OPERATIONAL ? "Local backend answers."
+                : "The local backend is not reachable" + (s.backendNote == null || s.backendNote.isBlank() ? "." : " (" + s.backendNote + ")."),
+                s.loadedAt, true));
+        Object[] feed = DockModel.feed(in.trading().feed);
+        StatusState feedState = (StatusState) feed[0];
+        boolean feedExpected = (boolean) feed[1];
+        out.add(new Component("feed", "Market feed", feedState, feedExpected, feedReason(feedState, feedExpected, in.trading().feed),
+                in.trading().feedUpdatedAt, false));
+        Object[] cap = DockModel.capture(s.capture.recorder());
+        StatusState capState = (StatusState) cap[0];
+        boolean capExpected = (boolean) cap[1];
+        out.add(new Component("capture", "Capture", capState, capExpected, switch (capState) {
+            case OPERATIONAL -> "The recorder is running.";
+            case UNAVAILABLE -> capExpected ? "The recorder is stopped. Nothing is expected to be capturing." : "The recorder is not reachable.";
+            default -> "The recorder state can not be read.";
+        }, s.captureStatusAt, false));
+        StatusState research = !in.researchAvailable() ? StatusState.UNAVAILABLE : backend == StatusState.OPERATIONAL ? StatusState.OPERATIONAL : StatusState.UNKNOWN;
+        out.add(new Component("research", "Research", research, !in.researchAvailable(), !in.researchAvailable()
+                ? "Research is available to administrators only." : research == StatusState.OPERATIONAL
+                ? "Pipeline readable. VALIDATION locked, FINAL_HOLDOUT sealed." : "Research depends on the backend, which can not be read.", s.loadedAt, false));
+        ByxSnapshot n = in.network();
+        StatusState node = DockModel.network(n.connection());
+        out.add(new Component("node", "BYX node", node, "UNKNOWN".equals(n.connection()) && n.height() == null, "BYX network: " + NetworkModel.state(n).text.toLowerCase(java.util.Locale.ROOT) + ".",
+                n.updatedAt(), true));
+        boolean verified = "VERIFIED".equals(n.identity());
+        out.add(new Component("wallet", "Wallet", !verified ? StatusState.UNAVAILABLE : in.walletLinked() ? StatusState.OPERATIONAL : StatusState.UNAVAILABLE,
+                !verified || !in.walletLinked(), !verified ? "The network identity is not verified, so no wallet can be read."
+                        : in.walletLinked() ? "A verified wallet is linked." : "No wallet is linked.", null, false));
+        out.add(new Component("auth", "Authentication", in.sessionActive() ? StatusState.OPERATIONAL : StatusState.UNAVAILABLE, false,
+                !in.sessionActive() ? "No active session." : in.adminSession() ? "Signed in with an active admin session." : "Signed in. Admin verification not active.", null, false));
+        return out;
+    }
+
+    private static String feedReason(StatusState state, boolean expected, String feed) {
+        return switch (state) {
+            case OPERATIONAL -> "Receiving market data.";
+            case CONNECTING -> "Waiting for the market feed.";
+            case RECONNECTING -> "Reconnecting to the market feed.";
+            case DEGRADED -> feed == null ? "Degraded." : "Feed is " + feed.toLowerCase(java.util.Locale.ROOT) + ".";
+            case UNAVAILABLE -> expected ? "No market feed is configured in this build." : "The market feed is disconnected.";
+            case UNKNOWN -> "The feed state can not be read.";
+        };
+    }
+
+    /** Idade do dado em texto curto ("—" quando não há horário; nunca inventa). */
+    public static String age(Instant at, Instant now) {
+        if (at == null) {
+            return "—";
+        }
+        long s = Math.max(0, java.time.Duration.between(at, now).getSeconds());
+        return s < 60 ? s + "s ago" : s < 3600 ? s / 60 + " min ago" : s / 3600 + " h ago";
+    }
+}

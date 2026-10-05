@@ -48,22 +48,25 @@ final class AccountDataAdapter implements AccountData {
         return ctx.audit.recentFor(ctx.sessions.user().orElseThrow().user().username(), limit);
     }
 
-    @Override public Prefs prefs() { return new Prefs(ctx.settings.motion, ctx.settings.density, ctx.settings.animatedIcons); }
+    @Override public Prefs prefs() { return new Prefs(ctx.settings.motion, ctx.settings.density, ctx.settings.animatedIcons, ctx.settings.primaryWorkspace); }
 
     @Override
     public void savePrefs(Prefs p) {
         var st = ctx.settings;
         String oldMotion = st.motion, oldDensity = st.density;
         boolean oldIcons = st.animatedIcons;
+        String oldWorkspace = st.primaryWorkspace;
         st.motion = p.motion();
         st.density = p.density();
         st.animatedIcons = p.animatedIcons();
+        st.primaryWorkspace = p.primaryWorkspace();
         try {
             st.save();
         } catch (java.io.IOException e) {
             st.motion = oldMotion;
             st.density = oldDensity;
             st.animatedIcons = oldIcons;
+            st.primaryWorkspace = oldWorkspace;
             throw new IllegalStateException("settings not saved", e);
         }
         ctx.applyMotionSettings();

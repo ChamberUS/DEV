@@ -94,8 +94,8 @@ class DockModelTest {
     @Test
     void linksOnlyToRealScreensTheSessionCanOpen() {
         var trader = build(new Snapshot(), new TraderSnapshot(), "UNKNOWN", false, false);
-        assertNull(item(trader, "capture").target(), "Capture needs admin: no link for a trader");
-        assertNull(item(trader, "backend").target(), "System Status is step 12: no link yet");
+        assertEquals("sys-status", item(trader, "capture").target(), "Capture needs admin: a trader gets the System Status detail");
+        assertEquals("sys-status", item(trader, "backend").target(), "Backend links to System Status");
         assertNull(item(trader, "auth"), "no Admin session item without an admin session");
         var admin = build(new Snapshot(), new TraderSnapshot(), "UNKNOWN", true, true);
         assertEquals("capture", item(admin, "capture").target());

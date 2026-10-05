@@ -9,7 +9,8 @@ public enum ShellContext {
     RESEARCH("Research", "research", true),
     BYX("BYX", "byx", true),
     ACCOUNT("Account", "trader", false),
-    HELP("Help", "trader", false);
+    HELP("Help", "trader", false),
+    SYSTEM("System", "trader", false);
 
     public final String label;
     /** Classe de contexto das folhas legadas e do acento V2 (account usa o acento Ion de trading). */

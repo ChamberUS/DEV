@@ -40,7 +40,7 @@ class AccountScreensTest {
         volatile boolean devicesAvailable = true;
         final List<String> contactCalls = new ArrayList<>();
         final List<Prefs> saves = new ArrayList<>();
-        volatile Prefs prefs = new Prefs("FULL", "COMPACT", true);
+        volatile Prefs prefs = new Prefs("FULL", "COMPACT", true, "TRADING");
         volatile List<SecurityAuditService.Entry> audit = List.of();
         volatile boolean auditFails;
 
@@ -239,7 +239,7 @@ class AccountScreensTest {
             assertTrue(s.hasUnsavedChanges(), "a failed save keeps the draft");
             data.saveFails = false;
             s.save();
-            assertEquals(List.of(new AccountData.Prefs("OFF", "COMPACT", true)), data.saves);
+            assertEquals(List.of(new AccountData.Prefs("OFF", "COMPACT", true, "TRADING")), data.saves);
             assertFalse(s.hasUnsavedChanges());
         });
     }

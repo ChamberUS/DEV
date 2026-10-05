@@ -38,7 +38,7 @@ public final class HelpContent {
     public record WhatsNewContent(String status, List<Release> entries) {
     }
 
-    static JsonNode read(String resource) {
+    public static JsonNode read(String resource) {
         try (InputStream in = HelpContent.class.getResourceAsStream(resource)) {
             if (in == null) {
                 throw new IllegalStateException("missing content " + resource);

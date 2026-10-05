@@ -47,7 +47,8 @@ public class PanelApp extends Application {
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
             "t-byx", "t-wallet", "t-benefits", "t-treasury",
             "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
-            "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts");
+            "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts",
+            "sys-status", "sys-unavailable");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -99,6 +100,7 @@ public class PanelApp extends Application {
         stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(stage.isShowing() && !iconified));
         stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing && !stage.isIconified()));
         ctx.motion.reference.bind(rootStack);
+        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> onUncaught(e)); // só a thread FX; trabalhadores seguem o padrão
         stage.setScene(scene);
         stage.setMinWidth(1100);
         stage.setMinHeight(700);
@@ -157,7 +159,13 @@ public class PanelApp extends Application {
                 this::afterPasswordChanged, this::showEntry, this::show,
                 ctx.devOtp != null ? panel.auth.DevOtpProvider.LABEL : null);
         rootStack.getChildren().setAll(authScreens.node());
-        show(ctx.auth.firstRun() ? panel.authview.AuthScreens.SETUP : panel.authview.AuthScreens.LOGIN);
+        lastDisplayed = null;
+        previousRoute = null;
+        recovery.reset();
+        boolean noAccounts = ctx.auth.firstRun();
+        var situation = panel.systemview.FirstRunModel.resolve(noAccounts, ctx.settings.onboardingCompleted, false, message != null && message.toLowerCase().contains("expired"));
+        show(!noAccounts ? panel.authview.AuthScreens.LOGIN : panel.systemview.FirstRunModel.showsWelcome(situation)
+                ? panel.authview.AuthScreens.WELCOME : panel.authview.AuthScreens.SETUP);
     }
 
     /** Operações reais por trás das telas de entrada. */
@@ -272,6 +280,7 @@ public class PanelApp extends Application {
         views.put("t-account-activity", new panel.accountview.ActivityScreen(clock, accountData));
         views.put("t-settings", new panel.accountview.SettingsScreen(ctx.motion, accountData, this::show, overlayOf));
         registerHelpViews();
+        registerSystemViews();
         if (user.admin()) {
             registerResearchViews();
         }
@@ -287,6 +296,7 @@ public class PanelApp extends Application {
         if (!listening) {
             listening = true;
             ctx.research.snapshot.addListener((o, a, s) -> {
+                recovery.retryFinished("backend", panel.shell.DockModel.backend(s));
                 if (mainActive) {
                     render(s);
                 }
@@ -301,11 +311,18 @@ public class PanelApp extends Application {
         lastView.put(false, "overview");
         mainActive = true;
         // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
-        String start = pendingReturn == null ? panel.authview.SessionReturn.DEFAULT_ROUTE
+        lastDisplayed = null;
+        previousRoute = null;
+        String start = pendingReturn == null ? primaryRoute(user)
                 : pendingReturn.resolve(user.id(), views::containsKey, panel.shell.ShellRoutes::isResearch); // Research exige verificação
         pendingReturn = null;
         show(start);
         render(ctx.research.snapshot.get());
+        if (panel.systemview.FirstRunModel.showsOnboarding(ctx.settings.onboardingCompleted, true)) {
+            Platform.runLater(() -> { // só se nenhuma outra camada abriu nesse intervalo
+                if (mainActive && shell != null && shell.overlay().openDialogs() == 0 && shell.mainOverlay() == null) openOnboarding(false);
+            });
+        }
         expiryWatch = new Timeline(new KeyFrame(Duration.seconds(10), e -> watchAdminSession()));
         expiryWatch.setCycleCount(Timeline.INDEFINITE);
         expiryWatch.play();
@@ -367,6 +384,10 @@ public class PanelApp extends Application {
 
     /** Pedido de navegação (rail, switcher, busca, menu, dock, Views). Só o roteador troca a tela. */
     private void show(String id) {
+        if ("sys-onboarding".equals(id)) { // diálogo, não rota
+            if (shell != null && shell.overlay().openDialogs() == 0) openOnboarding(true);
+            return;
+        }
         router.request(id);
     }
 
@@ -388,7 +409,10 @@ public class PanelApp extends Application {
         }
         boolean research = panel.shell.ShellRoutes.isResearch(id);
         if (!views.containsKey(id)) {
-            return research ? requestResearch(id, ticket) : panel.shell.ShellRouter.Decision.DENY;
+            if (research) return requestResearch(id, ticket);
+            unavailableRequested = id; // rota interna que não existe: Page unavailable (sem 404 de web, sem redirecionar sozinho)
+            router.complete(ticket, "sys-unavailable");
+            return panel.shell.ShellRouter.Decision.PENDING;
         }
         if (research) {
             if (!ctx.adminAccess.hasValidAdminSession()) {
@@ -574,7 +598,7 @@ public class PanelApp extends Application {
     private boolean authRouteAllowed(String id) {
         if (authScreens == null) return false;
         return switch (id) {
-            case panel.authview.AuthScreens.SETUP -> ctx.auth.firstRun();
+            case panel.authview.AuthScreens.SETUP, panel.authview.AuthScreens.WELCOME -> ctx.auth.firstRun();
             case panel.authview.AuthScreens.CHANGE_PASSWORD -> mustChangeUser != null
                     && ctx.sessions.user().filter(u -> u.user().id() == mustChangeUser.id()).isPresent();
             case panel.authview.AuthScreens.LOGIN, panel.authview.AuthScreens.FORGOT -> ctx.sessions.user().isEmpty() && !ctx.auth.firstRun();
@@ -594,13 +618,16 @@ public class PanelApp extends Application {
         }
         if (palette != null) palette.close();
         closeTwoFactor();
+        if (lastDisplayed != null && !lastDisplayed.equals(id) && !lastDisplayed.equals("sys-unavailable")) previousRoute = lastDisplayed;
+        lastDisplayed = id;
+        if (id.equals("sys-unavailable")) ((panel.systemview.PageUnavailableScreen) views.get(id)).setRequested(unavailableRequested);
         boolean toTrader = !panel.shell.ShellRoutes.isResearch(id);
         boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-wallet-verify").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
         byxWorkspace = toByx;
         trader = toTrader;
         lastView.put(toTrader, id);
-        stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : id.startsWith("h-") ? "Help" : toTrader ? "Trading" : "Research"));
+        stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : id.startsWith("h-") ? "Help" : id.startsWith("sys-") ? "System" : toTrader ? "Trading" : "Research"));
         View next = views.get(id);
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
@@ -618,6 +645,109 @@ public class PanelApp extends Application {
             if (!panel.shell.ShellRoutes.isResearch(id) || ctx.adminAccess.hasValidAdminSession()) view.onSnapshot(s);
         });
         chrome(s);
+    }
+
+    // ---- System: status, recuperação, erros, onboarding --------------------------------
+
+    private final panel.systemview.RecoveryTracker recovery = new panel.systemview.RecoveryTracker();
+    private String lastDisplayed;
+    private String previousRoute;
+    private String unavailableRequested;
+    private int unexpectedCount;
+
+    private void registerSystemViews() {
+        views.put("sys-status", new panel.systemview.SystemStatusScreen(ctx.motion, java.time.Clock.systemUTC(), this::statusInputs, recovery, this::retryService));
+        views.put("sys-unavailable", new panel.systemview.PageUnavailableScreen(ctx.motion, () -> previousRoute != null && views.containsKey(previousRoute) ? previousRoute : null,
+                this::show, primaryRouteForCurrent()));
+    }
+
+    private String primaryRouteForCurrent() {
+        return panel.authview.SessionReturn.DEFAULT_ROUTE;
+    }
+
+    private String primaryRoute(User user) {
+        return switch (ctx.settings.primaryWorkspace) {
+            case "BYX" -> "t-byx";
+            case "RESEARCH" -> user.admin() ? "overview" : panel.authview.SessionReturn.DEFAULT_ROUTE;
+            default -> panel.authview.SessionReturn.DEFAULT_ROUTE;
+        };
+    }
+
+    private panel.systemview.SystemStatusModel.Inputs statusInputs() {
+        boolean linked;
+        try {
+            linked = ctx.byxWallets.wallets().stream().anyMatch(w -> w.validAt(java.time.Instant.now()));
+        } catch (RuntimeException unavailable) {
+            linked = false;
+        }
+        return new panel.systemview.SystemStatusModel.Inputs(ctx.research.snapshot.get(), ctx.trading.snapshot.get(), ctx.byx.snapshot(),
+                ctx.sessions.user().isPresent(), ctx.adminAccess.hasValidAdminSession(), linked, views.containsKey("overview"));
+    }
+
+    /** Retry só existe onde há uma nova tentativa REAL: backend (refresh da pesquisa) e nó BYX (leitura da cadeia). */
+    private void retryService(String id) {
+        switch (id) {
+            case "backend" -> {
+                recovery.retryStarted("backend");
+                ctx.refresh();
+            }
+            case "node" -> {
+                recovery.retryStarted("node");
+                ctx.byx.refresh().whenComplete((s, e) -> Platform.runLater(() -> recovery.retryFinished("node", panel.shell.DockModel.network(ctx.byx.snapshot().connection()))));
+            }
+            default -> { }
+        }
+    }
+
+    /** Recuperação: transições reais viram chip, uma notificação de "restored" e a faixa global do backend. Nada navega. */
+    private void updateRecovery() {
+        if (shell == null) return;
+        java.time.Instant now = java.time.Instant.now();
+        for (var c : panel.systemview.SystemStatusModel.components(statusInputs())) {
+            var ev = recovery.update(c.id(), c.state(), now);
+            if (ev == panel.systemview.RecoveryTracker.Event.RESTORED) {
+                shell.overlay().toast(panel.design.ByxOverlayHost.ToastKind.SUCCESS, c.name() + " connection restored.");
+            }
+        }
+        shell.setGlobalBar(recovery.lost("backend") ? panel.systemview.ErrorPatterns.globalBar("Backend connection lost. Values shown are the last known ones.")
+                : null);
+    }
+
+    /** Exceção não tratada na thread FX: detalhe só no log; a UI mostra o fallback seguro (sem stack trace, token ou caminho). */
+    private void onUncaught(Throwable error) {
+        System.err.println("UNEXPECTED " + error);
+        error.printStackTrace();
+        if (shell == null || !mainActive) return;
+        if (shell.mainOverlay() != null) {
+            toast(ToastType.ERROR, "Something went wrong.");
+            return;
+        }
+        unexpectedCount++;
+        String code = panel.systemview.ErrorArchitecture.referenceCode(error, java.time.Instant.now());
+        String disabled = unexpectedCount >= 3 ? "the same problem happened again" : null;
+        Runnable close = () -> shell.setMainOverlay(null);
+        shell.setMainOverlay(new panel.systemview.UnexpectedErrorScreen(ctx.motion, code, disabled,
+                () -> { close.run(); String r = router.route(); if (r != null) router.request(r); },
+                () -> { close.run(); show("h-diagnostics"); },
+                () -> { close.run(); show(panel.authview.SessionReturn.DEFAULT_ROUTE); }));
+    }
+
+    /** Onboarding (diálogo persistente): só guarda o workspace de abertura e a conclusão; nada mais é tocado. */
+    private void openOnboarding(boolean replay) {
+        if (shell == null) return;
+        panel.systemview.OnboardingDialog.open(shell.overlay(), ctx.motion, ctx.settings.primaryWorkspace, r -> {
+            ctx.settings.onboardingCompleted = true;
+            if (r.completed()) ctx.settings.primaryWorkspace = r.workspace();
+            try {
+                ctx.settings.save();
+            } catch (java.io.IOException e) {
+                toast(ToastType.WARNING, "Onboarding preferences could not be saved.");
+            }
+            if (!replay && r.completed()) {
+                User u = ctx.sessions.user().map(x -> x.user()).orElse(null);
+                if (u != null) show(primaryRoute(u));
+            }
+        });
     }
 
     // ---- Help (sessão) e modo público ------------------------------------------------
@@ -768,6 +898,8 @@ public class PanelApp extends Application {
         out.add(panel.shell.ShellPalette.Entry.command("Refresh data", ctx::refresh));
         out.add(panel.shell.ShellPalette.Entry.command("Open notifications", () -> notificationPanel.open()));
         out.add(panel.shell.ShellPalette.Entry.command("Sign out", this::confirmSignOut));
+        out.add(panel.shell.ShellPalette.Entry.nav("System Status", "sys-status", null));
+        out.add(panel.shell.ShellPalette.Entry.command("Onboarding tour", () -> show("sys-onboarding")));
         for (String[] h : new String[][] {{"About BYX", "h-about"}, {"Help and support", "h-help"}, {"FAQ", "h-faq"}, {"Diagnostics", "h-diagnostics"},
                 {"Product overview", "h-overview"}, {"What's new", "h-whats-new"}, {"Terms of Use", "h-terms"}, {"Privacy", "h-privacy"}}) {
             out.add(new panel.shell.ShellPalette.Entry(panel.shell.ShellPalette.Group.HELP, h[0], h[1], null, null, null));
@@ -785,6 +917,7 @@ public class PanelApp extends Application {
     /** Dock só com estado real; o que não pode ser lido é UNKNOWN. Igual ao anterior: o dock não toca em nada. */
     private void updateStatusDock(Snapshot s) {
         if (shell == null) return;
+        updateRecovery();
         shell.dock().setModel(panel.shell.DockModel.build(s, ctx.trading.snapshot.get(), ctx.byx.snapshot(),
                 !"VERIFIED".equals(ctx.byx.snapshot().identity()) ? "Wallet unavailable"
                         : ctx.byxWallets.wallets().isEmpty() ? "Wallet not linked" : "Wallet linked",

@@ -43,6 +43,8 @@ public final class ByxShell extends StackPane {
     /** Conteúdo V2 (Views já portadas): fora do LegacyHost, sem folhas legadas. */
     private final StackPane v2Content = new StackPane();
     private javafx.scene.Node mainOverlay;
+    private final VBox center;
+    private javafx.scene.Node globalBar;
 
     public ByxShell(ShellRouter router, MotionService motion, LegacyHost content) {
         this.router = router;
@@ -61,7 +63,7 @@ public final class ByxShell extends StackPane {
         main = new StackPane(content, v2Content);
         main.getStyleClass().add("byx-main");
         main.setMinSize(0, 0);
-        VBox center = new VBox(topBar, main, dock);
+        center = new VBox(topBar, main, dock);
         VBox.setVgrow(main, Priority.ALWAYS);
         center.setMinWidth(0);
         BorderPane frame = new BorderPane(center);
@@ -140,6 +142,24 @@ public final class ByxShell extends StackPane {
         if (node != null) {
             main.getChildren().add(node);
         }
+    }
+
+    /** Faixa global fina sob a barra superior (perda do backend); null remove. Não muda a rota nem recria o conteúdo. */
+    public void setGlobalBar(javafx.scene.Node bar) {
+        if (globalBar == bar) {
+            return;
+        }
+        if (globalBar != null) {
+            center.getChildren().remove(globalBar);
+        }
+        globalBar = bar;
+        if (bar != null) {
+            center.getChildren().add(1, bar);
+        }
+    }
+
+    public javafx.scene.Node globalBar() {
+        return globalBar;
     }
 
     public javafx.scene.Node mainOverlay() {

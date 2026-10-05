@@ -59,3 +59,13 @@
 .byx-key { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 12px; -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-bg3; -fx-background-radius: 6; -fx-padding: 3 8 3 8; }
 .byx-toc-link { -fx-background-color: transparent; -fx-padding: 6 10 6 10; -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; -fx-cursor: hand; -fx-alignment: center-left; }
 .byx-toc-link:hover, .byx-toc-link.current { -fx-text-fill: -byx-text-primary; -fx-background-color: -byx-bg2; -fx-background-radius: 8; }
+
+/* system */
+.byx-inline-error { -fx-background-color: -byx-negative-banner; -fx-background-radius: 10; -fx-padding: 10 12 10 12; }
+.byx-global-bar { -fx-background-color: -byx-warning-banner; -fx-padding: 0 20 0 20; -fx-border-color: transparent transparent -byx-line transparent; -fx-border-width: 0 0 1 0; }
+.byx-global-bar-text { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-banner-warning; }
+.byx-choice { -fx-background-color: -byx-bg2; -fx-background-radius: 10; -fx-padding: 12 14 12 14; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; -fx-cursor: hand; -fx-alignment: center-left; -fx-border-color: transparent; -fx-border-radius: 10; }
+.byx-choice:selected { -fx-background-color: -byx-accent-tint; -fx-border-color: -byx-accent; -fx-text-fill: -byx-text-primary; }
+.byx-choice:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; }
+.byx-step-dot { -fx-background-color: -byx-bg3; -fx-background-radius: 4; -fx-min-width: 8; -fx-min-height: 8; -fx-max-width: 8; -fx-max-height: 8; }
+.byx-step-dot.on { -fx-background-color: -byx-accent; }
