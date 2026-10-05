@@ -1,0 +1,67 @@
+/*
+ * BYX-MVP V2 Research Overview and Capture (handoff screens/research, screens/capture). Only .byx-* classes.
+ * Gates are shown with three different treatments (open / locked / sealed): never as disabled buttons.
+ */
+.byx-res-guard { -fx-padding: 12; }
+.byx-res-gate { -fx-background-color: -byx-bg2; -fx-background-radius: 10; }
+.byx-res-gate.open { -fx-background-color: #42D79B14; }
+.byx-res-gate.locked { -fx-background-color: #FF7A7A10; }
+.byx-res-gate.sealed { -fx-background-color: #1A2030; }
+.byx-res-gate-icon { -fx-background-radius: 16; -fx-background-color: #AAB3C722; }
+.byx-res-gate.open .byx-res-gate-icon { -fx-background-color: #42D79B22; }
+.byx-res-gate.locked .byx-res-gate-icon { -fx-background-color: #FF7A7A22; }
+.byx-res-gate.open .byx-icon { -fx-stroke: -byx-positive; }
+.byx-res-gate.locked .byx-icon { -fx-stroke: -byx-negative; }
+.byx-res-gate.sealed .byx-icon, .byx-res-gate.unknown .byx-icon { -fx-stroke: -byx-text-secondary; }
+.byx-res-guard-state { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-secondary; }
+.byx-res-guard-state.open { -fx-text-fill: -byx-positive; }
+.byx-res-guard-state.locked { -fx-text-fill: -byx-negative; }
+.byx-res-guard-state.unknown { -fx-text-fill: -byx-text-tertiary; }
+
+/* pipeline */
+.byx-res-step { -fx-cursor: hand; }
+.byx-res-step:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 6; -fx-border-insets: -4; }
+.byx-res-step .dim { -fx-text-fill: -byx-text-tertiary; }
+.byx-res-bar { -fx-background-radius: 4; -fx-background-color: -byx-disabled; }
+.byx-res-bar.complete { -fx-background-color: -byx-positive; }
+.byx-res-bar.current { -fx-background-color: -byx-warning; }
+.byx-res-bar.current.live { -fx-background-color: -byx-accent; }
+.byx-res-bar.pending { -fx-background-color: -byx-disabled; }
+.byx-res-bar.locked { -fx-background-color: -byx-disabled; -fx-opacity: 0.55; }
+.byx-res-bar.failed { -fx-background-color: -byx-negative; }
+
+/* KPIs, sessions */
+.byx-res-big { -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 30px; -fx-min-height: 36; -fx-text-fill: -byx-text-primary; }
+.byx-res-big.pos { -fx-text-fill: -byx-positive; }
+.byx-res-big.dim { -fx-text-fill: -byx-text-tertiary; }
+.byx-res-big.purple { -fx-text-fill: -byx-research; }
+.byx-res-kpi { -fx-spacing: 0; }
+.byx-res-seg { -fx-background-radius: 6; -fx-background-color: -byx-disabled; }
+.byx-res-seg.complete { -fx-background-color: #42D79BBF; }
+.byx-res-seg.capturing { -fx-background-color: -byx-accent; }
+.byx-res-seg.failed { -fx-background-color: -byx-negative; }
+.byx-res-seg.pending { -fx-background-color: -byx-bg3; }
+.byx-res-next {
+    -fx-background-color: -byx-accent; -fx-background-radius: 9; -fx-padding: 10 16 10 16;
+    -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-on-accent; -fx-cursor: hand;
+}
+.byx-res-next:hover { -fx-background-color: derive(-byx-accent, 12%); }
+.byx-res-next:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 9; -fx-border-insets: -2; }
+
+/* capture */
+.byx-res-process { -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 36px; -fx-min-height: 44; -fx-text-fill: -byx-text-primary; }
+.byx-res-session { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 15px; -fx-text-fill: -byx-text-primary; -fx-padding: 8 0 8 0; }
+.byx-res-sessionbar { -fx-background-color: -byx-accent; -fx-background-radius: 8; -fx-padding: 0 12 0 12; -fx-opacity: 0.85; }
+.byx-res-sessionbar.stale { -fx-background-color: -byx-warning; }
+.byx-res-sessionbar.stopped { -fx-background-color: -byx-bg3; }
+.byx-res-bar-text { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-on-accent; }
+.byx-res-sessionbar.stopped .byx-res-bar-text { -fx-text-fill: -byx-text-secondary; }
+.byx-res-now { -fx-background-color: #0A0C14; -fx-background-radius: 5; }
+.byx-res-dotted { -fx-border-color: -byx-line; -fx-border-style: segments(2, 4); -fx-border-width: 2 0 0 0; -fx-min-height: 2; -fx-pref-height: 2; -fx-max-height: 2; }
+.byx-res-banner { -fx-background-color: -byx-bg2; -fx-background-radius: 14; -fx-padding: 14 16 14 16; }
+.byx-res-details-toggle {
+    -fx-background-color: transparent; -fx-padding: 0 0 6 0; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 15px;
+    -fx-text-fill: -byx-text-primary; -fx-cursor: hand;
+}
+.byx-res-details-toggle:focused { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 4; -fx-border-insets: -2; }
+.byx-badge.dim { -fx-opacity: 0.45; }

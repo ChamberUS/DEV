@@ -111,8 +111,8 @@ public final class FidelityProductionSmoke {
         private void capture() throws Exception {
             invoke("show",String.class,"capture"); later(() -> {
                 ctx.captureMonitor.stop();
-                Field f=panel.ui.CaptureView.class.getDeclaredField("monitor");f.setAccessible(true);
-                var monitor=(panel.ui.CaptureMonitorCard)f.get(view("capture"));
+                Field f=panel.researchview.CaptureScreen.class.getDeclaredField("panel");f.setAccessible(true);
+                var monitor=(panel.researchview.CapturePanel)f.get(view("capture"));
                 Instant now=Instant.now();
                 var capture=new CaptureSnapshot(CaptureSnapshot.State.RUNNING, null, true, now.minusSeconds(1269),
                         "qa-campaign", now.minusSeconds(1269), "ETHUSDT", "Binance USD-M Futures", now, now,

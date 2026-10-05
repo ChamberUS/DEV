@@ -183,6 +183,11 @@ public class JobsView implements View {
         tick.stop();
     }
 
+    /** Fim da View: nenhum timer permanece. */
+    public void dispose() {
+        tick.stop();
+    }
+
     @Override
     public void onSnapshot(Snapshot s) {
         table.refresh();

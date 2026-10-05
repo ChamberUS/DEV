@@ -19,7 +19,7 @@ import panel.model.CaptureSnapshot.State;
 import panel.motion.*;
 import panel.security.AccessDeniedException;
 import panel.service.CaptureMonitorService;
-import panel.ui.CaptureMonitorCard;
+import panel.researchview.CapturePanel;
 
 class CaptureMonitorTest {
     static final Path STATE = Path.of("/test/state");
@@ -161,7 +161,7 @@ class CaptureMonitorTest {
     }
     @Test void motionFullReducedOffAndPresentationTimerDoNotReadSource() throws Exception {
         FxSupport.fx(() -> {
-            var motion = new MotionService(); var card = new CaptureMonitorCard(motion, clock);
+            var motion = new MotionService(); var card = new CapturePanel(motion, clock);
             var stage = new Stage(); stage.setScene(new Scene(card, 1200, 850)); stage.show();
             try {
                 card.show(probe().read()); card.start(() -> {}); motion.refreshLoops(); assertEquals(1, motion.runningLoops());

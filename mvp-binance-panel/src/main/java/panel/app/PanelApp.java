@@ -20,7 +20,6 @@ import javafx.util.Duration;
 import panel.model.DataSource;
 import panel.model.Snapshot;
 import panel.model.TraderSnapshot;
-import panel.ui.CaptureView;
 import panel.ui.DatasetView;
 import panel.ui.ExecutionView;
 import panel.ui.FeaturesView;
@@ -29,7 +28,6 @@ import panel.ui.JobsView;
 import panel.ui.LabelsView;
 import panel.ui.LockedView;
 import panel.ui.LogsView;
-import panel.ui.OverviewView;
 import panel.ui.SessionsView;
 import panel.ui.SettingsView;
 import panel.ui.Credits;
@@ -47,7 +45,7 @@ public class PanelApp extends Application {
     private final AppContext ctx = new AppContext();
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
-    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets");
+    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture");
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -305,8 +303,13 @@ public class PanelApp extends Application {
     }
 
     private void registerResearchViews() {
-        views.put("overview", new OverviewView(ctx));
-        views.put("capture", new CaptureView(ctx));
+        views.put("overview", new panel.researchview.ResearchOverview(ctx.motion, new panel.researchview.ResearchOverview.Source() {
+            @Override public panel.model.Snapshot snapshot() { return ctx.research.snapshot.get(); }
+            @Override public boolean labelsRunning() { return ctx.research.labelsRunning(); }
+            @Override public int failedJobs() { return (int) ctx.jobs.jobs.stream().filter(j -> j.state.get() == panel.model.JobState.FAILED).count(); }
+        }, this::show));
+        views.put("capture", new panel.researchview.CaptureScreen(ctx.motion, java.time.Clock.systemUTC(), ctx.captureMonitor, ctx.adminAccess,
+                ctx.adminAccess::hasValidAdminSession, ctx.research.snapshot::get));
         views.put("sessions", new SessionsView(ctx));
         views.put("dataset", new DatasetView(ctx));
         views.put("labels", new LabelsView(ctx));

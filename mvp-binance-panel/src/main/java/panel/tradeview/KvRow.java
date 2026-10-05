@@ -5,11 +5,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
 /** Linha rótulo/valor (referência .r): borda superior, rótulo secundário à esquerda, valor à direita. */
-final class KvRow extends HBox {
+public final class KvRow extends HBox {
     private final Label key;
     private final Label value = Fx.label("N/A", "byx-desk-row-value");
 
-    KvRow(String key) {
+    public KvRow(String key) {
         super(12);
         this.key = Fx.label(key, "byx-desk-row-key");
         getStyleClass().add("byx-desk-row");
@@ -20,16 +20,16 @@ final class KvRow extends HBox {
         getChildren().addAll(this.key, Fx.spacer(), value);
     }
 
-    Label valueLabel() {
+    public Label valueLabel() {
         return value;
     }
 
-    String key() {
+    public String key() {
         return key.getText();
     }
 
     /** mono = valor numérico/ID (JetBrains Mono); tone: "neg", "pos", "warn", "dim" ou null. */
-    void set(String text, boolean mono, String tone) {
+    public void set(String text, boolean mono, String tone) {
         Fx.text(value, text);
         Fx.cls(value, "mono", mono);
         Fx.tone(value, tone, "neg", "pos", "warn", "dim");
