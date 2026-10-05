@@ -479,7 +479,7 @@ public class PanelApp extends Application {
         shell.setOnOpenSearch(palette::open);
         userMenu = new panel.shell.UserMenu(shell.overlay(), shell.topBar().avatar(), router);
         userMenu.setIdentity(new panel.shell.UserMenu.Identity(user.username(), blankToNull(user.email()),
-                user.admin() ? "Administrator" : "Trader"));
+                user.admin() ? "Admin" : "Trader"));
         notificationPanel = new panel.shell.NotificationPanel(shell.overlay(), shell.topBar().notifications(), ctx.motion);
         userMenu.setItems(userMenuItems());
         rootStack.getChildren().setAll(shell);

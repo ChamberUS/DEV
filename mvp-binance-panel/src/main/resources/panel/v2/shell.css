@@ -150,3 +150,20 @@
 .byx-menu-item.danger .byx-icon { -fx-stroke: #FF9B9B; }
 .byx-menu-item:disabled { -fx-opacity: 0.55; }
 .byx-notification-panel { -fx-padding: 14; }
+.byx-user-menu .byx-badge { -fx-font-size: 10px; -fx-padding: 2 6 2 6; }
+.byx-filter-chip {
+    -fx-background-color: -byx-line, -byx-bg3; -fx-background-insets: 0, 1; -fx-background-radius: 999, 999;
+    -fx-padding: 4 12 4 12; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 12px; -fx-text-fill: -byx-text-secondary;
+}
+.byx-filter-chip:disabled { -fx-opacity: 0.55; }
+
+/* ---------- V2 scroll bars (palette and other V2 scroll areas) ---------- */
+.byx-palette-scroll .scroll-bar { -fx-background-color: transparent; -fx-padding: 0 2 0 2; }
+.byx-palette-scroll .scroll-bar .thumb { -fx-background-color: -byx-line; -fx-background-radius: 6; }
+.byx-palette-scroll .scroll-bar .thumb:hover { -fx-background-color: -byx-hover; }
+.byx-palette-scroll .scroll-bar .track, .byx-palette-scroll .scroll-bar .track-background { -fx-background-color: transparent; }
+.byx-palette-scroll .scroll-bar .increment-button, .byx-palette-scroll .scroll-bar .decrement-button {
+    -fx-padding: 0; -fx-background-color: transparent;
+}
+.byx-palette-scroll .scroll-bar .increment-arrow, .byx-palette-scroll .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
+.byx-palette-scroll .corner { -fx-background-color: transparent; }

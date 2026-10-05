@@ -66,8 +66,8 @@ public final class NotificationPanel {
         Button all = new Button("All");
         Button unread = new Button("Unread");
         for (Button f : new Button[] {all, unread}) {
-            f.getStyleClass().addAll("byx-btn", "secondary", "small");
-            f.setDisable(true);
+            f.getStyleClass().add("byx-filter-chip");
+            f.setDisable(true); // sem serviço não há o que filtrar
         }
         HBox filters = new HBox(6, all, unread);
         // matriz do handoff lista READY LOADING EMPTY ERROR; sem serviço, EMPTY afirmaria "carregou e não há nada"

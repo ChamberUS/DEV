@@ -100,6 +100,23 @@ public final class ShellQaSmoke {
                 p.play();
                 return;
             }
+            if (step.startsWith("do:")) { // abre/fecha camadas do shell real
+                panel.shell.ByxShell sh = (panel.shell.ByxShell) field("shell");
+                switch (step.substring(3)) {
+                    case "palette" -> sh.topBar().search().fire();
+                    case "menu" -> sh.topBar().avatar().fire();
+                    case "notifications" -> sh.topBar().notifications().fire();
+                    case "toast" -> sh.overlay().toast(panel.design.ByxOverlayHost.ToastKind.INFO, "Data refreshed.");
+                    case "esc" -> {
+                        javafx.scene.Node t = stage.getScene().getFocusOwner() != null ? stage.getScene().getFocusOwner() : sh.overlay();
+                        javafx.event.Event.fireEvent(t, new javafx.scene.input.KeyEvent(javafx.scene.input.KeyEvent.KEY_PRESSED, "", "",
+                                javafx.scene.input.KeyCode.ESCAPE, false, false, false, false));
+                    }
+                    default -> throw new IllegalArgumentException(step);
+                }
+                later(this::next);
+                return;
+            }
             if (step.startsWith("shot:")) { // captura sem navegar
                 shot(step.substring(5));
                 next();
@@ -142,6 +159,12 @@ public final class ShellQaSmoke {
             Path file = output.resolve(name + ".png");
             javax.imageio.ImageIO.write(ControlGalleryTest.toAwt(image), "png", file.toFile());
             report.add("SHOT " + name + " scene=" + (int) image.getWidth() + "x" + (int) image.getHeight());
+        }
+
+        private Object field(String name) throws Exception {
+            Field f = PanelApp.class.getDeclaredField(name);
+            f.setAccessible(true);
+            return f.get(this);
         }
 
         private void invoke(String name, Class<?> type, Object arg) throws Exception {

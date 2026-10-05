@@ -154,12 +154,15 @@ public final class UserMenu {
         initials.setAlignment(Pos.CENTER);
         Label name = new Label(identity.name());
         name.getStyleClass().add("byx-menu-name");
+        name.setMinWidth(0);
         Label email = new Label(identity.email() == null ? "Email not provided by the API" : identity.email());
         email.getStyleClass().add("byx-menu-email");
+        email.setMinWidth(0);
         VBox who = new VBox(2, name, email);
         who.setMinWidth(0);
         HBox.setHgrow(who, Priority.ALWAYS);
         Label role = ByxBadge.of(identity.role().toUpperCase(java.util.Locale.ROOT), ByxBadge.Tone.ACCENT);
+        role.setMinWidth(Region.USE_PREF_SIZE); // o papel nunca é cortado; nome e e-mail reticenciam
         HBox header = new HBox(10, initials, who, role);
         header.setAlignment(Pos.CENTER_LEFT);
         header.getStyleClass().add("byx-menu-header");
@@ -185,13 +188,17 @@ public final class UserMenu {
     private Node item(Item it) {
         Label label = new Label(it.label());
         label.getStyleClass().add("byx-menu-label");
+        label.setMinWidth(Region.USE_PREF_SIZE);
         Region spacer = new Region();
+        spacer.setMinWidth(0);
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox row = new HBox(10, ByxIcon.path(ShellIcons.path(it.icon()), 18, null), label, spacer);
+        HBox row = new HBox(8, ByxIcon.path(ShellIcons.path(it.icon()), 18, null), label, spacer);
         row.setAlignment(Pos.CENTER_LEFT);
         boolean current = it.route() != null && it.route().equals(router.route());
         if (it.pending() != null) {
-            row.getChildren().add(ByxBadge.availability(ByxBadge.Availability.COMING_SOON));
+            Label soon = ByxBadge.availability(ByxBadge.Availability.COMING_SOON);
+            soon.setMinWidth(Region.USE_PREF_SIZE);
+            row.getChildren().add(soon);
         } else if (current) {
             javafx.scene.shape.Circle dot = new javafx.scene.shape.Circle(3);
             dot.getStyleClass().add("byx-menu-current-dot");
