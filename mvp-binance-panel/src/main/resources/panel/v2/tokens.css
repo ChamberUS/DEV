@@ -54,10 +54,10 @@
     -byx-error-ring: #FF7A7A1A;
 }
 
-/* contexts: trading / research / byx (same root classes PanelApp already toggles) */
-.root.trader { -byx-accent: -byx-trading; -byx-accent-tint: #7C96FF1F; }
-.root.research { -byx-accent: -byx-research; -byx-accent-tint: #B896FF1F; }
-.root.byx { -byx-accent: -byx-byx; -byx-accent-tint: #5ED6C41F; }
+/* contexts: trading / research / byx, on the scene root or on any V2 container (byx-ctx-*) */
+.root.trader, .byx-ctx-trader { -byx-accent: -byx-trading; -byx-accent-tint: #7C96FF1F; }
+.root.research, .byx-ctx-research { -byx-accent: -byx-research; -byx-accent-tint: #B896FF1F; }
+.root.byx, .byx-ctx-byx { -byx-accent: -byx-byx; -byx-accent-tint: #5ED6C41F; }
 
 /* accessibility.highContrast */
 .root.hc {

@@ -18,8 +18,13 @@ public final class ByxIcon {
         if (a == null) {
             throw new IllegalArgumentException("unknown icon " + name);
         }
+        return path(a.svgPath(), size, tone);
+    }
+
+    /** Ícone a partir de um path SVG de viewBox 24 (ex.: ícones do shell copiados da referência). */
+    public static Node path(String svgPath, double size, String tone) {
         SVGPath p = new SVGPath();
-        p.setContent(a.svgPath());
+        p.setContent(svgPath);
         p.getStyleClass().add("byx-icon");
         if (tone != null) {
             p.getStyleClass().add("tone-" + tone);

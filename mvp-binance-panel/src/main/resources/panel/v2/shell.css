@@ -1,0 +1,113 @@
+/*
+ * BYX-MVP V2 shell (handoff css/layout.css + P2.4 measurements): rail 68, top bar 56, dock 38.
+ * Only .byx-* classes; legacy content sits in .byx-legacy-host with its own stylesheets.
+ */
+.byx-app, .byx-shell, .byx-frame { -fx-background-color: -byx-bg0; }
+.byx-main { -fx-background-color: -byx-bg0; }
+
+/* ---------- rail ---------- */
+.byx-rail { -fx-background-color: -byx-bg1; -fx-padding: 14 0 14 0; -fx-spacing: 4; }
+.byx-logo-bar { -fx-fill: -byx-accent; }
+.byx-rail-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+.byx-rail-item .byx-icon { -fx-stroke: -byx-text-tertiary; }
+.byx-rail-label { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 11px; -fx-text-fill: -byx-text-tertiary; }
+.byx-rail-item:hover { -fx-background-color: -byx-bg2; }
+.byx-rail-item:hover .byx-icon { -fx-stroke: -byx-text-primary; }
+.byx-rail-item:hover .byx-rail-label { -fx-text-fill: -byx-text-primary; }
+.byx-rail-item:pressed, .byx-rail-item:armed { -fx-background-color: -byx-bg3; }
+.byx-rail-item:selected { -fx-background-color: -byx-bg3; }
+.byx-rail-item:selected .byx-icon { -fx-stroke: -byx-accent; }
+.byx-rail-item:selected .byx-rail-label { -fx-text-fill: -byx-text-primary; }
+.byx-rail-item:disabled { -fx-opacity: 0.55; -fx-cursor: default; }
+.byx-rail-item:focus-visible, .root.focusall .byx-rail-item:focused {
+    -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-insets: -2; -fx-border-radius: 14;
+}
+.byx-rail-indicator { -fx-background-color: -byx-accent; -fx-background-radius: 2; }
+
+/* ---------- top bar ---------- */
+.byx-topbar { -fx-padding: 0 20 0 20; -fx-spacing: 16; -fx-background-color: -byx-bg0; }
+.byx-switch { -fx-background-color: -byx-bg1; -fx-background-radius: 10; -fx-padding: 3; }
+.byx-switch-seg {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 7 16 7 16;
+    -fx-font-family: "Schibsted Grotesk SemiBold";
+    -fx-font-size: 14px;
+    -fx-text-fill: -byx-text-secondary;
+    -fx-graphic-text-gap: 6;
+    -fx-cursor: hand;
+}
+.byx-switch-seg:hover { -fx-background-color: -byx-bg2; -fx-text-fill: -byx-text-primary; }
+.byx-switch-seg:selected { -fx-background-color: -byx-bg3; -fx-text-fill: -byx-text-primary; }
+.byx-switch-seg:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 8; }
+.byx-switch-underline { -fx-background-color: -byx-accent; }
+.byx-breadcrumb .byx-crumb { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-tertiary; }
+.byx-context-chip {
+    -fx-background-color: -byx-bg1; -fx-background-radius: 7; -fx-padding: 4 10 4 10;
+    -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 12px; -fx-text-fill: -byx-text-primary;
+}
+.byx-search {
+    -fx-background-color: -byx-bg1;
+    -fx-background-radius: 10;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.byx-search .byx-icon { -fx-stroke: -byx-text-tertiary; }
+.byx-search-prompt { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-text-fill: -byx-text-tertiary; }
+.byx-search-key { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 14px; -fx-text-fill: -byx-text-tertiary; }
+.byx-search:hover { -fx-background-color: -byx-bg2; }
+.byx-search:focused, .byx-search:focus-visible {
+    -fx-background-color: -byx-focus-ring, -byx-accent, -byx-bg1;
+    -fx-background-insets: -3, 0, 1;
+    -fx-background-radius: 13, 10, 9;
+}
+.byx-tbtn { -fx-background-color: transparent; -fx-background-radius: 10; -fx-padding: 0; -fx-cursor: hand; }
+.byx-tbtn .byx-icon { -fx-stroke: -byx-text-secondary; }
+.byx-tbtn:hover { -fx-background-color: -byx-bg1; }
+.byx-tbtn:hover .byx-icon { -fx-stroke: -byx-text-primary; }
+.byx-tbtn.expanded { -fx-background-color: -byx-bg2; }
+.byx-tbtn:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 10; }
+.byx-count {
+    -fx-min-width: 18; -fx-min-height: 18; -fx-pref-height: 18; -fx-max-height: 18;
+    -fx-padding: 0 5 0 5; -fx-background-radius: 9;
+    -fx-background-color: -byx-bg0, -byx-trading; -fx-background-insets: -2, 0;
+    -fx-text-fill: -byx-text-on-accent; -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 11px; -fx-alignment: center;
+}
+.byx-admin-badge { -fx-font-size: 12px; -fx-padding: 5 10 5 10; }
+.byx-avatar {
+    -fx-background-color: #FFFFFF1A, -byx-bg3; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
+    -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;
+    -fx-padding: 0; -fx-cursor: hand;
+}
+.byx-avatar:hover { -fx-background-color: #FFFFFF40, -byx-bg3; }
+.byx-avatar.expanded { -fx-background-color: -byx-accent, -byx-bg0, -byx-bg3; -fx-background-insets: -2, 0, 0; -fx-background-radius: 20, 18, 18; }
+.byx-avatar:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-insets: -4; -fx-border-radius: 22; }
+
+/* ---------- status dock ---------- */
+.byx-dock { -fx-background-color: -byx-bg1; -fx-padding: 0 20 0 20; }
+.byx-dock-grp { -fx-spacing: 16; }
+.byx-dock-group { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 11px; -fx-text-fill: -byx-text-tertiary; }
+.byx-dock-sep { -fx-background-color: -byx-line; }
+.byx-dock-item {
+    -fx-background-color: transparent; -fx-background-radius: 6;
+    -fx-padding: 0 8 0 8; -fx-min-height: 26; -fx-pref-height: 26; -fx-max-height: 26;
+}
+.byx-dock-item.link { -fx-cursor: hand; }
+.byx-dock-item.link:hover { -fx-background-color: -byx-bg2; }
+.byx-dock-item.link:hover .byx-dock-text { -fx-text-fill: -byx-text-primary; }
+.byx-dock-item:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 6; }
+.byx-dock-text { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-secondary; }
+.byx-dock-text.tone-primary { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-text-fill: -byx-text-primary; }
+.byx-dock-text.tone-tertiary { -fx-text-fill: -byx-text-tertiary; }
+
+/* ---------- tooltip (rail 300 ms) ---------- */
+.byx-tooltip {
+    -fx-background-color: -byx-hover; -fx-background-radius: 8; -fx-padding: 6 10 6 10;
+    -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 24, 0, 0, 8);
+}
