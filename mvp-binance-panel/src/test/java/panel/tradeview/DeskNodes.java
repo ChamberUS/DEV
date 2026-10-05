@@ -7,11 +7,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.Labeled;
 
 /** Percurso do grafo de cena para os testes do Desk. */
-final class DeskNodes {
+public final class DeskNodes {
     private DeskNodes() {
     }
 
-    static <T> List<T> all(Node root, Class<T> type) {
+    public static <T> List<T> all(Node root, Class<T> type) {
         List<T> out = new ArrayList<>();
         walk(root, n -> {
             if (type.isInstance(n)) {
@@ -21,7 +21,7 @@ final class DeskNodes {
         return out;
     }
 
-    static void walk(Node n, java.util.function.Consumer<Node> visit) {
+    public static void walk(Node n, java.util.function.Consumer<Node> visit) {
         visit.accept(n);
         if (n instanceof Parent p) {
             for (Node c : p.getChildrenUnmodifiable()) {
@@ -31,7 +31,7 @@ final class DeskNodes {
     }
 
     /** Todo texto de rótulo que o usuário veria (nós visíveis e gerenciados). */
-    static List<String> visibleTexts(Node root) {
+    public static List<String> visibleTexts(Node root) {
         List<String> out = new ArrayList<>();
         collect(root, out);
         return out;
@@ -59,7 +59,7 @@ final class DeskNodes {
     }
 
     /** Resumo estrutural (texto, visibilidade, classes de estilo): igual em FULL, REDUCED e OFF. Não entra nas células de TableView. */
-    static List<String> digest(Node root) {
+    public static List<String> digest(Node root) {
         List<String> out = new ArrayList<>();
         digest(root, out);
         return out;

@@ -23,10 +23,10 @@ import panel.shell.LegacyHost;
 import panel.shell.ShellRouter;
 
 /** Desk dentro do shell V2 real (rail 68, top bar 56, dock 38) numa cena de tamanho exato; relógio controlável. */
-final class DeskHarness {
+public final class DeskHarness {
     /** Relógio mutável: o Desk nunca lê o relógio do sistema. */
-    static final class TestClock extends Clock {
-        Instant now = DeskFixtures.NOW;
+    public static final class TestClock extends Clock {
+        public Instant now = DeskFixtures.NOW;
 
         @Override
         public java.time.ZoneId getZone() {
@@ -114,7 +114,7 @@ final class DeskHarness {
         shell.dispose();
     }
 
-    static <T> T fx(Supplier<T> s) throws Exception {
+    public static <T> T fx(Supplier<T> s) throws Exception {
         FxStart.start();
         AtomicReference<T> out = new AtomicReference<>();
         AtomicReference<Throwable> err = new AtomicReference<>();
@@ -137,7 +137,7 @@ final class DeskHarness {
         return out.get();
     }
 
-    static void fx(Runnable r) throws Exception {
+    public static void fx(Runnable r) throws Exception {
         fx(() -> {
             r.run();
             return null;
