@@ -29,6 +29,8 @@ public class TraderSnapshot {
     public String symbol;
     public String market;
     public String feed;
+    /** Instante da última atualização do feed; null = não informado (nenhum provider real o preenche hoje). */
+    public java.time.Instant feedUpdatedAt;
     public Double price;
     public Double change24hPct;
     public Double high24h;
