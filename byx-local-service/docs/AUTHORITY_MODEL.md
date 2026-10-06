@@ -1,5 +1,7 @@
 # V2.1F — Autoridade de autenticação e sessão (fundação)
 
+> **V2.1G:** a autoridade deixou de ser só QA: o serviço do produto a monta com o perfil de PRODUÇÃO e o painel autentica exclusivamente por ela (migração dos usuários/segredos reais preparada, cutover manual pendente). Plano, trava de migração, rollback e limites: ver `mvp-binance-panel/docs/AUTHORITY_CUTOVER.md`. O parágrafo abaixo descreve a fase V2.1F (histórico).
+
 **Escopo desta fase.** Esta fase NÃO migra usuários reais, NÃO lê os três segredos reais, NÃO habilita Binance Account, NÃO habilita notificações privadas e NÃO abre capacidades privadas. O app normal continua no fluxo de login atual (painel). A nova autoridade vive no serviço, isolada num harness de teste / modo de QA empacotado (`AuthQaMain`, só no bundle de TESTE); não existe flag de produção que a ligue (`AuthIsolationTest`). `PRIVATE_CAPABILITIES_ALLOWED` continua `false`.
 
 ## 1. Auditoria da autenticação atual (painel; somente leitura)

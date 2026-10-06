@@ -132,6 +132,41 @@ class AuthCutoverTest {
         assertEquals(Code.OK, begin.code());
     }
 
+    // ---- elevação deslizante -----------------------------------------------------------------------------------------------------------
+
+    @Test
+    void elevationSlidesWithActivityUpToTheAbsoluteSessionLimitAndLapsesWhenIdle() throws Exception {
+        f.admin.setProviders(new ProviderSettings(null, null, null, null, 30)); // janela migrada do legado: 30 min
+        String t = adminLogin();
+        fullMfa(t, f.adminId);
+        assertEquals(Code.OK, f.auth.adminElevation(PEER, t).code());
+        for (int i = 0; i < 8; i++) { // atividade a cada 10 min mantém a elevação (além da janela de MFA recente, que só vale para ELEVAR)
+            f.clock.advance(Duration.ofMinutes(10));
+            assertEquals(Code.OK, f.auth.adminElevation(PEER, t).code(), "slide " + i);
+            assertEquals(true, f.auth.sessionStatus(PEER, t).data().get("elevated"));
+        }
+        assertTrue(f.auth.sessionStatus(PEER, t).data().get("elevatedForSec") instanceof Long l && l > 25 * 60 && l <= 30 * 60);
+        f.clock.advance(Duration.ofMinutes(31)); // ocioso além da janela: a sessão cai por inatividade de 15 min (e a elevação lapsaria de qualquer forma)
+        assertEquals(Code.AUTH_REQUIRED, f.auth.authorize(PEER, t, "qa.adminOp", null).code());
+        String t2 = adminLogin();
+        fullMfa(t2, f.adminId);
+        f.auth.adminElevation(PEER, t2);
+        f.clock.advance(Duration.ofMinutes(14)); // sessão ainda viva (idle 15), elevação ainda válida
+        f.auth.sessionStatus(PEER, t2);
+        f.clock.advance(Duration.ofMinutes(14));
+        f.auth.sessionStatus(PEER, t2);
+        f.clock.advance(Duration.ofMinutes(14)); // 42 min sem elevar: lapsou (janela 30)
+        assertEquals(Code.DENIED, f.auth.authorize(PEER, t2, "qa.adminOp", null).code());
+        assertEquals(Code.ELEVATION_REQUIRES_MFA, f.auth.adminElevation(PEER, t2).code(), "lapsed elevation needs the second factor (or a trusted device) again");
+    }
+
+    @Test
+    void theElevationWindowDefaultsToTheStrictLimitWhenNothingWasMigrated() throws Exception {
+        assertEquals(AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), ProviderSettings.NONE.elevationMs());
+        assertEquals(30 * 60_000L, new ProviderSettings(null, null, null, null, 30).elevationMs());
+        assertEquals(AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), new ProviderSettings(null, null, null, null, 999).elevationMs(), "out-of-range values are not honored");
+    }
+
     // ---- dispositivo confiável -------------------------------------------------------------------------------------------------------
 
     @Test

@@ -79,6 +79,7 @@ final class AuthorityCodec {
         p.put("twilioAccountSid", s.providers().twilioAccountSid());
         p.put("twilioApiKeySid", s.providers().twilioApiKeySid());
         p.put("twilioVerifyServiceSid", s.providers().twilioVerifyServiceSid());
+        p.put("adminElevationMinutes", s.providers().adminElevationMinutes());
         ArrayNode devs = o.putArray("devices");
         List<TrustedDevice> ds = new ArrayList<>(s.devices());
         ds.sort(Comparator.comparing(TrustedDevice::id));
@@ -251,11 +252,11 @@ final class AuthorityCodec {
                         n.get("phoneVerified").asBoolean(), n.get("mustChangePassword").asBoolean(), lastLogin));
             }
             JsonNode pv = st.get("providers");
-            if (pv.size() != 4) {
+            if (pv.size() != 5 || !pv.path("adminElevationMinutes").isIntegralNumber() || pv.get("adminElevationMinutes").asLong() < 0 || pv.get("adminElevationMinutes").asLong() > ProviderSettings.MAX_ELEVATION_MINUTES) {
                 throw new FormatException();
             }
             ProviderSettings providers = new ProviderSettings(nullableText(pv, "resendFromAddress"), nullableText(pv, "twilioAccountSid"), nullableText(pv, "twilioApiKeySid"),
-                    nullableText(pv, "twilioVerifyServiceSid"));
+                    nullableText(pv, "twilioVerifyServiceSid"), (int) pv.get("adminElevationMinutes").asLong());
             List<TrustedDevice> devices = new ArrayList<>();
             Set<String> deviceIds = new HashSet<>();
             for (JsonNode n : st.get("devices")) {

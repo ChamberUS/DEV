@@ -59,15 +59,17 @@ public final class Migrator {
     private final AuthProfile profile;
     private final Path legacyDb;
     private final Path providersFile;
+    private final Path securityFile;
     private final LegacySecretSource legacy;
     private final SecretStore secrets;
     private final Clock clock;
     private final String serviceRequirement;
 
-    Migrator(AuthProfile profile, Path legacyDb, Path providersFile, LegacySecretSource legacy, SecretStore secrets, Clock clock, String serviceRequirement) {
+    public Migrator(AuthProfile profile, Path legacyDb, Path providersFile, Path securityFile, LegacySecretSource legacy, SecretStore secrets, Clock clock, String serviceRequirement) {
         this.profile = profile;
         this.legacyDb = legacyDb;
         this.providersFile = providersFile;
+        this.securityFile = securityFile;
         this.legacy = legacy;
         this.secrets = secrets;
         this.clock = clock;
@@ -213,7 +215,22 @@ public final class Migrator {
         } catch (IOException e) {
             throw new MigrationException("providers_unreadable");
         }
-        ProviderSettings ps = new ProviderSettings(p.getProperty("resend.fromAddress"), p.getProperty("twilio.accountSid"), p.getProperty("twilio.apiKeySid"), p.getProperty("twilio.verifyServiceSid"));
+        int minutes = 30; // padrão do painel legado quando a chave não existe
+        Properties sec = new Properties();
+        if (securityFile != null && Files.exists(securityFile)) {
+            try (var in = Files.newInputStream(securityFile)) {
+                sec.load(in);
+            } catch (IOException e) {
+                throw new MigrationException("security_config_unreadable");
+            }
+            try {
+                minutes = Integer.parseInt(sec.getProperty("security.admin.sessionTimeoutMinutes", "30").trim());
+            } catch (NumberFormatException e) {
+                throw new MigrationException("security_config_invalid", "key=security.admin.sessionTimeoutMinutes");
+            }
+        }
+        minutes = Math.max(1, Math.min(ProviderSettings.MAX_ELEVATION_MINUTES, minutes)); // o legado impunha mínimo 1; o serviço limita a 60
+        ProviderSettings ps = new ProviderSettings(p.getProperty("resend.fromAddress"), p.getProperty("twilio.accountSid"), p.getProperty("twilio.apiKeySid"), p.getProperty("twilio.verifyServiceSid"), minutes);
         List<String> bad = new ArrayList<>();
         if (!ps.emailConfigured() || ps.resendFromAddress().length() > 254 || ps.resendFromAddress().chars().anyMatch(c -> c < 32 || c == 127)) {
             bad.add("resend.fromAddress");

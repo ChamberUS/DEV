@@ -178,7 +178,7 @@ class AuthIsolationTest {
         for (String weak : new String[] {"/ECB", "/CBC", "DESede", "\"DES\"", "RC4", "Blowfish"}) {
             assertFalse(codec.contains(weak), "no weak or home-made cipher: " + weak);
         }
-        assertEquals(Set.of("auth/AuthorityStore.java", "auth/EncryptionKeyVault.java", "auth/MemoryKeyVault.java", "auth/SecretStoreKeyVault.java"), filesContaining("EncryptionKeyVault"),
+        assertEquals(Set.of("auth/AuthorityStore.java", "auth/EncryptionKeyVault.java", "auth/MemoryKeyVault.java", "auth/SecretStoreKeyVault.java", "migration/Migrator.java"), filesContaining("EncryptionKeyVault"),
                 "the key is reached only through the typed vault");
         String store = Files.readString(MAIN.resolve("byx/service/auth/AuthorityStore.java"));
         assertFalse(store.contains("derivedKey(\"enc") || store.contains("mac(key, \"enc"), "the AEAD key is never derived from the MAC key");

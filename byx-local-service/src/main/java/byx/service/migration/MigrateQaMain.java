@@ -28,7 +28,7 @@ public final class MigrateQaMain {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
-            System.err.println("usage: seed|tamper-source|status|audit|plan|prepare|verify|finalize|cleanup");
+            System.err.println("usage: seed|tamper-source|legacy-status|status|audit|plan|prepare|verify|finalize|cleanup");
             System.exit(2);
         }
         String env = System.getenv("BYX_LOCAL_SERVICE_HOME");
@@ -50,11 +50,17 @@ public final class MigrateQaMain {
         AuthProfile profile = AuthProfile.qa(home.resolve("qa-authority"));
         LegacyKeychain legacy = new LegacyKeychain(LegacyKeychain.Names.TEST, false);
         String team = PeerIdentity.selfTeamId();
-        Migrator m = new Migrator(profile, db, providers, legacy, profile.secrets(), Clock.systemUTC(), team == null ? "unsigned" : AppIdentity.requirement(AppIdentity.SERVICE_ID, team));
+        Migrator m = new Migrator(profile, db, providers, legacyDir.resolve("security.properties"), legacy, profile.secrets(), Clock.systemUTC(), team == null ? "unsigned" : AppIdentity.requirement(AppIdentity.SERVICE_ID, team));
         int rc = 0;
         switch (args[0]) {
             case "seed" -> seed(legacyDir, db, providers, legacy);
             case "tamper-source" -> tamper(db);
+            case "legacy-status" -> {
+                for (LegacySecretSource.Item i : LegacySecretSource.Item.values()) {
+                    System.out.println("legacy." + i.name() + "=" + legacy.describe(i).name());
+                }
+                System.out.println("RESULT OK legacy-status");
+            }
             case "cleanup" -> {
                 for (LegacySecretSource.Item i : LegacySecretSource.Item.values()) {
                     legacy.deleteForTest(i);
@@ -82,6 +88,7 @@ public final class MigrateQaMain {
             st.execute("CREATE TABLE trusted_devices (device_id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, display_name TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, "
                     + "last_used_at TEXT NOT NULL, expires_at TEXT NOT NULL, revoked_at TEXT, FOREIGN KEY(user_id) REFERENCES users(id))");
             st.execute("CREATE TABLE meta (name TEXT PRIMARY KEY, value TEXT NOT NULL)");
+            com.fasterxml.jackson.databind.node.ObjectNode creds = new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode();
             String[][] users = {{"Qa_Admin", "qa.admin@example.test", "ADMIN", "ACTIVE", "+5511900000001"}, {"qa_user", "qa.user@example.test", "USER", "ACTIVE", "+5511900000002"},
                 {"qa_off", "qa.off@example.test", "USER", "DISABLED", null}};
             for (String[] u : users) {
@@ -91,18 +98,25 @@ public final class MigrateQaMain {
                         + "VALUES(?,?,?,?,?,?,1,0,0,'2026-10-02T04:00:12.751772Z','2026-10-02T04:00:12.751772Z',NULL)")) {
                     p.setString(1, u[0]);
                     p.setString(2, u[1]);
-                    p.setString(3, pv.hash(java.util.Base64.getEncoder().encodeToString(r).toCharArray())); // senha aleatória e descartada
+                    String password = "qa-" + java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(r);
+                    creds.putObject(u[0].toLowerCase()).put("password", password); // senhas SINTÉTICAS de teste, em arquivo 0600 do diretório de QA (para provar o login com a senha antiga)
+                    p.setString(3, pv.hash(password.toCharArray()));
                     p.setString(4, u[2]);
                     p.setString(5, u[3]);
                     p.setString(6, u[4]);
                     p.executeUpdate();
                 }
             }
+            Path pf = legacyDir.resolve("qa-passwords.json");
+            Files.deleteIfExists(pf);
+            Files.createFile(pf, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+            Files.writeString(pf, creds.toString());
             st.execute("INSERT INTO audit_log(ts,event,actor,detail) VALUES('2026-10-02T04:00:12Z','INITIAL_ADMIN_CREATED','qa','')");
             st.execute("INSERT INTO trusted_devices VALUES('dev-1',1,'This Mac','" + "f".repeat(64) + "','2026-10-03T00:00:00Z','2026-10-03T00:00:00Z','2099-01-01T00:00:00Z',NULL)");
             st.execute("INSERT INTO meta VALUES('rl_pepper','synthetic')");
         }
         Files.writeString(providers, "resend.fromAddress=QA <qa@example.test>\ntwilio.accountSid=AC" + "1".repeat(32) + "\ntwilio.apiKeySid=SK" + "2".repeat(32) + "\ntwilio.verifyServiceSid=VA" + "3".repeat(32) + "\n");
+        Files.writeString(legacyDir.resolve("security.properties"), "security.admin.sessionTimeoutMinutes=30\n");
         legacy.addForTest(LegacySecretSource.Item.RESEND, "re_SYNTHETIC_LEGACY_RESEND_KEY".getBytes(StandardCharsets.UTF_8));
         legacy.addForTest(LegacySecretSource.Item.TWILIO, "SYNTHETIC-LEGACY-TWILIO-SECRET".getBytes(StandardCharsets.UTF_8));
         legacy.addForTest(LegacySecretSource.Item.TRUSTED_DEVICE, "SYNTHETIC-LEGACY-DEVICE-TOKEN".getBytes(StandardCharsets.UTF_8));

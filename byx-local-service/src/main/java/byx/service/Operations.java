@@ -70,7 +70,7 @@ final class Operations {
                 PrivateCapabilityGate.PREREQUISITES.forEach(unmet::add);
                 var identity = out.putObject("identity");
                 identity.put("peer", identityMode == IdentityPolicy.Mode.PACKAGED_VERIFIED ? "verified_app_code_identity_and_pairing_secret" : "pairing_secret_same_user");
-                identity.put("userAuthentication", "not_implemented");
+                identity.put("userAuthentication", authentication ? "service_authority" : "not_implemented");
                 identity.put("appIdentity", identityMode.wire); // packaged_verified | development_unverified (nunca habilita capacidade privada)
                 identity.put("authorization", market != null ? "service_status_and_public_market_data" : "service_status_only");
                 out.put("mode", "development_local_same_user");

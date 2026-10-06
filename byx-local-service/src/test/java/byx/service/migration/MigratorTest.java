@@ -126,12 +126,13 @@ class MigratorTest {
         userHash = PV.hash(userPw.toCharArray());
         createLegacy(true);
         Files.writeString(providers, "resend.fromAddress=BYX <noreply@example.test>\ntwilio.accountSid=AC" + "1".repeat(32) + "\ntwilio.apiKeySid=SK" + "2".repeat(32) + "\ntwilio.verifyServiceSid=VA" + "3".repeat(32) + "\n");
+        Files.writeString(dir.resolve("security.properties"), "security.admin.sessionTimeoutMinutes=30\nsecurity.dev.mode=ignored\n");
         legacy = new FakeLegacy();
         legacy.values.put(Item.RESEND, "re_FAKE_LEGACY_KEY".getBytes(StandardCharsets.UTF_8));
         legacy.values.put(Item.TWILIO, "FAKE-LEGACY-TWILIO".getBytes(StandardCharsets.UTF_8));
         legacy.values.put(Item.TRUSTED_DEVICE, "FAKE-LEGACY-DEVICE".getBytes(StandardCharsets.UTF_8));
         profile = AuthProfile.production(home); // perfil de produção sobre um HOME TEMPORÁRIO e um cofre de MENTIRA (nada real é tocado)
-        m = new Migrator(profile, db, providers, legacy, new ScopedSecretStore(backend, SecretId.Scope.PRODUCTION), Clock.systemUTC(), "identifier \"x\" and anchor apple generic and certificate leaf[subject.OU] = \"AAAAAAAAAA\"");
+        m = new Migrator(profile, db, providers, dir.resolve("security.properties"), legacy, new ScopedSecretStore(backend, SecretId.Scope.PRODUCTION), Clock.systemUTC(), "identifier \"x\" and anchor apple generic and certificate leaf[subject.OU] = \"AAAAAAAAAA\"");
     }
 
     @AfterEach
@@ -263,6 +264,7 @@ class MigratorTest {
         assertTrue(st.migrationFreeze(), "the safety window is on from the start");
         assertTrue(st.devices().isEmpty(), "no trusted device was migrated");
         assertEquals("BYX <noreply@example.test>", st.providers().resendFromAddress());
+        assertEquals(30, st.providers().adminElevationMinutes(), "the configured admin session window is migrated (legacy: 30 min)");
         // o snapshot em disco é cifrado
         String raw = new String(Files.readAllBytes(profile.snapshot()), StandardCharsets.ISO_8859_1);
         assertFalse(raw.contains("syn_admin") || raw.contains("argon2id") || raw.contains("example.test"));

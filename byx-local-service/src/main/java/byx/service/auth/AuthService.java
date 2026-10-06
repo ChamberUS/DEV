@@ -386,6 +386,12 @@ public final class AuthService {
             audit.record("ELEVATION_DENIED", ok.account.id());
             return Result.of(Code.DENIED);
         }
+        long window = elevationMs();
+        long absoluteCap = ok.session.createdAtMs + AuthLimits.ABSOLUTE_TIMEOUT.toMillis();
+        if (ok.session.elevatedUntilMs > now) { // elevação AINDA válida: atividade a estende (deslizante), nunca além da sessão absoluta; se lapsou, exige 2º fator ou dispositivo de novo
+            ok.session.elevatedUntilMs = Math.min(now + window, absoluteCap);
+            return new Result(Code.OK, view(ok.account, ok.session));
+        }
         boolean mfaFresh = ok.session.mfaAtMs >= 0 && now - ok.session.mfaAtMs <= AuthLimits.RECENT_MFA_WINDOW.toMillis();
         if (!mfaFresh) {
             Optional<TrustedDevice> td = activeDevice(ok.account.id(), now);
@@ -401,9 +407,17 @@ public final class AuthService {
             }
             audit.record("ELEVATION_TRUSTED_DEVICE", ok.account.id());
         }
-        ok.session.elevatedUntilMs = Math.min(now + AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), ok.session.createdAtMs + AuthLimits.ABSOLUTE_TIMEOUT.toMillis());
+        ok.session.elevatedUntilMs = Math.min(now + window, absoluteCap);
         audit.record("ELEVATION_GRANTED", ok.account.id());
         return new Result(Code.OK, view(ok.account, ok.session));
+    }
+
+    private long elevationMs() {
+        try {
+            return authority.current().providers().elevationMs();
+        } catch (AuthorityException e) {
+            return AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis();
+        }
     }
 
     private Optional<TrustedDevice> activeDevice(String accountId, long now) {

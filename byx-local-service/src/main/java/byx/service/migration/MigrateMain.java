@@ -6,9 +6,7 @@ import byx.service.identity.PeerIdentity;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Clock;
 import java.util.Map;
 
@@ -29,10 +27,9 @@ public final class MigrateMain {
         }
         Path userHome = Path.of(System.getProperty("user.home"));
         Path serviceHome = AuthProfile.defaultServiceHome();
-        Files.createDirectories(serviceHome, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
         AuthProfile profile = AuthProfile.production(serviceHome);
         String team = PeerIdentity.selfTeamId();
-        Migrator m = new Migrator(profile, userHome.resolve(".mvp-binance-panel/panel.db"), userHome.resolve(".mvp-binance-panel/providers.properties"),
+        Migrator m = new Migrator(profile, userHome.resolve(".mvp-binance-panel/panel.db"), userHome.resolve(".mvp-binance-panel/providers.properties"), userHome.resolve(".mvp-binance-panel/security.properties"),
                 new LegacyKeychain(LegacyKeychain.Names.REAL, true), profile.secrets(), Clock.systemUTC(),
                 team == null ? "unsigned" : AppIdentity.requirement(AppIdentity.SERVICE_ID, team));
         System.exit(run(m, args[0], new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))));
