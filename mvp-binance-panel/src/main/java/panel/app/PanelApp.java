@@ -157,6 +157,9 @@ public class PanelApp extends Application {
         mainActive = false;
         ctx.market.stop(); // logout/troca de usuário cancela a assinatura de mercado
         ctx.localService.stop();
+        Thread launcher = new Thread(ctx.authority::ensureService, "service-launcher"); // a autenticação depende do serviço do próprio bundle: inicia se preciso
+        launcher.setDaemon(true);
+        launcher.start();
         closeShell();
         if (activeView != null) { activeView.onHide(); activeView = null; }
         router.reset();
@@ -237,8 +240,8 @@ public class PanelApp extends Application {
     }
 
     private void afterPasswordChanged() {
-        User fresh = ctx.users.findById(mustChangeUser.id()).orElse(mustChangeUser);
-        ctx.sessions.updateUser(fresh);
+        User fresh = ctx.auth.refreshUser().orElse(null); // a SESSÃO no serviço decide (a troca obrigatória limpou o marcador lá)
+        if (fresh == null) { showEntry("Session expired. Please sign in again."); return; }
         enterApp(fresh);
     }
 
@@ -540,18 +543,16 @@ public class PanelApp extends Application {
             adapter = new TwoFactorFlowAdapter(ctx.adminAccess.startTwoFactor());
         } catch (panel.auth.TwoFactorNotConfiguredException e) {
             throw new panel.authview.AdminVerificationView.NotConfigured(
-                    ctx.emailProvider.name() + ": " + ctx.emailProvider.status().state() + " · " + ctx.emailProvider.status().detail() + "\n"
-                    + ctx.smsProvider.name() + ": " + ctx.smsProvider.status().state() + " · " + ctx.smsProvider.status().detail()
-                    + "\nRun setup-local-2fa.sh and restart the app.");
+                    "Email and SMS providers run inside the local service and are not configured there.\nProvider setup is part of the authority migration (see the migration plan).");
         }
         return adapter;
     }
 
     private record TwoFactorFlowAdapter(panel.auth.TwoFactorFlow flow) implements panel.authview.AdminVerificationView.Flow {
         @Override public void sendEmailCode() { flow.sendEmailCode(); }
-        @Override public panel.auth.OtpService.Result verifyEmail(String code) { return flow.verifyEmail(code); }
+        @Override public panel.auth.TwoFactorResult verifyEmail(String code) { return flow.verifyEmail(code); }
         @Override public void sendSmsCode() { flow.sendSmsCode(); }
-        @Override public panel.auth.OtpService.Result verifySms(String code) { return flow.verifySms(code); }
+        @Override public panel.auth.TwoFactorResult verifySms(String code) { return flow.verifySms(code); }
         @Override public void finish(boolean trust) { flow.finish(trust); }
         @Override public long resendSeconds(boolean phone) { return flow.resendSeconds(phone); }
         @Override public void cancel() { flow.cancel(); }

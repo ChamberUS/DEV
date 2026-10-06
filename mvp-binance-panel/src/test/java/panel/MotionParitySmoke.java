@@ -14,7 +14,7 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import panel.app.AppContext;
 import panel.app.PanelApp;
-import panel.auth.OtpService;
+import panel.auth.TwoFactorResult;
 import panel.user.User;
 
 /** Real native pulses, isolated auth/backend, frame traces; no arbitrary sleeps. */
@@ -59,7 +59,7 @@ public final class MotionParitySmoke {
             super.start(stage); this.stage = stage;
             try {
                 Field field = PanelApp.class.getDeclaredField("ctx"); field.setAccessible(true); ctx = (AppContext)field.get(this);
-                ctx.userService.createInitialAdmin("motion-admin", "motion@example.invalid", "motion-smoke-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("motion-admin", "motion@example.invalid", "+5511999991234", "motion-smoke-pass-1", panel.security.Role.ADMIN, false);
                 admin = ctx.auth.login("motion-admin", "motion-smoke-pass-1".toCharArray());
                 nextSize();
             } catch (Throwable error) { fail(error); }
@@ -78,8 +78,8 @@ public final class MotionParitySmoke {
             ctx.research.snapshot.set(new panel.adapter.FileResearchBackend(ctx.cli).load(ctx.settings));
             if (!ctx.adminAccess.hasValidAdminSession()) {
                 var flow = ctx.adminAccess.startTwoFactor(); flow.sendEmailCode();
-                check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "Email gate");
-                flow.sendSmsCode(); check(flow.verifySms(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "SMS gate"); flow.finish(false);
+                check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == TwoFactorResult.OK, "Email gate");
+                flow.sendSmsCode(); check(flow.verifySms(panel.QaContext.dev().lastCode()) == TwoFactorResult.OK, "SMS gate"); flow.finish(false);
             }
             invoke("show", String.class, "t-markets");
             invoke("show", String.class, "t-desk");

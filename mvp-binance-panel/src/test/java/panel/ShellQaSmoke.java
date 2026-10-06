@@ -67,7 +67,7 @@ public final class ShellQaSmoke {
                 Field f = PanelApp.class.getDeclaredField("ctx");
                 f.setAccessible(true);
                 ctx = (AppContext) f.get(this);
-                ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "shell-qa-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "shell-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, null); // sai do first-run: a entrada passa a ser o Login
                 later(this::next);
             } catch (Throwable e) {

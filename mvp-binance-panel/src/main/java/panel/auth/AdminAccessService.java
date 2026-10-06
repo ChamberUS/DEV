@@ -1,121 +1,226 @@
 package panel.auth;
 
-import java.time.*;
-import java.util.*;
-import panel.security.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import panel.localservice.AuthorityGateway;
+import panel.security.AccessDeniedException;
+import panel.security.AdminGate;
 import panel.user.User;
 
-/** Login and ADMIN are mandatory; only two factors or a valid Keychain-backed device grant a session. */
+/**
+ * Acesso administrativo pelo SERVIÇO: elevação, segundo fator e dispositivo confiável são decididos e guardados lá. Este objeto só mantém a REPRESENTAÇÃO
+ * (cache de apresentação) do que o serviço respondeu e a mostra à interface; um cache velho nunca concede nada que o serviço negue, e perder a sessão no
+ * serviço (expirada, ociosa, revogada, serviço reiniciado) encerra a representação local. Esconder um botão não é autorização: toda operação protegida é
+ * decidida pelo serviço (as que ainda vivem no painel seguem barradas pela interface até migrarem para o serviço).
+ */
 public class AdminAccessService implements AdminGate {
-    private final SessionManager sessions; private final panel.user.UserRepository users; private final SecurityConfig config; private final OtpService otp;
-    private final EmailOtpProvider email; private final SmsOtpProvider sms; private final TrustedDeviceService devices;
-    private final SecurityAuditService audit; private final Clock clock;
+    private final SessionManager sessions;
+    private final AuthorityGateway gateway;
+    private final AuthService auth;
+    private final TrustedDeviceService devices;
+    private final Clock clock;
     private volatile TwoFactorFlow active;
-    private final Map<String,Instant> sends=new HashMap<>();
-    public AdminAccessService(SessionManager sessions, panel.user.UserRepository users, SecurityConfig config, OtpService otp, EmailOtpProvider email,
-            SmsOtpProvider sms, TrustedDeviceService devices, SecurityAuditService audit, Clock clock) {
-        this.users=java.util.Objects.requireNonNull(users);this.sessions=sessions;this.config=config;this.otp=otp;this.email=email;this.sms=sms;this.devices=devices;this.audit=audit;this.clock=clock;
+    private volatile long lastActivityMs = System.currentTimeMillis();
+    private volatile long lastPingMs;
+    private volatile boolean secondFactorConfigured;
+    private final ScheduledExecutorService keepalive = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "authority-keepalive");
+        t.setDaemon(true);
+        return t;
+    });
+
+    public AdminAccessService(SessionManager sessions, AuthorityGateway gateway, AuthService auth, TrustedDeviceService devices, Clock clock) {
+        this.sessions = sessions;
+        this.gateway = gateway;
+        this.auth = auth;
+        this.devices = devices;
+        this.clock = clock;
+        devices.onChanged = this::refreshQuietly;
         sessions.onLogout(this::cancelChallenge);
+        // com o usuário ATIVO a sessão no serviço é mantida viva e a representação sincronizada; ocioso (sem entrada por 60 s) deixa o prazo ocioso do serviço correr
+        keepalive.scheduleWithFixedDelay(this::keepaliveTick, 20, 20, TimeUnit.SECONDS);
     }
-    public boolean twoFactorConfigured(){return email.configured() && sms.configured();}
-    /**
-     * Revalida a conta contra a FONTE (o repositório), não contra a cópia guardada na sessão: conta desativada ou removida encerra a
-     * sessão; papel rebaixado remove a elevação e o privilégio de admin; falha ao ler a fonte nega (fecha), sem encerrar a sessão.
-     * Toda decisão de privilégio abaixo passa por aqui, então um desafio ou resposta assíncrona antigo não restaura nada.
-     */
-    private boolean revalidate() {
-        synchronized(sessions) {
-            var s=sessions.user();if(s.isEmpty())return false;
-            java.util.Optional<User> fresh;
-            try { fresh=users.findById(s.get().user().id()); } catch(RuntimeException e) { return false; }
-            if(fresh.isEmpty()||!fresh.get().active()) {
-                audit.record(AuditEvent.ADMIN_ACCESS_DENIED,actor(),"account state changed");
-                sessions.logout();return false;
+
+    private void keepaliveTick() {
+        try {
+            if (sessions.user().isPresent() && System.currentTimeMillis() - lastActivityMs < 60_000) {
+                refresh();
             }
-            User f=fresh.get();
-            if(s.get().user().admin() && !f.admin()) {
-                audit.record(AuditEvent.ADMIN_ACCESS_DENIED,actor(),"role downgraded");
-                sessions.revokeAdmin();cancelChallenge();
-            }
-            if(!f.equals(s.get().user())) sessions.updateUser(f);
-            return true;
+        } catch (RuntimeException ignored) {
+            // próxima volta
         }
     }
-    /** Troca ou reset de senha da conta: encerra a elevação administrativa e qualquer desafio em curso (reautenticação exigida). */
-    public void credentialsChanged(long userId) {
-        synchronized(sessions) {
-            if(sessions.revokeAdminFor(userId))audit.record(AuditEvent.ADMIN_ACCESS_DENIED,"user:"+userId,"credentials changed");
-            cancelChallenge();otp.clear(userId);
+
+    /** O serviço não reconhece mais a sessão (ou ficou indisponível): a representação local acaba e a interface volta ao login. */
+    void sessionLost() {
+        gateway.forgetSession();
+        sessions.logout();
+    }
+
+    /** Relê o estado no serviço e sincroniza a representação. Vazio = sem sessão válida (a representação já foi encerrada). */
+    public Optional<JsonNode> refresh() {
+        if (sessions.user().isEmpty()) {
+            return Optional.empty();
+        }
+        AuthorityGateway.Reply r = gateway.sessionStatus();
+        if (!r.ok()) {
+            sessionLost(); // fecha: sem o serviço não há sessão
+            return Optional.empty();
+        }
+        apply(r.result(), AuthMethod.TWO_FACTOR);
+        secondFactorConfigured = r.result().path("secondFactorConfigured").asBoolean(false);
+        return Optional.of(r.result());
+    }
+
+    private void refreshQuietly() {
+        try {
+            refresh();
+        } catch (RuntimeException ignored) {
+            // nada
         }
     }
+
+    private void apply(JsonNode st, AuthMethod method) {
+        sessions.updateUser(AuthService.toUser(st));
+        long left = st.path("elevatedForSec").asLong(0);
+        if (st.path("elevated").asBoolean(false) && left > 0) {
+            var cur = sessions.admin();
+            Instant now = clock.instant();
+            AuthMethod m = cur.map(AdminSession::method).orElse(method);
+            sessions.grantAdmin(new AdminSession(now, m, Duration.ofSeconds(left))); // expira quando o SERVIÇO diz que expira
+        } else {
+            sessions.revokeAdmin();
+        }
+    }
+
+    /** Se o serviço declarou os provedores de 2º fator configurados (a configuração e os segredos vivem no serviço). */
+    public boolean twoFactorConfigured() {
+        return secondFactorConfigured;
+    }
+
     public AccessDecision evaluate() {
-        revalidate();
-        var user=sessions.user();if(user.isEmpty())return AccessDecision.SESSION_EXPIRED;
-        if(!user.get().user().admin() || !user.get().user().active())return AccessDecision.FORBIDDEN_NOT_ADMIN;
-        return hasValidAdminSession()?AccessDecision.ALREADY_AUTHORIZED:AccessDecision.REQUIRES_2FA;
+        if (sessions.user().isEmpty()) {
+            return AccessDecision.SESSION_EXPIRED;
+        }
+        Optional<JsonNode> st = refresh();
+        if (st.isEmpty()) {
+            return AccessDecision.SESSION_EXPIRED;
+        }
+        if (!"ADMIN".equals(st.get().path("role").asText())) {
+            return AccessDecision.FORBIDDEN_NOT_ADMIN;
+        }
+        return st.get().path("elevated").asBoolean(false) ? AccessDecision.ALREADY_AUTHORIZED : AccessDecision.REQUIRES_2FA;
     }
+
+    /** Pede ao SERVIÇO a elevação por dispositivo confiável (o serviço decide se há dispositivo válido; sem ele exige o segundo fator). */
     public boolean tryTrustedDevice() {
-        if(evaluate()!=AccessDecision.REQUIRES_2FA)return false;
-        UserSession expected=sessions.user().orElseThrow();
-        if(!devices.use(expected))return false;
-        synchronized(sessions) {
-            if(!current(expected))return false;
-            sessions.grantAdmin(newSession(AuthMethod.TRUSTED_DEVICE));
-            audit.record(AuditEvent.ADMIN_ACCESS_TRUSTED_DEVICE,actor(),"");return true;
+        if (evaluate() != AccessDecision.REQUIRES_2FA) {
+            return false;
         }
+        AuthorityGateway.Reply r = gateway.adminElevation();
+        if (!r.ok()) {
+            if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
+                sessionLost();
+            }
+            return false;
+        }
+        sessions.revokeAdmin();
+        apply(r.result(), AuthMethod.TRUSTED_DEVICE);
+        return hasValidAdminSession();
     }
+
     public TwoFactorFlow startTwoFactor() {
-        if(evaluate()!=AccessDecision.REQUIRES_2FA)throw new AccessDeniedException("Two-factor is not applicable");
-        UserSession expected=sessions.user().orElseThrow();
-        if(!twoFactorConfigured())throw new TwoFactorNotConfiguredException();
-        synchronized(sessions) {
-            if(!current(expected))throw new AccessDeniedException("Session changed");
-            User u=expected.user();
-            if(u.email()==null || u.phone()==null || !u.phone().matches("\\+[1-9][0-9]{7,14}"))throw new IllegalStateException("Set an email and E.164 phone in Profile first.");
-            cancelChallenge();
-            active=new TwoFactorFlow(expected,otp,email,sms,this,clock);
-            audit.record(AuditEvent.ADMIN_2FA_STARTED,actor(),"");return active;
+        if (evaluate() != AccessDecision.REQUIRES_2FA) {
+            throw new AccessDeniedException("Two-factor is not applicable");
+        }
+        cancelChallenge();
+        TwoFactorFlow flow = new TwoFactorFlow(gateway, this, clock);
+        active = flow;
+        return flow;
+    }
+
+    /** O 2º fator foi concluído NO SERVIÇO: pede a elevação (que ele concede ou nega). */
+    void completed() {
+        AuthorityGateway.Reply r = gateway.adminElevation();
+        if (r.ok()) {
+            sessions.revokeAdmin();
+            apply(r.result(), AuthMethod.TWO_FACTOR);
+        } else if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
+            sessionLost();
         }
     }
-    boolean current(UserSession expected) {
-        return revalidate() && sessions.user().filter(s->s.id().equals(expected.id()) && s.user().id()==expected.user().id() && s.user().admin() && s.user().active()).isPresent();
-    }
-    boolean valid(TwoFactorFlow flow,UserSession expected){return flow==active && current(expected);}
-    void sent(UserSession expected,boolean phone) {
-        synchronized(sends) {
-            String key=expected.user().id()+":"+phone; Instant now=clock.instant(),last=sends.get(key);
-            if(last!=null && now.isBefore(last.plusSeconds(30)))throw new OtpService.CooldownException(Duration.between(now,last.plusSeconds(30)));
-            sends.put(key,now);
-        }
-    }
-    public void cancelChallenge() { if(active!=null){active.cancel();active=null;} }
-    void event(AuditEvent event,UserSession expected){audit.record(event,"user:"+expected.user().id(),"");}
-    void complete(TwoFactorFlow flow,UserSession expected) {
-        synchronized(sessions) {
-            if(!valid(flow,expected)||!flow.complete())throw new AccessDeniedException("Challenge expired or session changed");
-            sessions.grantAdmin(newSession(AuthMethod.TWO_FACTOR));event(AuditEvent.ADMIN_ACCESS_2FA,expected);
-        }
-    }
-    void trust(TwoFactorFlow flow,UserSession expected) {
-        if(!valid(flow,expected)||!flow.complete())throw new AccessDeniedException("Complete two-factor first");
+
+    void trustCurrent() {
         devices.trustCurrent();
     }
+
     public boolean hasValidAdminSession() {
-        return revalidate() && sessions.user().filter(s->s.user().admin()&&s.user().active()).isPresent()
-                && sessions.admin().filter(s->s.validAt(clock.instant())).isPresent();
+        return sessions.user().filter(s -> s.user().admin() && s.user().active()).isPresent() && sessions.admin().filter(s -> s.validAt(clock.instant())).isPresent();
     }
+
     public boolean expireIfNeeded() {
-        if(sessions.admin().filter(s->!s.validAt(clock.instant())).isPresent()){
-            sessions.revokeAdmin();audit.record(AuditEvent.ADMIN_SESSION_EXPIRED,actor(),"");return true;
-        }return false;
+        if (sessions.admin().filter(s -> !s.validAt(clock.instant())).isPresent()) {
+            sessions.revokeAdmin();
+            return true;
+        }
+        return false;
     }
-    public void touch(){sessions.admin().filter(s->s.validAt(clock.instant())).ifPresent(s->s.touch(clock.instant()));}
-    public Optional<AdminSession> adminSession(){return sessions.admin().filter(s->s.validAt(clock.instant()));}
-    public void noteDenied(String detail){audit.record(AuditEvent.ADMIN_ACCESS_DENIED,actor(),"Access denied");}
-    @Override public User requireAdmin() {
-        if(expireIfNeeded()||!hasValidAdminSession())throw new AccessDeniedException("Administrator session required");
+
+    /** Atividade do usuário (mouse/teclado): mantém a sessão e a elevação vivas no serviço (a elevação só desliza se ainda válida; lapsada exige o 2º fator de novo). */
+    public void touch() {
+        long now = System.currentTimeMillis();
+        lastActivityMs = now;
+        if (hasValidAdminSession() && now - lastPingMs > 60_000) {
+            lastPingMs = now;
+            keepalive.execute(() -> {
+                try {
+                    AuthorityGateway.Reply r = gateway.adminElevation();
+                    if (r.ok()) {
+                        apply(r.result(), AuthMethod.TWO_FACTOR);
+                    } else if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
+                        sessionLost();
+                    }
+                } catch (RuntimeException ignored) {
+                    // nada
+                }
+            });
+        }
+    }
+
+    public Optional<AdminSession> adminSession() {
+        return sessions.admin().filter(s -> s.validAt(clock.instant()));
+    }
+
+    /** Troca/reset de credencial: o serviço já encerrou a elevação; aqui só a representação e o desafio em curso. */
+    public void credentialsChanged(long userId) {
+        sessions.revokeAdminFor(userId);
+        cancelChallenge();
+    }
+
+    public void cancelChallenge() {
+        TwoFactorFlow f = active;
+        if (f != null) {
+            f.cancel();
+            active = null;
+        }
+    }
+
+    /** O painel não fabrica evento de segurança: a auditoria confiável é a do serviço. */
+    public void noteDenied(String detail) {
+        // intencionalmente vazio
+    }
+
+    @Override
+    public User requireAdmin() {
+        if (expireIfNeeded() || !hasValidAdminSession()) {
+            throw new AccessDeniedException("Administrator session required");
+        }
         return sessions.user().orElseThrow().user();
     }
-    private AdminSession newSession(AuthMethod method){return new AdminSession(clock.instant(),method,Duration.ofMinutes(config.sessionTimeoutMinutes()));}
-    private String actor(){return sessions.user().map(s->"user:"+s.user().id()).orElse("-");}
 }

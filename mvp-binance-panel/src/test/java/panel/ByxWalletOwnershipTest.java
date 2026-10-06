@@ -101,8 +101,8 @@ class ByxWalletOwnershipTest {
         assertThrows(AccessDeniedException.class,()->identity.verify(altered));
     }
     @Test void wrongUserOrNewLoginCannotUseOldChallenge() throws Exception {
-        var p=valid();auth.authorize();var other=auth.userService.createUser("other","other@example.invalid","temporary-pass-1".toCharArray(),null,Role.USER);
-        auth.sessions.login(other,auth.clock.instant());auth.userService.changeOwnPassword(other.id(),"temporary-pass-1".toCharArray(),"different-pass-2".toCharArray());auth.auth.login("other","different-pass-2".toCharArray());assertThrows(AccessDeniedException.class,()->identity.verify(p));
+        var p=valid();auth.authorize();auth.createUser("other","other@example.invalid","temporary-pass-1".toCharArray(),null,Role.USER);
+        var other=auth.auth.login("other","temporary-pass-1".toCharArray());auth.userService.changeOwnPassword(other.id(),"temporary-pass-1".toCharArray(),"different-pass-2".toCharArray());auth.auth.login("other","different-pass-2".toCharArray());assertThrows(AccessDeniedException.class,()->identity.verify(p));
     }
     @Test void expiredChallengeRejectedAtBoundary() throws Exception {
         var p=valid();auth.clock.advance(Duration.ofSeconds(300));assertThrows(AccessDeniedException.class,()->identity.verify(p));

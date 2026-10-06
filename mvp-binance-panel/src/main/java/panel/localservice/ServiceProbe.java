@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.PrintStream;
 
 /**
- * Sonda de linha de comando do serviço local, SEM JavaFX: {@code BYX-MVP --probe-service [--market]}. Roda no MESMO executável assinado do
+ * Sonda de linha de comando do serviço local, SEM JavaFX: {@code BYX-MVP --probe-service [--market] [--ensure-service]}. Roda no MESMO executável assinado do
  * app (mesma identidade de código), serve à demonstração automatizada da identidade do peer e imprime só pares chave=valor não sensíveis.
  * Não lê banco, Keychain, sessão nem login e não habilita nada.
  */
@@ -20,6 +20,12 @@ public final class ServiceProbe {
     public static int run(String[] args, PrintStream out) {
         LocalServiceClient client = new LocalServiceClient(LocalServiceClient.defaultHome());
         out.println("probe.selfIdentity=" + client.identityMode().wire);
+        if (java.util.Arrays.asList(args).contains("--ensure-service")) {
+            // o MESMO caminho que o app usa antes do login: inicia o helper do PRÓPRIO bundle se o serviço não estiver de pé
+            ServiceLauncher launcher = new ServiceLauncher(LocalServiceClient.defaultHome(), ServiceLauncher.currentExecutable());
+            out.println("probe.launcher.available=" + launcher.available());
+            out.println("probe.launcher.ensured=" + launcher.ensureRunning(java.time.Duration.ofSeconds(40)));
+        }
         LocalServiceStatus s = client.probe(false);
         out.println("probe.state=" + s.state());
         out.println("probe.code=" + s.code());
@@ -33,6 +39,8 @@ public final class ServiceProbe {
                     JsonNode caps = LocalServiceClient.read(p.in(), LocalServiceClient.MAX_FRAME).path("result");
                     out.println("probe.service.appIdentity=" + caps.path("identity").path("appIdentity").asText("?"));
                     out.println("probe.service.privateGateAllowed=" + caps.path("privateGate").path("allowed").asText("?"));
+                    out.println("probe.service.privateGateReviewRequired=" + caps.path("privateGate").path("reviewRequired").asText("?"));
+                    out.println("probe.service.authentication=" + caps.path("features").path("authentication").asText("?"));
                     for (String f : new String[] {"accountData", "notifications", "adminOperations", "secretIntegrations"}) {
                         out.println("probe.service." + f + "=" + caps.path("features").path(f).asText("?"));
                     }

@@ -11,7 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import org.junit.jupiter.api.Test;
-import panel.auth.OtpService;
+import panel.auth.TwoFactorResult;
 import panel.authview.AdminVerificationView;
 import panel.design.ByxOtpInput;
 import panel.design.ByxTheme;
@@ -28,9 +28,9 @@ class AdminVerificationViewTest {
         boolean cancelled;
 
         @Override public void sendEmailCode() { calls.add("sendEmail"); }
-        @Override public OtpService.Result verifyEmail(String c) { calls.add("verifyEmail"); return c.equals(emailCode) ? OtpService.Result.OK : OtpService.Result.INVALID; }
+        @Override public TwoFactorResult verifyEmail(String c) { calls.add("verifyEmail"); return c.equals(emailCode) ? TwoFactorResult.OK : TwoFactorResult.INVALID; }
         @Override public void sendSmsCode() { calls.add("sendSms"); }
-        @Override public OtpService.Result verifySms(String c) { calls.add("verifySms"); return c.equals(smsCode) ? OtpService.Result.OK : OtpService.Result.INVALID; }
+        @Override public TwoFactorResult verifySms(String c) { calls.add("verifySms"); return c.equals(smsCode) ? TwoFactorResult.OK : TwoFactorResult.INVALID; }
         @Override public void finish(boolean trust) { trusted = trust; }
         @Override public long resendSeconds(boolean phone) { return 0; }
         @Override public void cancel() { cancelled = true; }

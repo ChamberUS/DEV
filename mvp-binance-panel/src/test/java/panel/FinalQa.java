@@ -91,7 +91,7 @@ public final class FinalQa {
                 Map<String, View> v = (Map<String, View>) field("views");
                 views = v;
                 if (!mode.equals("onboarding")) {
-                    ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "final-qa-pass-1".toCharArray(), "+5511999991234");
+                    panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "final-qa-pass-1", panel.security.Role.ADMIN, false);
                 }
                 invoke("showEntry", String.class, null);
                 RouteTrace.attach(router, routeLog, lines);
@@ -275,7 +275,7 @@ public final class FinalQa {
                 check(texts(((panel.authview.AuthScreens) field("authScreens")).node()).contains("Create the administrator account"), "Welcome offers the administrator account");
                 show("auth:setup");
                 check("auth:setup".equals(router.route()), "Welcome leads to the first-administrator setup");
-                ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "final-qa-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "final-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, "Administrator created. Sign in to continue.");
                 check("auth:login".equals(router.route()), "after setup the login opens");
                 before[0] = props();
@@ -590,8 +590,7 @@ public final class FinalQa {
         private void prodAuth() {
             plan.add(() -> {
                 check("true".equals(java.util.Properties.class.cast(propsOf()).getProperty("security.dev.mode")), "the temp profile really has security.dev.mode=true");
-                check(ctx.emailProvider.getClass().getSimpleName().equals("ResendEmailOtpProvider") && ctx.smsProvider.getClass().getSimpleName().equals("TwilioVerifySmsProvider"),
-                        "providers are the real ones: " + ctx.emailProvider.getClass().getSimpleName() + "/" + ctx.smsProvider.getClass().getSimpleName());
+                check(ctx.authority.getClass().getSimpleName().equals("AuthorityClient"), "the authority is the real service client: " + ctx.authority.getClass().getSimpleName());
                 check(ctx.developmentLabel == null, "no development label in the normal app");
                 login();
                 next(1200);

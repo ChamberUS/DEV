@@ -81,7 +81,7 @@ public final class ShellNavigationQa {
                 @SuppressWarnings("unchecked")
                 Map<String, View> v = (Map<String, View>) field("views");
                 views = v;
-                ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "shell-qa-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "shell-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, null);
                 RouteTrace.attach(router, routeLog, lines);
                 plan();

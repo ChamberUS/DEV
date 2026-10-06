@@ -1,6 +1,5 @@
 package panel.ui.auth;
 
-import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import panel.app.AppContext;
@@ -23,15 +22,9 @@ public final class SecuritySettingsPane extends VBox {
         }
         if(entries.isEmpty())devices.getChildren().add(Ui.label("No trusted devices","muted"));
         getChildren().addAll(providers,devices);
-        Thread worker=new Thread(()->{
-            ProviderStatus email=ctx.emailProvider.status(),sms=ctx.smsProvider.status();
-            Platform.runLater(()->{
-                if(!ctx.adminAccess.hasValidAdminSession())return;
-                providers.getChildren().setAll(Ui.label("TWO-FACTOR PROVIDERS","card-title"),
-                        Ui.kv("EMAIL",ctx.emailProvider.name()),Ui.kv("Status",email.state().name()),Ui.kv("Detail",email.detail()),
-                        Ui.kv("SMS",ctx.smsProvider.name()),Ui.kv("Status",sms.state().name()),Ui.kv("Detail",sms.detail()),
-                        Ui.kv("AdminSession timeout",ctx.security.sessionTimeoutMinutes()+" min"));
-            });
-        },"provider-status");worker.setDaemon(true);worker.start();
+        providers.getChildren().setAll(Ui.label("TWO-FACTOR PROVIDERS","card-title"),
+                Ui.kv("Delivery","Local service (provider secrets never reach this app)"),
+                Ui.kv("Status",ctx.adminAccess.twoFactorConfigured()?"CONFIGURED":"NOT_CONFIGURED"),
+                Ui.kv("AdminSession timeout","Set by the service (sliding, with activity)"));
     }
 }

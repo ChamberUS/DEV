@@ -12,9 +12,6 @@ import panel.adapter.MockTradingProvider;
 import panel.adapter.ResearchModeTradingProvider;
 import panel.auth.AdminAccessService;
 import panel.auth.AuthService;
-import panel.auth.InMemoryRateLimiter;
-import panel.auth.OtpService;
-import panel.auth.PasswordHasher;
 import panel.auth.SessionManager;
 import panel.model.Settings;
 import panel.motion.MotionPreference;
@@ -24,11 +21,9 @@ import panel.motion.icon.AnimationRepository;
 import panel.ui.toast.ToastHost;
 import panel.security.Database;
 import panel.security.SecurityAuditService;
-import panel.security.SecurityConfig;
 import panel.service.JobManager;
 import panel.service.ResearchService;
 import panel.service.TradingService;
-import panel.user.SqliteUserRepository;
 import panel.user.UserService;
 
 /** Composição das dependências; as telas recebem apenas este contexto. */
@@ -36,25 +31,19 @@ public class AppContext {
     private static final Path DB_FILE = Path.of(System.getProperty("user.home"), ".mvp-binance-panel", "panel.db");
 
     public final Settings settings = Settings.load();
-    public final SecurityConfig security = SecurityConfig.load();
     private final Clock clock = Clock.systemUTC();
     private final Database db = Database.open(DB_FILE);
-    public final SqliteUserRepository users = new SqliteUserRepository(db);
     public final SecurityAuditService audit = new SecurityAuditService(db, clock);
     public final SessionManager sessions = new SessionManager();
-    public final panel.security.SecretStore secrets = new panel.security.MacOsKeychainSecretStore();
-    public final panel.security.ProviderConfig providers = panel.security.ProviderConfig.load();
     /**
-     * Provedores de OTP. O caminho normal usa SEMPRE os reais (Resend e Twilio Verify): nenhum arquivo, variável de ambiente ou flag de
-     * runtime troca isso. Um provedor de desenvolvimento só pode ser injetado por código que o construa explicitamente
-     * ({@link #create}); a classe do provedor de desenvolvimento não faz parte do artefato de produção, só do código de teste.
-     * Isto não resiste a quem pode modificar os próprios binários.
+     * A autenticação é do SERVIÇO local (autoridade). O painel só a apresenta: não há banco de usuários, hash de senha, limitador, provedor de OTP, keychain legado nem
+     * flag que reabra o caminho antigo. Testes injetam um {@link panel.localservice.AuthorityGateway} (dublê) por {@link #create}; o caminho normal usa SEMPRE o
+     * cliente real do serviço pareado e verificado.
      */
-    public record Providers(panel.auth.EmailOtpProvider email, panel.auth.SmsOtpProvider sms, String developmentLabel, panel.adapter.ByxGasGrantGateway gasGateway) {
-        public Providers(panel.auth.EmailOtpProvider email, panel.auth.SmsOtpProvider sms, String developmentLabel) {
-            this(email, sms, developmentLabel, null);
+    public record Providers(panel.localservice.AuthorityGateway gateway, String developmentLabel, panel.adapter.ByxGasGrantGateway gasGateway) {
+        public Providers(panel.localservice.AuthorityGateway gateway, String developmentLabel) {
+            this(gateway, developmentLabel, null);
         }
-
     }
 
     private static final ThreadLocal<Providers> INJECTED = new ThreadLocal<>();
@@ -69,18 +58,14 @@ public class AppContext {
     }
 
     private final Providers injected = INJECTED.get();
-    /** Rótulo exibido quando a verificação usa um provedor de desenvolvimento injetado; null no caminho normal. */
+    /** Rótulo exibido quando a verificação usa uma autoridade injetada (teste); null no caminho normal. */
     public final String developmentLabel = injected == null ? null : injected.developmentLabel();
-    public final panel.auth.EmailOtpProvider emailProvider = injected != null ? injected.email() : new panel.auth.ResendEmailOtpProvider(secrets, providers);
-    public final panel.auth.SmsOtpProvider smsProvider = injected != null ? injected.sms() : new panel.auth.TwilioVerifySmsProvider(secrets, providers);
-    public final panel.auth.TrustedDeviceService trustedDevices = new panel.auth.TrustedDeviceService(db, secrets, sessions, audit, clock);
-    public final AdminAccessService adminAccess = new AdminAccessService(sessions, users, security, new OtpService(clock),
-            emailProvider, smsProvider, trustedDevices, audit, clock);
-    public final PasswordHasher hasher = new PasswordHasher();
-    public final AuthService auth = new AuthService(users, hasher, sessions,
-            new panel.auth.PersistentRateLimiter(db, clock, panel.auth.PersistentRateLimiter.Policy.login(), "login"), audit, clock);
-    public final UserService userService = new UserService(users, hasher, adminAccess, audit, sessions, clock);
-
+    public final panel.localservice.AuthorityGateway authority = injected != null && injected.gateway() != null ? injected.gateway()
+            : new panel.localservice.AuthorityClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome()));
+    public final AuthService auth = new AuthService(authority, sessions, clock);
+    public final panel.auth.TrustedDeviceService trustedDevices = new panel.auth.TrustedDeviceService(authority, clock);
+    public final AdminAccessService adminAccess = new AdminAccessService(sessions, authority, auth, trustedDevices, clock);
+    public final UserService userService = new UserService(authority, auth, sessions);
     public final panel.service.ByxNetworkService byx = new panel.service.ByxNetworkService(
             new panel.adapter.CosmosByxChainGateway(clock), adminAccess::requireAdmin, clock);
     public final panel.service.ByxWalletIdentityService byxWallets = new panel.service.ByxWalletIdentityService(

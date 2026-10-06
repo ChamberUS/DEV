@@ -284,8 +284,7 @@ public final class AuthFlowQa {
                 flow.sendSmsCode();
                 flow.verifySms(panel.QaContext.dev().lastCode());
                 flow.finish(false);
-                ctx.userService.createUser("qa-trader", "trader@example.invalid", "temporary-pass-1".toCharArray(), null,
-                        panel.security.Role.USER);
+                panel.QaContext.dev().add("qa-trader", "trader@example.invalid", null, "temporary-pass-1", panel.security.Role.USER, true);
                 // sair pelo menu: confirmação primeiro
                 shell().topBar().avatar().fire();
                 button("Sign out").fire(); // item do menu

@@ -83,7 +83,7 @@ class GasSignerIsolationTest {
             System.setProperty("user.home", home.toString());
             // as constantes de caminho são estáticas: uma JVM nova seria necessária para o home inteiro; aqui provamos a escolha do gateway
             // pela composição com Providers vazio (caminho normal) sobre o código de produção
-            AppContext.Providers none = new AppContext.Providers(new panel.auth.UnconfiguredEmailOtpProvider(), new panel.auth.UnconfiguredSmsOtpProvider(), null);
+            AppContext.Providers none = new AppContext.Providers(null, null, null);
             assertEquals(null, none.gasGateway(), "no injected gateway in the normal composition");
             assertEquals(CosmosGasGrantGateway.class, new CosmosGasGrantGateway(java.time.Clock.systemUTC()).getClass());
         } finally {

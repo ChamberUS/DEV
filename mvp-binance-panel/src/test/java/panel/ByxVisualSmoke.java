@@ -11,7 +11,7 @@ import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import panel.app.*;
-import panel.auth.OtpService;
+import panel.auth.TwoFactorResult;
 import panel.user.User;
 
 /** Explicit visual QA with a disposable database and existing development OTP provider. */
@@ -58,13 +58,13 @@ public final class ByxVisualSmoke {
             super.start(stage); window = stage;
             try {
                 Field field = PanelApp.class.getDeclaredField("ctx"); field.setAccessible(true); context = (AppContext) field.get(this);
-                context.userService.createInitialAdmin("smoke-admin", "admin@example.invalid", password.toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("smoke-admin", "admin@example.invalid", "+5511999991234", password, panel.security.Role.ADMIN, false);
                 var user = context.auth.login("smoke-admin", password.toCharArray());
                 invoke("afterLogin", User.class, user);
                 var flow = context.adminAccess.startTwoFactor();
-                flow.sendEmailCode(); ByxLocalnetSmoke.check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "Email OTP");
-                flow.sendSmsCode(); ByxLocalnetSmoke.check(flow.verifySms(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "SMS OTP");
-                context.userService.createUser("smoke-user", "user@example.invalid", password.toCharArray(), null, panel.security.Role.USER);
+                flow.sendEmailCode(); ByxLocalnetSmoke.check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == TwoFactorResult.OK, "Email OTP");
+                flow.sendSmsCode(); ByxLocalnetSmoke.check(flow.verifySms(panel.QaContext.dev().lastCode()) == TwoFactorResult.OK, "SMS OTP");
+                panel.QaContext.dev().add("smoke-user", "user@example.invalid", null, password, panel.security.Role.USER, true);
                 context.byx.configure(ByxLocalnetSmoke.config(manifest, "alice-test"));
                 context.byx.refresh().whenComplete((snapshot, error) -> Platform.runLater(() -> {
                     try {

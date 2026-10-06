@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import panel.app.AppContext;
 import panel.app.PanelApp;
-import panel.auth.OtpService;
+import panel.auth.TwoFactorResult;
 import panel.user.User;
 
 /** Offline native smoke, with an isolated REAL-mode empty backend and development OTP. */
@@ -73,8 +73,8 @@ public final class RedesignVisualSmoke {
         private void authorize() {
             if (context.adminAccess.hasValidAdminSession()) return;
             var flow = context.adminAccess.startTwoFactor();
-            flow.sendEmailCode(); check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "Email OTP");
-            flow.sendSmsCode(); check(flow.verifySms(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "SMS OTP");
+            flow.sendEmailCode(); check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == TwoFactorResult.OK, "Email OTP");
+            flow.sendSmsCode(); check(flow.verifySms(panel.QaContext.dev().lastCode()) == TwoFactorResult.OK, "SMS OTP");
             flow.finish(false);
         }
 
@@ -146,8 +146,7 @@ public final class RedesignVisualSmoke {
 
         private void permissionChecks() throws Exception {
             invoke("show", String.class, "t-desk");
-            context.userService.createUser("qa-user", "user@example.invalid", "temp-pass-2".toCharArray(), null,
-                    panel.security.Role.USER);
+            panel.QaContext.dev().add("qa-user", "user@example.invalid", null, "temp-pass-2", panel.security.Role.USER, true);
             invoke("show", String.class, "overview");
             context.sessions.grantAdmin(new panel.auth.AdminSession(java.time.Instant.now().minusSeconds(3600),
                     panel.auth.AuthMethod.TWO_FACTOR, java.time.Duration.ofMinutes(30)));

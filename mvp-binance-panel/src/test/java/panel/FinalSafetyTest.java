@@ -82,10 +82,7 @@ class FinalSafetyTest {
                 "no exchange or order endpoint exists in the product");
         // HMAC-SHA256 só em três pontos nomeados, cada um num método específico (não por arquivo inteiro): OTP, prova de pareamento do serviço
         // local impressão do identificador de tentativas sem conta (auditoria) e impressão do assunto do limitador persistente (L4). Nenhum assina requisição de exchange.
-        assertEquals(Set.of("auth/OtpService.java", "auth/AuthService.java", "auth/PersistentRateLimiter.java", "localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"));
-        assertEquals("subject", enclosingMethod("auth/PersistentRateLimiter.java", "Mac.getInstance(\"HmacSHA256\")"), "rate-limit subject fingerprint (never signs anything external)");
-        assertEquals("mac", enclosingMethod("auth/OtpService.java", "Mac.getInstance(\"HmacSHA256\")"));
-        assertEquals("fingerprint", enclosingMethod("auth/AuthService.java", "Mac.getInstance(\"HmacSHA256\")"));
+        assertEquals(Set.of("localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"), "after the authority cutover the panel signs only the pairing proof (OTP and limiter live in the service)");
         assertEquals("proof", enclosingMethod("localservice/LocalServiceClient.java", "Mac.getInstance(\"HmacSHA256\")"));
         assertTrue(Files.readString(MAIN.resolve("panel/localservice/LocalServiceClient.java")).contains("\"byx-ipc-v1|\""), "the pairing proof is domain-separated");
         assertEquals(Set.of(), filesMatching("Mac\\.getInstance\\(\"Hmac(SHA1|SHA512|MD5)"), "no other HMAC variant is used anywhere");
@@ -123,7 +120,7 @@ class FinalSafetyTest {
         // O resolver de captura pertence a outro trabalho e pode ou não estar presente no checkout: a exceção só existe SE o arquivo existir
         // (e então é verificada de forma específica abaixo); sem ele, nenhum outro ProcessBuilder é aceito.
         boolean resolverPresent = Files.exists(MAIN.resolve("panel/adapter/CaptureRuntimeResolver.java"));
-        Set<String> expectedProcesses = new TreeSet<>(Set.of("motion/SystemMotionProbe.java", "process/ProcessRunner.java"));
+        Set<String> expectedProcesses = new TreeSet<>(Set.of("motion/SystemMotionProbe.java", "process/ProcessRunner.java", "localservice/ServiceLauncher.java"));
         if (resolverPresent) {
             expectedProcesses.add("adapter/CaptureRuntimeResolver.java");
         }
@@ -134,6 +131,12 @@ class FinalSafetyTest {
             assertNoShell("adapter/CaptureRuntimeResolver.java", "/usr/sbin/lsof", 1);
         }
         assertNoShell("motion/SystemMotionProbe.java", "/usr/bin/defaults", 2);
+        // o lançador do serviço: UM ProcessBuilder, sobre o helper do PRÓPRIO bundle (derivado do executável atual e conferido), sem shell, sem argumentos
+        String launcher = Files.readString(MAIN.resolve("panel/localservice/ServiceLauncher.java"));
+        assertEquals(1, Pattern.compile("new ProcessBuilder\\(").matcher(launcher).results().count(), "one launch site");
+        assertTrue(launcher.contains("new ProcessBuilder(helper.toString())") && launcher.contains("helperOf(executable)"), "the executable is the verified helper of the own bundle, with no arguments");
+        assertFalse(launcher.contains("\"/bin/") || launcher.contains("\"sh\"") || launcher.contains("bash") || launcher.contains("Runtime.getRuntime().exec"), "no shell");
+        assertFalse(launcher.contains("System.getenv") || launcher.contains("getProperty(\"byx"), "nothing about what is launched comes from configuration");
         // L10b: o signer de teste NÃO existe mais no produto (ver GasSignerIsolationTest)
         assertEquals(Set.of(), filesMatching("I_ACKNOWLEDGE_TEST_ONLY|LocalnetGasTestSigner"));
         assertEquals(Set.of("accountview/SettingsScreen.java", "helpview/AboutScreen.java", "systemview/OnboardingDialog.java"), filesMatching("DEVNET"),

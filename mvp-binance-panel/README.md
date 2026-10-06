@@ -12,33 +12,20 @@ Não contém lógica de pesquisa e não altera o projeto Python; lê os relatór
 - Main class `panel.app.Main` (não herda de Application) para facilitar `jpackage`.
 
 ## Autenticação e autorização
-- Abre no login. Primeiro uso sem usuários: "Initial admin setup" cria o primeiro ADMIN; não existe credencial padrão.
-- Usuários e auditoria: SQLite em `~/.mvp-binance-panel/panel.db`. Senhas: Argon2id. USER permanece no Trading.
-- Research exige login ADMIN e uma AdminSession obtida por **Email → SMS** ou por dispositivo confiável válido. Nenhum endereço IP concede autorização; a chave legada de rede é ignorada.
-- Email: SDK oficial Resend; OTP local de seis dígitos, SecureRandom, HMAC somente em memória, validade de cinco minutos, cinco tentativas, uso único e cooldown de 30s. SMS: Twilio Verify gera e verifica o código; o app não gera SMS de produção.
-- Desafios pertencem ao UUID do login e são invalidados por logout/troca de usuário. AdminSession possui timeout independente (`security.admin.sessionTimeoutMinutes` em `security.properties`).
-- Após ambos os fatores, "Trust this Mac for 30 days" grava token aleatório de 256 bits no Keychain e somente SHA-256 no SQLite. Não usa IP, MAC, serial ou hostname. Revogar em Settings → Security invalida a sessão administrativa; o próximo acesso exige 2FA.
-- Profile permite editar email/telefone E.164 com senha atual. Contatos ficam mascarados fora da edição; alterações invalidam dispositivos e autorização administrativa.
+- Abre no login. **A autenticação é do serviço local (autoridade), não do painel** (V2.1G): contas, verificadores de senha (Argon2id), papéis, limitador de tentativas, segundo fator, dispositivos confiáveis, sessões e auditoria de segurança vivem no serviço (`byx-local-service`), em snapshot cifrado (AES-256-GCM) com âncora de rollback no keychain de proteção de dados. O painel só envia credenciais/códigos e APRESENTA o que o serviço decide (papel, elevação e expiração são exibição; esconder um botão não é autorização). Não existe credencial padrão, primeiro-uso no painel nem caminho para autenticar contra o `panel.db` antigo, e nenhuma flag o reabre.
+- O app empacotado inicia o helper do serviço do PRÓPRIO bundle quando ele não está rodando. Reiniciar o serviço invalida todas as sessões (novo login).
+- Contas migradas do banco legado (somente leitura) pelo migrador assinado `byx-migrate` (ver [`docs/AUTHORITY_CUTOVER.md`](docs/AUTHORITY_CUTOVER.md)); o `panel.db` antigo permanece intacto como fonte de rollback até uma etapa de limpeza separada.
+- Research exige login ADMIN e uma elevação obtida por **Email → SMS** (decididos pelo serviço) ou por dispositivo confiável do serviço. Nenhum endereço IP concede autorização. A elevação desliza com atividade (janela migrada de `security.admin.sessionTimeoutMinutes`) e some se o papel mudar.
+- Email: Resend e SMS: Twilio Verify, ambos chamados PELO SERVIÇO; os segredos ficam só no cofre do serviço (nunca no painel). OTP de e-mail de seis dígitos gerado no serviço (uso único, validade absoluta de cinco minutos, cinco tentativas, reenvio não renova a janela).
+- "Trust this Mac" é inscrito pelo serviço (registro revogável, 30 dias, ligado à conta; sem IP/MAC/hostname). A confiança antiga do painel NÃO foi migrada: após o cutover o 2º fator é refeito e o serviço emite uma nova.
+- Durante a janela de segurança do cutover o serviço recusa troca de senha, mudança de papel, desabilitar/apagar e inscrição de dispositivo permanente; login, logout e 2º fator funcionam. A administração de contas (criar/listar/desabilitar/papel/redefinir/contato) ainda não existe no serviço e fica indisponível na interface.
 - `AdminGate`, TRAIN-only, VALIDATION LOCKED e FINAL_HOLDOUT SEALED continuam obrigatórios. `PasskeyProvider` é apenas interface futura; PASSKEY não concede sessão.
 
-### Setup local real (macOS)
-Execute `./setup-local-2fa.sh` em terminal interativo. API keys/secrets são digitados sem eco, enviados diretamente à API nativa do Keychain e nunca passam por argumentos de processos, histórico de shell ou arquivos temporários.
-
-Secrets no Keychain:
-- `mvp-binance-panel/resend-api-key`
-- `mvp-binance-panel/twilio-api-secret`
-- `mvp-binance-panel/trusted-device-token`
-
-O setup grava somente os quatro campos de `providers.example.properties` em `~/.mvp-binance-panel/providers.properties` (0600; diretório 0700), desativa o modo dev e preserva outras configurações de segurança. Reinicie o app depois. Account SID (AC), API Key SID (SK) e API Secret são usados para Twilio Verify; não use Primary Auth Token. Crie o Verify Service manualmente no Twilio e informe seu SID VA. Sem ele, a UI mostra **Twilio Verify / NOT_CONFIGURED / Missing Verify Service SID** e não envia SMS.
-
-Use um remetente autorizado no Resend. O default opcional `onboarding@resend.dev` está sujeito às restrições de teste da conta. Disponibilidade local CONFIGURED significa que a configuração e o segredo existem; entrega/autorização remota só são comprovadas por envio. Falhas aparecem como ERROR, com mensagem sanitizada. Keychain indisponível falha fechado, sem fallback automático.
-
-Providers fake só existem quando `security.dev.mode=true` é explicitamente definido em `~/.mvp-binance-panel/security.properties`; a UI identifica **DEVELOPMENT AUTH PROVIDER**. Testes usam doubles em memória, nunca enviam email/SMS. Não use modo dev para contas reais.
-
-Documentação: [Resend Java SDK](https://github.com/resend/resend-java), [Twilio Verify](https://www.twilio.com/docs/verify/api), [Verification](https://www.twilio.com/docs/verify/api/verification), [Verification Check](https://www.twilio.com/docs/verify/api/verification-check).
+### Provedores de 2º fator e segredos
+Chave Resend, segredo Twilio e a configuração não secreta (remetente, SIDs) migram do painel antigo para o serviço pelo migrador; o antigo `setup-local-2fa.sh` foi REMOVIDO (gravava no keychain legado). `providers.example.properties` documenta o formato do arquivo lido pelo migrador. Testes usam dublês de autoridade; provedor de desenvolvimento não existe no produto. Uma prova real de envio de OTP é MANUAL e exige confirmação explícita.
 
 ### Verificação manual
-Após setup/build, abra `./run.sh`, faça login ADMIN, complete Email e SMS, marque Trust this Mac e entre em Research. Faça logout/login, confirme TRUSTED_DEVICE, revogue em Settings → Security e confirme que Research exige 2FA novamente. USER deve permanecer sem acesso. Não copie códigos/segredos para logs ou issues. Sem providers configurados, pule os envios reais; isso não impede o build.
+Com o serviço preparado (ver `docs/AUTHORITY_CUTOVER.md`), abra o app empacotado, faça login ADMIN, complete Email e SMS, marque Trust this Mac (fora da janela de segurança) e entre em Research. Faça logout/login, confirme TRUSTED_DEVICE, revogue em Settings → Security e confirme que Research exige 2FA novamente. USER deve permanecer sem acesso. Não copie códigos/segredos para logs ou issues. Sem providers configurados, pule os envios reais; isso não impede o build.
 
 Limitação: app desktop local. Quem controla o usuário do sistema, banco e binário pode contornar as barreiras locais. Keychain protege secrets em repouso; autorização de operações sensíveis deve migrar para servidor no futuro.
 

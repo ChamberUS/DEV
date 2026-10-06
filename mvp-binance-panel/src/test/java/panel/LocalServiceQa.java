@@ -102,7 +102,7 @@ public final class LocalServiceQa {
                 @SuppressWarnings("unchecked")
                 Map<String, View> v = (Map<String, View>) field("views");
                 views = v;
-                ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "final-qa-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "final-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, null);
                 RouteTrace.attach(router, routeLog, lines);
                 startService();

@@ -55,7 +55,7 @@ class GasSponsorshipTest {
     }
     @Test void changedUserCannotAccessOwnGrant() throws Exception {
         service.request(address);f.auth.authorize();
-        f.auth.userService.createUser("gas-user","gas@example.invalid","temporary-pass-1".toCharArray(),null,panel.security.Role.USER);
+        f.auth.createUser("gas-user","gas@example.invalid","temporary-pass-1".toCharArray(),null,panel.security.Role.USER);
         f.auth.auth.logout();var user=f.auth.auth.login("gas-user","temporary-pass-1".toCharArray());
         f.auth.userService.changeOwnPassword(user.id(),"temporary-pass-1".toCharArray(),"gas-user-new-pass-2".toCharArray());
         f.auth.auth.login("gas-user","gas-user-new-pass-2".toCharArray());

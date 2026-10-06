@@ -38,9 +38,8 @@ final class AccountDataAdapter implements AccountData {
 
     @Override
     public List<ProviderLine> providers() {
-        var email = ctx.emailProvider.status();
-        var sms = ctx.smsProvider.status();
-        return List.of(new ProviderLine("Email", email.state().name(), email.detail()), new ProviderLine("SMS", sms.state().name(), sms.detail()));
+        String state = ctx.adminAccess.twoFactorConfigured() ? "CONFIGURED" : "NOT_CONFIGURED";
+        return List.of(new ProviderLine("Email", state, "Delivered by the local service"), new ProviderLine("SMS", state, "Verified by the local service"));
     }
 
     @Override

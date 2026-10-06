@@ -1,173 +1,81 @@
 package panel.user;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
-import java.util.regex.Pattern;
-import panel.auth.PasswordHasher;
-import panel.auth.SessionManager;
+import panel.auth.AuthService;
+import panel.localservice.AuthorityGateway;
 import panel.security.AccessDeniedException;
-import panel.security.AdminGate;
-import panel.security.AuditEvent;
 import panel.security.Role;
-import panel.security.SecurityAuditService;
 
-/** Regras de usuários. Operações administrativas passam sempre por AdminGate (barreira de serviço). */
+/**
+ * Regras de usuário na interface. A ÚNICA operação de conta que existe depois do cutover é a troca da PRÓPRIA senha, feita pelo SERVIÇO (exige a senha atual,
+ * sobe a versão de credencial e revoga as outras sessões). Criar, listar, desabilitar, mudar papel, redefinir senha e mudar contato exigem operações da autoridade que
+ * ainda não existem no serviço (e ficam bloqueadas durante a janela de segurança do cutover): aqui são recusadas com uma mensagem clara; nada toca o banco legado.
+ */
 public class UserService {
-    private static final Pattern USERNAME = Pattern.compile("[A-Za-z0-9_.-]{3,32}");
-    private static final Pattern EMAIL = Pattern.compile("[^@\\s]+@[^@\\s]+\\.[^@\\s]+");
-    private static final Pattern PHONE = Pattern.compile("\\+[1-9][0-9]{7,14}");
+    public static final String UNAVAILABLE = "Account administration is unavailable after the authority cutover (planned for a later phase).";
+    private final AuthorityGateway gateway;
+    private final AuthService auth;
+    private final panel.auth.SessionManager sessions;
 
-    private final UserRepository repo;
-    private final PasswordHasher hasher;
-    private final AdminGate gate;
-    private final SecurityAuditService audit;
-    private final SessionManager sessions;
-    private final Clock clock;
-    private final panel.auth.RateLimiter contactLimiter;
-
-    public UserService(UserRepository repo, PasswordHasher hasher, AdminGate gate, SecurityAuditService audit, SessionManager sessions, Clock clock) {
-        this.repo = repo;
-        this.hasher = hasher;
-        this.gate = gate;
-        this.audit = audit;
+    public UserService(AuthorityGateway gateway, AuthService auth, panel.auth.SessionManager sessions) {
+        this.gateway = gateway;
+        this.auth = auth;
         this.sessions = sessions;
-        this.clock = clock;
-        this.contactLimiter=new panel.auth.InMemoryRateLimiter(5,java.time.Duration.ofMinutes(1),clock);
     }
 
-    /** Só funciona enquanto não existe nenhum usuário. */
+    /** Chamado depois de trocar a senha da conta (a representação da elevação é encerrada). */
+    public java.util.function.Consumer<Long> onCredentialsChanged = id -> { };
+    public Runnable onContactsChanged = () -> { };
+
     public User createInitialAdmin(String username, String email, char[] password, String phone) {
-        if (repo.count() > 0) {
-            throw new AccessDeniedException("Initial setup is no longer available.");
-        }
-        User u = create(username, email, password, phone, Role.ADMIN, false);
-        audit.record(AuditEvent.INITIAL_ADMIN_CREATED, u.username(), "");
-        return u;
+        throw new AccessDeniedException("Initial setup is no longer available.");
     }
 
     public User createUser(String username, String email, char[] temporaryPassword, String phone, Role role) {
-        User admin = gate.requireAdmin();
-        User u = create(username, email, temporaryPassword, phone, role, true);
-        audit.record(AuditEvent.USER_CREATED, admin.username(), "target=" + u.username() + " role=" + role);
-        return u;
+        throw new AccessDeniedException(UNAVAILABLE);
     }
 
     public List<User> listUsers() {
-        gate.requireAdmin();
-        return repo.findAll();
+        throw new AccessDeniedException(UNAVAILABLE);
     }
 
     public void setStatus(long id, UserStatus status) {
-        User admin = gate.requireAdmin();
-        User t = load(id);
-        if (status == UserStatus.DISABLED) {
-            if (t.id() == admin.id()) {
-                throw new IllegalArgumentException("You cannot disable your own account.");
-            }
-            if (t.admin() && t.active() && repo.countActiveAdmins() <= 1) {
-                throw new IllegalArgumentException("At least one active administrator is required.");
-            }
-        }
-        save(t, t.role(), status, t.passwordHash(), t.mustChangePassword());
-        audit.record(status == UserStatus.DISABLED ? AuditEvent.USER_DISABLED : AuditEvent.USER_ENABLED, admin.username(), "target=" + t.username());
+        throw new AccessDeniedException(UNAVAILABLE);
     }
 
     public void changeRole(long id, Role role) {
-        User admin = gate.requireAdmin();
-        User t = load(id);
-        if (t.admin() && role != Role.ADMIN && t.active() && repo.countActiveAdmins() <= 1) {
-            throw new IllegalArgumentException("At least one active administrator is required.");
-        }
-        save(t, role, t.status(), t.passwordHash(), t.mustChangePassword());
-        audit.record(AuditEvent.ROLE_CHANGED, admin.username(), "target=" + t.username() + " role=" + role);
+        throw new AccessDeniedException(UNAVAILABLE);
     }
 
     public void resetPassword(long id, char[] temporaryPassword) {
-        User admin = gate.requireAdmin();
-        User t = load(id);
-        requirePolicy(temporaryPassword, t.username());
-        save(t, t.role(), t.status(), hasher.hash(temporaryPassword), true);
-        onCredentialsChanged.accept(id); // política: reset de senha encerra a elevação e os desafios da conta alvo
-        audit.record(AuditEvent.PASSWORD_RESET, admin.username(), "target=" + t.username());
+        throw new AccessDeniedException(UNAVAILABLE);
     }
-
-    /** O próprio usuário troca a senha (exige a senha atual, salvo troca forçada pós-login com senha temporária já verificada). */
-    public void changeOwnPassword(long id, char[] current, char[] next) {
-        User t = load(id);
-        if (!hasher.verify(current, t.passwordHash())) {
-            throw new IllegalArgumentException("Current password is incorrect.");
-        }
-        requirePolicy(next, t.username());
-        if (hasher.verify(next, t.passwordHash())) {
-            throw new IllegalArgumentException("New password must differ from the current one.");
-        }
-        User u = save(t, t.role(), t.status(), hasher.hash(next), false);
-        sessions.updateUser(u);
-        onCredentialsChanged.accept(id); // política: trocar a senha encerra a elevação administrativa
-        audit.record(AuditEvent.PASSWORD_CHANGED, t.username(), "");
-    }
-
-    public Runnable onContactsChanged = () -> {};
-    /** Chamado depois de trocar/resetar a senha de uma conta (a autoridade de acesso administrativo registra aqui a revogação). */
-    public java.util.function.Consumer<Long> onCredentialsChanged = id -> { };
 
     public void changeOwnContact(long id, char[] password, String email, String phone) {
-        var session = sessions.user().orElseThrow(() -> new AccessDeniedException("Login required"));
-        if(session.user().id()!=id)throw new AccessDeniedException("Cannot edit another account");
-        User current=load(id);
-        String rateKey=Long.toString(id);
-        if(contactLimiter.blockedFor(rateKey).isPresent())throw new IllegalArgumentException("Wait before retrying current password.");
-        if(!hasher.verify(password,current.passwordHash())){contactLimiter.recordFailure(rateKey);throw new IllegalArgumentException("Current password is incorrect.");}
-        contactLimiter.recordSuccess(rateKey);
-        if(email==null || !EMAIL.matcher(email.trim()).matches())throw new IllegalArgumentException("Invalid email.");
-        if(phone==null || !PHONE.matcher(phone.trim()).matches())throw new IllegalArgumentException("Phone must use E.164 format.");
-        var existing=repo.findByUsernameOrEmail(email.trim());
-        if(existing.isPresent() && existing.get().id()!=id)throw new IllegalArgumentException("Email already in use.");
-        synchronized(sessions) {
-            if(sessions.user().filter(s->s.id().equals(session.id())).isEmpty())throw new AccessDeniedException("Session changed");
-            onContactsChanged.run();
-            User updated=new User(current.id(),current.username(),email.trim(),current.passwordHash(),current.role(),current.status(),phone.trim(),
-                    false,false,current.mustChangePassword(),current.createdAt(),clock.instant(),current.lastLoginAt());
-            repo.update(updated);sessions.updateUser(updated);sessions.revokeAdmin();
-            audit.record(AuditEvent.CONTACT_CHANGED,"user:"+id,"");
-        }
+        throw new AccessDeniedException(UNAVAILABLE);
     }
 
-    private User create(String username, String email, char[] password, String phone, Role role, boolean mustChange) {
-        if (username == null || !USERNAME.matcher(username.trim()).matches()) {
-            throw new IllegalArgumentException("Username must have 3-32 letters, digits, '.', '_' or '-'.");
+    /** O próprio usuário troca a senha pelo serviço. Mensagens equivalentes às do fluxo anterior. */
+    public void changeOwnPassword(long id, char[] current, char[] next) {
+        String username = sessions.user().map(s -> s.user().username()).orElse(null);
+        String policy = PasswordPolicy.check(next, username);
+        if (policy != null) {
+            java.util.Arrays.fill(current, '\0');
+            java.util.Arrays.fill(next, '\0');
+            throw new IllegalArgumentException(policy);
         }
-        if (email == null || !EMAIL.matcher(email.trim()).matches()) {
-            throw new IllegalArgumentException("Invalid email.");
+        AuthorityGateway.Reply r = gateway.changePassword(current, next);
+        switch (r.code()) {
+            case "OK" -> {
+                auth.refreshUser();
+                onCredentialsChanged.accept(id);
+            }
+            case "INVALID_CREDENTIALS" -> throw new IllegalArgumentException("Current password is incorrect.");
+            case "WEAK_PASSWORD" -> throw new IllegalArgumentException("New password must differ from the current one and meet the password policy.");
+            case "RATE_LIMITED" -> throw new IllegalArgumentException("Wait before retrying current password.");
+            case "FROZEN" -> throw new AccessDeniedException("Password changes are temporarily unavailable until the security cutover validation is finished.");
+            case "AUTH_REQUIRED" -> throw new AccessDeniedException("Session changed");
+            default -> throw new IllegalStateException("Authority unavailable.");
         }
-        String ph = phone == null || phone.isBlank() ? null : phone.replaceAll("[\\s()-]", "");
-        if (ph != null && !PHONE.matcher(ph).matches()) {
-            throw new IllegalArgumentException("Invalid phone number.");
-        }
-        requirePolicy(password, username);
-        if (repo.findByUsernameOrEmail(username.trim()).isPresent() || repo.findByUsernameOrEmail(email.trim()).isPresent()) {
-            throw new IllegalArgumentException("Username or email already in use.");
-        }
-        Instant now = clock.instant();
-        return repo.insert(new User(0, username.trim(), email.trim(), hasher.hash(password), role, UserStatus.ACTIVE, ph, false, false, mustChange, now, now, null));
-    }
-
-    private static void requirePolicy(char[] password, String username) {
-        String err = PasswordPolicy.check(password, username);
-        if (err != null) {
-            throw new IllegalArgumentException(err);
-        }
-    }
-
-    private User load(long id) {
-        return repo.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found."));
-    }
-
-    private User save(User t, Role role, UserStatus status, String hash, boolean mustChange) {
-        User u = new User(t.id(), t.username(), t.email(), hash, role, status, t.phone(), t.emailVerified(), t.phoneVerified(), mustChange, t.createdAt(), clock.instant(), t.lastLoginAt());
-        repo.update(u);
-        sessions.updateUser(u);
-        return u;
     }
 }

@@ -8,25 +8,28 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
- * Cliente da AUTORIDADE de autenticação do serviço local (modelo mínimo para testes e migração futura). O painel NÃO decide nada: envia só
- * credenciais e o token opaco; papel, admin, MFA e estado de sessão que ele exibe vêm SEMPRE da resposta do serviço e nunca são enviados.
- * O token de sessão fica só na memória deste objeto (campo privado; toString redigido): nunca em argv, ambiente, arquivo, log ou diagnóstico.
- * O fluxo normal do app (login atual) NÃO usa esta classe; só o lançador de QA do bundle de teste a referencia.
+ * Cliente da AUTORIDADE de autenticação do serviço local. O painel NÃO decide nada: envia só credenciais e o token opaco; papel, admin, MFA e estado de
+ * sessão que ele exibe vêm SEMPRE da resposta do serviço e nunca são enviados. O token de sessão fica só na memória deste objeto (campo privado; toString
+ * redigido): nunca em argv, ambiente, arquivo, log ou diagnóstico. Cada chamada tem prazo (o canal é fechado ao estourar). Reaproveita o pareamento mútuo e a
+ * verificação de identidade do serviço de {@link LocalServiceClient}.
  */
-public final class AuthorityClient implements AutoCloseable {
-    /** Resposta tipada: code é fixo ("OK" ou o código de erro do serviço); result só existe quando ok. */
-    public record Reply(boolean ok, String code, JsonNode result) {
-        @Override
-        public String toString() {
-            return "Reply[" + code + "]";
-        }
-    }
-
+public final class AuthorityClient implements AuthorityGateway, AutoCloseable {
+    /** Compatibilidade com o QA: mesma forma de {@link AuthorityGateway.Reply}. */
+    public static final long CALL_TIMEOUT_MS = 5_000;
     private static final Pattern TOKEN = Pattern.compile("[A-Za-z0-9_-]{43}");
     private static final JsonMapper JSON = new JsonMapper();
+    private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "authority-client-timer");
+        t.setDaemon(true);
+        return t;
+    });
     private final LocalServiceClient client;
     private SocketChannel channel;
     private InputStream in;
@@ -52,9 +55,18 @@ public final class AuthorityClient implements AutoCloseable {
         }
     }
 
-    private Reply call(String op, String... fields) {
+    private synchronized Reply call(String op, String... fields) {
+        ScheduledFuture<?> guard = null;
         try {
             ensure();
+            SocketChannel mine = channel;
+            guard = TIMER.schedule(() -> {
+                try {
+                    mine.close();
+                } catch (IOException ignored) {
+                    // o prazo estourou: a leitura abaixo falha
+                }
+            }, CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             ObjectNode n = JSON.createObjectNode();
             n.put("v", 1);
             n.put("id", "c" + (++seq));
@@ -68,61 +80,141 @@ public final class AuthorityClient implements AutoCloseable {
                 return new Reply(true, "OK", r.path("result"));
             }
             String code = r.path("error").path("code").asText(r.path("code").asText("contract_violation"));
-            return new Reply(false, code.matches("[A-Za-z_]{1,40}") ? code : "contract_violation", null);
+            return new Reply(false, code.matches("[A-Za-z_]{1,40}") ? code : "contract_violation", r.path("error")); // o objeto de erro traz só campos fixos (ex.: retryAfterSec)
         } catch (LocalServiceClient.Fail f) {
             return new Reply(false, f.code, null);
         } catch (IOException e) {
             closeQuietly();
             return new Reply(false, "connection_closed", null);
+        } finally {
+            if (guard != null) {
+                guard.cancel(false);
+            }
         }
     }
 
+    private final ServiceLauncher launcher = new ServiceLauncher(LocalServiceClient.defaultHome(), ServiceLauncher.currentExecutable());
+
+    @Override
+    public boolean ensureService() {
+        return launcher.ensureRunning(java.time.Duration.ofSeconds(25));
+    }
+
+    @Override
     public boolean hasSession() {
         return token != null;
     }
 
+    @Override
+    public synchronized void forgetSession() {
+        token = null;
+    }
+
     /** Só para o QA empacotado simular "token roubado" por outro processo. Produto nenhum chama. */
-    public void adoptToken(String t) {
+    public synchronized void adoptToken(String t) {
         token = t != null && TOKEN.matcher(t).matches() ? t : null;
     }
 
-    public String exportTokenForQa() {
+    public synchronized String exportTokenForQa() {
         return token;
     }
 
-    public Reply login(String username, char[] password) {
-        Reply r = call("auth.password", "username", username, "password", new String(password));
-        java.util.Arrays.fill(password, '\0');
-        token = r.ok() && r.result().path("session").isTextual() ? r.result().path("session").asText() : token;
+    private Reply needToken() {
+        return new Reply(false, "AUTH_REQUIRED", null);
+    }
+
+    private Reply sessionCall(String op, String... fields) {
+        String t;
+        synchronized (this) {
+            t = token;
+        }
+        if (t == null) {
+            return needToken();
+        }
+        String[] all = new String[fields.length + 2];
+        all[0] = "session";
+        all[1] = t;
+        System.arraycopy(fields, 0, all, 2, fields.length);
+        Reply r = call(op, all);
+        if (!r.ok() && "AUTH_REQUIRED".equals(r.code())) {
+            synchronized (this) {
+                if (t.equals(token)) {
+                    token = null; // o serviço já não reconhece a sessão: o painel a esquece
+                }
+            }
+        }
         return r;
     }
 
+    @Override
+    public Reply login(String identifier, char[] password) {
+        Reply r = call("auth.password", "username", identifier, "password", new String(password));
+        java.util.Arrays.fill(password, '\0');
+        synchronized (this) {
+            if (r.ok() && r.result().path("session").isTextual()) {
+                token = r.result().path("session").asText();
+            }
+        }
+        return r;
+    }
+
+    @Override
     public Reply sessionStatus() {
-        return token == null ? new Reply(false, "AUTH_REQUIRED", null) : call("auth.sessionStatus", "session", token);
+        return sessionCall("auth.sessionStatus");
     }
 
+    @Override
     public Reply beginSecondFactor() {
-        return token == null ? new Reply(false, "AUTH_REQUIRED", null) : call("auth.beginSecondFactor", "session", token);
+        return sessionCall("auth.beginSecondFactor");
     }
 
+    @Override
     public Reply verifySecondFactor(String challenge, String code) {
-        return token == null ? new Reply(false, "AUTH_REQUIRED", null) : call("auth.verifySecondFactor", "session", token, "challenge", challenge, "code", code);
+        return sessionCall("auth.verifySecondFactor", "challenge", challenge, "code", code);
     }
 
+    @Override
+    public Reply sendSecondFactorSms() {
+        return sessionCall("auth.sendSecondFactorSms");
+    }
+
+    @Override
+    public Reply verifySecondFactorSms(String code) {
+        return sessionCall("auth.verifySecondFactorSms", "code", code);
+    }
+
+    @Override
     public Reply adminElevation() {
-        return token == null ? new Reply(false, "AUTH_REQUIRED", null) : call("auth.adminElevation", "session", token);
+        return sessionCall("auth.adminElevation");
     }
 
+    @Override
     public Reply changePassword(char[] current, char[] next) {
-        Reply r = token == null ? new Reply(false, "AUTH_REQUIRED", null) : call("auth.changePassword", "session", token, "current", new String(current), "next", new String(next));
+        Reply r = sessionCall("auth.changePassword", "current", new String(current), "next", new String(next));
         java.util.Arrays.fill(current, '\0');
         java.util.Arrays.fill(next, '\0');
         return r;
     }
 
+    @Override
+    public Reply enrollTrustedDevice() {
+        return sessionCall("auth.enrollTrustedDevice");
+    }
+
+    @Override
+    public Reply listTrustedDevices() {
+        return sessionCall("auth.listTrustedDevices");
+    }
+
+    @Override
+    public Reply revokeTrustedDevice(String deviceId) {
+        return sessionCall("auth.revokeTrustedDevice", "device", deviceId);
+    }
+
+    @Override
     public Reply logout() {
-        Reply r = token == null ? new Reply(false, "AUTH_REQUIRED", null) : call("auth.logout", "session", token);
-        token = null; // o painel esquece o token de qualquer forma
+        Reply r = sessionCall("auth.logout");
+        forgetSession(); // o painel esquece o token de qualquer forma
         return r;
     }
 
@@ -138,7 +230,7 @@ public final class AuthorityClient implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         token = null;
         closeQuietly();
     }

@@ -17,7 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import panel.auth.OtpService;
+import panel.auth.CooldownException;
+import panel.auth.TwoFactorResult;
 import panel.design.ByxBadge;
 import panel.design.ByxBanner;
 import panel.design.ByxButton;
@@ -38,11 +39,11 @@ public final class AdminVerificationView extends StackPane {
     public interface Flow {
         void sendEmailCode();
 
-        OtpService.Result verifyEmail(String code);
+        TwoFactorResult verifyEmail(String code);
 
         void sendSmsCode();
 
-        OtpService.Result verifySms(String code);
+        TwoFactorResult verifySms(String code);
 
         void finish(boolean trustDevice);
 
@@ -217,7 +218,7 @@ public final class AdminVerificationView extends StackPane {
                 emailCode.clear();
             }
             action(() -> phone ? flow.verifySms(code) : flow.verifyEmail(code), result -> {
-                if (result == OtpService.Result.OK) {
+                if (result == TwoFactorResult.OK) {
                     if (!phone) {
                         phone = true;
                         renderStep();
@@ -291,7 +292,7 @@ public final class AdminVerificationView extends StackPane {
                     busy = false;
                     verify.setLoading(false);
                     refreshSend();
-                    say(e instanceof OtpService.CooldownException ? e.getMessage()
+                    say(e instanceof CooldownException ? e.getMessage()
                             : "Verification unavailable. Check the providers, your session or the Keychain and try again.", true);
                 });
             }

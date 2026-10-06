@@ -150,8 +150,8 @@ class ByxPaymentTest {
     }
     @Test void anotherAuthenticatedUserCannotReadOrConfirmIntent()throws Exception {
         validTransaction();f.auth.authorize();
-        var other=f.auth.userService.createUser("payment-other","other@example.invalid","temporary-pay-1".toCharArray(),null,panel.security.Role.USER);
-        f.auth.sessions.login(other,f.auth.clock.instant());
+        f.auth.createUser("payment-other","other@example.invalid","temporary-pay-1".toCharArray(),null,panel.security.Role.USER);
+        var other=f.auth.auth.login("payment-other","temporary-pay-1".toCharArray());
         f.auth.userService.changeOwnPassword(other.id(),"temporary-pay-1".toCharArray(),"different-pay-2".toCharArray());
         f.auth.auth.login("payment-other","different-pay-2".toCharArray());
         assertThrows(AccessDeniedException.class,()->payments.get(intent.id()));

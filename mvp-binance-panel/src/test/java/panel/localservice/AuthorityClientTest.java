@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /** O cliente da autoridade: o painel não decide nada, o token só vive em memória, e o produto normal não o referencia. */
@@ -47,20 +44,5 @@ class AuthorityClientTest {
         for (String forbidden : new String[] {"\"role\"", "\"userId\"", "\"admin\"", "\"mfa\"", "\"adminElevated\"", "\"expectedRole\"", "auth.setRole", "auth.execute", "auth.debugLogin", "auth.impersonate"}) {
             assertFalse(src.contains(forbidden), "the client has no way to send " + forbidden);
         }
-    }
-
-    @Test
-    void onlyTheQaLauncherReferencesTheAuthorityClient() throws IOException {
-        Set<String> refs = new TreeSet<>();
-        try (Stream<Path> s = Files.walk(Path.of("src/main/java"))) {
-            for (Path f : s.filter(p -> p.toString().endsWith(".java")).toList()) {
-                String t = Files.readString(f);
-                if (t.contains("AuthorityClient") || t.contains("AuthorityQaCli")) {
-                    refs.add(Path.of("src/main/java").relativize(f).toString());
-                }
-            }
-        }
-        assertEquals(Set.of("panel/localservice/AuthorityClient.java", "panel/localservice/AuthorityQaCli.java"), refs, "the product (Main, views, session manager) does not use the new authority: the normal app keeps the current login");
-        assertNull(System.getProperty("byx.authority"), "no runtime switch exists");
     }
 }

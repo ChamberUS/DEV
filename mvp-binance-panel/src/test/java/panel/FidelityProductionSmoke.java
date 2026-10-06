@@ -74,7 +74,7 @@ public final class FidelityProductionSmoke {
             stage.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED,e -> keyEvents++);
             try {
                 Field field=PanelApp.class.getDeclaredField("ctx"); field.setAccessible(true);ctx=(AppContext)field.get(this);
-                ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "fidelity-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "fidelity-pass-1", panel.security.Role.ADMIN, false);
                 if (baseline) later(this::enter); else record("login", 1.8, this::enter);
             } catch(Throwable e){fail(e);}
         }
@@ -82,8 +82,8 @@ public final class FidelityProductionSmoke {
             User admin=ctx.auth.login("qa-admin", "fidelity-pass-1".toCharArray()); invoke("afterLogin",User.class,admin);
             ctx.research.close();ctx.byx.close();
             var flow=ctx.adminAccess.startTwoFactor();flow.sendEmailCode();
-            check(flow.verifyEmail(panel.QaContext.dev().lastCode())==panel.auth.OtpService.Result.OK,"Email authorization");
-            flow.sendSmsCode();check(flow.verifySms(panel.QaContext.dev().lastCode())==panel.auth.OtpService.Result.OK,"SMS authorization");flow.finish(false);
+            check(flow.verifyEmail(panel.QaContext.dev().lastCode())==panel.auth.TwoFactorResult.OK,"Email authorization");
+            flow.sendSmsCode();check(flow.verifySms(panel.QaContext.dev().lastCode())==panel.auth.TwoFactorResult.OK,"SMS authorization");flow.finish(false);
             fixture=fixture();ctx.research.snapshot.set(fixture);
             ctx.trading.snapshot.get().feed="WAITING";
             stage.toFront(); stage.requestFocus();

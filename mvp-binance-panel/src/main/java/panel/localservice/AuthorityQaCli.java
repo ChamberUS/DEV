@@ -9,7 +9,7 @@ import java.nio.file.Path;
 /**
  * Ferramenta de QA da autoridade (bundle de TESTE; o produto não a referencia: há teste de guarda). Lê comandos de stdin (nunca de argv,
  * para que senha e token não apareçam em ps) e imprime só códigos e campos não sensíveis. Comandos: login USER ARQUIVO_CREDENCIAIS,
- * adopt TOKEN (simula token roubado), printtoken (QA), status, begin2fa, verify2fa CHALLENGE ARQUIVO_OTP, elevate, logout, sleep MS, quit.
+ * adopt TOKEN (simula token roubado), printtoken (QA), status, begin2fa, verify2fa CHALLENGE ARQUIVO_OTP, sms, verifysms ARQUIVO, elevate, enroll, devices, revokedev ID, logout, sleep MS, quit.
  */
 public final class AuthorityQaCli {
     private AuthorityQaCli() {
@@ -22,7 +22,7 @@ public final class AuthorityQaCli {
             String line;
             while ((line = r.readLine()) != null) {
                 String[] p = line.trim().split("\\s+");
-                AuthorityClient.Reply reply = null;
+                AuthorityGateway.Reply reply = null;
                 switch (p[0]) {
                     case "login" -> {
                         // credenciais de TESTE do arquivo 0600 gerado pelo serviço de QA: {"user":{"id":..,"password":..}}
@@ -52,8 +52,18 @@ public final class AuthorityQaCli {
                             System.out.println("CHALLENGE=" + challenge);
                         }
                     }
-                    case "verify2fa" -> reply = c.verifySecondFactor(p[1], Files.readString(Path.of(p[2])).trim());
+                    case "verify2fa" -> reply = c.verifySecondFactor("-".equals(p[1]) ? challenge : p[1], Files.readString(Path.of(p[2])).trim()); // "-" = o último desafio impresso
                     case "elevate" -> reply = c.adminElevation();
+                    case "sms" -> reply = c.sendSecondFactorSms();
+                    case "verifysms" -> reply = c.verifySecondFactorSms(Files.readString(Path.of(p[1])).trim());
+                    case "enroll" -> reply = c.enrollTrustedDevice();
+                    case "devices" -> {
+                        reply = c.listTrustedDevices();
+                        if (reply.ok()) {
+                            System.out.println("DEVICES=" + reply.result().path("devices").asText());
+                        }
+                    }
+                    case "revokedev" -> reply = c.revokeTrustedDevice(p[1]);
                     case "logout" -> reply = c.logout();
                     case "sleep" -> {
                         Thread.sleep(Long.parseLong(p[1]));
@@ -69,7 +79,7 @@ public final class AuthorityQaCli {
                 }
                 StringBuilder sb = new StringBuilder("RESULT ").append(p[0]).append(' ').append(reply.code());
                 if (reply.ok() && reply.result() != null) {
-                    for (String f : new String[] {"role", "elevated", "mfaRecent"}) {
+                    for (String f : new String[] {"role", "elevated", "mfaRecent", "smsPending", "trustedDevice", "next"}) {
                         if (reply.result().has(f)) {
                             sb.append(' ').append(f).append('=').append(reply.result().get(f).asText());
                         }

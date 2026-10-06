@@ -6,18 +6,10 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import panel.auth.AdminAccessService;
 import panel.auth.AuthService;
-import panel.auth.DevOtpProvider;
-import panel.auth.InMemoryRateLimiter;
-import panel.auth.OtpService;
-import panel.auth.PasswordHasher;
 import panel.auth.SessionManager;
-import panel.auth.UnconfiguredEmailOtpProvider;
-import panel.auth.UnconfiguredSmsOtpProvider;
 import panel.security.Database;
 import panel.security.Role;
 import panel.security.SecurityAuditService;
-import panel.security.SecurityConfig;
-import panel.user.SqliteUserRepository;
 import panel.user.UserService;
 
 /** Monta a pilha de autenticação em memória com rede e OTP falsos (determinístico, sem rede real). */
@@ -48,47 +40,47 @@ class AuthFixture {
 
     final MutableClock clock = new MutableClock();
     final Database db = Database.inMemory();
-    final SqliteUserRepository users = new SqliteUserRepository(db);
     final SecurityAuditService audit = new SecurityAuditService(db, clock);
     final SessionManager sessions = new SessionManager();
-    final PasswordHasher hasher = new PasswordHasher(1024, 1, 1);
-    final DevOtpProvider otpProvider = new DevOtpProvider();
-    final AuthService auth;
-    final AdminAccessService access;
-    final UserService userService;
-
-    final MemorySecrets secrets = new MemorySecrets();
-    final panel.auth.TrustedDeviceService devices = new panel.auth.TrustedDeviceService(db,secrets,sessions,audit,clock);
+    /** Dublê da autoridade do serviço (os códigos de 2º fator são determinísticos: lastCode()). */
+    final FakeAuthority authority = new FakeAuthority(clock);
+    final FakeAuthority otpProvider = authority;
+    final AuthService auth = new AuthService(authority, sessions, clock);
+    final panel.auth.TrustedDeviceService devices = new panel.auth.TrustedDeviceService(authority, clock);
+    final AdminAccessService access = new AdminAccessService(sessions, authority, auth, devices, clock);
+    final UserService userService = new UserService(authority, auth, sessions);
 
     AuthFixture(boolean configured) {
-        SecurityConfig config = new SecurityConfig(30);
-        auth = new AuthService(users, hasher, sessions, new InMemoryRateLimiter(3, Duration.ofSeconds(60), clock), audit, clock);
-        OtpService otp = new OtpService(clock, Duration.ofMinutes(5), Duration.ofSeconds(30), 5);
-        access = new AdminAccessService(sessions,users,config,otp,configured?otpProvider:new UnconfiguredEmailOtpProvider(),
-                configured?otpProvider:new UnconfiguredSmsOtpProvider(),devices,audit,clock);
-        userService = new UserService(users,hasher,access,audit,sessions,clock);
-        userService.onContactsChanged=devices::revokeAllForCurrentUser;
-        userService.onCredentialsChanged=access::credentialsChanged;
+        authority.configured = configured;
+        userService.onCredentialsChanged = access::credentialsChanged;
     }
+
     static AuthFixture ready() { return new AuthFixture(true); }
+
+    /** Conclui os DOIS estágios do 2º fator (e-mail e SMS) e devolve a sessão administrativa concedida pelo serviço. */
     panel.auth.AdminSession authorize() {
         clock.advance(Duration.ofSeconds(31));
-        var flow=access.startTwoFactor();flow.sendEmailCode();
-        if(flow.verifyEmail(otpProvider.lastCode())!=OtpService.Result.OK)throw new AssertionError();
-        flow.sendSmsCode();if(flow.verifySms(otpProvider.lastCode())!=OtpService.Result.OK)throw new AssertionError();
+        var flow = access.startTwoFactor();
+        flow.sendEmailCode();
+        if (flow.verifyEmail(authority.lastEmailCode()) != panel.auth.TwoFactorResult.OK) throw new AssertionError();
+        flow.sendSmsCode();
+        if (flow.verifySms(authority.lastSmsCode()) != panel.auth.TwoFactorResult.OK) throw new AssertionError();
         return access.adminSession().orElseThrow();
     }
 
-    void seedAdmin() {
-        userService.createInitialAdmin("boss", "boss@example.com", "correct-horse-1".toCharArray(), "+5511999991234");
+    /** Provisiona outra conta USER na autoridade (os testes do painel não criam usuários pelo painel: isso não existe mais). */
+    panel.user.User createUser(String username, String email, char[] password, String phone, Role role) {
+        var a = authority.add(username, email, phone, new String(password), role, true);
+        return new panel.user.User(a.id(), a.username(), a.email(), "", a.role(), panel.user.UserStatus.ACTIVE, a.phone(), true, a.phone() != null, true, java.time.Instant.EPOCH, java.time.Instant.EPOCH, null);
     }
 
-    /** Cria um USER diretamente via admin temporário. */
+    void seedAdmin() {
+        authority.add("boss", "boss@example.com", "+5511999991234", "correct-horse-1", Role.ADMIN, false);
+    }
+
+    /** Cria um USER já provisionado na autoridade (a senha temporária obriga a troca, como no fluxo anterior). */
     void seedUser() {
         seedAdmin();
-        auth.login("boss", "correct-horse-1".toCharArray());
-        authorize();
-        userService.createUser("alice", "alice@example.com", "temporary-pass-1".toCharArray(), null, Role.USER);
-        auth.logout();
+        authority.add("alice", "alice@example.com", null, "temporary-pass-1", Role.USER, true);
     }
 }

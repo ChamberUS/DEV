@@ -70,7 +70,7 @@ public final class ResearchQa {
             super.start(stage);
             try {
                 ctx = (AppContext) field("ctx");
-                ctx.userService.createInitialAdmin("qa-admin", "qa@example.invalid", "shell-qa-pass-1".toCharArray(), "+5511999991234");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "shell-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, null);
                 User admin = ctx.auth.login("qa-admin", "shell-qa-pass-1".toCharArray());
                 invoke("afterLogin", User.class, admin);
