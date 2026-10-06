@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <!-- MODELO FUTURO, NÃO USADO ainda e NÃO TESTADO: só vale com o ID FINAL e um perfil de provisionamento que autorize estes direitos
+         (TN3137: os direitos de grupo do keychain de proteção de dados "devem ser autorizados por um perfil"; sem o perfil o processo é
+         encerrado no lançamento, como medido em experiments/dp-keychain). Só o HELPER DO SERVIÇO recebe o grupo; o painel NÃO. -->
+    <key>com.apple.application-identifier</key>
+    <string>__TEAM__.__APP_ID__</string>
+    <key>com.apple.developer.team-identifier</key>
+    <string>__TEAM__</string>
+    <key>keychain-access-groups</key>
+    <array>
+        <string>__TEAM__.__SERVICE_ID__</string>
+    </array>
+</dict>
+</plist>

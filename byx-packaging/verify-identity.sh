@@ -4,8 +4,10 @@
 #   uso: ./verify-identity.sh [--market]
 set -u
 HERE="${0:A:h}"; ROOT="${HERE:h}"
+source "$HERE/identity.env" # BYX_APP_ID / BYX_SERVICE_ID: fonte única
 APP="$HERE/build/BYX-MVP.app"; APPEXE="$APP/Contents/MacOS/BYX-MVP"; SVCEXE="$APP/Contents/MacOS/byx-local-service"
 JAVA_HOME="${JAVA_HOME:-$HOME/dev/tools/jdk-21.0.12.1+1/Contents/Home}"; JAVA="$JAVA_HOME/bin/java"
+export BYX_APP_ID BYX_TEAM="$(codesign -dvv "$APP" 2>&1 | awk -F= '/^TeamIdentifier/ {print $2}')"
 PASS=0; FAIL=0
 ok()   { echo "PASS  $1"; PASS=$((PASS+1)); }
 bad()  { echo "FAIL  $1"; FAIL=$((FAIL+1)); }
@@ -39,7 +41,7 @@ try:
     s=socket.socket(socket.AF_UNIX); s.settimeout(5); s.connect(home+"/run/service.sock")
     cn=base64.urlsafe_b64encode(os.urandom(16)).decode().rstrip("=")
     hello={"v":1,"type":"hello","clientNonce":cn}
-    if claims: hello.update({"bundleId":"network.byx.mvp","pid":int(sys.argv[2]),"teamId":"W5Z65G9UP2"})  # alegações falsas
+    if claims: hello.update({"bundleId":os.environ["BYX_APP_ID"],"pid":int(sys.argv[2]),"teamId":os.environ.get("BYX_TEAM","")})  # alegações falsas
     send(s,hello); ch=recv(s)
     if ch.get("type")=="error": print("REFUSED(%s)"%ch.get("code")); sys.exit(0)
     send(s,{"v":1,"type":"auth","clientProof":proof("client",cn,ch["serverNonce"])}); r=recv(s)
@@ -54,7 +56,7 @@ TEAM=$(codesign -dvv "$APP" 2>&1 | awk -F= '/^TeamIdentifier/ {print $2}')
 check "Team ID presente ($TEAM)" '[[ -n "$TEAM" && "$TEAM" != "not set" ]]'
 check "Hardened Runtime ligado (flag runtime)" 'codesign -dv "$APP" 2>&1 | grep -q "flags=0x10000(runtime)"'
 check "runtime Java EMBUTIDO no bundle (não usa o java global)" '[[ -n "$(find "$APP/Contents/runtime" -name libjvm.dylib | head -1)" ]] && ! otool -L "$APPEXE" | grep -q "/Users/.*/jdk"'
-check "o executável do serviço tem identificador próprio" 'codesign -dv "$SVCEXE" 2>&1 | grep -q "^Identifier=network.byx.mvp.service"'
+check "o executável do serviço tem identificador próprio" 'codesign -dv "$SVCEXE" 2>&1 | grep -q "^Identifier=$BYX_SERVICE_ID"'
 check "entitlements = somente allow-jit" '[[ "$(codesign -d --entitlements - "$APP" 2>&1 | grep -c "\[Key\]")" == "1" ]] && codesign -d --entitlements - "$APP" 2>&1 | grep -q allow-jit'
 check "sem disable-library-validation / debugger / dyld-env" '! codesign -d --entitlements - "$APP" 2>&1 | grep -qE "disable-library-validation|cs.debugger|allow-dyld-environment|get-task-allow"'
 
@@ -87,7 +89,7 @@ R=$(/usr/bin/python3 -c "$PYCLIENT" "$T" "$LEGIT_PID" 2>&1)
 check "alegações falsas (bundleId, pid=$LEGIT_PID do app legítimo, teamId): REJEITADO ($R)" '[[ "$R" == REFUSED* ]]'
 kill $LEGIT_PID 2>/dev/null; wait $LEGIT_PID 2>/dev/null
 # 4. cópia do executável com o MESMO identificador mas assinatura ad-hoc (sem cadeia Apple/Team)
-C=$(mktemp -d /tmp/idc.XXXX); cp -R "$APP" "$C/"; codesign --force --deep -s - --identifier network.byx.mvp "$C/BYX-MVP.app" 2>/dev/null
+C=$(mktemp -d /tmp/idc.XXXX); cp -R "$APP" "$C/"; codesign --force --deep -s - --identifier "$BYX_APP_ID" "$C/BYX-MVP.app" 2>/dev/null
 OUT=$(BYX_LOCAL_SERVICE_HOME="$T" "$C/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service 2>&1)
 check "app com mesmo identificador, assinatura ad-hoc: REJEITADO" '! echo "$OUT" | grep -q "^probe.state=CONNECTED"'
 rm -rf "$C"

@@ -9,7 +9,18 @@ source "$HERE/identity.env"
 export JAVA_HOME="${JAVA_HOME:-$HOME/dev/tools/jdk-21.0.12.1+1/Contents/Home}"
 export PATH="$JAVA_HOME/bin:$HOME/dev/tools/apache-maven-3.9.9/bin:$PATH"
 OUT="$HERE/build"; ENT="$HERE/entitlements"
-while [[ $# -gt 0 ]]; do case "$1" in --out) OUT="$2"; shift 2;; --entitlements-dir) ENT="$2"; shift 2;; *) echo "arg inválido: $1" >&2; exit 2;; esac; done
+CANARY=0; PROFILE=""
+while [[ $# -gt 0 ]]; do case "$1" in
+  --out) OUT="$2"; shift 2;;
+  --entitlements-dir) ENT="$2"; shift 2;;
+  # variante SÓ DE TESTE (nunca o bundle do produto): acrescenta o harness e o leitor do canário do cofre, em outro diretório
+  --with-canary-harness) CANARY=1; OUT="$HERE/build-canary"; shift;;
+  # perfil de provisionamento (futuro): só com os IDs FINAIS (BYX_IDS_FINAL=true). Caminho NÃO TESTADO: ainda não existe perfil.
+  --embedded-profile) PROFILE="$2"; shift 2;;
+  *) echo "arg inválido: $1" >&2; exit 2;; esac; done
+if [[ -n "$PROFILE" && "$BYX_IDS_FINAL" != "true" ]]; then
+  echo "BLOCKED: FINAL BUNDLE ID REQUIRED — nenhum perfil/grupo de acesso é configurado sob o ID provisório (rode set-final-ids.sh)"; exit 6
+fi
 APP="$OUT/$BYX_APP_NAME.app"
 IDENT="${BYX_SIGN_IDENTITY:-$(security find-identity -v -p codesigning | awk '/Apple Development/ {print $2; exit}')}"
 [[ -n "$IDENT" ]] || { echo "nenhuma identidade Apple Development encontrada (BYX_SIGN_IDENTITY)"; exit 3; }
@@ -23,11 +34,18 @@ cp "$PANEL_JAR" "$SERVICE_JAR" "$OUT/input/"
 
 echo "== 2. app-image (jpackage, runtime embutido via jlink)"
 printf 'main-jar=byx-local-service-0.1.0.jar\nmain-class=byx.service.ServiceMain\n' > "$OUT/service.properties"
+CANARY_LAUNCHERS=()
+if [[ $CANARY -eq 1 ]]; then
+  printf 'main-jar=byx-local-service-0.1.0.jar\nmain-class=byx.service.secrets.SecretCanaryHarness\n' > "$OUT/canary.properties"
+  printf 'main-jar=byx-local-service-0.1.0.jar\nmain-class=byx.service.secrets.SecretCanaryReader\n' > "$OUT/reader.properties"
+  printf 'main-jar=byx-local-service-0.1.0.jar\nmain-class=byx.service.secrets.SecretCanaryHolder\n' > "$OUT/holder.properties"
+  CANARY_LAUNCHERS=(--add-launcher byx-secret-canary="$OUT/canary.properties" --add-launcher byx-secret-reader="$OUT/reader.properties" --add-launcher byx-secret-holder="$OUT/holder.properties")
+fi
 jpackage --type app-image --name "$BYX_APP_NAME" --dest "$OUT" --input "$OUT/input" \
   --main-jar mvp-binance-panel-0.1.0.jar --main-class panel.app.Main --app-version "$BYX_BUNDLE_VERSION" --vendor "BYX-MVP" \
   --mac-package-identifier "$BYX_APP_ID" --mac-package-name "$BYX_APP_NAME" \
   --add-modules java.base,java.desktop,java.naming,java.net.http,java.sql,java.logging,java.xml,java.management,jdk.jfr,jdk.unsupported,jdk.crypto.ec \
-  --add-launcher byx-local-service="$OUT/service.properties" >/dev/null
+  --add-launcher byx-local-service="$OUT/service.properties" ${CANARY_LAUNCHERS[@]+"${CANARY_LAUNCHERS[@]}"} >/dev/null
 CONTENTS="$APP/Contents"; FW="$CONTENTS/Frameworks"; mkdir -p "$FW"
 
 echo "== 3. nativos pré-extraídos (nada é extraído em tempo de execução: biblioteca não assinada seria recusada pelo library validation)"
@@ -49,7 +67,9 @@ NATIVE_OPTS=(
 )
 # painel: classpath completo; serviço: só o que ele usa (superfície menor) + exposição controlada do fd do socket para a identidade do peer
 CFG_APP="$CONTENTS/app/$BYX_APP_NAME.cfg"; CFG_SVC="$CONTENTS/app/byx-local-service.cfg"
-python3 - "$CFG_SVC" <<'PY'
+SVC_CFGS=("$CFG_SVC"); [[ $CANARY -eq 1 ]] && SVC_CFGS+=("$CONTENTS/app/byx-secret-canary.cfg" "$CONTENTS/app/byx-secret-reader.cfg" "$CONTENTS/app/byx-secret-holder.cfg")
+for CFG in "${SVC_CFGS[@]}"; do
+python3 - "$CFG" <<'PY'
 import sys,re
 p=sys.argv[1]; s=open(p).read()
 keep=("byx-local-service-0.1.0.jar","jackson-core-2.21.6.jar","jackson-databind-2.20.0.jar","jackson-annotations-2.21.jar","jna-5.17.0.jar")
@@ -59,7 +79,8 @@ for l in s.splitlines():
     out.append(l)
 open(p,"w").write("\n".join(out)+"\n")
 PY
-for cfg in "$CFG_APP" "$CFG_SVC"; do
+done
+for cfg in "$CFG_APP" "${SVC_CFGS[@]}"; do
   python3 - "$cfg" "${NATIVE_OPTS[@]}" <<'PY'
 import sys
 p=sys.argv[1]; opts=sys.argv[2:]; s=open(p).read().splitlines()
@@ -69,7 +90,7 @@ open(p,"w").write("\n".join(s)+"\n")
 PY
 done
 # leitura do fd do socket (identidade do peer): só estes dois pacotes, só nestes dois lançadores; sem eles o peer fica NÃO verificado
-for cfg in "$CFG_APP" "$CFG_SVC"; do
+for cfg in "$CFG_APP" "${SVC_CFGS[@]}"; do
 python3 - "$cfg" <<'PY'
 import sys
 p=sys.argv[1]; s=open(p).read().splitlines()
@@ -94,7 +115,19 @@ sign() { codesign --force --options runtime --timestamp=none -s "$IDENT" "$@"; }
 find "$CONTENTS" -type f \( ! -path "$CONTENTS/MacOS/*" \) -print0 | while IFS= read -r -d '' f; do
   if file -b "$f" | grep -q "Mach-O"; then sign --identifier "$BYX_APP_ID.lib.$(basename "$f")" "$f"; fi
 done
-sign --identifier "$BYX_SERVICE_ID" -r "$(dr "$BYX_SERVICE_ID")" --entitlements "$ENT/service.entitlements" "$CONTENTS/MacOS/byx-local-service"
+SVC_ENT="$ENT/service.entitlements"
+if [[ -n "$PROFILE" ]]; then # NÃO TESTADO (sem perfil): modelo de direitos do helper do serviço; o painel NÃO recebe grupo de keychain
+  cp "$PROFILE" "$CONTENTS/embedded.provisionprofile"
+  SVC_ENT="$OUT/service.keychain.entitlements"
+  sed "s/__TEAM__/$TEAM/g; s/__APP_ID__/$BYX_APP_ID/g; s/__SERVICE_ID__/$BYX_SERVICE_ID/g" "$ENT/service.keychain.entitlements.template" > "$SVC_ENT"
+fi
+sign --identifier "$BYX_SERVICE_ID" -r "$(dr "$BYX_SERVICE_ID")" --entitlements "$SVC_ENT" "$CONTENTS/MacOS/byx-local-service"
+if [[ $CANARY -eq 1 ]]; then
+  # harness com a identidade e os direitos do SERVIÇO; leitor com a identidade e os direitos do PAINEL (sem grupo de keychain)
+  sign --identifier "$BYX_SERVICE_ID" -r "$(dr "$BYX_SERVICE_ID")" --entitlements "$SVC_ENT" "$CONTENTS/MacOS/byx-secret-canary"
+  sign --identifier "$BYX_SERVICE_ID" -r "$(dr "$BYX_SERVICE_ID")" --entitlements "$SVC_ENT" "$CONTENTS/MacOS/byx-secret-holder"
+  sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$ENT/app.entitlements" "$CONTENTS/MacOS/byx-secret-reader"
+fi
 sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$ENT/app.entitlements" "$APP"
 
 echo "== 6. verificação"

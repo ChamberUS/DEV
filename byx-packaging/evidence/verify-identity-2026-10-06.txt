@@ -18,7 +18,7 @@ PASS  accountData/notifications/adminOperations/secretIntegrations = false
 == ATAQUE do mesmo usuário (todos leem o pairing.token real)
 PASS  mesmo código do painel no java genérico: REJEITADO (selfIdentity=development_unverified)
 PASS  python3 com token e protocolo corretos: REJEITADO (REFUSED(closed_by_service))
-PASS  alegações falsas (bundleId, pid=48337 do app legítimo, teamId): REJEITADO (REFUSED(closed_by_service))
+PASS  alegações falsas (bundleId, pid=53073 do app legítimo, teamId): REJEITADO (REFUSED(closed_by_service))
 PASS  app com mesmo identificador, assinatura ad-hoc: REJEITADO
 PASS  app assinado com JAVA_TOOL_OPTIONS (injeção): REJEITADO
 PASS  app assinado com bundle adulterado (selo quebrado): REJEITADO
