@@ -72,7 +72,7 @@ class SystemScreensTest {
     @Test
     void systemStatusNeverInventsHealth() {
         var comps = SystemStatusModel.components(inputs(false, null, false));
-        assertEquals(List.of("backend", "feed", "capture", "research", "node", "wallet", "auth"), comps.stream().map(SystemStatusModel.Component::id).toList());
+        assertEquals(List.of("backend", "feed", "capture", "research", "node", "service", "wallet", "auth"), comps.stream().map(SystemStatusModel.Component::id).toList());
         assertEquals(StatusState.UNAVAILABLE, find(comps, "backend").state());
         assertEquals(StatusState.UNKNOWN, find(comps, "feed").state(), "an unreadable feed is UNKNOWN, never OPERATIONAL");
         assertEquals(StatusState.UNKNOWN, find(comps, "capture").state());
@@ -231,7 +231,7 @@ class SystemScreensTest {
             List<String> retries = new ArrayList<>();
             SystemStatusScreen s = new SystemStatusScreen(m, CLOCK, () -> inputs(backend[0], "NOT_CONFIGURED", true), tracker, retries::add);
             show(s.node());
-            assertEquals(7, s.rowsList().size());
+            assertEquals(8, s.rowsList().size());
             assertFalse(s.timerRunning());
             s.onShow();
             assertTrue(s.timerRunning());

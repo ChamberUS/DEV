@@ -1,0 +1,24 @@
+PASS the real service process is running
+TRACE +939ms thread=JavaFX Application Thread seq=2 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:259 < PanelApp.afterLogin:227 < LocalServiceQa$App.invoke:120 < LocalServiceQa$App.lambda$plan$2:189 < LocalServiceQa$App.run:143 < LocalServiceQa$App.lambda$after$0:127 < 
+TRACE +1359ms thread=JavaFX Application Thread seq=3 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:398 < PanelApp.enterApp:326 < PanelApp.afterLogin:227 < LocalServiceQa$App.invoke:120 < LocalServiceQa$App.lambda$plan$2:189 < LocalServiceQa$App.run:143 < LocalServiceQa$App.lambda$after$0:127 < 
+PASS panel client paired with the real service: CONNECTED · protocol 1 · v0.1.0
+PASS no private capability is honored
+PASS monitor runs while a session exists
+PASS real runtime files: dir 0700, run 0700, token 0600, socket 0600
+PASS the service has no TCP/UDP/IPv4/IPv6 socket open: []
+TRACE +5013ms thread=JavaFX Application Thread seq=4 pending=null t-desk -> sys-status via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:398 < LocalServiceQa$App.invoke:120 < LocalServiceQa$App.lambda$plan$3:216 < LocalServiceQa$App.run:143 < LocalServiceQa$App.lambda$after$0:127 < 
+PASS System Status shows the Local service row as answering
+PASS service down after having been up: UNAVAILABLE as a drop: UNAVAILABLE · refused
+PASS the outage navigated nowhere: []
+PASS shell not recreated by the outage
+PASS System Status explains the drop
+PASS after a restart the panel pairs again with the NEW secret: CONNECTED · protocol 1 · v0.1.0
+PASS a different instance id after restart (no stale state)
+PASS restoring changed no route: []
+PASS the real service output carries no canary secret and no local path
+PASS the service logs its lifecycle
+TRACE +11564ms thread=JavaFX Application Thread seq=4 pending=null sys-status -> null via ShellRouter.reset:84 < PanelApp.showEntry:154 < PanelApp.logout:239 < LocalServiceQa$App.invoke:120 < LocalServiceQa$App.lambda$plan$6:252 < LocalServiceQa$App.run:143 < LocalServiceQa$App.lambda$after$0:127 < 
+TRACE +11580ms thread=JavaFX Application Thread seq=5 pending=null null -> auth:login via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:398 < PanelApp.showEntry:173 < PanelApp.logout:239 < LocalServiceQa$App.invoke:120 < LocalServiceQa$App.lambda$plan$6:252 < LocalServiceQa$App.run:143 < LocalServiceQa$App.lambda$after$0:127 < 
+PASS logout stops the monitor (no polling without a session)
+PASS no state survives logout
+RESULT localservice failures=0

@@ -45,7 +45,8 @@ class FinalSafetyTest {
         assertEquals(Set.of(), filesMatching("trading\\s*=\\s*\"ENABLED"), "no code sets ENABLED");
         assertEquals(Set.of(), filesMatching("(?i)(api\\.binance|fapi\\.binance|/fapi/|newOrder|X-MBX-APIKEY|createOrder|placeOrder|submitOrder)"),
                 "no exchange or order endpoint exists in the product");
-        assertEquals(Set.of("auth/OtpService.java"), filesMatching("HmacSHA256"), "the only HMAC is the OTP one: no exchange request signing");
+        assertEquals(Set.of("auth/OtpService.java", "localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"),
+                "HMAC only for the OTP and for the local-service pairing proof (IPC): no exchange request signing");
         assertTrue(Files.readString(MAIN.resolve("panel/shell/DockModel.java")).contains("liveOff"), "the dock keeps the Live trading OFF text");
     }
 
@@ -77,8 +78,9 @@ class FinalSafetyTest {
     void byxV2IsReadOnlyAndTheLegacyActionsAreNotExposed() throws IOException {
         assertEquals(Set.of(), filesMatching("byxGas\\.(request|revoke|refresh)\\("), "gas request/revoke/refresh is called from no UI");
         assertEquals(Set.of(), filesMatching("byxPayments\\.(create|confirm)\\("), "payment intents are created and confirmed from no UI");
-        assertEquals(Set.of("adapter/LocalnetGasTestSigner.java", "motion/SystemMotionProbe.java", "process/ProcessRunner.java"), filesMatching("ProcessBuilder"),
-                "processes: the test signer (opt-in by env), the OS probe and the existing ProcessRunner only");
+        assertEquals(Set.of("adapter/CaptureRuntimeResolver.java", "adapter/LocalnetGasTestSigner.java", "motion/SystemMotionProbe.java", "process/ProcessRunner.java"),
+                filesMatching("ProcessBuilder"),
+                "processes: the capture resolver (read-only lsof with fixed arguments, added by the capture work), the test signer (opt-in by env), the OS probe and the existing ProcessRunner only");
         // o signer de teste só existe atrás da variável de ambiente e do modo de desenvolvimento
         String ctx = Files.readString(MAIN.resolve("panel/app/AppContext.java"));
         assertTrue(ctx.contains("I_ACKNOWLEDGE_TEST_ONLY") && ctx.contains("security.devMode()"));

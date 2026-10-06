@@ -14,7 +14,7 @@ import java.util.Set;
 public final class DiagnosticsReport {
     /** Allow-list completa, na ordem do relatório. */
     public static final List<String> FIELDS = List.of("Application", "Version", "Build", "Environment", "Java", "JavaFX", "Operating system",
-            "Backend", "Market feed", "Capture", "Research", "BYX node", "Wallet", "Authentication", "Motion mode", "Data source", "Density");
+            "Backend", "Market feed", "Capture", "Research", "BYX node", "Local service", "Wallet", "Authentication", "Motion mode", "Data source", "Density");
 
     /** O que o relatório nunca inclui (mostrado na tela). */
     public static final List<String> NEVER = List.of("Passwords", "Tokens and one-time codes", "Session secrets", "API keys", "Private keys",

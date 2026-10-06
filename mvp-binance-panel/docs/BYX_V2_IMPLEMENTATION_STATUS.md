@@ -460,3 +460,6 @@ Também legados, sem tela própria: o diálogo Credits, `ToastHost` (toasts da e
 
 ## Passo 14 · QA final
 Relatório completo em `docs/BYX_V2_FINAL_QA.md` (status: READY WITH KNOWN LIMITATIONS). 492 testes, `mvn test` e `mvn clean package` em sucesso; QAs dirigidos no app real em `docs/qa/step14/`.
+
+## V2.1A · Fundação segura do serviço local
+Serviço separado em `/Users/buynnex-corp/dev/byx-local-service` (documento de segurança, arquitetura e achados do login em `docs/SECURITY_FOUNDATION.md`). No painel: `panel.localservice` (`LocalServiceClient`, `LocalServiceMonitor`, `LocalServiceStatus`) mostra "Local service" em System Status (com Retry real) e em Diagnostics. Sondagem só com sessão, fora da FX, sem navegar, sem liberar permissão e sem tocar a captura. Nenhuma capacidade privada é honrada pelo painel. Evidência dinâmica com o serviço real: `docs/qa/v21a/localservice-qa.txt`.

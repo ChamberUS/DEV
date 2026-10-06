@@ -24,7 +24,12 @@ public final class SystemStatusModel {
     }
 
     public record Inputs(Snapshot research, TraderSnapshot trading, ByxSnapshot network, boolean sessionActive, boolean adminSession,
-            boolean walletLinked, boolean researchAvailable) {
+            boolean walletLinked, boolean researchAvailable, panel.localservice.LocalServiceStatus service) {
+        /** Sem serviço local conhecido (ainda não sondado). */
+        public Inputs(Snapshot research, TraderSnapshot trading, ByxSnapshot network, boolean sessionActive, boolean adminSession, boolean walletLinked,
+                boolean researchAvailable) {
+            this(research, trading, network, sessionActive, adminSession, walletLinked, researchAvailable, panel.localservice.LocalServiceStatus.unknown());
+        }
     }
 
     public static List<Component> components(Inputs in) {
@@ -55,6 +60,7 @@ public final class SystemStatusModel {
         StatusState node = DockModel.network(n.connection());
         out.add(new Component("node", "BYX node", node, "UNKNOWN".equals(n.connection()) && n.height() == null, "BYX network: " + NetworkModel.state(n).text.toLowerCase(java.util.Locale.ROOT) + ".",
                 n.updatedAt(), true));
+        out.add(serviceComponent(in.service()));
         boolean verified = "VERIFIED".equals(n.identity());
         out.add(new Component("wallet", "Wallet", !verified ? StatusState.UNAVAILABLE : in.walletLinked() ? StatusState.OPERATIONAL : StatusState.UNAVAILABLE,
                 !verified || !in.walletLinked(), !verified ? "The network identity is not verified, so no wallet can be read."
@@ -62,6 +68,31 @@ public final class SystemStatusModel {
         out.add(new Component("auth", "Authentication", in.sessionActive() ? StatusState.OPERATIONAL : StatusState.UNAVAILABLE, false,
                 !in.sessionActive() ? "No active session." : in.adminSession() ? "Signed in with an active admin session." : "Signed in. Admin verification not active.", null, false));
         return out;
+    }
+
+    public static StatusState serviceState(panel.localservice.LocalServiceStatus s) {
+        return switch (s.state()) {
+            case CONNECTED -> StatusState.OPERATIONAL;
+            case UNKNOWN -> StatusState.UNKNOWN;
+            case INCOMPATIBLE -> StatusState.DEGRADED;
+            default -> StatusState.UNAVAILABLE;
+        };
+    }
+
+    /** Serviço local: opcional nesta build. Nunca "operacional" sem uma resposta autenticada; as razões são textos fixos, nunca do serviço. */
+    static Component serviceComponent(panel.localservice.LocalServiceStatus s) {
+        StatusState state = serviceState(s);
+        boolean expected = s.state() == panel.localservice.LocalServiceStatus.State.UNAVAILABLE && !s.everConnected();
+        String reason = switch (s.state()) {
+            case UNKNOWN -> "Not checked yet.";
+            case CONNECTED -> "Local service answers (protocol " + s.protocol() + "). Account data and admin operations stay blocked: user identity and authorization "
+                    + "are not implemented in the service yet.";
+            case UNAVAILABLE -> s.everConnected() ? "The local service stopped answering." : "The local service is not running. It is optional in this build.";
+            case AUTH_FAILED -> "The service did not prove the pairing secret, or rejected ours. Nothing was sent to it.";
+            case INSECURE_PAIRING -> "The pairing files are not private to this user, so the panel refused to connect.";
+            case INCOMPATIBLE -> "The service answered outside the supported contract.";
+        };
+        return new Component("service", "Local service", state, expected, reason, s.checkedAt(), true);
     }
 
     private static String feedReason(StatusState state, boolean expected, String feed) {

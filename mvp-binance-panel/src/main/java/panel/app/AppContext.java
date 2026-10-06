@@ -83,6 +83,10 @@ public class AppContext {
     public final JobManager jobs = new JobManager(cli, settings::project, this::refresh, adminAccess::requireAdmin);
     public final ResearchService research = new ResearchService(settings, new panel.adapter.LocalBackendGateway(new FileResearchBackend(cli)), new MockResearchBackend(), jobs);
     public final panel.service.CaptureMonitorService captureMonitor;
+    /** Resultado de cada sondagem do serviço local (a UI registra o seu); a sondagem não navega nem concede nada. */
+    public volatile Consumer<panel.localservice.LocalServiceStatus> onLocalService = s -> { };
+    public final panel.localservice.LocalServiceMonitor localService = new panel.localservice.LocalServiceMonitor(
+            new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome()), s -> onLocalService.accept(s));
     public final TradingService trading = new TradingService(settings, new ResearchModeTradingProvider(), new MockTradingProvider());
     public final MotionService motion = new MotionService();
     public final ViewTransitionService transitions = new ViewTransitionService(motion);

@@ -99,6 +99,7 @@ public class PanelApp extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> ctx.adminAccess.touch());
         stage.focusedProperty().addListener((o, a, focused) -> { if (focused) ctx.refreshSystemMotion(); });
         ctx.refreshSystemMotion();
+        ctx.onLocalService = r -> Platform.runLater(() -> recovery.retryFinished("service", panel.systemview.SystemStatusModel.serviceState(r)));
         stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(stage.isShowing() && !iconified));
         stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing && !stage.isIconified()));
         ctx.motion.reference.bind(rootStack);
@@ -137,7 +138,7 @@ public class PanelApp extends Application {
     }
 
     @Override
-    public void stop() { ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
+    public void stop() { ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
 
     private void applyDensity() {
         if (shell != null) shell.content().setComfortable("COMFORTABLE".equals(ctx.settings.density));
@@ -147,6 +148,7 @@ public class PanelApp extends Application {
 
     private void showEntry(String message) {
         mainActive = false;
+        ctx.localService.stop();
         closeShell();
         if (activeView != null) { activeView.onHide(); activeView = null; }
         router.reset();
@@ -314,6 +316,7 @@ public class PanelApp extends Application {
         lastView.put(true, "t-desk");
         lastView.put(false, "overview");
         mainActive = true;
+        ctx.localService.start(); // sondagem do serviço local: só leitura de estado, nunca navega
         // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
         lastDisplayed = null;
         previousRoute = null;
@@ -685,7 +688,7 @@ public class PanelApp extends Application {
             linked = false;
         }
         return new panel.systemview.SystemStatusModel.Inputs(ctx.research.snapshot.get(), ctx.trading.snapshot.get(), ctx.byx.snapshot(),
-                ctx.sessions.user().isPresent(), ctx.adminAccess.hasValidAdminSession(), linked, views.containsKey("overview"));
+                ctx.sessions.user().isPresent(), ctx.adminAccess.hasValidAdminSession(), linked, views.containsKey("overview"), ctx.localService.snapshot());
     }
 
     /** Retry só existe onde há uma nova tentativa REAL: backend (refresh da pesquisa) e nó BYX (leitura da cadeia). */
@@ -694,6 +697,10 @@ public class PanelApp extends Application {
             case "backend" -> {
                 recovery.retryStarted("backend");
                 ctx.refresh();
+            }
+            case "service" -> {
+                recovery.retryStarted("service");
+                ctx.localService.refreshNow();
             }
             case "node" -> {
                 recovery.retryStarted("node");
@@ -786,7 +793,7 @@ public class PanelApp extends Application {
                 .set("Backend", panel.shell.DockModel.backend(s).name()).set("Market feed", ((panel.design.StatusState) panel.shell.DockModel.feed(t.feed)[0]).name())
                 .set("Capture", ((panel.design.StatusState) panel.shell.DockModel.capture(s.capture.recorder())[0]).name())
                 .set("Research", views.containsKey("overview") ? "Available to this account" : "Not available to this account")
-                .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Wallet", !"VERIFIED".equals(net.identity()) ? "Unavailable"
+                .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Local service", ctx.localService.snapshot().summary()).set("Wallet", !"VERIFIED".equals(net.identity()) ? "Unavailable"
                         : ctx.byxWallets.wallets().isEmpty() ? "Not linked" : "Linked")
                 .set("Authentication", !user ? "Signed out" : ctx.adminAccess.hasValidAdminSession() ? "Signed in · admin session active" : "Signed in")
                 .set("Motion mode", ctx.motion.preference.get().name() + (ctx.motionReducedBySystem() ? " (system)" : "")).set("Data source", ctx.settings.dataSource.name()).set("Density", ctx.settings.density);
