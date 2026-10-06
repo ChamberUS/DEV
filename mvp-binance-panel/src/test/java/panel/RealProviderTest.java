@@ -46,7 +46,7 @@ class RealProviderTest {
         var sms=new TwilioVerifySmsProvider(store,config(),(a,b,c)->{fail("must not send");return null;});
         assertFalse(email.configured());assertFalse(sms.configured());assertEquals("Resend",email.name());assertEquals("Twilio Verify",sms.name());
         store.unavailable=true;assertEquals(ProviderStatus.State.ERROR,email.status().state());assertEquals(ProviderStatus.State.ERROR,sms.status().state());
-        assertFalse(new SecurityConfig(30,false).devMode());
+        assertEquals(30,new SecurityConfig(30).sessionTimeoutMinutes());
     }
     @Test void auditRedactsContactValues(){
         var f=AuthFixture.ready();f.audit.record(AuditEvent.LOGIN_FAILED,"person@example.invalid","phone=+15555550123");

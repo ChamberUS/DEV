@@ -50,7 +50,11 @@ public class AppContext {
      * ({@link #create}); a classe do provedor de desenvolvimento não faz parte do artefato de produção, só do código de teste.
      * Isto não resiste a quem pode modificar os próprios binários.
      */
-    public record Providers(panel.auth.EmailOtpProvider email, panel.auth.SmsOtpProvider sms, String developmentLabel) {
+    public record Providers(panel.auth.EmailOtpProvider email, panel.auth.SmsOtpProvider sms, String developmentLabel, panel.adapter.ByxGasGrantGateway gasGateway) {
+        public Providers(panel.auth.EmailOtpProvider email, panel.auth.SmsOtpProvider sms, String developmentLabel) {
+            this(email, sms, developmentLabel, null);
+        }
+
     }
 
     private static final ThreadLocal<Providers> INJECTED = new ThreadLocal<>();
@@ -74,7 +78,7 @@ public class AppContext {
             emailProvider, smsProvider, trustedDevices, audit, clock);
     public final PasswordHasher hasher = new PasswordHasher();
     public final AuthService auth = new AuthService(users, hasher, sessions,
-            new InMemoryRateLimiter(5, Duration.ofSeconds(60), clock), audit, clock);
+            new panel.auth.PersistentRateLimiter(db, clock, panel.auth.PersistentRateLimiter.Policy.login(), "login"), audit, clock);
     public final UserService userService = new UserService(users, hasher, adminAccess, audit, sessions, clock);
 
     public final panel.service.ByxNetworkService byx = new panel.service.ByxNetworkService(
@@ -89,9 +93,12 @@ public class AppContext {
     public final panel.service.EntitlementService byxEntitlements = new panel.service.EntitlementService(byxBenefits,byxPayments);
 
     public final panel.repository.GasGrantRepository byxGasJournal = new panel.repository.GasGrantRepository(db);
-    public final panel.adapter.ByxGasGrantGateway byxGasGateway = security.devMode()
-            && "I_ACKNOWLEDGE_TEST_ONLY".equals(System.getenv("BYX_LOCALNET_TEST_SIGNER"))
-            ? new panel.adapter.LocalnetGasTestSigner(clock, true, Path.of("scripts/byx_gas_test.py"))
+    /**
+     * L10b: o produto normal só tem o gateway de leitura/verificação on-chain. O signer de teste (assina e transmite por um keyring externo)
+     * NÃO existe no artefato: a classe vive só no código de teste e só entra por esta injeção explícita; nenhuma flag, arquivo de
+     * configuração ou variável de ambiente o liga.
+     */
+    public final panel.adapter.ByxGasGrantGateway byxGasGateway = injected != null && injected.gasGateway() != null ? injected.gasGateway()
             : new panel.adapter.CosmosGasGrantGateway(clock);
     public final panel.service.GasSponsorshipService byxGas = new panel.service.GasSponsorshipService(
             sessions, byxWallets, byxBenefits, byxGasJournal, byxGasGateway, panel.service.GasSponsorshipPolicy::load, clock);

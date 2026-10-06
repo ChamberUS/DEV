@@ -131,7 +131,7 @@ class PrivilegeRevalidationTest {
                 throw e.getCause();
             }
         });
-        AdminAccessService access = new AdminAccessService(f.sessions, flaky, new SecurityConfig(30, true), new OtpService(f.clock), f.otpProvider, f.otpProvider, f.devices,
+        AdminAccessService access = new AdminAccessService(f.sessions, flaky, new SecurityConfig(30), new OtpService(f.clock), f.otpProvider, f.otpProvider, f.devices,
                 f.audit, f.clock);
         f.clock.advance(Duration.ofSeconds(31));
         var flow = access.startTwoFactor();

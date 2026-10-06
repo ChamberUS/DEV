@@ -63,6 +63,7 @@ class DeskMarketIntegrationTest {
             assertTrue(text.contains("24h -0.114%") || text.contains("24h " + Fmt.signed(-0.114, "%")), text);
             assertTrue(text.contains(Fmt.price(2734.0)) && text.contains(Fmt.price(2676.97)), "24h high and low");
             assertTrue(text.contains(DeskModel.volume(6356094948.14)), "24h volume (USDT, rolling window)");
+            assertFalse(text.contains(DeskModel.volume(2346638.29)), "the ETH (base) volume is never shown under the USDT label");
             assertTrue(text.toLowerCase().contains("24h volume (usdt)"), "the 24h label says it is a rolling 24h USDT volume");
             // chart: candles reais com eixo de tempo REAL
             assertTrue(d.desk.chart().showingCandles());

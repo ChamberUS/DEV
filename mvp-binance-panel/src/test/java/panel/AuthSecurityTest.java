@@ -295,7 +295,7 @@ class AuthSecurityTest {
         var path=dir.resolve("security.properties");
         java.nio.file.Files.writeString(path,"security.admin.trustedIpv6=2001:db8::1\nsecurity.admin.sessionTimeoutMinutes=7\n");
         var config=panel.security.SecurityConfig.load(path);
-        assertEquals(7,config.sessionTimeoutMinutes());assertFalse(config.devMode());
+        assertEquals(7,config.sessionTimeoutMinutes());
         AuthFixture f=AuthFixture.ready();f.seedAdmin();f.auth.login("boss",ADMIN_PW);
         var access=new panel.auth.AdminAccessService(f.sessions,f.users,config,new panel.auth.OtpService(f.clock),f.otpProvider,f.otpProvider,f.devices,f.audit,f.clock);
         assertEquals(AccessDecision.REQUIRES_2FA,access.evaluate());

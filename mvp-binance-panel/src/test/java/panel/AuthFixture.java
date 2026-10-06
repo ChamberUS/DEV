@@ -61,7 +61,7 @@ class AuthFixture {
     final panel.auth.TrustedDeviceService devices = new panel.auth.TrustedDeviceService(db,secrets,sessions,audit,clock);
 
     AuthFixture(boolean configured) {
-        SecurityConfig config = new SecurityConfig(30, true);
+        SecurityConfig config = new SecurityConfig(30);
         auth = new AuthService(users, hasher, sessions, new InMemoryRateLimiter(3, Duration.ofSeconds(60), clock), audit, clock);
         OtpService otp = new OtpService(clock, Duration.ofMinutes(5), Duration.ofSeconds(30), 5);
         access = new AdminAccessService(sessions,users,config,otp,configured?otpProvider:new UnconfiguredEmailOtpProvider(),

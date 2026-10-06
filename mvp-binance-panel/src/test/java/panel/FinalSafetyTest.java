@@ -81,8 +81,9 @@ class FinalSafetyTest {
         assertEquals(Set.of(), filesMatching("(?i)(api\\.binance|fapi\\.binance|/fapi/|newOrder|X-MBX-APIKEY|createOrder|placeOrder|submitOrder)"),
                 "no exchange or order endpoint exists in the product");
         // HMAC-SHA256 só em três pontos nomeados, cada um num método específico (não por arquivo inteiro): OTP, prova de pareamento do serviço
-        // local e impressão do identificador de tentativas sem conta (auditoria). Nenhum assina requisição de exchange.
-        assertEquals(Set.of("auth/OtpService.java", "auth/AuthService.java", "localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"));
+        // local impressão do identificador de tentativas sem conta (auditoria) e impressão do assunto do limitador persistente (L4). Nenhum assina requisição de exchange.
+        assertEquals(Set.of("auth/OtpService.java", "auth/AuthService.java", "auth/PersistentRateLimiter.java", "localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"));
+        assertEquals("subject", enclosingMethod("auth/PersistentRateLimiter.java", "Mac.getInstance(\"HmacSHA256\")"), "rate-limit subject fingerprint (never signs anything external)");
         assertEquals("mac", enclosingMethod("auth/OtpService.java", "Mac.getInstance(\"HmacSHA256\")"));
         assertEquals("fingerprint", enclosingMethod("auth/AuthService.java", "Mac.getInstance(\"HmacSHA256\")"));
         assertEquals("proof", enclosingMethod("localservice/LocalServiceClient.java", "Mac.getInstance(\"HmacSHA256\")"));
@@ -122,20 +123,19 @@ class FinalSafetyTest {
         // O resolver de captura pertence a outro trabalho e pode ou não estar presente no checkout: a exceção só existe SE o arquivo existir
         // (e então é verificada de forma específica abaixo); sem ele, nenhum outro ProcessBuilder é aceito.
         boolean resolverPresent = Files.exists(MAIN.resolve("panel/adapter/CaptureRuntimeResolver.java"));
-        Set<String> expectedProcesses = new TreeSet<>(Set.of("adapter/LocalnetGasTestSigner.java", "motion/SystemMotionProbe.java", "process/ProcessRunner.java"));
+        Set<String> expectedProcesses = new TreeSet<>(Set.of("motion/SystemMotionProbe.java", "process/ProcessRunner.java"));
         if (resolverPresent) {
             expectedProcesses.add("adapter/CaptureRuntimeResolver.java");
         }
         assertEquals(expectedProcesses, filesMatching("ProcessBuilder"),
-                "processes: the capture resolver when present (read-only lsof, fixed arguments), the test signer (opt-in by env), the OS probe and the existing ProcessRunner only");
+                "processes: the capture resolver when present (read-only lsof, fixed arguments), the OS probe and the existing ProcessRunner only");
         // as duas exceções novas são específicas: executável literal, argumentos literais (ou o pid), nenhum shell, um único subprocesso
         if (resolverPresent) {
             assertNoShell("adapter/CaptureRuntimeResolver.java", "/usr/sbin/lsof", 1);
         }
         assertNoShell("motion/SystemMotionProbe.java", "/usr/bin/defaults", 2);
-        // o signer de teste só existe atrás da variável de ambiente e do modo de desenvolvimento
-        String ctx = Files.readString(MAIN.resolve("panel/app/AppContext.java"));
-        assertTrue(ctx.contains("I_ACKNOWLEDGE_TEST_ONLY") && ctx.contains("security.devMode()"));
+        // L10b: o signer de teste NÃO existe mais no produto (ver GasSignerIsolationTest)
+        assertEquals(Set.of(), filesMatching("I_ACKNOWLEDGE_TEST_ONLY|LocalnetGasTestSigner"));
         assertEquals(Set.of("accountview/SettingsScreen.java", "helpview/AboutScreen.java", "systemview/OnboardingDialog.java"), filesMatching("DEVNET"),
                 "DEVNET appears only as unavailable text, never as an option");
         assertEquals(Set.of("helpview/DiagnosticsReport.java"), filesMatching("(privateKey|PrivateKey|mnemonic|seedPhrase|KeyPairGenerator)"), "no private key, mnemonic or key generation in code (UI statements about keys are text; the only hit is the diagnostics redaction list)");

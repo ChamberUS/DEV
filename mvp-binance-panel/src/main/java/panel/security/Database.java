@@ -1,6 +1,5 @@
 package panel.security;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,8 +16,11 @@ public class Database implements AutoCloseable {
 
     public static Database open(Path file) {
         try {
-            Files.createDirectories(file.getParent());
-            return init(DriverManager.getConnection("jdbc:sqlite:" + file));
+            PrivateFiles.prepareDirectory(file.toAbsolutePath().getParent()); // L12: 0700 novo; falha fechada se fora da política
+            PrivateFiles.prepareFile(file.toAbsolutePath()); // L12: 0600 novo (antes do SQLite); existente não é alterado
+            return init(DriverManager.getConnection("jdbc:sqlite:" + file.toAbsolutePath()));
+        } catch (PrivateFiles.InsecureStorageException e) {
+            throw e; // não continua em silêncio e não vira "banco indisponível"
         } catch (Exception e) {
             throw new IllegalStateException("Could not open local database", e);
         }
@@ -55,6 +57,11 @@ public class Database implements AutoCloseable {
                       token_hash TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, last_used_at TEXT NOT NULL,
                       expires_at TEXT NOT NULL, revoked_at TEXT,
                       FOREIGN KEY(user_id) REFERENCES users(id))""");
+            // L4: estado do limitador de autenticação (só impressão do assunto + contadores; nunca o texto digitado) e o sal local dela
+            s.execute("""
+                    CREATE TABLE IF NOT EXISTS rate_limits (
+                      subject TEXT PRIMARY KEY, failures INTEGER NOT NULL, last_at INTEGER NOT NULL, next_allowed_at INTEGER NOT NULL)""");
+            s.execute("CREATE TABLE IF NOT EXISTS meta (name TEXT PRIMARY KEY, value TEXT NOT NULL)");
             s.execute("""
                     CREATE TABLE IF NOT EXISTS audit_log (
                       id INTEGER PRIMARY KEY AUTOINCREMENT,

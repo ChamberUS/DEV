@@ -3,21 +3,23 @@ package panel.security;
 import java.nio.file.*;
 import java.util.Properties;
 
-/** Old network-trust properties are ignored; only timeout and explicit dev mode are loaded. */
+/**
+ * Só o tempo limite da sessão administrativa é lido do arquivo. Propriedades antigas (confiança de rede, a flag legada de modo de desenvolvimento) são
+ * IGNORADAS: nenhuma configuração liga código de desenvolvimento (OTP de desenvolvimento e signer de teste foram removidos do artefato).
+ */
 public class SecurityConfig {
     public static final Path FILE=Path.of(System.getProperty("user.home"), ".mvp-binance-panel", "security.properties");
-    private final int sessionTimeoutMinutes; private final boolean devMode;
-    public SecurityConfig(int timeout,boolean devMode) { this.sessionTimeoutMinutes=Math.max(1,timeout);this.devMode=devMode; }
+    private final int sessionTimeoutMinutes;
+    public SecurityConfig(int timeout) { this.sessionTimeoutMinutes=Math.max(1,timeout); }
     public static SecurityConfig load() { return load(FILE); }
     public static SecurityConfig load(Path file) {
         Properties p=new Properties();
         try(var in=Files.newInputStream(file)) { p.load(in); }
-        catch(java.io.IOException e) { return new SecurityConfig(30,false); }
+        catch(java.io.IOException e) { return new SecurityConfig(30); }
         int timeout=30;
         try { timeout=Integer.parseInt(p.getProperty("security.admin.sessionTimeoutMinutes","30")); }
         catch(NumberFormatException ignored) { }
-        return new SecurityConfig(timeout,Boolean.parseBoolean(p.getProperty("security.dev.mode","false")));
+        return new SecurityConfig(timeout);
     }
     public int sessionTimeoutMinutes(){return sessionTimeoutMinutes;}
-    public boolean devMode(){return devMode;}
 }

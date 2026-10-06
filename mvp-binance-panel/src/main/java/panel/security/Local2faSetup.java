@@ -36,7 +36,7 @@ public final class Local2faSetup {
             if(Files.exists(securityFile)){try(var in=Files.newInputStream(securityFile)){security.load(in);}}
             else Files.createFile(securityFile,PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
             Files.setPosixFilePermissions(securityFile,PosixFilePermissions.fromString("rw-------"));
-            security.setProperty("security.dev.mode","false");
+            security.stringPropertyNames().removeIf(k->k.endsWith(".dev.mode")); // flag legada de desenvolvimento: sem efeito, removida do perfil
             security.remove("security.admin.trustedIpv6");
             try(var out=Files.newOutputStream(securityFile)){security.store(out,"Local security configuration");}
             console.printf("Setup saved. Secrets are in macOS Keychain. Restart the app.\n");
