@@ -1,0 +1,89 @@
+== 0. lançador endurecido e subida
+PASS  serviço de QA sobe com identidade verificada e autoridade confiável
+PASS  modo de identidade empacotado e verificado
+PASS  arquivo de credenciais de teste é 0600
+PASS  arquivo da autoridade é 0600
+PASS  snapshot CIFRADO: cópia, hex-dump e strings do arquivo (mesmo usuário) não acham usuário, papel, verificador, senha nem estrutura
+PASS  strings(1) não acha texto estrutural
+PASS  só o magic fixo é legível
+== 1. login legítimo, estado e logout (cliente com a identidade do painel)
+PASS  login legítimo (USER)
+PASS  estado da sessão: USER, sem elevação
+PASS  após logout o cliente não tem token
+PASS  token opaco de 43 caracteres (256 bits)
+PASS  replay do token DEPOIS do logout é recusado pelo serviço
+== 2. credenciais: senha errada, usuário desconhecido, conta desabilitada
+PASS  senha errada
+PASS  usuário desconhecido: mesma resposta
+PASS  conta desabilitada com a senha CERTA: mesma resposta
+PASS  as três respostas externas são idênticas
+== 3. ligação da sessão ao peer (outro processo com a MESMA identidade de painel)
+PASS  painel B (outro processo, mesma identidade) com o token roubado: recusado
+PASS  Python genérico (mesmo usuário, pairing.token lido) é recusado antes de qualquer byte
+PASS  Java genérico (mesmo usuário, pairing.token lido) é recusado antes de qualquer byte
+PASS  o dono legítimo continua com a sessão válida
+== 4. segundo fator de teste e elevação de administrador
+PASS  elevação sem segundo fator recente é recusada
+PASS  e-mail verificado, mas o SMS ainda é exigido: sem elevação
+PASS  o 1º estágio pede o 2º (next=SMS)
+PASS  e-mail sozinho NÃO eleva
+PASS  segundo fator de dois estágios concluído
+PASS  ADMIN com e-mail+SMS recentes eleva (propriedade temporária da sessão)
+PASS  estado: ADMIN elevado
+PASS  reuso do mesmo código (replay) é recusado
+PASS  os códigos nunca saem do serviço para a saída do cliente
+== 4b. dispositivo confiável do serviço (inscrever, reduzir o 2º fator, revogar) e trava de migração
+PASS  inscrição do dispositivo (ADMIN elevado + 2º fator fresco)
+PASS  o dispositivo aparece ATIVO na lista do serviço
+PASS  nova sessão eleva SEM 2º fator por causa do dispositivo confiável (decidido pelo serviço)
+PASS  e a revogação encerra a elevação
+PASS  depois de revogado, o 2º fator volta a ser exigido
+PASS  um USER não inscreve dispositivo
+PASS  trava de migração: login, 2º fator e elevação seguem funcionando
+PASS  trava de migração: inscrição de dispositivo recusada (FROZEN)
+PASS  trava de migração: troca de senha recusada (FROZEN)
+PASS  depois da validação explícita (sem trava) a troca de senha de teste funciona
+== 5. reinício do serviço invalida toda sessão (nenhuma reconstrução automática)
+PASS  token anterior ao reinício → AUTH_REQUIRED
+PASS  novo login após o reinício funciona (login novo, não persistente)
+== 6. adulteração da autoridade com a âncora REAL no keychain do serviço
+PASS  bit do texto cifrado: serviço detecta e falha fechado
+PASS  bit do texto cifrado: login → AUTHORITY_UNAVAILABLE
+PASS  etiqueta GCM: serviço detecta e falha fechado
+PASS  etiqueta GCM: login → AUTHORITY_UNAVAILABLE
+PASS  nonce: serviço detecta e falha fechado
+PASS  nonce: login → AUTHORITY_UNAVAILABLE
+PASS  versão da autoridade no cabeçalho (AAD): serviço detecta e falha fechado
+PASS  versão da autoridade no cabeçalho (AAD): login → AUTHORITY_UNAVAILABLE
+PASS  texto cifrado truncado: serviço detecta e falha fechado
+PASS  texto cifrado truncado: login → AUTHORITY_UNAVAILABLE
+PASS  texto cifrado acima do limite: serviço detecta e falha fechado
+PASS  texto cifrado acima do limite: login → AUTHORITY_UNAVAILABLE
+PASS  formato antigo em claro / lixo: serviço detecta e falha fechado
+PASS  formato antigo em claro / lixo: login → AUTHORITY_UNAVAILABLE
+PASS  arquivo original restaurado após reinício: confiável de novo
+PASS  troca de senha de teste (versão da autoridade sobe)
+PASS  ROLLBACK para snapshot antigo detectado (âncora do serviço está na versão nova)
+PASS  arquivo apagado com âncora presente: falha fechada
+== 7. injeção na JVM do serviço (JAVA_TOOL_OPTIONS / -Xbootclasspath/a)
+PASS  controle positivo: o jar hostil É eficaz num java genérico
+PASS  helper endurecido: código injetado por JAVA_TOOL_OPTIONS/_JAVA_OPTIONS/JDK_JAVA_OPTIONS NÃO executou
+PASS  e o serviço sobe normalmente com esse ambiente hostil
+== 8. bundle adulterado não inicia
+PASS  jar do serviço alterado → lançador recusa (exit 71)
+PASS  mensagem fixa, sem caminhos
+== 9. PAINEL endurecido: injeção, DYLD, adulteração do bundle, e aceito pelo serviço endurecido
+PASS  painel endurecido (lançador nativo) é ACEITO pelo serviço endurecido
+PASS  o painel se vê como packaged_verified
+PASS  controle positivo (painel): JAVA_TOOL_OPTIONS/-Xbootclasspath hostil roda num java genérico
+PASS  painel endurecido: código injetado por JAVA_TOOL_OPTIONS NÃO executou
+PASS  painel endurecido: código injetado por _JAVA_OPTIONS NÃO executou
+PASS  painel endurecido: código injetado por JDK_JAVA_OPTIONS NÃO executou
+PASS  controle positivo: DYLD_INSERT_LIBRARIES carrega a biblioteca hostil num executável comum
+PASS  painel endurecido: DYLD_INSERT_LIBRARIES não carregou a biblioteca hostil
+PASS  painel com jar alterado → lançador recusa (exit 71)
+PASS  painel com .cfg alterado → lançador recusa (exit 71)
+PASS  mensagem fixa, sem caminhos
+PASS  cópia LIMPA do bundle (restaurado) inicia e conecta normalmente
+
+RESUMO: 76 PASS, 0 FAIL

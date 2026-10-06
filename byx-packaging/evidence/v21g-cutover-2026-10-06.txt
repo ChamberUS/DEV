@@ -1,0 +1,28 @@
+== 1. o app inicia o serviço do próprio bundle (sem daemon, sem argumento, sem configuração)
+PASS  o lançador encontra o helper do PRÓPRIO bundle
+PASS  e o serviço sobe e atende o handshake de pareamento
+PASS  painel empacotado ↔ serviço empacotado: conectados
+PASS  identidade verificada nos dois lados
+PASS  o serviço do produto monta a autenticação
+PASS  gate privado fechado
+PASS  e exige revisão explícita
+PASS  nenhuma capacidade privada habilitada
+PASS  o serviço iniciado pelo app encerra junto com ele (shutdown hook; só o que o app iniciou)
+PASS  service.log 0600 (só eventos fixos)
+PASS  o log não contém segredo
+== 2. sem autoridade preparada NENHUM login é possível (e não há fallback para o banco legado)
+PASS  autoridade não preparada: AUTHORITY_UNAVAILABLE
+PASS  e nenhuma sessão nasce
+PASS  o serviço NÃO cria autoridade sozinho (nem admin padrão)
+== 3. o artefato não contém o caminho de autenticação antigo
+PASS  classe legada ausente: panel/auth/PasswordHasher
+PASS  classe legada ausente: panel/auth/OtpService
+PASS  classe legada ausente: panel/auth/PersistentRateLimiter
+PASS  classe legada ausente: panel/security/MacOsKeychainSecretStore
+PASS  classe legada ausente: panel/user/SqliteUserRepository
+PASS  classe legada ausente: panel/auth/ResendEmailOtpProvider
+PASS  classe legada ausente: panel/auth/TwilioVerifySmsProvider
+PASS  o painel não traz SDK de provedor (Resend/OkHttp)
+PASS  sem setup de 2FA legado
+
+RESUMO: 23 PASS, 0 FAIL

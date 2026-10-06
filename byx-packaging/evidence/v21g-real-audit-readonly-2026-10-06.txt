@@ -1,0 +1,21 @@
+source.sha256=a75769d78cd65a333898831aecc34df1b165a6ab9a0ca9e9627b31ae03c7f7fc
+source.bytes=106496
+source.schemaFingerprint=f74ac5a7f1781dffed3463c02d36a321b9f7490bea1576062bd8012454fe3111
+source.userVersion=0
+users.total=1
+users.byRole.ADMIN=1
+users.enabled=1
+users.disabled=0
+users.hashAlgorithms.argon2id v=19 m=19456,t=2,p=1=1
+users.withPhone=1
+users.emailVerified=0
+users.usernamesLowercased=0
+trustedDevices.active=1
+auditRows=136
+metaNames=[rl_pepper]
+legacyKeychainItems.mvp-binance-panel/resend-api-key=PRESENT
+legacyKeychainItems.mvp-binance-panel/twilio-api-secret=PRESENT
+legacyKeychainItems.mvp-binance-panel/trusted-device-token=PRESENT
+legacyKeychainAccount=mvp-binance-panel
+importProblems=[]
+RESULT OK audit

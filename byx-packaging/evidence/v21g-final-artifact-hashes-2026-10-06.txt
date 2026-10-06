@@ -1,0 +1,24 @@
+built from repo HEAD: 08ab7fe (only evidence files are committed after this)
+service HEAD (last commit touching byx-local-service): 08ab7fe
+panel HEAD (last commit touching mvp-binance-panel): 64c4fb4
+packaging HEAD (last commit touching byx-packaging, excluding evidence): 08ab7fe
+8293c84b443acaceb2fab2a10d7d577e8bf041a66add7b25d753f1ca731a8172  ../byx-local-service/target/byx-local-service-0.1.0.jar
+44b43001b375f2cbb0bd0dd07cb46085eac7ed3ffc8244a023cef24746589aee  ../mvp-binance-panel/target/mvp-binance-panel-0.1.0.jar
+86d6e01f3a7d2b4611b9719d874b04f2a079938903f7e4383ce650887a99a0de  launcher/byx-launcher.c
+== build
+fe9789f943843d3c95de881b45c08f5313d1494b28a7e2b1156e66305df4fb21  build/BYX-MVP.app/Contents/MacOS/BYX-MVP
+5dcbe775b01b45c300c82570d070c0f4aabd3c214cb57ab9d822b7fb38e09a70  build/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/MacOS/byx-local-service
+0bf2dd63064fa2387f4d631700f472d9ab6edd415dec68aa0ccc948e61770191  build/BYX-MVP.app/Contents/Helpers/byx-migrate.app/Contents/MacOS/byx-migrate
+8293c84b443acaceb2fab2a10d7d577e8bf041a66add7b25d753f1ca731a8172  build/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar
+44b43001b375f2cbb0bd0dd07cb46085eac7ed3ffc8244a023cef24746589aee  build/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar
+designated => identifier "com.buynnex.byx" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+designated => identifier "com.buynnex.byx.service" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+== build-canary
+8334a1e85c0ae261047d317738983ea6169785ba7cf4b0e1c08ac3eb35409da4  build-canary/BYX-MVP.app/Contents/MacOS/BYX-MVP
+5adb47180947b31427f1883b3e1a445b383b6bc132875672f00fc8f503b40c44  build-canary/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/MacOS/byx-local-service
+4d08ba9c3597b36bca663a0d0b3f7660d3f6918601c0dad86b34fb72b93dd2b4  build-canary/BYX-MVP.app/Contents/Helpers/byx-migrate.app/Contents/MacOS/byx-migrate
+8293c84b443acaceb2fab2a10d7d577e8bf041a66add7b25d753f1ca731a8172  build-canary/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar
+44b43001b375f2cbb0bd0dd07cb46085eac7ed3ffc8244a023cef24746589aee  build-canary/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar
+designated => identifier "com.buynnex.byx" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+designated => identifier "com.buynnex.byx.service" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+profile expires 2026-10-13 16:49:55 W5Z65G9UP2.com.buynnex.byx.service
