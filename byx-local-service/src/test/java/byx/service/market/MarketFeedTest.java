@@ -174,6 +174,19 @@ class MarketFeedTest {
     }
 
     @Test
+    void tradeDirectionFollowsTheMakerFlag() {
+        start(FakeMarket.fast());
+        driveToLive(feed, ws);
+        ws.push(Allowlist.WS_MARKET, aggTrade(20, "2700.00", "1", false)); // m=false: buyer is taker → BUY aggressor
+        ws.push(Allowlist.WS_MARKET, aggTrade(21, "2700.10", "1", true)); // m=true: buyer is maker → SELL aggressor
+        await(() -> feed.view().trades().size() == 3, 2_000, "trades");
+        assertEquals(2700.10, feed.view().trades().get(0).price());
+        assertFalse(feed.view().trades().get(0).buy(), "m=true → SELL aggressor");
+        assertEquals(2700.00, feed.view().trades().get(1).price());
+        assertTrue(feed.view().trades().get(1).buy(), "m=false → BUY aggressor");
+    }
+
+    @Test
     void reconnectLoopIsBoundedByBackoff() throws Exception {
         ws.failConnect = true;
         start(FakeMarket.fast()); // base 40 ms, teto 320 ms

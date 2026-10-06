@@ -48,9 +48,15 @@ final class Operations {
                 var features = out.putObject("features");
                 // CAPACIDADE suportada (feed montado), distinta do ESTADO do feed (market.status): marketData=true com feed=DISCONNECTED é válido
                 features.put("marketData", market != null);
-                features.put("notifications", false);
-                features.put("accountData", false);
-                features.put("adminOperations", false);
+                // capacidades PRIVADAS: vêm da decisão estática PrivateCapabilityGate (false), nunca de configuração, ambiente ou pedido
+                features.put("notifications", PrivateCapabilityGate.allowed("notifications"));
+                features.put("accountData", PrivateCapabilityGate.allowed("accountData"));
+                features.put("adminOperations", PrivateCapabilityGate.allowed("adminOperations"));
+                features.put("secretIntegrations", PrivateCapabilityGate.allowed("secretIntegrations"));
+                var gate = out.putObject("privateGate");
+                gate.put("allowed", PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED);
+                var unmet = gate.putArray("unmetPrerequisites");
+                PrivateCapabilityGate.PREREQUISITES.forEach(unmet::add);
                 var identity = out.putObject("identity");
                 identity.put("peer", "pairing_secret_same_user");
                 identity.put("userAuthentication", "not_implemented");

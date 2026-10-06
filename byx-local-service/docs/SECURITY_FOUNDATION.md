@@ -216,3 +216,7 @@ Mapeamento confirmado: `depth` só entrega na rota `/public` e `aggTrade/markPri
 **Logs.** Só eventos e códigos fixos; nenhum corpo, URL, cabeçalho, caminho ou conteúdo de mensagem (teste com canário). 
 
 **Testes (serviço).** `AllowlistTest`, `MarketEventsTest`, `DepthBookTest`, `MarketFeedTest`, `ServiceMarketIpcTest`; fumaça manual opt-in contra a Binance real fora da suíte.
+
+
+## 11. V2.1C (endurecimento antes de capacidades privadas)
+L4 (limitador persistente), L12 (permissões do banco), L10b (signer de teste removido do produto), a auditoria L11 (Keychain/identidade do app: **BLOCKED ON APP SIGNING**), a decisão estática `PRIVATE_CAPABILITIES_ALLOWED = false` e o modelo de autoridade futuro estão em [`PRIVATE_CAPABILITY_GATE.md`](PRIVATE_CAPABILITY_GATE.md). Nesta tabela, L4, L10b e L12 passam a **corrigidos** (L12 para homes novos; o banco real não foi alterado), L11 continua **não comprovado/BLOQUEADO** por falta de assinatura do app.

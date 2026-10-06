@@ -42,6 +42,22 @@ class MarketEventsTest {
     }
 
     @Test
+    void tickerQuoteVolumeIsUsdtAndBaseVolumeIsEth() throws Exception {
+        // Binance 24hrTicker: v = volume em ativo BASE (ETH), q = volume em ativo de COTAÇÃO (USDT). Valores reais de 2026-10-06.
+        var t = MarketEvents.ticker(env(ticker("-0.114", "2734", "2676", "2346638.290", "6356094948.14")).data());
+        assertEquals(2346638.290, t.volumeBase(), "v is the base (ETH) volume");
+        assertEquals(6356094948.14, t.volumeQuote(), "q is the quote (USDT) volume: the one shown as '24h volume (USDT)'");
+        assertTrue(t.volumeQuote() > t.volumeBase() * 1000, "USDT volume is ~price x ETH volume, never the ETH figure");
+    }
+
+    @Test
+    void aggTradeMakerFlagMeansTheOppositeSideAggressed() throws Exception {
+        // m=false → o comprador é o TAKER → agressor COMPRADOR; m=true → o comprador é o MAKER → agressor VENDEDOR
+        assertFalse(MarketEvents.aggTrade(env(aggTrade(1, "1", "1", false)).data()).buyerIsMaker());
+        assertTrue(MarketEvents.aggTrade(env(aggTrade(2, "1", "1", true)).data()).buyerIsMaker());
+    }
+
+    @Test
     void wrongSymbolIsRejectedEverywhere() {
         String bad = envelope("x", "{\"e\":\"aggTrade\",\"s\":\"BTCUSDT\",\"a\":1,\"p\":\"1\",\"q\":\"1\",\"T\":1,\"m\":true}");
         assertEquals("wrong_symbol", code(() -> MarketEvents.aggTrade(env(bad).data())));

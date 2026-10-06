@@ -6,7 +6,7 @@ import java.util.Set;
 /**
  * Lista fechada de URIs que o serviço pode abrir. É comparação EXATA de texto com um conjunto fixo (esquema, host, caminho e query):
  * nada de prefixo, padrão ou sufixo de domínio, então userinfo, porta, fragmento, outro host, outro caminho, outro símbolo e qualquer
- * rota privada/assinada (order, account, listenKey, /private) simplesmente não estão no conjunto. Nenhuma URL chega aqui vinda da
+ * rota privada/assinada (ordens, conta, chave de escuta de usuário, /private) simplesmente não estão no conjunto. Nenhuma URL chega aqui vinda da
  * UI: o painel só pede operações tipadas, e o símbolo é uma constante do serviço.
  */
 public final class Allowlist {
