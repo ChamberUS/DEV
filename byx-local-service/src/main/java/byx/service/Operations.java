@@ -19,8 +19,10 @@ final class Operations {
     private final Instant startedAt;
     private final MarketFeed market;
     private final IdentityPolicy.Mode identityMode;
+    private final boolean authentication;
 
-    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode) {
+    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode, boolean authentication) {
+        this.authentication = authentication;
         this.identityMode = identityMode;
         this.instanceId = instanceId;
         this.startedAt = startedAt;
@@ -28,7 +30,7 @@ final class Operations {
     }
 
     boolean supports(String op) {
-        return Protocol.OPERATIONS.contains(op) || market != null && Protocol.MARKET_OPERATIONS.contains(op);
+        return Protocol.OPERATIONS.contains(op) || authentication && byx.service.auth.AuthIpc.OPERATIONS.contains(op) || market != null && Protocol.MARKET_OPERATIONS.contains(op);
     }
 
     ObjectNode run(String op, ObjectNode out) {
@@ -48,9 +50,14 @@ final class Operations {
                 var ops = out.putArray("operations");
                 java.util.stream.Stream.concat(Protocol.OPERATIONS.stream(), market == null ? java.util.stream.Stream.<String>empty() : Protocol.MARKET_OPERATIONS.stream())
                         .sorted().forEach(ops::add);
+                if (authentication) {
+                    byx.service.auth.AuthIpc.OPERATIONS.stream().sorted().forEach(ops::add);
+                }
                 var features = out.putObject("features");
                 // CAPACIDADE suportada (feed montado), distinta do ESTADO do feed (market.status): marketData=true com feed=DISCONNECTED é válido
                 features.put("marketData", market != null);
+                // autenticação: só a composição de QA da autoridade a monta (o produto não: o app normal segue o fluxo atual)
+                features.put("authentication", authentication);
                 // capacidades PRIVADAS: vêm da decisão estática PrivateCapabilityGate (false), nunca de configuração, ambiente ou pedido
                 features.put("notifications", PrivateCapabilityGate.allowed("notifications"));
                 features.put("accountData", PrivateCapabilityGate.allowed("accountData"));
@@ -58,6 +65,7 @@ final class Operations {
                 features.put("secretIntegrations", PrivateCapabilityGate.allowed("secretIntegrations"));
                 var gate = out.putObject("privateGate");
                 gate.put("allowed", PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED);
+                gate.put("reviewRequired", PrivateCapabilityGate.EXPLICIT_REVIEW_REQUIRED);
                 var unmet = gate.putArray("unmetPrerequisites");
                 PrivateCapabilityGate.PREREQUISITES.forEach(unmet::add);
                 var identity = out.putObject("identity");

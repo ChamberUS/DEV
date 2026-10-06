@@ -8,6 +8,8 @@ package byx.service.secrets;
 public enum SecretId {
     /** Canário de teste (valor aleatório, apagado ao fim). Único utilizável. */
     TEST_CANARY("test-canary", true),
+    /** Âncora de integridade do armazenamento de autoridade (chave MAC + versão monotônica + MAC do estado). SÓ teste nesta fase (namespace de teste). */
+    AUTHORITY_TEST_ANCHOR("authority-test-anchor", true),
     RESEND_API_KEY("resend-api-key", false),
     TWILIO_API_SECRET("twilio-api-secret", false),
     TRUSTED_DEVICE_MASTER_KEY("trusted-device-master-key", false),

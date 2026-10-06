@@ -1,5 +1,7 @@
 # BYX local service — fundação de segurança (V2.1A)
 
+> **V2.1F:** a autoridade de autenticação e sessão (no serviço; QA empacotado isolado, sem migrar usuários reais) está documentada em [`AUTHORITY_MODEL.md`](AUTHORITY_MODEL.md). O lançador do helper do serviço agora é nativo e endurecido (ambiente limpo, argumentos constantes, selo validado).
+
 Estado: fundação mínima. O serviço só responde `health`, `version` e `capabilities`. **Nenhum dado de conta, administrativo, de mercado ou de notificação é servido.** Este documento descreve o que foi decidido, o que foi provado por teste dinâmico e o que NÃO está coberto.
 
 Convenção de evidência: **TESTED** = teste dinâmico executado nesta entrega; **IMPLEMENTED** = código/documento sem teste dinâmico próprio; **NOT_APPLICABLE** = a ameaça não existe neste transporte (com a razão); **BLOCKED** = recusado de propósito até haver identidade e autorização demonstradas no serviço. Os IDs `BYX-xx` são os do pacote `byx-secure-development` (nossos, não oficiais).

@@ -43,6 +43,11 @@ public final class SecretBytes implements AutoCloseable {
         return value != null && other.value != null && MessageDigest.isEqual(value, other.value);
     }
 
+    /** Cópia para quem precisa decodificar o valor (o chamador DEVE zerar a cópia). Uso interno do serviço; nunca exposta por IPC. */
+    public byte[] copyBytes() {
+        return bytes().clone();
+    }
+
     /** Acesso interno ao buffer (só o backend do armazenamento). Não copie nem retenha. */
     byte[] bytes() {
         if (value == null) {

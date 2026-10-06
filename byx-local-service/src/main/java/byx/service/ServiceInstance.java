@@ -1,6 +1,8 @@
 package byx.service;
 
+import byx.service.auth.AuthIpc;
 import byx.service.identity.IdentityPolicy;
+import byx.service.identity.PeerKeys;
 import byx.service.identity.PeerVerifier;
 import byx.service.market.MarketFeed;
 import byx.service.market.MarketSubscriber;
@@ -66,6 +68,8 @@ public final class ServiceInstance implements AutoCloseable {
     private final Operations operations;
     private final MarketFeed market;
     private final IdentityPolicy identity;
+    private final AuthIpc authIpc;
+    private final PeerKeys.Provider peerKeys;
     private final AtomicInteger subscribers = new AtomicInteger();
     private final JsonMapper mapper = Protocol.mapper();
     private final ServerSocketChannel server;
@@ -122,7 +126,10 @@ public final class ServiceInstance implements AutoCloseable {
         }
     }
 
-    private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market, IdentityPolicy identity) {
+    private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc,
+            PeerKeys.Provider peerKeys) {
+        this.authIpc = authIpc;
+        this.peerKeys = peerKeys;
         this.market = market;
         this.identity = identity;
         this.limits = limits;
@@ -133,7 +140,7 @@ public final class ServiceInstance implements AutoCloseable {
         byte[] id = new byte[9];
         new SecureRandom().nextBytes(id);
         this.instanceId = Pairing.encode(id);
-        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode());
+        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode(), authIpc != null);
         this.acceptor = new Thread(this::acceptLoop, "byx-local-accept");
         this.acceptor.setDaemon(true);
     }
@@ -158,6 +165,14 @@ public final class ServiceInstance implements AutoCloseable {
      * privada existe de qualquer forma.
      */
     public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity) throws IOException {
+        return start(home, limits, market, identity, null, null);
+    }
+
+    /**
+     * authIpc != null só na composição de QA da autoridade (nunca no produto: {@code ServiceMain} não monta autenticação). peerKeys = chave
+     * do peer pelo kernel (produção: {@link PeerKeys#kernel()}; testes injetam).
+     */
+    public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys) throws IOException {
         RuntimeDir dir = RuntimeDir.prepare(home);
         dir.removeStaleSocket();
         byte[] secret = dir.writeFreshToken();
@@ -170,7 +185,7 @@ public final class ServiceInstance implements AutoCloseable {
             dir.cleanup();
             throw e;
         }
-        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity);
+        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys);
         s.acceptor.start();
         s.watchdog.scheduleWithFixedDelay(s::enforceDeadlines, 100, 100, TimeUnit.MILLISECONDS);
         Log.event("started", "protocol=" + Protocol.VERSION + " identity=" + identity.mode().wire);
@@ -337,8 +352,15 @@ public final class ServiceInstance implements AutoCloseable {
                 byte[] frame = Frames.read(in, Protocol.MAX_FRAME);
                 c.within(limits.readMs());
                 Protocol.Request req;
+                com.fasterxml.jackson.databind.JsonNode tree;
                 try {
-                    req = parse(frame, Protocol.Request.class);
+                    tree = mapper.readTree(new String(frame, StandardCharsets.UTF_8));
+                    if (tree == null || !tree.isObject() || !tree.path("op").isTextual()) {
+                        throw new com.fasterxml.jackson.databind.JsonMappingException(null, "not a request");
+                    }
+                    // auth.* tem DTOs tipados por operação (AuthIpc valida o conjunto fechado de campos); o resto segue o Request estrito
+                    req = AuthIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
+                            : mapper.treeToValue(tree, Protocol.Request.class);
                 } catch (JsonProcessingException e) {
                     send(c, error("bad_request"));
                     return;
@@ -350,7 +372,10 @@ public final class ServiceInstance implements AutoCloseable {
                 ObjectNode resp = mapper.createObjectNode();
                 resp.put("v", Protocol.VERSION);
                 resp.put("id", req.id());
-                if (!operations.supports(req.op())) {
+                if (AuthIpc.handles(req.op()) && authIpc != null) {
+                    AuthIpc.Reply r = authIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree);
+                    AuthIpc.write(r, resp);
+                } else if (!operations.supports(req.op())) {
                     resp.put("ok", false);
                     resp.putObject("error").put("code", "unsupported_operation");
                     Log.event("denied", "unsupported_operation");

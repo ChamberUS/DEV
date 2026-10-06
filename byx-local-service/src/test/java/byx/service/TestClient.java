@@ -15,33 +15,33 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 
 /** Cliente de referência dos testes: implementa o protocolo de forma independente do servidor e deixa montar quadros hostis. */
-final class TestClient implements AutoCloseable {
+public final class TestClient implements AutoCloseable {
     static final JsonMapper JSON = new JsonMapper();
 
-    final SocketChannel channel;
+    public final SocketChannel channel;
     final InputStream in;
-    final OutputStream out;
+    public final OutputStream out;
 
-    TestClient(Path socket) throws IOException {
+    public TestClient(Path socket) throws IOException {
         channel = SocketChannel.open(StandardProtocolFamily.UNIX);
         channel.connect(UnixDomainSocketAddress.of(socket));
         in = Channels.newInputStream(channel);
         out = Channels.newOutputStream(channel);
     }
 
-    static byte[] readToken(Path home) throws IOException {
+    public static byte[] readToken(Path home) throws IOException {
         return Pairing.decode(Files.readString(home.resolve("run").resolve(RuntimeDir.TOKEN)).trim());
     }
 
-    void sendJson(String json) throws IOException {
+    public void sendJson(String json) throws IOException {
         Frames.write(out, json.getBytes(StandardCharsets.UTF_8));
     }
 
-    JsonNode readJson() throws IOException {
+    public JsonNode readJson() throws IOException {
         return JSON.readTree(Frames.read(in, Protocol.MAX_FRAME));
     }
 
-    static void waitFor(java.util.function.BooleanSupplier c, long ms) throws InterruptedException {
+    public static void waitFor(java.util.function.BooleanSupplier c, long ms) throws InterruptedException {
         long end = System.currentTimeMillis() + ms;
         while (System.currentTimeMillis() < end && !c.getAsBoolean()) {
             Thread.sleep(15);
@@ -54,7 +54,7 @@ final class TestClient implements AutoCloseable {
     }
 
     /** Handshake completo. verifyServer=false simula um cliente que não confere o servidor (para testar só o lado do servidor). */
-    JsonNode handshake(byte[] secret, boolean verifyServer) throws IOException {
+    public JsonNode handshake(byte[] secret, boolean verifyServer) throws IOException {
         byte[] n = new byte[16];
         new SecureRandom().nextBytes(n);
         String cn = Pairing.encode(n);
@@ -71,13 +71,13 @@ final class TestClient implements AutoCloseable {
         return readJson();
     }
 
-    JsonNode call(String op) throws IOException {
+    public JsonNode call(String op) throws IOException {
         sendJson("{\"v\":1,\"id\":\"t1\",\"op\":\"" + op + "\"}");
         return readJson();
     }
 
     /** O servidor fechou a conexão (EOF ou erro de leitura) dentro do prazo. */
-    boolean closedWithin(long ms) {
+    public boolean closedWithin(long ms) {
         long end = System.currentTimeMillis() + ms;
         try {
             channel.configureBlocking(false);
