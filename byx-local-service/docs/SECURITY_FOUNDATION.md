@@ -224,3 +224,7 @@ L4 (limitador persistente), L12 (permissões do banco), L10b (signer de teste re
 
 ## 12. V2.1D (empacotamento macOS e identidade do app)
 App `BYX-MVP.app` assinado (Hardened Runtime, runtime Java embutido, único entitlement `allow-jit`) e identidade do peer verificada pelo kernel/Security.framework em modo `packaged_verified`: ver [`APP_IDENTITY.md`](APP_IDENTITY.md). O `pairing.token` deixa de ser a única barreira no modo empacotado; o gate de capacidades privadas continua `false`.
+
+
+## 13. V2.1E (armazenamento seguro de segredos)
+API interna tipada (`SecretId`/`SecretBytes`/`SecretStore`) sobre `SecItem*` (proteção de dados), sem IPC de segredo. Estado: **BLOCKED ON PROVISIONING** e **FINAL BUNDLE ID REQUIRED**; nada permanente criado, nenhum segredo real tocado. Ver [`SECURE_SECRET_STORE.md`](SECURE_SECRET_STORE.md).

@@ -19,7 +19,7 @@ public final class PrivateCapabilityGate {
      */
     public static final List<String> PREREQUISITES = List.of(
             "authority_model_implemented", // uma só autoridade de sessão, identidade autenticada entregue ao serviço, revogação e autorização por operação
-            "secure_secret_storage"); // API moderna de itens do chaveiro + controle de acesso ligado ao app assinado (substitui as APIs legadas de arquivo de chaveiro)
+            "secure_secret_storage"); // V2.1E: código do cofre moderno pronto e testado, mas o canário NÃO foi escrito pelo serviço (BLOCKED ON PROVISIONING / FINAL BUNDLE ID REQUIRED); continua pendente // API moderna de itens do chaveiro + controle de acesso ligado ao app assinado (substitui as APIs legadas de arquivo de chaveiro)
 
     private PrivateCapabilityGate() {
     }

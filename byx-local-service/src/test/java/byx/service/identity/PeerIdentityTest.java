@@ -91,7 +91,7 @@ class PeerIdentityTest {
 
     @Test
     void requirementsAreBuiltOnlyFromWellFormedComponents() {
-        assertEquals("identifier \"network.byx.mvp\" and anchor apple generic and certificate leaf[subject.OU] = \"W5Z65G9UP2\"",
+        assertEquals("identifier \"" + AppIdentity.APP_ID + "\" and anchor apple generic and certificate leaf[subject.OU] = \"W5Z65G9UP2\"",
                 AppIdentity.requirement(AppIdentity.APP_ID, "W5Z65G9UP2"));
         for (String bad : List.of("a\" or anything or \"b", "x y", "", "a/b\"")) {
             org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> AppIdentity.requirement(bad, "W5Z65G9UP2"), bad);

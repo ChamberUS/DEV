@@ -108,7 +108,11 @@ class PrivateCapabilityGateTest {
         try (var files = Files.walk(Path.of("src/main/java"))) {
             for (Path f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
                 String src = Files.readString(f);
-                for (String banned : List.of("X-MBX-APIKEY", "listenKey", "/fapi/v1/order", "/fapi/v2/account", "signature=", "SecKeychain", "SecItem", "api_key", "apiKey", "apiSecret")) {
+                // SecItem* (API moderna, só o armazenamento seguro interno) é permitido apenas no pacote secrets; fora dele continua banido
+                if (!f.toString().contains("/secrets/")) {
+                    assertFalse(src.contains("SecItem"), f + " must not use SecItem outside the secrets package");
+                }
+                for (String banned : List.of("X-MBX-APIKEY", "listenKey", "/fapi/v1/order", "/fapi/v2/account", "signature=", "SecKeychain", "api_key", "apiKey", "apiSecret")) {
                     assertFalse(src.contains(banned), f + " must not contain " + banned);
                 }
             }

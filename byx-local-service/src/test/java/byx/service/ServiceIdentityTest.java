@@ -90,7 +90,7 @@ class ServiceIdentityTest {
         // 1) peer não verificado: alegações no hello não mudam nada (a conexão já foi fechada)
         try (TestClient c = raw()) {
             try {
-                c.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"bundleId\":\"network.byx.mvp\",\"pid\":" + ProcessHandle.current().pid() + "}");
+                c.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"bundleId\":\"" + byx.service.identity.AppIdentity.APP_ID + "\",\"pid\":" + ProcessHandle.current().pid() + "}");
             } catch (IOException closedAlready) {
                 // esperado: o serviço já fechou
             }
@@ -99,7 +99,7 @@ class ServiceIdentityTest {
         // 2) peer verificado: o DTO estrito recusa campos de identidade desconhecidos (nunca são lidos como prova)
         verdict.set(PeerVerifier.Verdict.ok());
         try (TestClient c = raw()) {
-            c.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"bundleId\":\"network.byx.mvp\",\"pid\":1,\"teamId\":\"W5Z65G9UP2\"}");
+            c.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"bundleId\":\"" + byx.service.identity.AppIdentity.APP_ID + "\",\"pid\":1,\"teamId\":\"W5Z65G9UP2\"}");
             assertEquals("bad_request", c.readJson().path("code").asText());
         }
         // e o caminho legítimo continua funcionando (o mesmo serviço, o mesmo token, agora um peer verificado)
