@@ -59,10 +59,26 @@ public final class LocalServiceClient {
     });
 
     private final Path run;
+    private final panel.identity.IdentityPolicy identity;
 
     /** home = diretório do serviço (contém run/). */
     public LocalServiceClient(Path home) {
+        this(home, DetectedPolicy.POLICY);
+    }
+
+    /** Modo de identidade derivado da assinatura do PRÓPRIO processo (uma vez); nunca de configuração. */
+    private static final class DetectedPolicy {
+        static final panel.identity.IdentityPolicy POLICY = panel.identity.IdentityPolicy.detect(panel.identity.AppIdentity.APP_ID, panel.identity.AppIdentity.SERVICE_ID);
+    }
+
+    /** identity: política de identidade (testes injetam a sua). Empacotado, o painel só fala com o serviço de identidade verificada. */
+    public LocalServiceClient(Path home, panel.identity.IdentityPolicy identity) {
         this.run = home.resolve("run");
+        this.identity = identity;
+    }
+
+    public panel.identity.IdentityPolicy.Mode identityMode() {
+        return identity.mode();
     }
 
     public static Path defaultHome() {
@@ -200,6 +216,12 @@ public final class LocalServiceClient {
     /** Conecta, confere a prova do SERVIDOR antes de mandar a nossa e devolve os fluxos prontos para pedidos. */
     private Paired pair(SocketChannel ch, Path socket, byte[] secret) throws IOException, Fail {
         ch.connect(UnixDomainSocketAddress.of(socket));
+        if (identity.strict()) {
+            // o kernel diz QUEM é o outro lado: um processo do mesmo usuário que leu o pairing.token não é o serviço do produto
+            if (!identity.verifier().verify(ch).verified()) {
+                throw new Fail(LocalServiceStatus.State.AUTH_FAILED, "service_identity_not_verified");
+            }
+        }
         InputStream in = Channels.newInputStream(ch);
         OutputStream out = Channels.newOutputStream(ch);
         byte[] n = new byte[16];

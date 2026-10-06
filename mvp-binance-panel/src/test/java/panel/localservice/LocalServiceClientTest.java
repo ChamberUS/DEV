@@ -62,6 +62,19 @@ class LocalServiceClientTest {
     }
 
     @Test
+    void packagedClientRefusesAServiceWhoseCodeIdentityIsNotVerifiedEvenWithTheRightSecret() throws Exception {
+        FakeService f = fake(FakeService.Mode.GOOD); // um processo do mesmo usuário que LEU o pairing.token e fala o protocolo perfeitamente
+        var reject = panel.identity.IdentityPolicy.strict(ch -> panel.identity.PeerVerifier.Verdict.no("peer_requirement_failed"));
+        LocalServiceStatus s = new LocalServiceClient(home, reject).once(false);
+        assertEquals(State.AUTH_FAILED, s.state());
+        assertEquals("service_identity_not_verified", s.code());
+        Thread.sleep(300);
+        assertEquals(0, f.authFramesSeen.get(), "no hello, proof or request was ever sent to the unverified service");
+        var accept = panel.identity.IdentityPolicy.strict(ch -> panel.identity.PeerVerifier.Verdict.ok());
+        assertEquals(State.CONNECTED, new LocalServiceClient(home, accept).once(false).state(), "a verified service works as before");
+    }
+
+    @Test
     void anImpostorThatDoesNotKnowTheSecretIsRejectedBeforeAnyProofIsSent() throws Exception {
         FakeService f = fake(FakeService.Mode.IMPOSTOR);
         LocalServiceStatus s = probe();

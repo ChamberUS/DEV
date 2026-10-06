@@ -145,9 +145,9 @@ class FinalSafetyTest {
     void productCodeHasNoDebugLeftovers() throws IOException {
         assertEquals(Set.of(), filesMatching("\\b(TODO|FIXME|XXX|HACK)\\b"));
         assertEquals(Set.of(), filesMatching("\"/(tmp|private|Users)/"), "no absolute temp or user paths");
-        // System.out só nas ferramentas de desenvolvimento declaradas (galeria e probe); o log de erro inesperado usa System.err
+        // System.out só nas ferramentas de desenvolvimento declaradas (galeria e as sondas, inclusive a sonda do serviço local: só chave=valor não sensível); o log de erro inesperado usa System.err
         Set<String> out = filesMatching("System\\.out");
-        assertTrue(Set.of("app/GalleryApp.java", "design/ControlGallery.java", "app/PanelApp.java").containsAll(out), "debug System.out in product code: " + out);
+        assertTrue(Set.of("app/GalleryApp.java", "design/ControlGallery.java", "app/PanelApp.java", "localservice/ServiceProbe.java").containsAll(out), "debug System.out in product code: " + out);
         assertTrue(Files.readString(MAIN.resolve("panel/app/PanelApp.java")).contains("Boolean.getBoolean(\"byx.runtime.diagnostics\")"), "the runtime dump is opt-in");
         assertEquals(Set.of(), filesMatching("(?i)(demo data|DEMO_DATA)\\W.*\\bnew\\b").stream().filter(f -> !f.startsWith("design/")).collect(Collectors.toSet()));
     }
