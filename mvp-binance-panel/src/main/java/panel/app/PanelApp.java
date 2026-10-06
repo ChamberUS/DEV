@@ -41,7 +41,12 @@ import panel.tradeview.TradingDesk;
 import panel.user.User;
 
 public class PanelApp extends Application {
-    private final AppContext ctx = new AppContext();
+    private AppContext ctx;
+
+    /** Ponto de composição: o app normal usa os provedores reais; harnesses de QA sobrescrevem para injetar provedores de teste. */
+    protected AppContext createContext() {
+        return new AppContext();
+    }
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
@@ -76,6 +81,7 @@ public class PanelApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        this.ctx = createContext();
         this.stage = stage;
         for (String f : new String[] {"SchibstedGrotesk-Regular", "SchibstedGrotesk-SemiBold", "Inter-Regular", "Inter-Medium", "Inter-SemiBold", "Inter-Bold", "JetBrainsMono-Regular", "JetBrainsMono-Medium", "JetBrainsMono-SemiBold", "JetBrainsMono-Bold"}) {
             Font.loadFont(getClass().getResourceAsStream("/fonts/" + f + ".ttf"), 13);
@@ -163,7 +169,7 @@ public class PanelApp extends Application {
         disposePublic();
         authScreens = new panel.authview.AuthScreens(ctx.motion, authServices(), this::show, this::afterLogin,
                 this::afterPasswordChanged, this::showEntry, this::show,
-                ctx.devOtp != null ? panel.auth.DevOtpProvider.LABEL : null);
+                ctx.developmentLabel);
         rootStack.getChildren().setAll(authScreens.node());
         lastDisplayed = null;
         previousRoute = null;
@@ -506,7 +512,7 @@ public class PanelApp extends Application {
         User user = ctx.sessions.user().orElseThrow().user();
         panel.authview.AdminVerificationView[] ref = new panel.authview.AdminVerificationView[1];
         ref[0] = new panel.authview.AdminVerificationView(ctx.motion, this::startAdminVerification, twoFactorWorker,
-                javafx.application.Platform::runLater, user.maskedEmail(), user.maskedPhone(), ctx.devOtp != null, () -> {
+                javafx.application.Platform::runLater, user.maskedEmail(), user.maskedPhone(), ctx.developmentLabel != null, () -> {
                     closeTwoFactor();
                     updateLock(true);
                     router.complete(ticket, views.containsKey(target) ? target : "overview");

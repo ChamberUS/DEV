@@ -52,6 +52,11 @@ public final class TradingDeskQa {
     }
 
     public static final class App extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private Stage stage;
         private AppContext ctx;
         private int index;
@@ -70,9 +75,9 @@ public final class TradingDeskQa {
                 invoke("afterLogin", User.class, admin);
                 var flow = ctx.adminAccess.startTwoFactor();
                 flow.sendEmailCode();
-                flow.verifyEmail(ctx.devOtp.lastCode());
+                flow.verifyEmail(panel.QaContext.dev().lastCode());
                 flow.sendSmsCode();
-                flow.verifySms(ctx.devOtp.lastCode());
+                flow.verifySms(panel.QaContext.dev().lastCode());
                 flow.finish(false);
                 invoke("show", String.class, "t-desk");
                 later(this::next);

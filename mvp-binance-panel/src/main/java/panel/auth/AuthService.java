@@ -30,6 +30,8 @@ public class AuthService {
     private final SecurityAuditService audit;
     private final Clock clock;
     private final String dummyHash;
+    /** Chave aleatória por processo: impressão do identificador de uma tentativa sem conta (não reversível, não correlaciona entre execuções). */
+    private final byte[] attemptKey = new java.security.SecureRandom().generateSeed(32);
 
     public AuthService(UserRepository users, PasswordHasher hasher, SessionManager sessions, RateLimiter limiter, SecurityAuditService audit, Clock clock) {
         this.users = users;
@@ -39,6 +41,16 @@ public class AuthService {
         this.audit = audit;
         this.clock = clock;
         this.dummyHash = hasher.hash("dummy-password-for-timing".toCharArray());
+    }
+
+    private String fingerprint(String normalized) {
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+            mac.init(new javax.crypto.spec.SecretKeySpec(attemptKey, "HmacSHA256"));
+            return java.util.HexFormat.of().formatHex(mac.doFinal(normalized.getBytes(java.nio.charset.StandardCharsets.UTF_8)), 0, 6);
+        } catch (java.security.GeneralSecurityException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public boolean firstRun() {
@@ -55,7 +67,9 @@ public class AuthService {
         boolean ok = hasher.verify(password, found.map(User::passwordHash).orElse(dummyHash)) && found.isPresent();
         if (!ok) {
             limiter.recordFailure(key);
-            audit.record(AuditEvent.LOGIN_FAILED, key.isEmpty() ? "-" : key, "invalid credentials");
+            // O texto digitado NUNCA vai para o log: pode ser uma senha digitada no campo de usuário. Conta existente = o próprio usuário;
+            // sem conta = impressão HMAC curta (mantém o registro e permite contar tentativas repetidas sem guardar o conteúdo).
+            audit.record(AuditEvent.LOGIN_FAILED, found.map(User::username).orElse(key.isEmpty() ? "-" : "attempt:" + fingerprint(key)), "invalid credentials");
             throw new LoginException(Failure.INVALID_CREDENTIALS, null);
         }
         User u = found.get();

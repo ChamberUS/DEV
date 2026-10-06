@@ -60,6 +60,11 @@ public final class NavStressQa {
     }
 
     public static final class App extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private AppContext ctx;
         private ShellRouter router;
         private Map<String, View> views;

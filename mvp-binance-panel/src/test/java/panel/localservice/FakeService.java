@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /** Serviço de mentira para provar o comportamento do CLIENTE do painel diante de peers hostis. Fala o mesmo protocolo, com defeitos escolhidos. */
 final class FakeService implements AutoCloseable {
-    enum Mode { GOOD, IMPOSTOR, REJECTS_CLIENT, OVERSIZE, STALL, GARBAGE, INCOMPATIBLE_PROTOCOL, HOSTILE_STRINGS }
+    enum Mode { GOOD, REPLAYED_SERVER_PROOF, IMPOSTOR, REJECTS_CLIENT, OVERSIZE, STALL, GARBAGE, INCOMPATIBLE_PROTOCOL, HOSTILE_STRINGS }
 
     private static final JsonMapper JSON = new JsonMapper();
     final Path home;
@@ -113,7 +113,9 @@ final class FakeService implements AutoCloseable {
                 out.write(junk);
                 return;
             }
-            send(out, "{\"v\":1,\"type\":\"challenge\",\"serverNonce\":\"" + sn + "\",\"serverProof\":\"" + proof(secret, "server", cn, sn) + "\"}");
+            // REPLAYED_SERVER_PROOF: prova VÁLIDA (segredo real) mas de uma conversa anterior, calculada sobre outro nonce de cliente
+            String proofCn = mode == Mode.REPLAYED_SERVER_PROOF ? "AAAAAAAAAAAAAAAAAAAAAA" : cn;
+            send(out, "{\"v\":1,\"type\":\"challenge\",\"serverNonce\":\"" + sn + "\",\"serverProof\":\"" + proof(secret, "server", proofCn, sn) + "\"}");
             JsonNode auth = read(in);
             authFramesSeen.incrementAndGet();
             if (mode == Mode.REJECTS_CLIENT) {

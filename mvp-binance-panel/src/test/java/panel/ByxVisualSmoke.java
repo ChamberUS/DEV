@@ -46,6 +46,11 @@ public final class ByxVisualSmoke {
         System.out.println("VISUAL_SMOKE_OK isolated_database development_OTP FULL_MOTION " + evidence);
     }
     public static final class VisualApp extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         AppContext context;
         Stage window;
         String password = "localnet-smoke-pass-1";
@@ -57,8 +62,8 @@ public final class ByxVisualSmoke {
                 var user = context.auth.login("smoke-admin", password.toCharArray());
                 invoke("afterLogin", User.class, user);
                 var flow = context.adminAccess.startTwoFactor();
-                flow.sendEmailCode(); ByxLocalnetSmoke.check(flow.verifyEmail(context.devOtp.lastCode()) == OtpService.Result.OK, "Email OTP");
-                flow.sendSmsCode(); ByxLocalnetSmoke.check(flow.verifySms(context.devOtp.lastCode()) == OtpService.Result.OK, "SMS OTP");
+                flow.sendEmailCode(); ByxLocalnetSmoke.check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "Email OTP");
+                flow.sendSmsCode(); ByxLocalnetSmoke.check(flow.verifySms(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "SMS OTP");
                 context.userService.createUser("smoke-user", "user@example.invalid", password.toCharArray(), null, panel.security.Role.USER);
                 context.byx.configure(ByxLocalnetSmoke.config(manifest, "alice-test"));
                 context.byx.refresh().whenComplete((snapshot, error) -> Platform.runLater(() -> {

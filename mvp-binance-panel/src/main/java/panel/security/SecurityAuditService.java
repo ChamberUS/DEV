@@ -33,8 +33,28 @@ public class SecurityAuditService {
 
     private static String safe(String value) {
         if(value==null)return null;
-        return value.replaceAll("[^\\s@]+@[^\\s@]+", "[email redacted]")
+        String v = value.replaceAll("\\p{Cntrl}+", " ") // quebras de linha e controles não forjam linhas de log
+                .replaceAll("[^\\s@]+@[^\\s@]+", "[email redacted]")
                 .replaceAll("\\+[0-9]{8,15}", "[phone redacted]");
+        return v.length() > 200 ? v.substring(0, 200) : v;
+    }
+
+    private static final java.util.regex.Pattern SAFE_ACTOR = java.util.regex.Pattern.compile("[A-Za-z0-9_.-]{1,64}|(user|attempt):[A-Za-z0-9]{1,32}|-");
+
+    /**
+     * Linhas antigas de LOGIN_FAILED guardaram o identificador digitado (que pode ter sido uma senha). Elas NÃO são apagadas nem
+     * reescritas: só são mascaradas na leitura quando o ator não é um usuário existente nem um formato seguro.
+     */
+    private Entry present(java.sql.Connection c, Entry e) throws java.sql.SQLException {
+        if(!AuditEvent.LOGIN_FAILED.name().equals(e.event())||e.actor()==null)return e;
+        if(e.actor().startsWith("attempt:")||e.actor().startsWith("user:")||e.actor().equals("-"))return e;
+        if(SAFE_ACTOR.matcher(e.actor()).matches()) {
+            try(PreparedStatement ps=c.prepareStatement("SELECT 1 FROM users WHERE username=? COLLATE NOCASE")) {
+                ps.setString(1,e.actor());
+                try(ResultSet r=ps.executeQuery()) { if(r.next())return e; }
+            }
+        }
+        return new Entry(e.ts(),e.event(),"legacy-attempt",e.detail());
     }
 
     public List<Entry> recent(int limit) {
@@ -44,7 +64,7 @@ public class SecurityAuditService {
                 ps.setInt(1, limit);
                 ResultSet r = ps.executeQuery();
                 while (r.next()) {
-                    l.add(new Entry(r.getString(1), r.getString(2), r.getString(3), r.getString(4)));
+                    l.add(present(c, new Entry(r.getString(1), r.getString(2), r.getString(3), r.getString(4))));
                 }
             }
             return l;
@@ -59,7 +79,7 @@ public class SecurityAuditService {
                 ps.setInt(2, limit);
                 ResultSet r = ps.executeQuery();
                 while (r.next()) {
-                    l.add(new Entry(r.getString(1), r.getString(2), r.getString(3), r.getString(4)));
+                    l.add(present(c, new Entry(r.getString(1), r.getString(2), r.getString(3), r.getString(4))));
                 }
             }
             return l;

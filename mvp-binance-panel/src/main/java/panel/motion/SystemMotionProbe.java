@@ -13,7 +13,7 @@ public interface SystemMotionProbe {
             return NONE;
         }
         // macOS recente guarda a chave em com.apple.Accessibility; versões anteriores, em com.apple.universalaccess. Qualquer uma ligada = reduzido.
-        return () -> read("com.apple.Accessibility", "ReduceMotionEnabled") || read("com.apple.universalaccess", "reduceMotion");
+        return () -> read(true) || read(false);
     }
 
     /** Valor de "1"/"true" (saída do defaults); chave ausente ou qualquer outra coisa = falso. */
@@ -22,9 +22,11 @@ public interface SystemMotionProbe {
         return t.equals("1") || t.equalsIgnoreCase("true");
     }
 
-    private static boolean read(String domain, String key) {
+    /** Argumentos SEMPRE literais (nenhum dado externo chega ao comando): chave moderna ou legada do macOS. */
+    private static boolean read(boolean modern) {
         try {
-            Process p = new ProcessBuilder("/usr/bin/defaults", "read", domain, key).redirectErrorStream(true).start();
+            Process p = (modern ? new ProcessBuilder("/usr/bin/defaults", "read", "com.apple.Accessibility", "ReduceMotionEnabled")
+                    : new ProcessBuilder("/usr/bin/defaults", "read", "com.apple.universalaccess", "reduceMotion")).redirectErrorStream(true).start();
             if (!p.waitFor(2, TimeUnit.SECONDS)) {
                 p.destroyForcibly();
                 return false;

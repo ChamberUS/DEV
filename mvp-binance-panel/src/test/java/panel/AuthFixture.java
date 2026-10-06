@@ -64,10 +64,11 @@ class AuthFixture {
         SecurityConfig config = new SecurityConfig(30, true);
         auth = new AuthService(users, hasher, sessions, new InMemoryRateLimiter(3, Duration.ofSeconds(60), clock), audit, clock);
         OtpService otp = new OtpService(clock, Duration.ofMinutes(5), Duration.ofSeconds(30), 5);
-        access = new AdminAccessService(sessions,config,otp,configured?otpProvider:new UnconfiguredEmailOtpProvider(),
+        access = new AdminAccessService(sessions,users,config,otp,configured?otpProvider:new UnconfiguredEmailOtpProvider(),
                 configured?otpProvider:new UnconfiguredSmsOtpProvider(),devices,audit,clock);
         userService = new UserService(users,hasher,access,audit,sessions,clock);
         userService.onContactsChanged=devices::revokeAllForCurrentUser;
+        userService.onCredentialsChanged=access::credentialsChanged;
     }
     static AuthFixture ready() { return new AuthFixture(true); }
     panel.auth.AdminSession authorize() {

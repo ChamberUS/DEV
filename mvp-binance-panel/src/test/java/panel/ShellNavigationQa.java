@@ -61,6 +61,11 @@ public final class ShellNavigationQa {
     }
 
     public static final class App extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private AppContext ctx;
         private ShellRouter router;
         private Map<String, View> views;
@@ -176,9 +181,9 @@ public final class ShellNavigationQa {
                 // agora verifica o admin (OTP de desenvolvimento) para os demais cenários
                 var flow = ctx.adminAccess.startTwoFactor();
                 flow.sendEmailCode();
-                flow.verifyEmail(ctx.devOtp.lastCode());
+                flow.verifyEmail(panel.QaContext.dev().lastCode());
                 flow.sendSmsCode();
-                flow.verifySms(ctx.devOtp.lastCode());
+                flow.verifySms(panel.QaContext.dev().lastCode());
                 flow.finish(false);
                 next(300);
             });

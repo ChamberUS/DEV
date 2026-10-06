@@ -88,6 +88,7 @@ public class UserService {
         User t = load(id);
         requirePolicy(temporaryPassword, t.username());
         save(t, t.role(), t.status(), hasher.hash(temporaryPassword), true);
+        onCredentialsChanged.accept(id); // política: reset de senha encerra a elevação e os desafios da conta alvo
         audit.record(AuditEvent.PASSWORD_RESET, admin.username(), "target=" + t.username());
     }
 
@@ -103,10 +104,13 @@ public class UserService {
         }
         User u = save(t, t.role(), t.status(), hasher.hash(next), false);
         sessions.updateUser(u);
+        onCredentialsChanged.accept(id); // política: trocar a senha encerra a elevação administrativa
         audit.record(AuditEvent.PASSWORD_CHANGED, t.username(), "");
     }
 
     public Runnable onContactsChanged = () -> {};
+    /** Chamado depois de trocar/resetar a senha de uma conta (a autoridade de acesso administrativo registra aqui a revogação). */
+    public java.util.function.Consumer<Long> onCredentialsChanged = id -> { };
 
     public void changeOwnContact(long id, char[] password, String email, String phone) {
         var session = sessions.user().orElseThrow(() -> new AccessDeniedException("Login required"));

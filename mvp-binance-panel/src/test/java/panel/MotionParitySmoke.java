@@ -45,6 +45,11 @@ public final class MotionParitySmoke {
     }
 
     public static final class SmokeApp extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private Stage stage;
         private AppContext ctx;
         private User admin;
@@ -73,8 +78,8 @@ public final class MotionParitySmoke {
             ctx.research.snapshot.set(new panel.adapter.FileResearchBackend(ctx.cli).load(ctx.settings));
             if (!ctx.adminAccess.hasValidAdminSession()) {
                 var flow = ctx.adminAccess.startTwoFactor(); flow.sendEmailCode();
-                check(flow.verifyEmail(ctx.devOtp.lastCode()) == OtpService.Result.OK, "Email gate");
-                flow.sendSmsCode(); check(flow.verifySms(ctx.devOtp.lastCode()) == OtpService.Result.OK, "SMS gate"); flow.finish(false);
+                check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "Email gate");
+                flow.sendSmsCode(); check(flow.verifySms(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "SMS gate"); flow.finish(false);
             }
             invoke("show", String.class, "t-markets");
             invoke("show", String.class, "t-desk");

@@ -1,0 +1,26 @@
+TRACE +670ms thread=JavaFX Application Thread seq=2 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:265 < PanelApp.afterLogin:233 < FinalQa$App.invoke:125 < FinalQa$App.login:168 < FinalQa$App.lambda$system$27:447 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+TRACE +1109ms thread=JavaFX Application Thread seq=3 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < PanelApp.enterApp:332 < PanelApp.afterLogin:233 < FinalQa$App.invoke:125 < FinalQa$App.login:168 < FinalQa$App.lambda$system$27:447 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS backend lost: the slim global bar appears
+PASS global bar text
+PASS no route change on loss: []
+PASS shell not recreated
+PASS no page enter on loss
+PASS restored: the global bar is gone
+PASS restored: one success notice
+PASS no route change, rebuild or page enter on restore
+TRACE +8190ms thread=JavaFX Application Thread seq=4 pending=null t-desk -> sys-status via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$system$31:480 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS System Status shows the RESTORED recovery chip: true
+PASS RESTORED returns to CONNECTED after the 3 s hold
+TRACE +12507ms thread=JavaFX Application Thread seq=5 pending=null sys-status -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$system$33:491 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+TRACE +12617ms thread=JavaFX Application Thread seq=6 pending=null t-desk -> sys-unavailable via ShellRouter.commit:89 < ShellRouter.complete:72 < PanelApp.evaluateRoute:427 < ShellRouter.request:56 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$system$33:492 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS unknown internal route opens Page unavailable: sys-unavailable
+PASS page unavailable content
+PASS Page unavailable never redirects by itself
+TRACE +14274ms thread=JavaFX Application Thread seq=7 pending=null sys-unavailable -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < PageUnavailableScreen.lambda$new$0:38 < FinalQa$App.lambda$system$34:501 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS Return to previous goes through the router: t-desk
+PASS unexpected error fallback shown
+PASS fallback shows a code, never the exception, a secret or a path
+PASS fallback does not change the route
+PASS Return clears the fallback
+PASS Retry is disabled after repeated failures
+RESULT mode=system failures=0

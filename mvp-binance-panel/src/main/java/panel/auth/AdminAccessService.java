@@ -7,18 +7,49 @@ import panel.user.User;
 
 /** Login and ADMIN are mandatory; only two factors or a valid Keychain-backed device grant a session. */
 public class AdminAccessService implements AdminGate {
-    private final SessionManager sessions; private final SecurityConfig config; private final OtpService otp;
+    private final SessionManager sessions; private final panel.user.UserRepository users; private final SecurityConfig config; private final OtpService otp;
     private final EmailOtpProvider email; private final SmsOtpProvider sms; private final TrustedDeviceService devices;
     private final SecurityAuditService audit; private final Clock clock;
     private volatile TwoFactorFlow active;
     private final Map<String,Instant> sends=new HashMap<>();
-    public AdminAccessService(SessionManager sessions, SecurityConfig config, OtpService otp, EmailOtpProvider email,
+    public AdminAccessService(SessionManager sessions, panel.user.UserRepository users, SecurityConfig config, OtpService otp, EmailOtpProvider email,
             SmsOtpProvider sms, TrustedDeviceService devices, SecurityAuditService audit, Clock clock) {
-        this.sessions=sessions;this.config=config;this.otp=otp;this.email=email;this.sms=sms;this.devices=devices;this.audit=audit;this.clock=clock;
+        this.users=java.util.Objects.requireNonNull(users);this.sessions=sessions;this.config=config;this.otp=otp;this.email=email;this.sms=sms;this.devices=devices;this.audit=audit;this.clock=clock;
         sessions.onLogout(this::cancelChallenge);
     }
     public boolean twoFactorConfigured(){return email.configured() && sms.configured();}
+    /**
+     * Revalida a conta contra a FONTE (o repositório), não contra a cópia guardada na sessão: conta desativada ou removida encerra a
+     * sessão; papel rebaixado remove a elevação e o privilégio de admin; falha ao ler a fonte nega (fecha), sem encerrar a sessão.
+     * Toda decisão de privilégio abaixo passa por aqui, então um desafio ou resposta assíncrona antigo não restaura nada.
+     */
+    private boolean revalidate() {
+        synchronized(sessions) {
+            var s=sessions.user();if(s.isEmpty())return false;
+            java.util.Optional<User> fresh;
+            try { fresh=users.findById(s.get().user().id()); } catch(RuntimeException e) { return false; }
+            if(fresh.isEmpty()||!fresh.get().active()) {
+                audit.record(AuditEvent.ADMIN_ACCESS_DENIED,actor(),"account state changed");
+                sessions.logout();return false;
+            }
+            User f=fresh.get();
+            if(s.get().user().admin() && !f.admin()) {
+                audit.record(AuditEvent.ADMIN_ACCESS_DENIED,actor(),"role downgraded");
+                sessions.revokeAdmin();cancelChallenge();
+            }
+            if(!f.equals(s.get().user())) sessions.updateUser(f);
+            return true;
+        }
+    }
+    /** Troca ou reset de senha da conta: encerra a elevação administrativa e qualquer desafio em curso (reautenticação exigida). */
+    public void credentialsChanged(long userId) {
+        synchronized(sessions) {
+            if(sessions.revokeAdminFor(userId))audit.record(AuditEvent.ADMIN_ACCESS_DENIED,"user:"+userId,"credentials changed");
+            cancelChallenge();otp.clear(userId);
+        }
+    }
     public AccessDecision evaluate() {
+        revalidate();
         var user=sessions.user();if(user.isEmpty())return AccessDecision.SESSION_EXPIRED;
         if(!user.get().user().admin() || !user.get().user().active())return AccessDecision.FORBIDDEN_NOT_ADMIN;
         return hasValidAdminSession()?AccessDecision.ALREADY_AUTHORIZED:AccessDecision.REQUIRES_2FA;
@@ -47,7 +78,7 @@ public class AdminAccessService implements AdminGate {
         }
     }
     boolean current(UserSession expected) {
-        return sessions.user().filter(s->s.id().equals(expected.id()) && s.user().id()==expected.user().id() && s.user().admin() && s.user().active()).isPresent();
+        return revalidate() && sessions.user().filter(s->s.id().equals(expected.id()) && s.user().id()==expected.user().id() && s.user().admin() && s.user().active()).isPresent();
     }
     boolean valid(TwoFactorFlow flow,UserSession expected){return flow==active && current(expected);}
     void sent(UserSession expected,boolean phone) {
@@ -70,7 +101,7 @@ public class AdminAccessService implements AdminGate {
         devices.trustCurrent();
     }
     public boolean hasValidAdminSession() {
-        return sessions.user().filter(s->s.user().admin()&&s.user().active()).isPresent()
+        return revalidate() && sessions.user().filter(s->s.user().admin()&&s.user().active()).isPresent()
                 && sessions.admin().filter(s->s.validAt(clock.instant())).isPresent();
     }
     public boolean expireIfNeeded() {

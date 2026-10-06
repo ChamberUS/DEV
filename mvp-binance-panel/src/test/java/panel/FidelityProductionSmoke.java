@@ -47,6 +47,11 @@ public final class FidelityProductionSmoke {
         System.out.println("FIDELITY_PRODUCTION_SMOKE_OK fixtures=true baseline=" + baseline + " " + output);
     }
     public static final class SmokeApp extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private Stage stage;
         private AppContext ctx;
         private Robot robot;
@@ -77,8 +82,8 @@ public final class FidelityProductionSmoke {
             User admin=ctx.auth.login("qa-admin", "fidelity-pass-1".toCharArray()); invoke("afterLogin",User.class,admin);
             ctx.research.close();ctx.byx.close();
             var flow=ctx.adminAccess.startTwoFactor();flow.sendEmailCode();
-            check(flow.verifyEmail(ctx.devOtp.lastCode())==panel.auth.OtpService.Result.OK,"Email authorization");
-            flow.sendSmsCode();check(flow.verifySms(ctx.devOtp.lastCode())==panel.auth.OtpService.Result.OK,"SMS authorization");flow.finish(false);
+            check(flow.verifyEmail(panel.QaContext.dev().lastCode())==panel.auth.OtpService.Result.OK,"Email authorization");
+            flow.sendSmsCode();check(flow.verifySms(panel.QaContext.dev().lastCode())==panel.auth.OtpService.Result.OK,"SMS authorization");flow.finish(false);
             fixture=fixture();ctx.research.snapshot.set(fixture);
             ctx.trading.snapshot.get().feed="WAITING";
             stage.toFront(); stage.requestFocus();

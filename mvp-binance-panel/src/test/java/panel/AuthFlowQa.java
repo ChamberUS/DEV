@@ -61,6 +61,11 @@ public final class AuthFlowQa {
     }
 
     public static final class App extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private Stage stage;
         private AppContext ctx;
         private ShellRouter router;
@@ -275,9 +280,9 @@ public final class AuthFlowQa {
                 // admin cria um trader com senha temporária (exige verificação real de admin, OTP de dev)
                 var flow = ctx.adminAccess.startTwoFactor();
                 flow.sendEmailCode();
-                flow.verifyEmail(ctx.devOtp.lastCode());
+                flow.verifyEmail(panel.QaContext.dev().lastCode());
                 flow.sendSmsCode();
-                flow.verifySms(ctx.devOtp.lastCode());
+                flow.verifySms(panel.QaContext.dev().lastCode());
                 flow.finish(false);
                 ctx.userService.createUser("qa-trader", "trader@example.invalid", "temporary-pass-1".toCharArray(), null,
                         panel.security.Role.USER);

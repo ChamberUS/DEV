@@ -42,6 +42,11 @@ public final class RedesignVisualSmoke {
     }
 
     public static final class SmokeApp extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            return panel.QaContext.create();
+        }
+
         private AppContext context;
         private Stage window;
         private int screen;
@@ -68,8 +73,8 @@ public final class RedesignVisualSmoke {
         private void authorize() {
             if (context.adminAccess.hasValidAdminSession()) return;
             var flow = context.adminAccess.startTwoFactor();
-            flow.sendEmailCode(); check(flow.verifyEmail(context.devOtp.lastCode()) == OtpService.Result.OK, "Email OTP");
-            flow.sendSmsCode(); check(flow.verifySms(context.devOtp.lastCode()) == OtpService.Result.OK, "SMS OTP");
+            flow.sendEmailCode(); check(flow.verifyEmail(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "Email OTP");
+            flow.sendSmsCode(); check(flow.verifySms(panel.QaContext.dev().lastCode()) == OtpService.Result.OK, "SMS OTP");
             flow.finish(false);
         }
 
@@ -120,15 +125,15 @@ public final class RedesignVisualSmoke {
             later(() -> {
                 check(authRoot().lookupAll(".button").stream().map(n -> (Button) n)
                         .anyMatch(b -> b.getText().startsWith("Resend in") && b.isDisabled()), "Real resend cooldown");
-                shot("auth-cooldown"); code("000000".equals(context.devOtp.lastCode()) ? "111111" : "000000");
+                shot("auth-cooldown"); code("000000".equals(panel.QaContext.dev().lastCode()) ? "111111" : "000000");
                 authButton("Verify Email");
                 later(() -> {
                     check(authRoot().lookup(".otp-invalid") != null, "Invalid OTP styling");
                     check(!context.adminAccess.hasValidAdminSession(), "Invalid OTP never authorizes");
-                    shot("auth-invalid-code"); code(context.devOtp.lastCode()); authButton("Verify Email");
+                    shot("auth-invalid-code"); code(panel.QaContext.dev().lastCode()); authButton("Verify Email");
                     later(() -> {
                         shot("auth-sms"); authButton("Resend code");
-                        later(() -> { code(context.devOtp.lastCode()); authButton("Verify Phone");
+                        later(() -> { code(panel.QaContext.dev().lastCode()); authButton("Verify Phone");
                             later(() -> { shot("auth-verification-success"); authButton("Continue to Research");
                                 later(() -> { check(context.adminAccess.hasValidAdminSession(), "Real AdminSession from UI");
                                     authChecked = true; next(); });

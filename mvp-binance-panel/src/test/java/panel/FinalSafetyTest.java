@@ -39,14 +39,55 @@ class FinalSafetyTest {
         return out;
     }
 
+    /** Nome do método (nível de classe) que contém a primeira ocorrência do trecho no arquivo. */
+    private static String enclosingMethod(String file, String needle) throws IOException {
+        String src = Files.readString(MAIN.resolve("panel").resolve(file));
+        int at = src.indexOf(needle);
+        assertTrue(at >= 0, needle + " in " + file);
+        String[] lines = src.substring(0, at).split("\n");
+        Pattern header = Pattern.compile("^ {4}(?!\\s).*\\b(\\w+)\\s*\\(.*\\)\\s*(throws [\\w., ]+)?\\{\\s*$");
+        for (int i = lines.length - 1; i >= 0; i--) {
+            var m = header.matcher(lines[i]);
+            if (m.find()) {
+                return m.group(1);
+            }
+        }
+        throw new AssertionError("no enclosing method for " + needle);
+    }
+
+    /** Argumentos de cada {@code new ProcessBuilder(...)} do arquivo, sem shell: primeiro argumento é o executável literal e os demais são literais ou o pid. */
+    private static void assertNoShell(String file, String executable, int expected) throws IOException {
+        String src = Files.readString(MAIN.resolve("panel").resolve(file));
+        var m = Pattern.compile("new ProcessBuilder\\(([^;]*?)\\)\\s*(?:[.;)]|:)").matcher(src);
+        int found = 0;
+        while (m.find()) {
+            found++;
+            String[] args = m.group(1).split(",\\s*(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+            assertEquals("\"" + executable + "\"", args[0].trim(), file + ": the executable is a fixed literal path");
+            for (int i = 1; i < args.length; i++) {
+                String a = args[i].trim();
+                assertTrue(a.matches("\"[^\"]*\"") || a.matches("Long\\.toString\\(\\w+\\)"), file + ": argument " + i + " is a literal or the pid, not input: " + a);
+            }
+        }
+        assertEquals(expected, found, file + ": the expected subprocess launch sites");
+        // nenhum outro caminho de execução: sem Runtime.exec e sem ProcessBuilder montado de outra forma (os argumentos acima já são literais)
+        assertFalse(src.contains("Runtime.getRuntime().exec") || src.contains("ProcessBuilder.command("), file + ": no other way to start a process");
+    }
+
     @Test
     void liveTradingCanNeverBeEnabledByTheProduct() throws IOException {
         assertEquals(Set.of(), filesMatching("\\.trading\\s*=[^=]"), "no code writes the trading mode");
         assertEquals(Set.of(), filesMatching("trading\\s*=\\s*\"ENABLED"), "no code sets ENABLED");
         assertEquals(Set.of(), filesMatching("(?i)(api\\.binance|fapi\\.binance|/fapi/|newOrder|X-MBX-APIKEY|createOrder|placeOrder|submitOrder)"),
                 "no exchange or order endpoint exists in the product");
-        assertEquals(Set.of("auth/OtpService.java", "localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"),
-                "HMAC only for the OTP and for the local-service pairing proof (IPC): no exchange request signing");
+        // HMAC-SHA256 só em três pontos nomeados, cada um num método específico (não por arquivo inteiro): OTP, prova de pareamento do serviço
+        // local e impressão do identificador de tentativas sem conta (auditoria). Nenhum assina requisição de exchange.
+        assertEquals(Set.of("auth/OtpService.java", "auth/AuthService.java", "localservice/LocalServiceClient.java"), filesMatching("HmacSHA256"));
+        assertEquals("mac", enclosingMethod("auth/OtpService.java", "Mac.getInstance(\"HmacSHA256\")"));
+        assertEquals("fingerprint", enclosingMethod("auth/AuthService.java", "Mac.getInstance(\"HmacSHA256\")"));
+        assertEquals("proof", enclosingMethod("localservice/LocalServiceClient.java", "Mac.getInstance(\"HmacSHA256\")"));
+        assertTrue(Files.readString(MAIN.resolve("panel/localservice/LocalServiceClient.java")).contains("\"byx-ipc-v1|\""), "the pairing proof is domain-separated");
+        assertEquals(Set.of(), filesMatching("Mac\\.getInstance\\(\"Hmac(SHA1|SHA512|MD5)"), "no other HMAC variant is used anywhere");
         assertTrue(Files.readString(MAIN.resolve("panel/shell/DockModel.java")).contains("liveOff"), "the dock keeps the Live trading OFF text");
     }
 
@@ -78,9 +119,20 @@ class FinalSafetyTest {
     void byxV2IsReadOnlyAndTheLegacyActionsAreNotExposed() throws IOException {
         assertEquals(Set.of(), filesMatching("byxGas\\.(request|revoke|refresh)\\("), "gas request/revoke/refresh is called from no UI");
         assertEquals(Set.of(), filesMatching("byxPayments\\.(create|confirm)\\("), "payment intents are created and confirmed from no UI");
-        assertEquals(Set.of("adapter/CaptureRuntimeResolver.java", "adapter/LocalnetGasTestSigner.java", "motion/SystemMotionProbe.java", "process/ProcessRunner.java"),
-                filesMatching("ProcessBuilder"),
-                "processes: the capture resolver (read-only lsof with fixed arguments, added by the capture work), the test signer (opt-in by env), the OS probe and the existing ProcessRunner only");
+        // O resolver de captura pertence a outro trabalho e pode ou não estar presente no checkout: a exceção só existe SE o arquivo existir
+        // (e então é verificada de forma específica abaixo); sem ele, nenhum outro ProcessBuilder é aceito.
+        boolean resolverPresent = Files.exists(MAIN.resolve("panel/adapter/CaptureRuntimeResolver.java"));
+        Set<String> expectedProcesses = new TreeSet<>(Set.of("adapter/LocalnetGasTestSigner.java", "motion/SystemMotionProbe.java", "process/ProcessRunner.java"));
+        if (resolverPresent) {
+            expectedProcesses.add("adapter/CaptureRuntimeResolver.java");
+        }
+        assertEquals(expectedProcesses, filesMatching("ProcessBuilder"),
+                "processes: the capture resolver when present (read-only lsof, fixed arguments), the test signer (opt-in by env), the OS probe and the existing ProcessRunner only");
+        // as duas exceções novas são específicas: executável literal, argumentos literais (ou o pid), nenhum shell, um único subprocesso
+        if (resolverPresent) {
+            assertNoShell("adapter/CaptureRuntimeResolver.java", "/usr/sbin/lsof", 1);
+        }
+        assertNoShell("motion/SystemMotionProbe.java", "/usr/bin/defaults", 2);
         // o signer de teste só existe atrás da variável de ambiente e do modo de desenvolvimento
         String ctx = Files.readString(MAIN.resolve("panel/app/AppContext.java"));
         assertTrue(ctx.contains("I_ACKNOWLEDGE_TEST_ONLY") && ctx.contains("security.devMode()"));

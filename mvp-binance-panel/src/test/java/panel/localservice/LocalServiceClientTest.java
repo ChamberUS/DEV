@@ -72,6 +72,16 @@ class LocalServiceClientTest {
     }
 
     @Test
+    void aServerProofReplayedFromAnEarlierConversationIsRejected() throws Exception {
+        FakeService f = fake(FakeService.Mode.REPLAYED_SERVER_PROOF);
+        LocalServiceStatus s = probe();
+        assertEquals(State.AUTH_FAILED, s.state());
+        assertEquals("server_not_verified", s.code(), "a valid-looking proof bound to another client nonce does not authenticate the server");
+        Thread.sleep(300);
+        assertEquals(0, f.authFramesSeen.get(), "and the client sent nothing to it");
+    }
+
+    @Test
     void aServiceThatRejectsOurProofIsAuthFailedNotConnected() throws Exception {
         fake(FakeService.Mode.REJECTS_CLIENT);
         LocalServiceStatus s = probe();

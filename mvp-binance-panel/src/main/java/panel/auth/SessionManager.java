@@ -33,6 +33,15 @@ public class SessionManager {
         admin = null;
     }
 
+    /** Revoga a elevação administrativa se ela pertence a esta conta (troca/reset de senha, mudança de papel). */
+    public synchronized boolean revokeAdminFor(long userId) {
+        if (user != null && user.user().id() == userId && admin != null) {
+            admin = null;
+            return true;
+        }
+        return false;
+    }
+
     public synchronized void updateUser(User u) {
         if (user != null && user.user().id() == u.id()) {
             user = new UserSession(u, user.loggedInAt());

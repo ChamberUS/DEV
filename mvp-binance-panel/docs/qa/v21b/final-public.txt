@@ -1,0 +1,46 @@
+PASS entry opens the login route: auth:login
+TRACE +611ms thread=JavaFX Application Thread seq=3 pending=null auth:login -> h-faq via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$publicMode$5:242 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS public page opens: h-faq
+PASS public host shows h-faq
+PASS no rail or dock in public mode (h-faq)
+TRACE +687ms thread=JavaFX Application Thread seq=4 pending=null h-faq -> h-about via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$publicMode$5:242 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS public page opens: h-about
+PASS public host shows h-about
+PASS no rail or dock in public mode (h-about)
+TRACE +688ms thread=JavaFX Application Thread seq=5 pending=null h-about -> h-help via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$publicMode$5:242 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS public page opens: h-help
+PASS public host shows h-help
+PASS no rail or dock in public mode (h-help)
+TRACE +688ms thread=JavaFX Application Thread seq=6 pending=null h-help -> h-terms via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$publicMode$5:242 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS public page opens: h-terms
+PASS public host shows h-terms
+PASS no rail or dock in public mode (h-terms)
+TRACE +688ms thread=JavaFX Application Thread seq=7 pending=null h-terms -> h-privacy via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$publicMode$5:242 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS public page opens: h-privacy
+PASS public host shows h-privacy
+PASS no rail or dock in public mode (h-privacy)
+PASS no session: t-desk stays inaccessible (route h-privacy)
+PASS no session: t-markets stays inaccessible (route h-privacy)
+PASS no session: overview stays inaccessible (route h-privacy)
+PASS no session: capture stays inaccessible (route h-privacy)
+PASS no session: validation stays inaccessible (route h-privacy)
+PASS no session: t-byx stays inaccessible (route h-privacy)
+PASS no session: t-wallet stays inaccessible (route h-privacy)
+PASS no session: t-treasury stays inaccessible (route h-privacy)
+PASS no session: t-profile stays inaccessible (route h-privacy)
+PASS no session: t-security stays inaccessible (route h-privacy)
+PASS no session: t-sessions stays inaccessible (route h-privacy)
+PASS no session: t-settings stays inaccessible (route h-privacy)
+PASS no session: sys-status stays inaccessible (route h-privacy)
+PASS no session: h-diagnostics stays inaccessible (route h-privacy)
+PASS no session: h-overview stays inaccessible (route h-privacy)
+PASS no session: h-shortcuts stays inaccessible (route h-privacy)
+PASS no session: h-whats-new stays inaccessible (route h-privacy)
+PASS no session: auth:setup stays inaccessible (route h-privacy)
+PASS still no session
+PASS public host has Sign in
+TRACE +690ms thread=JavaFX Application Thread seq=25 pending=null h-privacy -> null via ShellRouter.reset:84 < PanelApp.showEntry:160 < PanelApp.lambda$showPublic$44:832 < PublicHost.lambda$new$1:46 < FinalQa$App.lambda$publicMode$5:258 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+TRACE +695ms thread=JavaFX Application Thread seq=26 pending=null null -> auth:login via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < PanelApp.showEntry:179 < PanelApp.lambda$showPublic$44:832 < PublicHost.lambda$new$1:46 < FinalQa$App.lambda$publicMode$5:258 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS Sign in returns to the login route: auth:login
+PASS public host released
+RESULT mode=public failures=0

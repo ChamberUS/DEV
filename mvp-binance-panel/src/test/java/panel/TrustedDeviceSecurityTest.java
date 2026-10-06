@@ -64,7 +64,7 @@ class TrustedDeviceSecurityTest {
             public String startVerification(String phone){return "fake-id";}
             public boolean checkVerification(String phone,String id,String code){entered.countDown();try{release.await(5,TimeUnit.SECONDS);}catch(InterruptedException e){throw new RuntimeException();}return true;}
         };
-        var access=new AdminAccessService(f.sessions,new SecurityConfig(30,true),new OtpService(f.clock),f.otpProvider,provider,f.devices,f.audit,f.clock);
+        var access=new AdminAccessService(f.sessions,f.users,new SecurityConfig(30,true),new OtpService(f.clock),f.otpProvider,provider,f.devices,f.audit,f.clock);
         var flow=access.startTwoFactor();flow.sendEmailCode();flow.verifyEmail(f.otpProvider.lastCode());flow.sendSmsCode();
         var result=new AtomicReference<OtpService.Result>();Thread t=new Thread(()->result.set(flow.verifySms("123456")));t.start();
         try{assertTrue(entered.await(5,TimeUnit.SECONDS));relogin(f);}finally{release.countDown();t.join(5000);}

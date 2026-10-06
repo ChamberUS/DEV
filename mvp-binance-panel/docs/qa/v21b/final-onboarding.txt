@@ -1,0 +1,29 @@
+PASS first install opens the Welcome route: auth:welcome
+PASS Welcome offers the administrator account
+TRACE +621ms thread=JavaFX Application Thread seq=3 pending=null auth:welcome -> auth:setup via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < FinalQa$App.invoke:125 < FinalQa$App.show:129 < FinalQa$App.lambda$onboarding$7:276 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS Welcome leads to the first-administrator setup
+TRACE +786ms thread=JavaFX Application Thread seq=3 pending=null auth:setup -> null via ShellRouter.reset:84 < PanelApp.showEntry:160 < FinalQa$App.invoke:125 < FinalQa$App.lambda$onboarding$7:279 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+TRACE +795ms thread=JavaFX Application Thread seq=4 pending=null null -> auth:login via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < PanelApp.showEntry:179 < FinalQa$App.invoke:125 < FinalQa$App.lambda$onboarding$7:279 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS after setup the login opens
+PASS gates before onboarding: LOCKED / SEALED
+TRACE +929ms thread=JavaFX Application Thread seq=4 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:265 < PanelApp.afterLogin:233 < FinalQa$App.invoke:125 < FinalQa$App.login:168 < FinalQa$App.lambda$onboarding$7:285 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+TRACE +1345ms thread=JavaFX Application Thread seq=5 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < PanelApp.enterApp:332 < PanelApp.afterLogin:233 < FinalQa$App.invoke:125 < FinalQa$App.login:168 < FinalQa$App.lambda$onboarding$7:285 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS onboarding opens after the first login
+PASS starts at step 1 of 6
+PASS Next advances
+PASS choice recorded in the dialog only
+PASS nothing persisted before Finish/Skip
+PASS Skip closes the dialog
+PASS Skip records completion and keeps the primary workspace
+PASS Skip keeps the route: t-desk
+PASS replay opens the dialog again
+PASS five fast Next end on step 6 with one active step
+PASS Finish closes the dialog
+PASS Finish stores the primary workspace
+PASS a replay never navigates (only the first onboarding opens the chosen workspace): t-desk
+PASS gates after onboarding: LOCKED / SEALED
+PASS trading untouched (DISABLED)
+PASS no wallet linked by onboarding
+PASS BYX node untouched (no DEVNET, no node start)
+PASS only the two onboarding preferences changed value on disk: [onboardingCompleted, primaryWorkspace]
+RESULT mode=onboarding failures=0

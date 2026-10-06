@@ -64,6 +64,12 @@ public final class FinalQa {
     }
 
     public static final class App extends PanelApp {
+        @Override
+        protected panel.app.AppContext createContext() {
+            // prodauth usa a composição de PRODUÇÃO (sem provedor de desenvolvimento) para provar que security.dev.mode=true não muda nada
+            return mode.equals("prodauth") ? new panel.app.AppContext() : panel.QaContext.create();
+        }
+
         private AppContext ctx;
         private ShellRouter router;
         private Map<String, View> views;
@@ -96,6 +102,7 @@ public final class FinalQa {
                     case "system" -> system();
                     case "legacy" -> legacy();
                     case "roundtrip" -> roundtrip();
+                    case "prodauth" -> prodAuth();
                     default -> throw new IllegalArgumentException(mode);
                 }
                 after(600, this::run);
@@ -164,9 +171,9 @@ public final class FinalQa {
         private void verifyAdmin() throws Exception {
             var flow = ctx.adminAccess.startTwoFactor();
             flow.sendEmailCode();
-            flow.verifyEmail(ctx.devOtp.lastCode());
+            flow.verifyEmail(panel.QaContext.dev().lastCode());
             flow.sendSmsCode();
-            flow.verifySms(ctx.devOtp.lastCode());
+            flow.verifySms(panel.QaContext.dev().lastCode());
             flow.finish(false);
         }
 
@@ -576,6 +583,45 @@ public final class FinalQa {
                 l.addAll(List.of("overview", "t-byx", "t-desk"));
             }
             return l;
+        }
+
+        // ---- L10: com security.dev.mode=true, o app normal NÃO usa provedor de desenvolvimento ------------------------------------
+
+        private void prodAuth() {
+            plan.add(() -> {
+                check("true".equals(java.util.Properties.class.cast(propsOf()).getProperty("security.dev.mode")), "the temp profile really has security.dev.mode=true");
+                check(ctx.emailProvider.getClass().getSimpleName().equals("ResendEmailOtpProvider") && ctx.smsProvider.getClass().getSimpleName().equals("TwilioVerifySmsProvider"),
+                        "providers are the real ones: " + ctx.emailProvider.getClass().getSimpleName() + "/" + ctx.smsProvider.getClass().getSimpleName());
+                check(ctx.developmentLabel == null, "no development label in the normal app");
+                login();
+                next(1200);
+            });
+            plan.add(() -> {
+                check(!ctx.adminAccess.twoFactorConfigured(), "no two-factor is configured in this profile and the dev flag did not fake it");
+                boolean refused = false;
+                try {
+                    ctx.adminAccess.startTwoFactor();
+                } catch (panel.auth.TwoFactorNotConfiguredException e) {
+                    refused = true;
+                }
+                check(refused, "starting admin verification is refused as NOT CONFIGURED (no dev bypass)");
+                show("overview");
+                next(800);
+            });
+            plan.add(() -> {
+                check(!ctx.adminAccess.hasValidAdminSession(), "no admin elevation exists");
+                check(!"overview".equals(router.route()), "Research stayed closed: " + router.route());
+                check(!java.nio.file.Files.exists(java.nio.file.Path.of("target/classes/panel/auth/DevOtpProvider.class")), "DevOtpProvider is not in the production classes");
+                next(100);
+            });
+        }
+
+        private Object propsOf() throws Exception {
+            java.util.Properties p = new java.util.Properties();
+            try (var in = java.nio.file.Files.newInputStream(java.nio.file.Path.of(System.getProperty("user.home"), ".mvp-binance-panel", "security.properties"))) {
+                p.load(in);
+            }
+            return p;
         }
 
         // ---- 22/25. Views legadas e fronteira de CSS ---------------------------------------------------------------------

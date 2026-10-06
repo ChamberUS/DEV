@@ -1,0 +1,11 @@
+PASS the temp profile really has security.dev.mode=true
+PASS providers are the real ones: ResendEmailOtpProvider/TwilioVerifySmsProvider
+PASS no development label in the normal app
+TRACE +700ms thread=JavaFX Application Thread seq=2 pending=null auth:login -> null via ShellRouter.reset:84 < PanelApp.enterApp:265 < PanelApp.afterLogin:233 < FinalQa$App.invoke:125 < FinalQa$App.login:168 < FinalQa$App.lambda$prodAuth$42:596 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+TRACE +1162ms thread=JavaFX Application Thread seq=3 pending=null null -> t-desk via ShellRouter.commit:89 < ShellRouter.request:57 < PanelApp.show:404 < PanelApp.enterApp:332 < PanelApp.afterLogin:233 < FinalQa$App.invoke:125 < FinalQa$App.login:168 < FinalQa$App.lambda$prodAuth$42:596 < FinalQa$App.run:153 < FinalQa$App.lambda$after$0:140 < 
+PASS no two-factor is configured in this profile and the dev flag did not fake it
+PASS starting admin verification is refused as NOT CONFIGURED (no dev bypass)
+PASS no admin elevation exists
+PASS Research stayed closed: t-desk
+PASS DevOtpProvider is not in the production classes
+RESULT mode=prodauth failures=0

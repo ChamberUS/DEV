@@ -297,7 +297,7 @@ class AuthSecurityTest {
         var config=panel.security.SecurityConfig.load(path);
         assertEquals(7,config.sessionTimeoutMinutes());assertFalse(config.devMode());
         AuthFixture f=AuthFixture.ready();f.seedAdmin();f.auth.login("boss",ADMIN_PW);
-        var access=new panel.auth.AdminAccessService(f.sessions,config,new panel.auth.OtpService(f.clock),f.otpProvider,f.otpProvider,f.devices,f.audit,f.clock);
+        var access=new panel.auth.AdminAccessService(f.sessions,f.users,config,new panel.auth.OtpService(f.clock),f.otpProvider,f.otpProvider,f.devices,f.audit,f.clock);
         assertEquals(AccessDecision.REQUIRES_2FA,access.evaluate());
         assertFalse(access.tryTrustedDevice());assertThrows(AccessDeniedException.class,access::requireAdmin);
     }

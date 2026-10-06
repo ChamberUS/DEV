@@ -12,7 +12,6 @@ import panel.adapter.MockTradingProvider;
 import panel.adapter.ResearchModeTradingProvider;
 import panel.auth.AdminAccessService;
 import panel.auth.AuthService;
-import panel.auth.DevOtpProvider;
 import panel.auth.InMemoryRateLimiter;
 import panel.auth.OtpService;
 import panel.auth.PasswordHasher;
@@ -45,11 +44,33 @@ public class AppContext {
     public final SessionManager sessions = new SessionManager();
     public final panel.security.SecretStore secrets = new panel.security.MacOsKeychainSecretStore();
     public final panel.security.ProviderConfig providers = panel.security.ProviderConfig.load();
-    public final DevOtpProvider devOtp = security.devMode() ? new DevOtpProvider() : null;
-    public final panel.auth.EmailOtpProvider emailProvider = devOtp != null ? devOtp : new panel.auth.ResendEmailOtpProvider(secrets, providers);
-    public final panel.auth.SmsOtpProvider smsProvider = devOtp != null ? devOtp : new panel.auth.TwilioVerifySmsProvider(secrets, providers);
+    /**
+     * Provedores de OTP. O caminho normal usa SEMPRE os reais (Resend e Twilio Verify): nenhum arquivo, variável de ambiente ou flag de
+     * runtime troca isso. Um provedor de desenvolvimento só pode ser injetado por código que o construa explicitamente
+     * ({@link #create}); a classe do provedor de desenvolvimento não faz parte do artefato de produção, só do código de teste.
+     * Isto não resiste a quem pode modificar os próprios binários.
+     */
+    public record Providers(panel.auth.EmailOtpProvider email, panel.auth.SmsOtpProvider sms, String developmentLabel) {
+    }
+
+    private static final ThreadLocal<Providers> INJECTED = new ThreadLocal<>();
+
+    public static AppContext create(panel.adapter.CaptureProcessProbe captureProbe, Providers injected) {
+        INJECTED.set(injected);
+        try {
+            return new AppContext(captureProbe);
+        } finally {
+            INJECTED.remove();
+        }
+    }
+
+    private final Providers injected = INJECTED.get();
+    /** Rótulo exibido quando a verificação usa um provedor de desenvolvimento injetado; null no caminho normal. */
+    public final String developmentLabel = injected == null ? null : injected.developmentLabel();
+    public final panel.auth.EmailOtpProvider emailProvider = injected != null ? injected.email() : new panel.auth.ResendEmailOtpProvider(secrets, providers);
+    public final panel.auth.SmsOtpProvider smsProvider = injected != null ? injected.sms() : new panel.auth.TwilioVerifySmsProvider(secrets, providers);
     public final panel.auth.TrustedDeviceService trustedDevices = new panel.auth.TrustedDeviceService(db, secrets, sessions, audit, clock);
-    public final AdminAccessService adminAccess = new AdminAccessService(sessions, security, new OtpService(clock),
+    public final AdminAccessService adminAccess = new AdminAccessService(sessions, users, security, new OtpService(clock),
             emailProvider, smsProvider, trustedDevices, audit, clock);
     public final PasswordHasher hasher = new PasswordHasher();
     public final AuthService auth = new AuthService(users, hasher, sessions,
@@ -104,6 +125,7 @@ public class AppContext {
         sessions.onLogout(captureMonitor::stop);
         sessions.onLogout(byx::pause);
         userService.onContactsChanged = trustedDevices::revokeAllForCurrentUser;
+        userService.onCredentialsChanged = adminAccess::credentialsChanged;
         applyMotionSettings();
         research.snapshot.addListener((o, a, s) -> trading.update(s));
         trading.update(research.snapshot.get());
