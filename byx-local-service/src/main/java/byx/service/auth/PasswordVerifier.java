@@ -56,6 +56,44 @@ public final class PasswordVerifier {
         return phc;
     }
 
+    /** O verificador PHC é utilizável por este serviço (algoritmo, parâmetros dentro dos limites, sal e hash decodificáveis)? Sem derivar nada. */
+    public static boolean compatible(String encoded) {
+        try {
+            String[] parts = encoded.split("\\$");
+            if (encoded.length() > 256 || parts.length != 6 || !parts[1].equals("argon2id") || !parts[2].equals("v=19")) {
+                return false;
+            }
+            int m = 0;
+            int t = 0;
+            int p = 0;
+            for (String kv : parts[3].split(",")) {
+                String[] x = kv.split("=");
+                switch (x[0]) {
+                    case "m" -> m = Integer.parseInt(x[1]);
+                    case "t" -> t = Integer.parseInt(x[1]);
+                    case "p" -> p = Integer.parseInt(x[1]);
+                    default -> {
+                        return false;
+                    }
+                }
+            }
+            if (m < 8 || m > MAX_MEMORY_KB || t < 1 || t > MAX_ITERATIONS || p < 1 || p > MAX_PARALLELISM) {
+                return false;
+            }
+            Base64.Decoder d = Base64.getDecoder();
+            byte[] salt = d.decode(parts[4]);
+            return salt.length >= 8 && salt.length <= 64 && d.decode(parts[5]).length == HASH_BYTES;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /** Só o algoritmo e os parâmetros (nunca sal nem hash): "argon2id v=19 m=19456,t=2,p=1". */
+    public static String algorithmOf(String encoded) {
+        String[] parts = encoded.split("\\$");
+        return parts.length == 6 ? parts[1] + " " + parts[2] + " " + parts[3] : "unknown";
+    }
+
     public boolean verify(char[] password, String encoded) {
         try {
             String[] parts = encoded.split("\\$");

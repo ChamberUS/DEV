@@ -107,7 +107,7 @@ class SecretStoreTest {
     @Test
     void onlyTheTestIdsAreUsableInThisPhase() throws Exception {
         for (SecretId id : SecretId.values()) {
-            assertEquals(id == SecretId.TEST_CANARY || id == SecretId.AUTHORITY_TEST_ANCHOR || id == SecretId.AUTHORITY_TEST_ENCRYPTION_KEY, id.usable(), id.name());
+            assertEquals(id != SecretId.TRUSTED_DEVICE_MASTER_KEY && id != SecretId.BINANCE_READONLY_CREDENTIAL, id.usable(), id.name());
             if (!id.usable()) {
                 try (SecretBytes v = SecretBytes.random(16)) {
                     assertEquals(SecretStatus.NOT_CONFIGURED, assertThrows(SecretStoreException.class, () -> store.write(id, v)).status(), id.name());
@@ -138,8 +138,10 @@ class SecretStoreTest {
             }
         }
         assertEquals("invalid.byx-canary-test/test-canary", SecretNamespace.service(SecretId.TEST_CANARY));
-        assertEquals(SecretStatus.NOT_CONFIGURED, assertThrows(SecretStoreException.class, () -> SecretNamespace.service(SecretId.RESEND_API_KEY)).status(),
-                "production ids have no namespace until the final bundle id exists");
+        assertEquals("com.buynnex.byx.service/secrets/authority-encryption-key", SecretNamespace.service(SecretId.AUTHORITY_ENCRYPTION_KEY), "production items live under the final service id");
+        assertNotEquals(SecretNamespace.service(SecretId.AUTHORITY_TEST_ENCRYPTION_KEY).replace("authority-test-", ""), SecretNamespace.service(SecretId.AUTHORITY_ENCRYPTION_KEY).replace("authority-", ""),
+                "test and production namespaces never collide");
+        assertEquals(SecretStatus.NOT_CONFIGURED, assertThrows(SecretStoreException.class, () -> SecretNamespace.service(SecretId.BINANCE_READONLY_CREDENTIAL)).status(), "unused ids stay unusable");
     }
 
     @Test

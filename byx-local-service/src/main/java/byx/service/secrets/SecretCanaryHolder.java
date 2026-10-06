@@ -11,7 +11,7 @@ public final class SecretCanaryHolder {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        SecretStore store = SecretStores.system();
+        SecretStore store = SecretStores.test();
         System.out.println("holder.status=" + store.status());
         boolean wrote = false;
         try (SecretBytes v = SecretBytes.random(32)) {

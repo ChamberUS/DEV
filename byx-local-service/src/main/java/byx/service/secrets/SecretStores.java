@@ -13,6 +13,16 @@ public final class SecretStores {
         }
     }
 
+    /** Armazenamento de TESTE/QA: só itens do escopo TEST (incapaz de tocar a autoridade ou os segredos reais). */
+    public static SecretStore test() {
+        return new ScopedSecretStore(system(), SecretId.Scope.TEST);
+    }
+
+    /** Armazenamento de PRODUÇÃO: só itens do escopo PRODUCTION (incapaz de tocar itens de teste). */
+    public static SecretStore production() {
+        return new ScopedSecretStore(system(), SecretId.Scope.PRODUCTION);
+    }
+
     /** Sem macOS/JNA: tudo NOT_CONFIGURED (nunca texto puro). */
     private static final class UnavailableSecretStore implements SecretStore {
         public SecretStatus status() {

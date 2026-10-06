@@ -35,6 +35,9 @@ import java.util.function.UnaryOperator;
 public final class AuthorityStore {
     public enum Status { UNINITIALIZED, TRUSTED, UNTRUSTED }
 
+    /** Versão do formato do snapshot (para o manifesto da migração). */
+    public static final int FORMAT_VERSION = AuthorityCodec.FORMAT_VERSION;
+
     private static final long MAX_FILE = AuthorityCodec.MAX_FILE;
     private final Path file;
     private final Anchor anchor;
@@ -231,14 +234,21 @@ public final class AuthorityStore {
 
     /** Aplica uma mudança AUTORIZADA (só código interno do serviço): versão+1, arquivo atômico, depois âncora. */
     public synchronized AuthorityState mutate(UnaryOperator<AuthorityState> change) throws AuthorityException {
+        return mutateRaw(change);
+    }
+
+    /** Como {@link #mutate}, mas deixa passar RuntimeException de política (a trava de migração) para o chamador interno traduzir. */
+    synchronized AuthorityState mutateRaw(UnaryOperator<AuthorityState> change) throws AuthorityException {
         AuthorityState cur = current();
         AuthorityState proposed;
         try {
             proposed = change.apply(cur);
+        } catch (AuthorityAdmin.FrozenException e) {
+            throw e; // política da trava: o chamador interno traduz para "frozen"
         } catch (RuntimeException e) {
             throw new AuthorityException("invalid_change"); // a mudança não é aplicada; nada é escrito
         }
-        AuthorityState next = new AuthorityState(cur.version() + 1, proposed.accounts());
+        AuthorityState next = new AuthorityState(cur.version() + 1, proposed.accounts(), proposed.providers(), proposed.devices(), proposed.migrationFreeze());
         byte[] canon = AuthorityCodec.canonical(next);
         byte[] mac = AuthorityCodec.mac(key, canon);
         try {

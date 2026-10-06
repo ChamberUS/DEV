@@ -28,6 +28,7 @@ import javax.crypto.spec.SecretKeySpec;
 final class AuthorityCodec {
     static final int FORMAT = 1;
     static final int MAX_ACCOUNTS = 10_000;
+    static final int MAX_DEVICES = 10_000;
     private static final byte[] LABEL = "byx-authority-v1\u0000".getBytes(StandardCharsets.UTF_8);
     private static final JsonMapper JSON = JsonMapper.builder(JsonFactory.builder()
             .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(6).maxStringLength(512).maxNumberLength(20).build()).build())
@@ -65,7 +66,32 @@ final class AuthorityCodec {
             n.put("credentialVersion", a.credentialVersion());
             n.put("passwordHash", a.passwordHash());
             n.put("createdAtMs", a.createdAtMs());
+            n.put("legacyUserId", a.legacyUserId());
+            n.put("email", a.email());
+            n.put("phone", a.phone());
+            n.put("emailVerified", a.emailVerified());
+            n.put("phoneVerified", a.phoneVerified());
+            n.put("mustChangePassword", a.mustChangePassword());
+            n.put("lastLoginAtMs", a.lastLoginAtMs());
         }
+        ObjectNode p = o.putObject("providers");
+        p.put("resendFromAddress", s.providers().resendFromAddress());
+        p.put("twilioAccountSid", s.providers().twilioAccountSid());
+        p.put("twilioApiKeySid", s.providers().twilioApiKeySid());
+        p.put("twilioVerifyServiceSid", s.providers().twilioVerifyServiceSid());
+        ArrayNode devs = o.putArray("devices");
+        List<TrustedDevice> ds = new ArrayList<>(s.devices());
+        ds.sort(Comparator.comparing(TrustedDevice::id));
+        for (TrustedDevice d : ds) {
+            ObjectNode n = devs.addObject();
+            n.put("id", d.id());
+            n.put("accountId", d.accountId());
+            n.put("createdAtMs", d.createdAtMs());
+            n.put("lastUsedAtMs", d.lastUsedAtMs());
+            n.put("expiresAtMs", d.expiresAtMs());
+            n.put("revokedAtMs", d.revokedAtMs());
+        }
+        o.put("migrationFreeze", s.migrationFreeze());
         try {
             return JSON.writeValueAsBytes(o);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
@@ -86,7 +112,7 @@ final class AuthorityCodec {
 
     // ---- snapshot cifrado: magic(4) | formatVersion(2) | authorityVersion(8) | nonce(12) | ciphertext+tag(GCM, 128 bits) ----------------------
     static final byte[] MAGIC = {'B', 'Y', 'X', 'A'};
-    static final int FORMAT_VERSION = 2;
+    static final int FORMAT_VERSION = 3;
     static final int HEADER = 4 + 2 + 8;
     static final int NONCE = 12;
     static final int TAG_BITS = 128;
@@ -177,31 +203,42 @@ final class AuthorityCodec {
     static AuthorityState parseState(byte[] plain) throws FormatException {
         try {
             JsonNode st = JSON.readTree(plain);
-            if (st == null || !st.isObject() || st.size() != 2 || !st.path("version").isIntegralNumber() || !st.path("accounts").isArray()) {
+            if (st == null || !st.isObject() || st.size() != 5 || !st.path("version").isIntegralNumber() || !st.path("accounts").isArray() || !st.path("providers").isObject()
+                    || !st.path("devices").isArray() || !st.path("migrationFreeze").isBoolean()) {
                 throw new FormatException();
             }
             long version = st.get("version").asLong();
-            if (version < 1 || st.get("accounts").size() > MAX_ACCOUNTS) {
+            if (version < 1 || st.get("accounts").size() > MAX_ACCOUNTS || st.get("devices").size() > MAX_DEVICES) {
                 throw new FormatException();
             }
             List<Account> accounts = new ArrayList<>();
             Set<String> ids = new HashSet<>();
             Set<String> names = new HashSet<>();
+            Set<String> emails = new HashSet<>();
+            Set<Long> legacy = new HashSet<>();
             for (JsonNode n : st.get("accounts")) {
-                if (!n.isObject() || n.size() != 7) {
+                if (!n.isObject() || n.size() != 14) {
                     throw new FormatException();
                 }
                 String id = text(n, "id");
                 String username = text(n, "username");
                 String roleText = text(n, "role");
                 String hash = text(n, "passwordHash");
+                String email = nullableText(n, "email");
+                String phone = nullableText(n, "phone");
                 if (!id.matches("[0-9a-f]{32}") || !username.matches("[a-z0-9._-]{1,64}") || !hash.startsWith("$argon2id$") || hash.length() > 256
-                        || !n.path("enabled").isBoolean() || !n.path("credentialVersion").isIntegralNumber() || !n.path("createdAtMs").isIntegralNumber()) {
+                        || !n.path("enabled").isBoolean() || !n.path("credentialVersion").isIntegralNumber() || !n.path("createdAtMs").isIntegralNumber()
+                        || !n.path("legacyUserId").isIntegralNumber() || !n.path("lastLoginAtMs").isIntegralNumber() || !n.path("emailVerified").isBoolean()
+                        || !n.path("phoneVerified").isBoolean() || !n.path("mustChangePassword").isBoolean()
+                        || email != null && (email.length() > 254 || !email.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) || phone != null && !phone.matches("\\+[1-9][0-9]{7,14}")) {
                     throw new FormatException();
                 }
                 long cv = n.get("credentialVersion").asLong();
                 long created = n.get("createdAtMs").asLong();
-                if (cv < 1 || created < 0 || !ids.add(id) || !names.add(username)) {
+                long legacyId = n.get("legacyUserId").asLong();
+                long lastLogin = n.get("lastLoginAtMs").asLong();
+                if (cv < 1 || created < 0 || legacyId < 0 || lastLogin < 0 || !ids.add(id) || !names.add(username) || email != null && !emails.add(email.toLowerCase(java.util.Locale.ROOT))
+                        || legacyId != 0 && !legacy.add(legacyId)) {
                     throw new FormatException();
                 }
                 Role role;
@@ -210,12 +247,41 @@ final class AuthorityCodec {
                 } catch (IllegalArgumentException e) {
                     throw new FormatException();
                 }
-                accounts.add(new Account(id, username, role, n.get("enabled").asBoolean(), cv, hash, created));
+                accounts.add(new Account(id, username, role, n.get("enabled").asBoolean(), cv, hash, created, legacyId, email, phone, n.get("emailVerified").asBoolean(),
+                        n.get("phoneVerified").asBoolean(), n.get("mustChangePassword").asBoolean(), lastLogin));
             }
-            return new AuthorityState(version, accounts);
+            JsonNode pv = st.get("providers");
+            if (pv.size() != 4) {
+                throw new FormatException();
+            }
+            ProviderSettings providers = new ProviderSettings(nullableText(pv, "resendFromAddress"), nullableText(pv, "twilioAccountSid"), nullableText(pv, "twilioApiKeySid"),
+                    nullableText(pv, "twilioVerifyServiceSid"));
+            List<TrustedDevice> devices = new ArrayList<>();
+            Set<String> deviceIds = new HashSet<>();
+            for (JsonNode n : st.get("devices")) {
+                if (!n.isObject() || n.size() != 6 || !n.path("createdAtMs").isIntegralNumber() || !n.path("lastUsedAtMs").isIntegralNumber() || !n.path("expiresAtMs").isIntegralNumber()
+                        || !n.path("revokedAtMs").isIntegralNumber()) {
+                    throw new FormatException();
+                }
+                String did = text(n, "id");
+                String acc = text(n, "accountId");
+                if (!did.matches("[0-9a-f]{32}") || !ids.contains(acc) || !deviceIds.add(did)) {
+                    throw new FormatException();
+                }
+                devices.add(new TrustedDevice(did, acc, n.get("createdAtMs").asLong(), n.get("lastUsedAtMs").asLong(), n.get("expiresAtMs").asLong(), n.get("revokedAtMs").asLong()));
+            }
+            return new AuthorityState(version, accounts, providers, devices, st.get("migrationFreeze").asBoolean());
         } catch (java.io.IOException | IllegalArgumentException e) {
             throw new FormatException();
         }
+    }
+
+    private static String nullableText(JsonNode n, String f) throws FormatException {
+        JsonNode v = n.get(f);
+        if (v == null || !(v.isNull() || v.isTextual())) {
+            throw new FormatException();
+        }
+        return v.isNull() ? null : v.asText();
     }
 
     private static String text(JsonNode n, String f) throws FormatException {

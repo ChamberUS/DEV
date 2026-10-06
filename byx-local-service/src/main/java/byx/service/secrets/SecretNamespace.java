@@ -8,6 +8,8 @@ package byx.service.secrets;
  */
 final class SecretNamespace {
     static final String TEST = "invalid.byx-canary-test";
+    /** Namespace de PRODUÇÃO: derivado do ID final do serviço (identity.env), nunca de configuração. */
+    static final String PRODUCTION = "com.buynnex.byx.service/secrets";
     static final String ACCOUNT = "byx";
     /** Item de SONDA de disponibilidade: nome dedicado que nunca é criado (a sonda só o apaga: -34018 sem entitlement, -25300 com). Nunca o canário nem um segredo. */
     static final String PROBE_SERVICE = TEST + "/availability-probe";
@@ -19,6 +21,6 @@ final class SecretNamespace {
         if (!id.usable()) {
             throw new SecretStoreException(SecretStatus.NOT_CONFIGURED); // FINAL BUNDLE ID REQUIRED
         }
-        return TEST + "/" + id.wireName();
+        return (id.scope() == SecretId.Scope.PRODUCTION ? PRODUCTION : TEST) + "/" + id.wireName();
     }
 }

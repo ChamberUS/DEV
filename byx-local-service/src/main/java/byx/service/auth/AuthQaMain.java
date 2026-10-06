@@ -29,9 +29,10 @@ public final class AuthQaMain {
     private AuthQaMain() {
     }
 
-    /** Segundo fator de TESTE: arquivo 0600 por conta em qa-otp/. Só existe nesta classe de QA. */
+    /** Segundo fator de TESTE (dois estágios, como o real): e-mail e SMS escrevem o código em arquivos 0600 de qa-otp/ (nunca IPC, log ou saída). Só existe nesta classe de QA. */
     static final class FileSecondFactor implements SecondFactorProvider {
         private final Path dir;
+        private final SecureRandom rnd = new SecureRandom();
 
         FileSecondFactor(Path dir) {
             this.dir = dir;
@@ -43,13 +44,38 @@ public final class AuthQaMain {
         }
 
         @Override
-        public void deliver(String accountId, char[] code) throws DeliveryException {
+        public boolean smsRequired() {
+            return true;
+        }
+
+        private void put(String name, String content) throws DeliveryException {
             try {
                 Files.createDirectories(dir, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
-                Path f = dir.resolve(accountId + ".otp");
+                Path f = dir.resolve(name);
                 Files.deleteIfExists(f);
                 Files.createFile(f, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
-                Files.writeString(f, new String(code));
+                Files.writeString(f, content);
+            } catch (IOException e) {
+                throw new DeliveryException();
+            }
+        }
+
+        @Override
+        public void deliver(String accountId, char[] code) throws DeliveryException {
+            put(accountId + ".otp", new String(code));
+        }
+
+        @Override
+        public String startSms(Account a) throws DeliveryException {
+            String code = String.format("%06d", rnd.nextInt(1_000_000));
+            put(a.id() + ".sms", code);
+            return "VE" + "0".repeat(32);
+        }
+
+        @Override
+        public boolean checkSms(Account a, String verificationId, String code) throws DeliveryException {
+            try {
+                return Files.readString(dir.resolve(a.id() + ".sms")).trim().equals(code);
             } catch (IOException e) {
                 throw new DeliveryException();
             }
@@ -63,43 +89,50 @@ public final class AuthQaMain {
         }
         String env = System.getenv("BYX_LOCAL_SERVICE_HOME");
         Path home = env != null && !env.isBlank() ? Path.of(env) : Path.of(System.getProperty("user.home"), ".byx-auth-qa");
-        Path qa = home.resolve("qa-authority");
+        // GUARDA: o QA nunca roda sobre o home REAL do serviço (nem em diretório que o contenha ou o seja): a autoridade real é inalcançável daqui
+        Path real = AuthProfile.defaultServiceHome().toAbsolutePath().normalize();
+        Path mine = home.toAbsolutePath().normalize();
+        if (mine.equals(real) || mine.startsWith(real) || real.startsWith(mine)) {
+            System.err.println("qa refuses to run on the real service home");
+            System.exit(4);
+        }
+        AuthProfile profile = AuthProfile.qa(home.resolve("qa-authority"));
+        Path qa = profile.dir();
         Files.createDirectories(qa, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
-        SecretStore secrets = SecretStores.system();
-        Anchor anchor = new SecretStoreAnchor(secrets, SecretId.AUTHORITY_TEST_ANCHOR);
-        EncryptionKeyVault vault = new SecretStoreKeyVault(secrets, SecretId.AUTHORITY_TEST_ENCRYPTION_KEY);
-        if (Files.exists(qa.resolve("qa-wipe"))) { // limpeza final do QA: remove o item de teste do keychain e os arquivos de teste; não sobe serviço
-            secrets.delete(SecretId.AUTHORITY_TEST_ANCHOR);
-            secrets.delete(SecretId.AUTHORITY_TEST_ENCRYPTION_KEY);
-            for (String f : new String[] {"authority.bin", "ratelimit.json", "qa-credentials.json", "qa-wipe"}) {
+        SecretStore secrets = profile.secrets(); // escopo TEST: incapaz de tocar itens de produção
+        if (Files.exists(qa.resolve("qa-wipe"))) { // limpeza final do QA: remove os itens de TESTE do keychain e os arquivos de teste; não sobe serviço
+            secrets.delete(profile.anchorId());
+            secrets.delete(profile.encryptionKeyId());
+            for (String f : new String[] {"authority.bin", "ratelimit.bin", "audit.log", "qa-credentials.json", "qa-wipe"}) {
                 Files.deleteIfExists(qa.resolve(f));
             }
             System.out.println("qa wiped");
             System.exit(0);
         }
         Path reset = qa.resolve("qa-reset");
-        if (Files.exists(reset)) { // QA: recomeça do zero (só o item de teste e o arquivo de teste)
-            secrets.delete(SecretId.AUTHORITY_TEST_ANCHOR);
-            secrets.delete(SecretId.AUTHORITY_TEST_ENCRYPTION_KEY);
-            Files.deleteIfExists(qa.resolve("authority.bin"));
-            Files.deleteIfExists(qa.resolve("ratelimit.json"));
+        if (Files.exists(reset)) { // QA: recomeça do zero (só os itens de teste e os arquivos de teste)
+            secrets.delete(profile.anchorId());
+            secrets.delete(profile.encryptionKeyId());
+            Files.deleteIfExists(profile.snapshot());
+            Files.deleteIfExists(profile.rateLimitFile());
+            Files.deleteIfExists(profile.auditFile());
             Files.deleteIfExists(reset);
         }
-        AuthorityStore store = AuthorityStore.open(qa.resolve("authority.bin"), anchor, vault);
-        PasswordVerifier pw = new PasswordVerifier();
         Clock clock = Clock.systemUTC();
-        if (store.status() == AuthorityStore.Status.UNINITIALIZED) {
-            store.initialize();
-            seed(store, pw, clock, qa);
+        PasswordVerifier pw = new PasswordVerifier();
+        AuthorityStore pre = AuthorityStore.open(profile.snapshot(), new SecretStoreAnchor(secrets, profile.anchorId()), new SecretStoreKeyVault(secrets, profile.encryptionKeyId()));
+        if (pre.status() == AuthorityStore.Status.UNINITIALIZED) {
+            pre.initialize();
+            seed(pre, pw, clock, qa);
         }
-        AuthService auth;
-        if (store.status() == AuthorityStore.Status.TRUSTED) {
-            AuthRateLimiter limiter = new AuthRateLimiter(qa.resolve("ratelimit.json"), store.derivedKey("ratelimit"), store.derivedKey("ratelimit-subject"), clock);
-            auth = new AuthService(store, new AuthorityAdmin(store, pw, clock), pw, limiter, new FileSecondFactor(qa.resolve("qa-otp")), AuthPolicy.standard(), new AuthAudit(clock), clock);
-        } else { // não confiável: sobe mesmo assim para provar a falha fechada (toda autenticação responde AUTHORITY_UNAVAILABLE)
-            AuthRateLimiter limiter = new AuthRateLimiter(null, new byte[32], new byte[32], clock);
-            auth = new AuthService(store, new AuthorityAdmin(store, pw, clock), pw, limiter, new NotConfiguredSecondFactor(), AuthPolicy.standard(), new AuthAudit(clock), clock);
+        if (Files.exists(qa.resolve("qa-freeze")) && pre.status() == AuthorityStore.Status.TRUSTED) { // simula a trava do cutover (só QA; em produção só o migrador)
+            new AuthorityAdmin(pre, pw, clock).setFreeze(true);
+        } else if (Files.exists(qa.resolve("qa-unfreeze")) && pre.status() == AuthorityStore.Status.TRUSTED) {
+            new AuthorityAdmin(pre, pw, clock).setFreeze(false);
         }
+        AuthComposition.Composed composed = AuthComposition.compose(profile, secrets, clock, st -> st.status() == AuthorityStore.Status.TRUSTED ? new FileSecondFactor(qa.resolve("qa-otp")) : new NotConfiguredSecondFactor());
+        AuthorityStore store = composed.store();
+        AuthService auth = composed.auth();
         Log.event("auth_qa", "authority=" + store.status().name().toLowerCase() + (store.status() == AuthorityStore.Status.TRUSTED ? "" : " reason=" + store.reason()));
         ServiceInstance service;
         try {

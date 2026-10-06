@@ -22,7 +22,13 @@ public final class ServiceMain {
                     byx.service.market.MarketFeed.Config.production());
             // modo de identidade derivado da assinatura do PRÓPRIO processo (nunca de argumento, ambiente ou arquivo)
             var identity = byx.service.identity.IdentityPolicy.detect(byx.service.identity.AppIdentity.SERVICE_ID, byx.service.identity.AppIdentity.APP_ID);
-            service = ServiceInstance.start(home, ServiceInstance.Limits.defaults(), feed, identity);
+            // autoridade de autenticação REAL (perfil de produção: ids e diretório próprios; segredos só do cofre de produção). Se não houver autoridade
+            // preparada (migração não executada) ou ela não for confiável, TODA autenticação responde AUTHORITY_UNAVAILABLE: não existe fallback.
+            var profile = byx.service.auth.AuthProfile.production(home);
+            var secrets = profile.secrets();
+            var composed = byx.service.auth.AuthComposition.compose(profile, secrets, java.time.Clock.systemUTC(),
+                    byx.service.auth.AuthComposition.realProviders(profile, secrets, byx.service.auth.HttpTransport.jdk()));
+            service = ServiceInstance.start(home, ServiceInstance.Limits.defaults(), feed, identity, new byx.service.auth.AuthIpc(composed.auth()), byx.service.identity.PeerKeys.kernel());
         } catch (RuntimeDir.InsecureException e) {
             System.err.println("refusing to start: " + e.getMessage());
             System.exit(3);

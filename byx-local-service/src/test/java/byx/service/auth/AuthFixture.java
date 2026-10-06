@@ -39,9 +39,30 @@ final class AuthFixture implements AutoCloseable {
         final List<String> history = new ArrayList<>();
         volatile boolean configured = true;
         volatile boolean failDelivery;
+        volatile boolean sms;
+        final Map<String, String> smsCodes = new HashMap<>();
+        final List<String> smsLog = new ArrayList<>();
 
         public boolean configured() {
             return configured;
+        }
+
+        public boolean smsRequired() {
+            return sms;
+        }
+
+        public String startSms(Account a) throws DeliveryException {
+            if (failDelivery) {
+                throw new DeliveryException();
+            }
+            String code = String.format("%06d", new java.security.SecureRandom().nextInt(1_000_000));
+            smsCodes.put(a.id(), code);
+            smsLog.add(code);
+            return "VE" + "a".repeat(32);
+        }
+
+        public boolean checkSms(Account a, String vid, String code) {
+            return code.equals(smsCodes.get(a.id()));
         }
 
         public void deliver(String accountId, char[] code) throws DeliveryException {

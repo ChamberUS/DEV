@@ -10,7 +10,7 @@ public final class SecretCanaryReader {
     }
 
     public static void main(String[] args) {
-        SecretStore store = SecretStores.system();
+        SecretStore store = SecretStores.test();
         System.out.println("reader.status=" + store.status());
         try (var found = store.read(SecretId.TEST_CANARY).orElse(null)) {
             System.out.println("reader.result=" + (found != null ? "FOUND(length=" + found.length() + ")" : "NOT_FOUND"));

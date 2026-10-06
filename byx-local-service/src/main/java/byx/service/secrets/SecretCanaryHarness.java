@@ -10,7 +10,7 @@ public final class SecretCanaryHarness {
     }
 
     public static void main(String[] args) {
-        System.exit(run(SecretStores.system()));
+        System.exit(run(SecretStores.test()));
     }
 
     static int run(SecretStore store) {

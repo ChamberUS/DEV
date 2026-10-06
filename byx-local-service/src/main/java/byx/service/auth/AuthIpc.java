@@ -15,20 +15,27 @@ import java.util.regex.Pattern;
  */
 public final class AuthIpc {
     /** Operações e seus campos (além de v, id, op). */
-    private static final Map<String, Set<String>> FIELDS = Map.of(
-            "auth.password", Set.of("username", "password"),
-            "auth.beginSecondFactor", Set.of("session"),
-            "auth.verifySecondFactor", Set.of("session", "challenge", "code"),
-            "auth.sessionStatus", Set.of("session"),
-            "auth.logout", Set.of("session"),
-            "auth.adminElevation", Set.of("session"),
-            "auth.changePassword", Set.of("session", "current", "next"));
+    private static final Map<String, Set<String>> FIELDS = Map.ofEntries(
+            Map.entry("auth.password", Set.of("username", "password")),
+            Map.entry("auth.beginSecondFactor", Set.of("session")),
+            Map.entry("auth.verifySecondFactor", Set.of("session", "challenge", "code")),
+            Map.entry("auth.sessionStatus", Set.of("session")),
+            Map.entry("auth.logout", Set.of("session")),
+            Map.entry("auth.adminElevation", Set.of("session")),
+            Map.entry("auth.changePassword", Set.of("session", "current", "next")),
+            Map.entry("auth.sendSecondFactorSms", Set.of("session")),
+            Map.entry("auth.verifySecondFactorSms", Set.of("session", "code")),
+            Map.entry("auth.enrollTrustedDevice", Set.of("session")),
+            Map.entry("auth.listTrustedDevices", Set.of("session")),
+            Map.entry("auth.revokeTrustedDevice", Set.of("session", "device")));
     public static final Set<String> OPERATIONS = FIELDS.keySet();
 
     private static final Pattern TOKEN = Pattern.compile("[A-Za-z0-9_-]{43}");
     private static final Pattern CHALLENGE = Pattern.compile("[A-Za-z0-9_-]{22}");
     private static final Pattern CODE = Pattern.compile("[0-9]{6}");
-    private static final Pattern USERNAME = Pattern.compile("[A-Za-z0-9._-]{1,64}");
+    private static final Pattern CODE_ANY = Pattern.compile("[0-9]{4,10}");
+    private static final Pattern DEVICE = Pattern.compile("[0-9a-f]{32}");
+    private static final Pattern USERNAME = Pattern.compile("[A-Za-z0-9._@+-]{1,254}"); // usuário OU e-mail
     private static final int PASSWORD_MAX = 256;
 
     /** Resposta de aplicação: ok + (result | code). */
@@ -87,6 +94,19 @@ public final class AuthIpc {
                     String ch = text(req, "challenge");
                     String code = text(req, "code");
                     yield t == null || !CHALLENGE.matcher(ch).matches() || !CODE.matcher(code).matches() ? bad() : from(auth.verifySecondFactor(peerKey, t, ch, code));
+                }
+                case "auth.sendSecondFactorSms" -> token(req) == null ? bad() : from(auth.sendSecondFactorSms(peerKey, token(req)));
+                case "auth.verifySecondFactorSms" -> {
+                    String t = token(req);
+                    String code = text(req, "code");
+                    yield t == null || !CODE_ANY.matcher(code).matches() ? bad() : from(auth.verifySecondFactorSms(peerKey, t, code));
+                }
+                case "auth.enrollTrustedDevice" -> token(req) == null ? bad() : from(auth.enrollTrustedDevice(peerKey, token(req)));
+                case "auth.listTrustedDevices" -> token(req) == null ? bad() : from(auth.listTrustedDevices(peerKey, token(req)));
+                case "auth.revokeTrustedDevice" -> {
+                    String t = token(req);
+                    String dev = text(req, "device");
+                    yield t == null || !DEVICE.matcher(dev).matches() ? bad() : from(auth.revokeTrustedDevice(peerKey, t, dev));
                 }
                 case "auth.sessionStatus" -> token(req) == null ? bad() : from(auth.sessionStatus(peerKey, token(req)));
                 case "auth.logout" -> token(req) == null ? bad() : from(auth.logout(peerKey, token(req)));

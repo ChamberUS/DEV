@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 public final class AuthService {
     public enum Code {
         OK, INVALID_CREDENTIALS, RATE_LIMITED, AUTH_REQUIRED, DENIED, SECOND_FACTOR_NOT_CONFIGURED, CHALLENGE_INVALID, CHALLENGE_EXPIRED, TOO_MANY_ATTEMPTS,
-        COOLDOWN, TOO_MANY_SENDS, AUTHORITY_UNAVAILABLE, WEAK_PASSWORD, ELEVATION_REQUIRES_MFA
+        COOLDOWN, TOO_MANY_SENDS, AUTHORITY_UNAVAILABLE, WEAK_PASSWORD, ELEVATION_REQUIRES_MFA, FROZEN
     }
 
     /** data NUNCA carrega senha, OTP, hash ou token além do campo "session" entregue no login. */
@@ -79,7 +79,7 @@ public final class AuthService {
 
     public Result login(long peerKey, String username, char[] password) {
         try {
-            String name = AuthorityAdmin.normalize(username);
+            String name = AuthorityAdmin.normalize(username); // usuário OU e-mail digitado (mesmo caminho para ambos)
             Optional<java.time.Duration> blocked = limiter.blockedFor("login", name);
             if (blocked.isPresent()) {
                 audit.record("LOGIN_RATE_LIMITED", "-");
@@ -98,7 +98,7 @@ public final class AuthService {
                 audit.record("LOGIN_FAILED", "-");
                 return Result.of(Code.INVALID_CREDENTIALS);
             }
-            Optional<Account> found = name.matches("[a-z0-9._-]{1,64}") ? st.byUsername(name) : Optional.empty();
+            Optional<Account> found = name.matches("[a-z0-9._@+-]{1,254}") ? st.byIdentifier(name) : Optional.empty();
             // conta inexistente, senha errada e conta desabilitada seguem o MESMO caminho (uma verificação Argon2 e a mesma resposta)
             boolean verified = found.isPresent() ? passwords.verify(password, found.get().passwordHash()) : passwords.verifyDummy(password);
             if (!verified || !found.get().enabled()) {
@@ -108,6 +108,12 @@ public final class AuthService {
             }
             Account a = found.get();
             limiter.recordSuccess("login", name);
+            try {
+                admin.recordLogin(a.id(), clock.millis());
+            } catch (AuthorityException e) {
+                failClosed();
+                return Result.of(Code.AUTHORITY_UNAVAILABLE);
+            }
             String[] created = sessions.create(a.id(), a.credentialVersion(), peerKey);
             if (created == null) {
                 audit.record("LOGIN_DENIED_SESSION_LIMIT", a.id());
@@ -217,7 +223,7 @@ public final class AuthService {
             return new Result("TOO_MANY_SENDS".equals(c.getMessage()) ? Code.TOO_MANY_SENDS : Code.COOLDOWN, Map.of("retryAfterSec", c.retryAfterMs / 1000 + 1));
         }
         try {
-            second.deliver(ok.account.id(), issued.code());
+            second.deliver(ok.account, issued.code());
         } catch (SecondFactorProvider.DeliveryException e) {
             otp.cancelSession(ok.session.id);
             audit.record("OTP_DELIVERY_FAILED", ok.account.id());
@@ -244,8 +250,15 @@ public final class AuthService {
         switch (otp.verify(ok.session.id, ok.account.id(), challengeId, code)) {
             case OK -> {
                 limiter.recordSuccess("2fa", ok.account.id());
-                ok.session.mfaAtMs = clock.millis();
                 audit.record("OTP_OK", ok.account.id());
+                if (second.smsRequired()) { // dois estágios: o e-mail sozinho NÃO conclui o segundo fator
+                    ok.session.clearSecondFactorStage();
+                    ok.session.emailOkAtMs = clock.millis();
+                    Map<String, Object> d = new LinkedHashMap<>(view(ok.account, ok.session));
+                    d.put("next", "SMS");
+                    return new Result(Code.OK, d);
+                }
+                ok.session.mfaAtMs = clock.millis();
                 return new Result(Code.OK, view(ok.account, ok.session));
             }
             case EXPIRED -> {
@@ -268,6 +281,100 @@ public final class AuthService {
         }
     }
 
+    /** Estágio 2: envia o SMS (só depois do e-mail verificado e dentro do fluxo de 10 min; envios e intervalo limitados). */
+    public Result sendSecondFactorSms(long peerKey, String token) {
+        Object v = validate(peerKey, token);
+        if (v instanceof Result r) {
+            return r;
+        }
+        Valid ok = (Valid) v;
+        Session s = ok.session;
+        long now = clock.millis();
+        if (!second.configured() || !second.smsRequired()) {
+            return Result.of(Code.SECOND_FACTOR_NOT_CONFIGURED);
+        }
+        if (s.emailOkAtMs < 0 || now - s.emailOkAtMs > AuthLimits.SECOND_FACTOR_FLOW.toMillis()) {
+            s.clearSecondFactorStage();
+            return Result.of(Code.CHALLENGE_EXPIRED);
+        }
+        Optional<java.time.Duration> blocked = limiter.blockedFor("2fa", ok.account.id());
+        if (blocked.isPresent()) {
+            return new Result(Code.RATE_LIMITED, Map.of("retryAfterSec", blocked.get().toSeconds() + 1));
+        }
+        if (s.smsSends >= AuthLimits.SMS_MAX_SENDS) {
+            return Result.of(Code.TOO_MANY_SENDS);
+        }
+        if (s.smsSentAtMs >= 0 && now - s.smsSentAtMs < AuthLimits.OTP_RESEND_COOLDOWN.toMillis()) {
+            return new Result(Code.COOLDOWN, Map.of("retryAfterSec", (AuthLimits.OTP_RESEND_COOLDOWN.toMillis() - (now - s.smsSentAtMs)) / 1000 + 1));
+        }
+        String id;
+        try {
+            id = second.startSms(ok.account);
+        } catch (SecondFactorProvider.DeliveryException e) {
+            audit.record("SMS_DELIVERY_FAILED", ok.account.id());
+            return Result.of(Code.DENIED);
+        }
+        s.smsVerificationId = id;
+        s.smsSentAtMs = now;
+        s.smsSends++;
+        audit.record("SMS_SENT", ok.account.id());
+        return new Result(Code.OK, Map.of("expiresInSec", AuthLimits.SMS_TTL.toSeconds(), "resendAfterSec", AuthLimits.OTP_RESEND_COOLDOWN.toSeconds()));
+    }
+
+    /** Estágio 2: confere o código de SMS; sucesso conclui o segundo fator (mfaAt). Tentativas acumulam entre reenvios. */
+    public Result verifySecondFactorSms(long peerKey, String token, String code) {
+        Object v = validate(peerKey, token);
+        if (v instanceof Result r) {
+            return r;
+        }
+        Valid ok = (Valid) v;
+        Session s = ok.session;
+        long now = clock.millis();
+        if (!second.configured() || !second.smsRequired()) {
+            return Result.of(Code.SECOND_FACTOR_NOT_CONFIGURED);
+        }
+        Optional<java.time.Duration> blocked = limiter.blockedFor("2fa", ok.account.id());
+        if (blocked.isPresent()) {
+            return new Result(Code.RATE_LIMITED, Map.of("retryAfterSec", blocked.get().toSeconds() + 1));
+        }
+        String vid = s.smsVerificationId;
+        if (vid == null || s.emailOkAtMs < 0) {
+            return Result.of(Code.CHALLENGE_INVALID);
+        }
+        if (now - s.emailOkAtMs > AuthLimits.SECOND_FACTOR_FLOW.toMillis() || now - s.smsSentAtMs > AuthLimits.SMS_TTL.toMillis()) {
+            s.clearSecondFactorStage();
+            audit.record("SMS_EXPIRED", ok.account.id());
+            return Result.of(Code.CHALLENGE_EXPIRED);
+        }
+        if (s.smsAttempts >= AuthLimits.SMS_MAX_ATTEMPTS) {
+            limiter.recordFailure("2fa", ok.account.id());
+            return Result.of(Code.TOO_MANY_ATTEMPTS);
+        }
+        s.smsAttempts++;
+        boolean good;
+        try {
+            good = code != null && code.matches("[0-9]{4,10}") && second.checkSms(ok.account, vid, code);
+        } catch (SecondFactorProvider.DeliveryException e) {
+            audit.record("SMS_CHECK_FAILED", ok.account.id());
+            return Result.of(Code.DENIED);
+        }
+        // a sessão pode ter sido revogada enquanto o provedor respondia: revalida antes de conceder qualquer coisa
+        Object again = validate(peerKey, token);
+        if (again instanceof Result r2) {
+            return r2;
+        }
+        if (!good) {
+            limiter.recordFailure("2fa", ok.account.id());
+            audit.record("SMS_FAILED", ok.account.id());
+            return Result.of(Code.CHALLENGE_INVALID);
+        }
+        limiter.recordSuccess("2fa", ok.account.id());
+        s.clearSecondFactorStage();
+        s.mfaAtMs = clock.millis();
+        audit.record("SMS_OK", ok.account.id());
+        return new Result(Code.OK, view(ok.account, s));
+    }
+
     public Result adminElevation(long peerKey, String token) {
         Object v = validate(peerKey, token);
         if (v instanceof Result r) {
@@ -279,13 +386,105 @@ public final class AuthService {
             audit.record("ELEVATION_DENIED", ok.account.id());
             return Result.of(Code.DENIED);
         }
-        if (ok.session.mfaAtMs < 0 || now - ok.session.mfaAtMs > AuthLimits.RECENT_MFA_WINDOW.toMillis()) {
-            audit.record("ELEVATION_DENIED", ok.account.id());
-            return Result.of(Code.ELEVATION_REQUIRES_MFA);
+        boolean mfaFresh = ok.session.mfaAtMs >= 0 && now - ok.session.mfaAtMs <= AuthLimits.RECENT_MFA_WINDOW.toMillis();
+        if (!mfaFresh) {
+            Optional<TrustedDevice> td = activeDevice(ok.account.id(), now);
+            if (td.isEmpty()) {
+                audit.record("ELEVATION_DENIED", ok.account.id());
+                return Result.of(Code.ELEVATION_REQUIRES_MFA);
+            }
+            try {
+                admin.touchDevice(td.get().id());
+            } catch (AuthorityException e) {
+                failClosed();
+                return Result.of(Code.AUTHORITY_UNAVAILABLE);
+            }
+            audit.record("ELEVATION_TRUSTED_DEVICE", ok.account.id());
         }
         ok.session.elevatedUntilMs = Math.min(now + AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), ok.session.createdAtMs + AuthLimits.ABSOLUTE_TIMEOUT.toMillis());
         audit.record("ELEVATION_GRANTED", ok.account.id());
         return new Result(Code.OK, view(ok.account, ok.session));
+    }
+
+    private Optional<TrustedDevice> activeDevice(String accountId, long now) {
+        try {
+            return authority.current().devices().stream().filter(d -> d.accountId().equals(accountId) && d.activeAt(now)).findFirst();
+        } catch (AuthorityException e) {
+            return Optional.empty();
+        }
+    }
+
+    // ---- dispositivos confiáveis (esta instalação): inscrever exige ADMIN elevado + 2º fator fresco (≤ 5 min) e é recusado durante a trava -------------
+
+    public Result enrollTrustedDevice(long peerKey, String token) {
+        Object v = validate(peerKey, token);
+        if (v instanceof Result r) {
+            return r;
+        }
+        Valid ok = (Valid) v;
+        long now = clock.millis();
+        if (ok.account.role() != Role.ADMIN || ok.session.elevatedUntilMs <= now || ok.session.mfaAtMs < 0 || now - ok.session.mfaAtMs > AuthLimits.TRUSTED_DEVICE_ENROLL_MFA_WINDOW.toMillis()) {
+            audit.record("DEVICE_ENROLL_DENIED", ok.account.id());
+            return Result.of(Code.DENIED);
+        }
+        try {
+            TrustedDevice d = admin.enrollDevice(ok.account.id(), AuthLimits.TRUSTED_DEVICE_VALIDITY.toMillis());
+            audit.record("DEVICE_ENROLLED", ok.account.id());
+            return new Result(Code.OK, Map.of("device", d.id(), "expiresAtMs", d.expiresAtMs()));
+        } catch (AuthorityException e) {
+            if ("frozen".equals(e.code)) {
+                audit.record("DEVICE_ENROLL_FROZEN", ok.account.id());
+                return Result.of(Code.FROZEN);
+            }
+            failClosed();
+            return Result.of(Code.AUTHORITY_UNAVAILABLE);
+        }
+    }
+
+    public Result listTrustedDevices(long peerKey, String token) {
+        Object v = validate(peerKey, token);
+        if (v instanceof Result r) {
+            return r;
+        }
+        Valid ok = (Valid) v;
+        long now = clock.millis();
+        if (ok.account.role() != Role.ADMIN || ok.session.elevatedUntilMs <= now) {
+            return Result.of(Code.DENIED);
+        }
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (TrustedDevice d : authority.current().devices()) {
+                if (d.accountId().equals(ok.account.id())) {
+                    sb.append(sb.length() == 0 ? "" : ";").append(d.id()).append(',').append(d.status(now)).append(',').append(d.createdAtMs()).append(',').append(d.lastUsedAtMs()).append(',')
+                            .append(d.expiresAtMs());
+                }
+            }
+        } catch (AuthorityException e) {
+            failClosed();
+            return Result.of(Code.AUTHORITY_UNAVAILABLE);
+        }
+        return new Result(Code.OK, Map.of("devices", sb.toString()));
+    }
+
+    public Result revokeTrustedDevice(long peerKey, String token, String deviceId) {
+        Object v = validate(peerKey, token);
+        if (v instanceof Result r) {
+            return r;
+        }
+        Valid ok = (Valid) v;
+        long now = clock.millis();
+        if (ok.account.role() != Role.ADMIN || ok.session.elevatedUntilMs <= now) {
+            return Result.of(Code.DENIED);
+        }
+        try {
+            admin.revokeDevice(ok.account.id(), deviceId);
+        } catch (AuthorityException e) {
+            failClosed();
+            return Result.of(Code.AUTHORITY_UNAVAILABLE);
+        }
+        ok.session.elevatedUntilMs = -1; // como no fluxo legado: revogar encerra a elevação
+        audit.record("DEVICE_REVOKED", ok.account.id());
+        return Result.of(Code.OK);
     }
 
     /**
@@ -317,7 +516,14 @@ public final class AuthService {
             try {
                 admin.changePassword(ok.account.id(), next);
                 ok.session.credentialVersion = authority.current().byId(ok.account.id()).orElseThrow().credentialVersion();
-            } catch (AuthorityException | RuntimeException e) {
+            } catch (AuthorityException e) {
+                if ("frozen".equals(e.code)) { // janela de segurança do cutover: sem mudança de senha até a validação explícita
+                    audit.record("PASSWORD_CHANGE_FROZEN", ok.account.id());
+                    return Result.of(Code.FROZEN);
+                }
+                failClosed();
+                return Result.of(Code.AUTHORITY_UNAVAILABLE);
+            } catch (RuntimeException e) {
                 failClosed();
                 return Result.of(Code.AUTHORITY_UNAVAILABLE);
             }
@@ -418,6 +624,19 @@ public final class AuthService {
         m.put("role", a.role().name()); // exibição apenas: a decisão é sempre refeita aqui
         m.put("mfaRecent", s.mfaAtMs >= 0 && now - s.mfaAtMs <= AuthLimits.RECENT_MFA_WINDOW.toMillis());
         m.put("elevated", s.elevatedUntilMs > now && a.role() == Role.ADMIN);
+        m.put("elevatedForSec", s.elevatedUntilMs > now && a.role() == Role.ADMIN ? (s.elevatedUntilMs - now) / 1000 : 0L);
+        // apresentação para a UI (a decisão é sempre refeita aqui): identidade estável legada, contato, flags e conclusão do 1º estágio do 2º fator
+        m.put("userId", a.legacyUserId());
+        m.put("email", a.email() == null ? "" : a.email());
+        m.put("phone", a.phone() == null ? "" : a.phone());
+        m.put("emailVerified", a.emailVerified());
+        m.put("phoneVerified", a.phoneVerified());
+        m.put("mustChangePassword", a.mustChangePassword());
+        m.put("lastLoginAtMs", a.lastLoginAtMs());
+        m.put("createdAtMs", a.createdAtMs());
+        m.put("secondFactorConfigured", second.configured());
+        m.put("smsPending", s.emailOkAtMs >= 0 && now - s.emailOkAtMs <= AuthLimits.SECOND_FACTOR_FLOW.toMillis());
+        m.put("trustedDevice", activeDevice(a.id(), now).isPresent());
         m.put("expiresInSec", Math.max(0, (s.createdAtMs + AuthLimits.ABSOLUTE_TIMEOUT.toMillis() - now) / 1000));
         return m;
     }
