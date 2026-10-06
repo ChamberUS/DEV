@@ -59,6 +59,7 @@ public final class CapturePanel extends GridPane {
     private final KvRow files = new KvRow("Files");
     private final KvRow captured = new KvRow("Captured data");
     private final KvRow lastEvent = new KvRow("Last event");
+    private final KvRow lastWrite = new KvRow("Last write");
     private final KvRow diskUsage = new KvRow("Disk usage");
     private final KvRow diskFree = new KvRow("Disk free");
     private final KvRow retry = new KvRow("Retry / recovery");
@@ -111,7 +112,7 @@ public final class CapturePanel extends GridPane {
         session.setWrapText(true);
         session.setMaxWidth(Double.MAX_VALUE);
         VBox sessionCard = panel("capture-session", ByxFonts.upper(Fx.label("Session", "byx-label")), session, campaign);
-        VBox growth = rows("capture-growth", "Growth", events, files, captured, lastEvent);
+        VBox growth = rows("capture-growth", "Growth", events, files, captured, lastEvent, lastWrite);
         VBox storage = rows("capture-storage", "Storage", diskUsage, diskFree, retry);
 
         VBox integrityPanel = rows("capture-integrity", "Scientific integrity");
@@ -324,7 +325,7 @@ public final class CapturePanel extends GridPane {
         snapshot = null;
         Fx.text(title, Fmt.NA);
         setState(State.UNKNOWN);
-        for (KvRow r : new KvRow[] {events, files, captured, lastEvent, diskUsage, diskFree, retry, pid, started, checked, path, storageChecked}) {
+        for (KvRow r : new KvRow[] {events, files, captured, lastEvent, lastWrite, diskUsage, diskFree, retry, pid, started, checked, path, storageChecked}) {
             r.set(Fmt.NA, true, "dim");
         }
         Fx.text(session, Fmt.NA);
@@ -340,20 +341,22 @@ public final class CapturePanel extends GridPane {
 
     public void show(CaptureSnapshot v) {
         snapshot = v;
+        setCurrentSession(v.sessionId());
         shows++;
         Fx.text(title, Fmt.text(v.symbol()) + " · " + (v.market() == null ? Fmt.NA : panel.tradeview.DeskModel.venue(v.market())));
         setState(v.state());
         events.set(NOT_REPORTED, false, "dim");
         files.set(NOT_REPORTED, false, "dim");
         captured.set(orNa(bytes(v.capturedBytes())), true, v.capturedBytes() == null ? "dim" : null);
-        lastEvent.set(orNa(utc(v.lastUpdate())), true, v.lastUpdate() == null ? "dim" : null);
+        lastEvent.set(orNa(utc(v.lastEvent())), true, v.lastEvent() == null ? "dim" : null);
+        lastWrite.set(orNa(utc(v.lastUpdate())), true, v.lastUpdate() == null ? "dim" : null);
         String usage = diskUsage(v);
         diskUsage.set(orNa(usage), true, usage == null ? "dim" : null);
         diskFree.set(orNa(bytes(v.diskFreeBytes())), true, v.diskFreeBytes() == null ? "dim" : null);
         retry.set(NOT_REPORTED, false, "dim");
         Fx.text(campaign, "Campaign " + Fmt.text(v.campaignId()));
         warnings.set(v.warnings().isEmpty() ? "None" : String.join(" · ", v.warnings()), false, v.warnings().isEmpty() ? "dim" : "warn");
-        pid.set(orNa(v.pid() == null ? null : v.pid().toString()), true, v.pid() == null ? "dim" : null);
+        pid.set(v.pid() == null ? Fmt.NA : v.pid() + (v.collectorPid() == null ? "" : " · collector " + v.collectorPid()), true, v.pid() == null ? "dim" : null);
         started.set(orNa(utc(v.processStartedAt())), true, v.processStartedAt() == null ? "dim" : null);
         checked.set(orNa(utc(v.checkedAt())), true, v.checkedAt() == null ? "dim" : null);
         path.set(orNa(v.storagePath()), true, v.storagePath() == null ? "dim" : null);

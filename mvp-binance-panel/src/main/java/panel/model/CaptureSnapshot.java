@@ -8,10 +8,19 @@ import java.util.List;
 public record CaptureSnapshot(State state, Long pid, boolean processAlive, Instant processStartedAt,
         String campaignId, Instant campaignStartedAt, String symbol, String market,
         Instant checkedAt, Instant lastUpdate, String storagePath, Long capturedBytes,
-        Long diskFreeBytes, Long diskTotalBytes, Instant storageCheckedAt, List<String> warnings) {
+        Long diskFreeBytes, Long diskTotalBytes, Instant storageCheckedAt, List<String> warnings,
+        String sessionId, Long collectorPid, Instant lastEvent) {
     public enum State { RUNNING, STOPPED, STALE, UNKNOWN }
     public static final long TARGET_SECONDS = 86400;
     public CaptureSnapshot { warnings = List.copyOf(warnings); }
+    public CaptureSnapshot(State state, Long pid, boolean processAlive, Instant processStartedAt,
+            String campaignId, Instant campaignStartedAt, String symbol, String market,
+            Instant checkedAt, Instant lastUpdate, String storagePath, Long capturedBytes,
+            Long diskFreeBytes, Long diskTotalBytes, Instant storageCheckedAt, List<String> warnings) {
+        this(state, pid, processAlive, processStartedAt, campaignId, campaignStartedAt, symbol, market,
+                checkedAt, lastUpdate, storagePath, capturedBytes, diskFreeBytes, diskTotalBytes,
+                storageCheckedAt, warnings, null, null, null);
+    }
 
     public static CaptureSnapshot unknown(Instant now, String warning) {
         return new CaptureSnapshot(State.UNKNOWN, null, false, null, null, null, null, null,

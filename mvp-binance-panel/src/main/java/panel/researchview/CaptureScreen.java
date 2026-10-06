@@ -26,7 +26,6 @@ public final class CaptureScreen implements View {
     private final CaptureMonitorService monitor;
     private final AdminGate gate;
     private final BooleanSupplier hasSession;
-    private final Supplier<Snapshot> snapshot;
     private boolean observing;
 
     public CaptureScreen(MotionService motion, Clock clock, CaptureMonitorService monitor, AdminGate gate,
@@ -34,7 +33,6 @@ public final class CaptureScreen implements View {
         this.monitor = monitor;
         this.gate = gate;
         this.hasSession = hasAdminSession;
-        this.snapshot = snapshot;
         this.panel = new CapturePanel(motion, clock);
         this.scroll = V2Scroll.wrap(panel);
         scroll.visibleProperty().addListener((o, a, b) -> visibility());
@@ -94,7 +92,6 @@ public final class CaptureScreen implements View {
             release();
             return;
         }
-        panel.setCurrentSession(snapshot.get().capture.currentSession());
         visibility();
     }
 

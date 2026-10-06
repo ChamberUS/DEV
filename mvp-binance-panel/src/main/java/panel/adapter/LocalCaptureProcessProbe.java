@@ -18,6 +18,9 @@ public final class LocalCaptureProcessProbe implements CaptureProcessProbe {
         String text(Path file) throws IOException;
         ProcessInfo process(long pid, Path script, String campaign) throws IOException;
         Storage storage(Path root) throws IOException;
+        default CaptureRuntimeResolver.Runtime runtime(Path state, Path root, Instant now) throws IOException {
+            return null;
+        }
     }
     private static final Pattern CAMPAIGN = Pattern.compile("[a-zA-Z0-9_-]+-(\\d{8}T\\d{6}Z)");
     private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("uuuuMMdd'T'HHmmss'Z'")
@@ -51,37 +54,46 @@ public final class LocalCaptureProcessProbe implements CaptureProcessProbe {
         Instant start = null; String campaign = null; Instant campaignStart = null;
         String symbol = null; String market = null;
         State state = State.UNKNOWN;
+        CaptureRuntimeResolver.Runtime runtime = null;
         try {
-            String raw = optional(stateDir.resolve("capture.pid"));
-            campaign = optional(stateDir.resolve("current_campaign"));
-            if (campaign != null && campaign.isEmpty()) campaign = null;
-            campaignStart = campaignStart(campaign);
-            if (campaign != null && (campaignStart == null || campaignStart.isAfter(now))) {
-                warnings.add("Invalid current campaign timestamp"); campaignStart = null;
-            }
-            if (raw == null) state = State.STOPPED;
-            else {
-                try { pid = Long.valueOf(raw); } catch (NumberFormatException e) { warnings.add("Invalid PID file"); }
-                if (pid == null || pid <= 0) { state = State.STALE; pid = null; warnings.add("PID must be a positive integer"); }
+            runtime = source.runtime(stateDir, storagePath, now);
+            if (runtime != null) {
+                pid = runtime.supervisor(); alive = runtime.alive(); start = runtime.start();
+                campaign = runtime.campaign(); campaignStart = campaignStart(campaign);
+                symbol = runtime.symbol(); market = runtime.market(); state = runtime.state();
+                warnings.addAll(runtime.warnings());
+            } else {
+                String raw = optional(stateDir.resolve("capture.pid"));
+                campaign = optional(stateDir.resolve("current_campaign"));
+                if (campaign != null && campaign.isEmpty()) campaign = null;
+                campaignStart = campaignStart(campaign);
+                if (campaign != null && (campaignStart == null || campaignStart.isAfter(now))) {
+                    warnings.add("Invalid current campaign timestamp"); campaignStart = null;
+                }
+                if (raw == null) state = State.STOPPED;
                 else {
-                    Path script = stateDir.resolve("continuous_capture.sh").toAbsolutePath().normalize();
-                    ProcessInfo p = source.process(pid, script, campaign);
-                    if (!p.alive()) {
-                        state = pid.equals(observedPid) ? State.STOPPED : State.STALE;
-                        if (pid.equals(observedPid)) start = observedStart;
-                        warnings.add("PID file refers to a process that is no longer running");
-                    } else if (!matches(p, script)) {
-                        state = State.STALE; warnings.add("PID belongs to a different process");
-                    } else if (pid.equals(observedPid) && observedStart != null && p.start() != null
-                            && !observedStart.equals(p.start())) {
-                        state = State.STALE; warnings.add("PID was reused; supervisor identity changed");
-                    } else {
-                        alive = true; start = p.start(); observedPid = pid; observedStart = start;
-                        symbol = p.symbol(); market = p.market();
-                        state = campaignStart == null ? State.UNKNOWN : State.RUNNING;
-                        if (campaignStart == null) warnings.add("Campaign TRANSITION: waiting for current_campaign");
-                        if (start == null) warnings.add("Process start time unavailable");
-                        if (p.arguments() == null) warnings.add("Process arguments unavailable; identity only partially verified");
+                    try { pid = Long.valueOf(raw); } catch (NumberFormatException e) { warnings.add("Invalid PID file"); }
+                    if (pid == null || pid <= 0) { state = State.STALE; pid = null; warnings.add("PID must be a positive integer"); }
+                    else {
+                        Path script = stateDir.resolve("continuous_capture.sh").toAbsolutePath().normalize();
+                        ProcessInfo p = source.process(pid, script, campaign);
+                        if (!p.alive()) {
+                            state = pid.equals(observedPid) ? State.STOPPED : State.STALE;
+                            if (pid.equals(observedPid)) start = observedStart;
+                            warnings.add("PID file refers to a process that is no longer running");
+                        } else if (!matches(p, script)) {
+                            state = State.STALE; warnings.add("PID belongs to a different process");
+                        } else if (pid.equals(observedPid) && observedStart != null && p.start() != null
+                                && !observedStart.equals(p.start())) {
+                            state = State.STALE; warnings.add("PID was reused; supervisor identity changed");
+                        } else {
+                            alive = true; start = p.start(); observedPid = pid; observedStart = start;
+                            symbol = p.symbol(); market = p.market();
+                            state = campaignStart == null ? State.UNKNOWN : State.RUNNING;
+                            if (campaignStart == null) warnings.add("Campaign TRANSITION: waiting for current_campaign");
+                            if (start == null) warnings.add("Process start time unavailable");
+                            if (p.arguments() == null) warnings.add("Process arguments unavailable; identity only partially verified");
+                        }
                     }
                 }
             }
@@ -92,9 +104,10 @@ public final class LocalCaptureProcessProbe implements CaptureProcessProbe {
             storageAt = now;
         }
         if (storage.warning() != null) warnings.add(storage.warning());
-        warnings.add("Process presence is not recorder health; live health telemetry is N/A");
+        warnings.add("Heartbeat and exchange event timestamps are not exported; last write is file mtime. Live scientific integrity is NOT CHECKED");
         return new CaptureSnapshot(state, pid, alive, start, campaign, campaignStart, symbol, market,
-                now, storage.updated(), storagePath.toString(), storage.bytes(), storage.free(), storage.total(), storageAt, warnings);
+                now, runtime == null ? storage.updated() : runtime.lastWrite(), storagePath.toString(), storage.bytes(), storage.free(), storage.total(), storageAt, warnings,
+                runtime == null ? null : runtime.session(), runtime == null ? null : runtime.collector(), null);
     }
     private String optional(Path file) throws IOException {
         try { return source.text(file).strip(); }
@@ -109,6 +122,9 @@ public final class LocalCaptureProcessProbe implements CaptureProcessProbe {
     public static final class NioSource implements Source {
         private final Path cli;
         public NioSource(Path cli) { this.cli = cli.toAbsolutePath().normalize(); }
+        @Override public CaptureRuntimeResolver.Runtime runtime(Path state, Path root, Instant now) throws IOException {
+            return new CaptureRuntimeResolver(cli).read(state, root, now);
+        }
         @Override public String text(Path file) throws IOException {
             try (var reader = Files.newBufferedReader(file)) {
                 char[] chars = new char[4097]; int count = reader.read(chars);
