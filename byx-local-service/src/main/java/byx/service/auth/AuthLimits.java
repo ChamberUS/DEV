@@ -36,6 +36,9 @@ public final class AuthLimits {
     public static final int PASSWORD_MAX_BYTES = 256;
     /** Sessões simultâneas no serviço (memória limitada). */
     public static final int MAX_SESSIONS = 64;
+    public static boolean recentMfa(long verifiedAtMs, long nowMs) {
+        return verifiedAtMs >= 0 && nowMs >= verifiedAtMs && nowMs - verifiedAtMs <= RECENT_MFA_WINDOW.toMillis();
+    }
 
     private AuthLimits() {
     }

@@ -61,6 +61,7 @@ public class Settings {
     }
 
     public void save() throws IOException {
+        panel.security.ServerAuthorization.requirePersistence("settings.persist");
         Properties p = new Properties();
         p.setProperty("projectPath", projectPath);
         p.setProperty("cliPath", cliPath);

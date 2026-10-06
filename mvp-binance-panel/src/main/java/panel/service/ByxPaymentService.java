@@ -19,7 +19,7 @@ public final class ByxPaymentService {
     private final Clock clock;
     private final Supplier<ByxPaymentPolicy> policy;
     public ByxPaymentService(SessionManager sessions,ByxWalletIdentityService identity,ByxPaymentRepository repository,ByxPaymentVerifier verifier,Clock clock,Supplier<ByxPaymentPolicy> policy){this.sessions=sessions;this.identity=identity;this.repository=repository;this.verifier=verifier;this.clock=clock;this.policy=policy;}
-    private long user(){return sessions.user().filter(s->s.user().active()&&!s.user().mustChangePassword()).orElseThrow(()->new AccessDeniedException("Authenticated user required")).user().id();}
+    private long user(){panel.security.ServerAuthorization.require("wallet.payment");return sessions.user().filter(s->s.user().active()&&!s.user().mustChangePassword()).orElseThrow(()->new AccessDeniedException("Authenticated user required")).user().id();}
     public PaymentIntent create(String address){
         long user=user();var config=identity.network();var p=policy.get();p.check(config);
         var wallet=identity.verified(address).orElseThrow(()->new AccessDeniedException("Verified wallet required"));

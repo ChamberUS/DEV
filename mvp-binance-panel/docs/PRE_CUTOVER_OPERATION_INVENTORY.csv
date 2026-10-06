@@ -1,0 +1,45 @@
+operation,category,source,decision,reason
+"Research/Admin routes, visibility, badges, button affordances",A,PanelApp; AdminAccessService.hasValidAdminSession; ShellRoutes.isResearch,PRESENTATION_ONLY,Does not authorize any sensitive operation
+Capture observation and refresh,B,CaptureMonitorService; LocalCaptureProcessProbe,READ_ONLY_LOCAL,Operational metadata only; authority status checked by AdminAccessService.requireAdmin; CaptureRuntimeResolver unchanged
+Research report and status presentation,B,ResearchService; FileResearchBackend,READ_ONLY_LOCAL,Existing reports/metadata only; no jobs may execute
+"Public LOCALNET endpoint selection, configure/details/refresh",B,ByxNetworkService.configure/details/refresh,READ_ONLY_PUBLIC_NETWORK,Config is in memory; gateway reads public node data only; configure/details query current authority through AdminGate; not wallet authorization
+Legacy audit recent/recentFor,B,SecurityAuditService.recent/recentFor,READ_ONLY_LOCAL_HISTORY,Masked legacy history; not authoritative current service security events; not used to authorize
+CLI label-status,B,CommandSpec; JobManager.submit,SERVER_AUTHORIZATION_REQUIRED,Conservatively disabled with all external jobs; no backend operation endpoint
+CLI checkpoint-status,B,CommandSpec; JobManager.submit,SERVER_AUTHORIZATION_REQUIRED,Conservatively disabled with all external jobs; no backend operation endpoint
+CLI feature-status,B,CommandSpec; JobManager.submit,SERVER_AUTHORIZATION_REQUIRED,Conservatively disabled with all external jobs; no backend operation endpoint
+CLI label-run-session,C,CommandSpec; JobManager.submit,SERVER_AUTHORIZATION_REQUIRED,Cannot launch processing or write artifacts
+CLI label-run,C,CommandSpec; JobManager.submit,SERVER_AUTHORIZATION_REQUIRED,Cannot launch processing or write artifacts
+CLI label-aggregate,C,CommandSpec; JobManager.submit,SERVER_AUTHORIZATION_REQUIRED,Cannot launch processing or write artifacts
+Cancel queued/running research job,C,JobManager.cancel,SERVER_AUTHORIZATION_REQUIRED,No process cancellation from a forged panel elevation
+Wallet network,D,ByxWalletIdentityService.network -> user,SERVER_AUTHORIZATION_REQUIRED,No service-owned resource authorization; blocked before dependencies or storage access
+Wallet challenge,D,ByxWalletIdentityService.challenge -> user,SERVER_AUTHORIZATION_REQUIRED,No service-owned resource authorization; blocked before dependencies or storage access
+Wallet verify,E,ByxWalletIdentityService.verify -> user,SERVER_AUTHORIZATION_REQUIRED,No service-owned resource authorization; blocked before dependencies or storage access
+Wallet wallets,D,ByxWalletIdentityService.wallets -> user,SERVER_AUTHORIZATION_REQUIRED,No service-owned resource authorization; blocked before dependencies or storage access
+Wallet verified,D,ByxWalletIdentityService.verified -> user,SERVER_AUTHORIZATION_REQUIRED,No service-owned resource authorization; blocked before dependencies or storage access
+Wallet revoke,E,ByxWalletIdentityService.revoke -> user,SERVER_AUTHORIZATION_REQUIRED,No service-owned resource authorization; blocked before dependencies or storage access
+Payment create,E,ByxPaymentService.create -> user,SERVER_AUTHORIZATION_REQUIRED,Intent/get/confirm can mutate journal; receipts/active are account-specific financial state
+Payment get,E,ByxPaymentService.get -> user,SERVER_AUTHORIZATION_REQUIRED,Intent/get/confirm can mutate journal; receipts/active are account-specific financial state
+Payment confirm,E,ByxPaymentService.confirm -> user,SERVER_AUTHORIZATION_REQUIRED,Intent/get/confirm can mutate journal; receipts/active are account-specific financial state
+Payment receipts,E,ByxPaymentService.receipts -> user,SERVER_AUTHORIZATION_REQUIRED,Intent/get/confirm can mutate journal; receipts/active are account-specific financial state
+Payment active,E,ByxPaymentService.active -> user,SERVER_AUTHORIZATION_REQUIRED,Intent/get/confirm can mutate journal; receipts/active are account-specific financial state
+Gas request,E,GasSponsorshipService.request,SERVER_AUTHORIZATION_REQUIRED,Refresh can automatically revoke and mutate journal; no UI-only financial authority
+Gas refresh,E,GasSponsorshipService.refresh,SERVER_AUTHORIZATION_REQUIRED,Refresh can automatically revoke and mutate journal; no UI-only financial authority
+Gas revoke,E,GasSponsorshipService.revoke,SERVER_AUTHORIZATION_REQUIRED,Refresh can automatically revoke and mutate journal; no UI-only financial authority
+Gas journal,E,GasSponsorshipService.journal,SERVER_AUTHORIZATION_REQUIRED,Refresh can automatically revoke and mutate journal; no UI-only financial authority
+Treasury refresh/account wallet benefits,D,TreasuryService.refresh; ByxBenefitsService -> ByxWalletIdentityService,SERVER_AUTHORIZATION_REQUIRED,Treasury entry and account-bound wallet dependency are blocked; pure public/synthetic previews are not entitlements for real operations
+Persist appearance/onboarding/project/CLI/report settings,C,Settings.save; AccountDataAdapter.savePrefs; SettingsView,SERVER_AUTHORIZATION_REQUIRED,No filesystem persistence based on panel session/role; drafts are presentation only
+Write legacy security audit,D,SecurityAuditService.record,SERVER_AUTHORIZATION_REQUIRED,Trusted security audit lives in the authority service
+Account createInitialAdmin,D,UserService.createInitialAdmin,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Account createUser,D,UserService.createUser,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Account listUsers,D,UserService.listUsers,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Account setStatus,D,UserService.setStatus,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Account changeRole,D,UserService.changeRole,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Account resetPassword,D,UserService.resetPassword,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Account changeOwnContact,D,UserService.changeOwnContact,OPERATIONAL_LIMITATION,"Explicit unavailable exception; no CRUD, recovery or legacy database writes"
+Own password change,D,UserService.changeOwnPassword -> AuthorityGateway.changePassword -> service AuthService.changePassword,SERVICE_BACKED,Opaque valid session and current password proof; authority owns account and revocation
+Password login/session/logout,D,AuthorityGateway -> AuthIpc -> AuthService,SERVICE_BACKED,Role/session decisions are in authority; unexpected client identity fields rejected
+OTP begin/verify and SMS stages,D,TwoFactorFlow -> AuthorityGateway -> AuthService,SERVICE_BACKED,Service proof only; no actual OTP sent in this review
+Admin elevation,D,AdminAccessService -> AuthorityGateway.adminElevation -> AuthService.adminElevation,SERVICE_BACKED,"Current ADMIN, valid session, actual recent MFA; absolute five-minute deadline"
+Trusted device enroll/list/revoke,D,TrustedDeviceService -> AuthorityGateway -> AuthService,SERVICE_BACKED,Current authority session/role/elevation and account ownership; trust does not grant MFA
+Account/private notifications/admin private operation,D,byx-local-service PrivateCapabilityGate; AuthPolicy,STATIC_DENIED,PRIVATE_CAPABILITIES_ALLOWED=false; EXPLICIT_REVIEW_REQUIRED=true
+Order execution and wallet signing/broadcast,E,Trader UI placeholders; CosmosGasGrantGateway.grant/revoke,UNIMPLEMENTED_AND_DISABLED,No production signer or order endpoint; local gas entry points additionally denied

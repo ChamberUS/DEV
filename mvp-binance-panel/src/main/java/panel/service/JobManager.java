@@ -47,6 +47,7 @@ public class JobManager {
 
     /** Deve ser chamado na thread da UI. Lança IllegalArgumentException/IllegalStateException se o comando for recusado. */
     public JobRecord submit(CommandSpec spec, String sessionId) {
+        panel.security.ServerAuthorization.require("research.job.submit");
         gate.run();
         if (spec.heavy && !externals.isEmpty()) {
             throw new IllegalStateException("Another label job is already running (pid " + externals.get(0).pid() + "). Wait for it to finish.");
@@ -102,6 +103,7 @@ public class JobManager {
     }
 
     public void cancel(JobRecord job) {
+        panel.security.ServerAuthorization.require("research.job.cancel");
         gate.run();
         if (job.state.get() == JobState.QUEUED) {
             job.state.set(JobState.CANCELLED);

@@ -2,7 +2,7 @@ package byx.service.auth;
 
 /**
 
- * Configuração NÃO secreta da autoridade: provedores de 2º fator (remetente do e-mail, SIDs do Twilio) e a janela da elevação administrativa (migrada do legado: 30 min). Vive no snapshot cifrado (integridade e
+ * Configuração NÃO secreta da autoridade: provedores de 2º fator (remetente do e-mail, SIDs do Twilio). O campo legado de prazo é preservado no esquema, mas não define autorização. Vive no snapshot cifrado (integridade e
  * confidencialidade); os SEGREDOS (chave Resend, segredo Twilio) ficam só no cofre do serviço.
  */
 public record ProviderSettings(String resendFromAddress, String twilioAccountSid, String twilioApiKeySid, String twilioVerifyServiceSid, int adminElevationMinutes) {
@@ -13,9 +13,9 @@ public record ProviderSettings(String resendFromAddress, String twilioAccountSid
         this(resendFromAddress, twilioAccountSid, twilioApiKeySid, twilioVerifyServiceSid, 0);
     }
 
-    /** Janela (ms) da elevação administrativa: o valor migrado do painel legado (1..60 min) ou, se ausente, o padrão de {@link AuthLimits}. */
+    /** O prazo de autorização vem exclusivamente de {@link AuthLimits}. */
     public long elevationMs() {
-        return adminElevationMinutes >= 1 && adminElevationMinutes <= MAX_ELEVATION_MINUTES ? adminElevationMinutes * 60_000L : AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis();
+        return AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis();
     }
 
     public boolean emailConfigured() {

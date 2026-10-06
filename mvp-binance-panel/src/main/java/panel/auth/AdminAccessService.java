@@ -16,8 +16,8 @@ import panel.user.User;
 /**
  * Acesso administrativo pelo SERVIÇO: elevação, segundo fator e dispositivo confiável são decididos e guardados lá. Este objeto só mantém a REPRESENTAÇÃO
  * (cache de apresentação) do que o serviço respondeu e a mostra à interface; um cache velho nunca concede nada que o serviço negue, e perder a sessão no
- * serviço (expirada, ociosa, revogada, serviço reiniciado) encerra a representação local. Esconder um botão não é autorização: toda operação protegida é
- * decidida pelo serviço (as que ainda vivem no painel seguem barradas pela interface até migrarem para o serviço).
+ * serviço (expirada, ociosa, revogada, serviço reiniciado) encerra a representação local. Esconder um botão não é autorização: operações sensíveis sem endpoint
+ * do serviço ficam indisponíveis por ServerAuthorization, independentemente deste cache.
  */
 public class AdminAccessService implements AdminGate {
     private final SessionManager sessions;
@@ -27,7 +27,6 @@ public class AdminAccessService implements AdminGate {
     private final Clock clock;
     private volatile TwoFactorFlow active;
     private volatile long lastActivityMs = System.currentTimeMillis();
-    private volatile long lastPingMs;
     private volatile boolean secondFactorConfigured;
     private final ScheduledExecutorService keepalive = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "authority-keepalive");
@@ -118,7 +117,7 @@ public class AdminAccessService implements AdminGate {
         return st.get().path("elevated").asBoolean(false) ? AccessDecision.ALREADY_AUTHORIZED : AccessDecision.REQUIRES_2FA;
     }
 
-    /** Pede ao SERVIÇO a elevação por dispositivo confiável (o serviço decide se há dispositivo válido; sem ele exige o segundo fator). */
+    /** Compatibilidade da UI: confiança do dispositivo nunca substitui MFA recente na elevação. */
     public boolean tryTrustedDevice() {
         if (evaluate() != AccessDecision.REQUIRES_2FA) {
             return false;
@@ -131,7 +130,7 @@ public class AdminAccessService implements AdminGate {
             return false;
         }
         sessions.revokeAdmin();
-        apply(r.result(), AuthMethod.TRUSTED_DEVICE);
+        apply(r.result(), AuthMethod.TWO_FACTOR);
         return hasValidAdminSession();
     }
 
@@ -172,25 +171,9 @@ public class AdminAccessService implements AdminGate {
         return false;
     }
 
-    /** Atividade do usuário (mouse/teclado): mantém a sessão e a elevação vivas no serviço (a elevação só desliza se ainda válida; lapsada exige o 2º fator de novo). */
+    /** Atividade renova somente o idle da sessão comum. Nunca solicita nem estende elevação. */
     public void touch() {
-        long now = System.currentTimeMillis();
-        lastActivityMs = now;
-        if (hasValidAdminSession() && now - lastPingMs > 60_000) {
-            lastPingMs = now;
-            keepalive.execute(() -> {
-                try {
-                    AuthorityGateway.Reply r = gateway.adminElevation();
-                    if (r.ok()) {
-                        apply(r.result(), AuthMethod.TWO_FACTOR);
-                    } else if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
-                        sessionLost();
-                    }
-                } catch (RuntimeException ignored) {
-                    // nada
-                }
-            });
-        }
+        lastActivityMs = System.currentTimeMillis();
     }
 
     public Optional<AdminSession> adminSession() {
@@ -218,7 +201,10 @@ public class AdminAccessService implements AdminGate {
 
     @Override
     public User requireAdmin() {
-        if (expireIfNeeded() || !hasValidAdminSession()) {
+        var status = refresh();
+        if (status.isEmpty() || !"ADMIN".equals(status.get().path("role").asText())
+                || !status.get().path("elevated").asBoolean(false)
+                || !status.get().path("mfaRecent").asBoolean(false)) {
             throw new AccessDeniedException("Administrator session required");
         }
         return sessions.user().orElseThrow().user();

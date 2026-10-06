@@ -94,6 +94,8 @@ public final class WalletScreen implements View {
         grid.add(card, 1, 0);
         grid.add(histPanel, 0, 1, 2, 1);
         VBox page = Kit.page(14);
+        if (data.accountOperationsUnavailableReason() != null) page.getChildren().add(
+                ByxBadge.of(data.accountOperationsUnavailableReason(), ByxBadge.Tone.NEGATIVE));
         page.getChildren().add(grid);
         scroll = Kit.scroll(page);
         render();
@@ -133,6 +135,7 @@ public final class WalletScreen implements View {
     }
 
     private void refresh() {
+        if (data.accountOperationsUnavailableReason() != null) return;
         String addr = selected();
         if (addr == null || inFlight || !data.sessionActive()) {
             return;

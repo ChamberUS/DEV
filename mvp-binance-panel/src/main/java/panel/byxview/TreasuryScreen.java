@@ -65,6 +65,8 @@ public final class TreasuryScreen implements View {
         grid.add(lanes, 0, 0);
         grid.add(right, 1, 0);
         VBox page = Kit.page(14);
+        if (data.accountOperationsUnavailableReason() != null) page.getChildren().add(
+                ByxBadge.of(data.accountOperationsUnavailableReason(), ByxBadge.Tone.NEGATIVE));
         page.getChildren().add(Kit.environment("LOCALNET", "Development environment", "TEST assets only. Nothing here has real value."));
         page.getChildren().add(grid);
         scroll = Kit.scroll(page);
@@ -98,6 +100,7 @@ public final class TreasuryScreen implements View {
 
     /** Leitura de cadeia fora da thread FX; resultado tardio (tela escondida, sessão trocada) é descartado. */
     public void refresh() {
+        if (data.accountOperationsUnavailableReason() != null) return;
         if (busy || !data.sessionActive()) {
             return;
         }

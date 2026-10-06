@@ -3,18 +3,16 @@ package panel.auth;
 import java.time.Duration;
 import java.time.Instant;
 
-/** Autorização temporária adicional para a área Research/Admin. Expira por inatividade. */
+/** Presentation of an absolute authority deadline; this object never authorizes an operation. */
 public class AdminSession {
     private final Instant authorizedAt;
     private final AuthMethod method;
-    private final Duration timeout;
-    private Instant expiresAt;
+    private final Instant expiresAt;
 
     public AdminSession(Instant authorizedAt, AuthMethod method, Duration timeout) {
         if (method == AuthMethod.PASSKEY) throw new IllegalArgumentException("Passkey is not implemented");
         this.authorizedAt = authorizedAt;
         this.method = method;
-        this.timeout = timeout;
         this.expiresAt = authorizedAt.plus(timeout);
     }
 
@@ -35,6 +33,6 @@ public class AdminSession {
     }
 
     public void touch(Instant now) {
-        expiresAt = now.plus(timeout);
+        // Compatibility only: activity cannot extend the authority deadline.
     }
 }

@@ -46,6 +46,8 @@ public class SettingsView extends PageView {
 
         var save = Ui.button("Save", "primary");
         var status = Ui.label("", "muted");
+        save.setDisable(true);
+        status.setText(panel.security.ServerAuthorization.REQUIRED);
         save.setOnAction(e -> {
             try {
                 ctx.adminAccess.requireAdmin();

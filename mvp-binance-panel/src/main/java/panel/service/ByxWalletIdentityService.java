@@ -26,6 +26,7 @@ public final class ByxWalletIdentityService {
         sessions.onLogout(() -> { synchronized (pending) { pending.clear(); } });
     }
     private UserSession user() {
+        ServerAuthorization.require("wallet.identity");
         return sessions.user().filter(s -> s.user().active() && !s.user().mustChangePassword())
                 .orElseThrow(() -> new AccessDeniedException("Authenticated user required"));
     }

@@ -19,6 +19,7 @@ public final class TreasuryService {
         this.identity=identity;this.chain=chain;this.gas=gas;this.journal=journal;this.policy=policy;this.clock=clock;
     }
     public TreasurySnapshot refresh() throws Exception {
+        panel.security.ServerAuthorization.require("wallet.treasury.read");
         var c=identity.network(); var p=policy.get(); p.matches(c);
         var query=new ByxConfig(c.endpoint(),c.rpcEndpoint(),"LOCALNET",c.expectedChainId(),c.genesisFingerprint(),"ubyx","BYX",6,"BANK_METADATA",p.granter());
         var s=chain.read(query); var now=clock.instant();

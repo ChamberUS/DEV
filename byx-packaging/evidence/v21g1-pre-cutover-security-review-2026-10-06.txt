@@ -1,0 +1,70 @@
+BYX V2.1G-1 PRE-CUTOVER SECURITY REVIEW — 2026-10-06
+Scope: source audit, in-memory/temp synthetic tests, isolated TEST Keychain namespaces, signed bundles. No real cutover.
+SESSION_ABSOLUTE=8h; SESSION_IDLE=15m; RECENT_MFA=10m; ADMIN_ELEVATION=5m ABSOLUTE.
+Legacy 30-minute provider setting cannot override AuthLimits. Activity/navigation/keepalive/repeated valid elevation requests do not extend elevation.
+Current ADMIN + valid authority session + real recent second-factor verification required; trusted device alone is denied.
+SessionManager/AdminSession are presentation. Forged role/elevation/MFA tests deny before effects.
+Operations without authority endpoints are statically unavailable: SERVER_AUTHORIZATION_REQUIRED.
+Inventory: mvp-binance-panel/docs/PRE_CUTOVER_OPERATION_INVENTORY.csv (44 rows).
+Categories: {'A': 1, 'B': 7, 'C': 5, 'D': 19, 'E': 12}
+Migration audit/plan/prepare/verify/finalize remain separate. Both exact confirmation phrases remain. Normal panel has no migration calls.
+Finalize requires trusted authority, fresh verify PASS, both freeze flags active, private gate false, current embedded provisioning profile, enabled ADMIN, configured email/SMS and both vault items present.
+Missing/expired profile and unavailable configured provider fail closed. Network delivery was NOT CHECKED; no real OTP was sent.
+Account create/list/disable/change role/reset/contact edit and password recovery remain OPERATIONAL LIMITATION. Own password change remains service-backed.
+PRIVATE_CAPABILITIES_ALLOWED=false; EXPLICIT_REVIEW_REQUIRED=true (unchanged).
+
+DIRECTED TESTS (latest successful runs):
+Service: AuthServiceTest=23, AuthCutoverTest=19, AuthIpcTest=8, AuthIsolationTest=10, MigratorTest=19, FinalizePreflightTest=2. TOTAL=81; failures/errors/skipped=0.
+Panel: PreCutoverSecurityTest=4, AuthorityCutoverTest=13, LegacyAuthDisabledTest=5. TOTAL=22; failures/errors/skipped=0.
+Each changed project: mvn -q -DskipTests package ONCE; exit=0.
+Migration synthetic QA: verify-migration.sh ONCE against fresh signed TEST bundle; 62 PASS, 0 FAIL; test items cleaned.
+Synthetic QA log: byx-packaging/evidence/v21g1-migration-synthetic-2026-10-06.txt.
+Fresh production bundle built; codesign --verify --deep --strict PASS after installing at requested path.
+GUI/profile smoke NOT EXECUTED; manual by user. No identity/secret-store stress/full QA suite.
+Real panel.db, authority home, authentication secrets/passwords/OTP, scientific repo/capture and CaptureRuntimeResolver were not accessed or changed.
+git diff --check restricted to owned projects/artifacts: PASS. No push.
+
+FINAL BUNDLE: /Users/buynnex-corp/dev/byx-packaging/build/BYX-MVP.app
+PREVIOUS BUNDLE PRESERVED: /Users/buynnex-corp/dev/byx-packaging/build/BYX-MVP.before-v21g1-20261006T210259Z.app
+JAR SHA256 (matches packaged source):
+3649ca619b999dd587f538ab0aec8ec59887bcd5db7127bb1410fec8c24c9682  byx-packaging/build/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar
+b18caf767ba5b09555a8fab2580ee387149ccc1ccd991127d49995559374603f  byx-packaging/build/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar
+b18caf767ba5b09555a8fab2580ee387149ccc1ccd991127d49995559374603f  byx-packaging/build/BYX-MVP.app/Contents/Helpers/byx-migrate.app/Contents/app/byx-local-service-0.1.0.jar
+
+FILES (explicit staging whitelist; pre-existing unrelated changes excluded):
+MODIFIED byx-local-service/src/main/java/byx/service/auth/AuthLimits.java
+MODIFIED byx-local-service/src/main/java/byx/service/auth/AuthService.java
+MODIFIED byx-local-service/src/main/java/byx/service/auth/ProviderSettings.java
+MODIFIED byx-local-service/src/main/java/byx/service/migration/Migrator.java
+CREATED  byx-local-service/src/main/java/byx/service/migration/FinalizePreflight.java
+MODIFIED byx-local-service/src/test/java/byx/service/auth/AuthCutoverTest.java
+MODIFIED byx-local-service/src/test/java/byx/service/migration/MigratorTest.java
+CREATED  byx-local-service/src/test/java/byx/service/migration/FinalizePreflightTest.java
+MODIFIED mvp-binance-panel/src/main/java/panel/app/AccountDataAdapter.java
+MODIFIED mvp-binance-panel/src/main/java/panel/app/ByxDataAdapter.java
+MODIFIED mvp-binance-panel/src/main/java/panel/auth/AdminAccessService.java
+MODIFIED mvp-binance-panel/src/main/java/panel/auth/AdminSession.java
+MODIFIED mvp-binance-panel/src/main/java/panel/auth/SessionManager.java
+MODIFIED mvp-binance-panel/src/main/java/panel/byxview/BenefitsScreen.java
+MODIFIED mvp-binance-panel/src/main/java/panel/byxview/ByxData.java
+MODIFIED mvp-binance-panel/src/main/java/panel/byxview/TreasuryScreen.java
+MODIFIED mvp-binance-panel/src/main/java/panel/byxview/WalletScreen.java
+MODIFIED mvp-binance-panel/src/main/java/panel/model/Settings.java
+MODIFIED mvp-binance-panel/src/main/java/panel/security/SecurityAuditService.java
+CREATED  mvp-binance-panel/src/main/java/panel/security/ServerAuthorization.java
+MODIFIED mvp-binance-panel/src/main/java/panel/service/ByxPaymentService.java
+MODIFIED mvp-binance-panel/src/main/java/panel/service/ByxWalletIdentityService.java
+MODIFIED mvp-binance-panel/src/main/java/panel/service/GasSponsorshipService.java
+MODIFIED mvp-binance-panel/src/main/java/panel/service/JobManager.java
+MODIFIED mvp-binance-panel/src/main/java/panel/service/TreasuryService.java
+MODIFIED mvp-binance-panel/src/main/java/panel/ui/SettingsView.java
+MODIFIED mvp-binance-panel/src/test/java/panel/AuthorityCutoverTest.java
+MODIFIED mvp-binance-panel/src/test/java/panel/FakeAuthority.java
+CREATED  mvp-binance-panel/src/test/java/panel/PreCutoverSecurityTest.java
+MODIFIED mvp-binance-panel/docs/AUTHORITY_CUTOVER.md
+CREATED  mvp-binance-panel/docs/PRE_CUTOVER_OPERATION_INVENTORY.csv
+CREATED  byx-packaging/evidence/v21g1-migration-synthetic-2026-10-06.txt
+CREATED  byx-packaging/evidence/v21g1-pre-cutover-security-review-2026-10-06.txt
+
+MANUAL CUTOVER SECURITY GATE: READY
+Real GUI/auth/provider delivery readiness is not asserted. No real migration authorized or executed.

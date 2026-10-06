@@ -191,7 +191,7 @@ class AuthorityCutoverTest {
     // ---- dispositivo confiável (do serviço) e janela de segurança --------------------------------------------------------------------------------
 
     @Test
-    void trustedDevicesLiveInTheServiceAndReduceTheSecondFactorUntilRevoked() {
+    void trustedDevicesLiveInTheServiceButNeverSubstituteMfaForElevation() {
         AuthFixture f = admin();
         TwoFactorFlow flow = f.access.startTwoFactor();
         flow.sendEmailCode();
@@ -203,8 +203,9 @@ class AuthorityCutoverTest {
         f.auth.logout();
         f.auth.login("boss", pw());
         assertEquals(AccessDecision.REQUIRES_2FA, f.access.evaluate());
-        assertTrue(f.access.tryTrustedDevice(), "the service honours its own trusted device");
-        assertTrue(f.access.hasValidAdminSession());
+        assertFalse(f.access.tryTrustedDevice(), "trusted device without a recent OTP cannot elevate");
+        assertFalse(f.access.hasValidAdminSession());
+        f.authorize();
         var id = f.devices.list().get(0).id();
         f.devices.revoke(id);
         assertFalse(f.access.hasValidAdminSession(), "revoking ends the elevation");

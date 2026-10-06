@@ -20,6 +20,7 @@ public class SecurityAuditService {
     }
 
     public void record(AuditEvent event, String actor, String detail) {
+        ServerAuthorization.require("legacy.security.audit.write");
         db.with(c -> {
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO audit_log(ts,event,actor,detail) VALUES (?,?,?,?)")) {
                 ps.setString(1, clock.instant().toString());

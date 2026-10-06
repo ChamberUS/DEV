@@ -17,6 +17,8 @@ import panel.service.EntitlementService;
  * expõe leituras de cadeia e do repositório local. {@link #configure} só aponta o app para um nó LOCALNET de leitura.
  */
 public interface ByxData {
+    /** Availability only, never authorization. Synthetic read-only fixtures may omit this notice. */
+    default String accountOperationsUnavailableReason() { return null; }
     ByxSnapshot network();
 
     /** Há sessão de usuário (leituras que dependem dela falham sem). */

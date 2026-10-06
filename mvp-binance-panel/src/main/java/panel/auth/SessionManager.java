@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import panel.user.User;
 
-/** Guarda UserSession e AdminSession atuais. Logout encerra as duas. */
+/** Presentation state only. Neither role nor elevation here authorizes an operation. Logout clears both. */
 public class SessionManager {
     private UserSession user;
     private AdminSession admin;

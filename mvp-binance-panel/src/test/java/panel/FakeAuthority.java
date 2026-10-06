@@ -34,7 +34,8 @@ public final class FakeAuthority implements AuthorityGateway {
     public volatile boolean configured = true;
     public volatile boolean frozen;
     public volatile boolean unavailable;
-    public volatile int elevationMinutes = 30;
+    public volatile int elevationMinutes = 5;
+    public volatile int elevationCalls;
     private String emailCode;
     private String smsCode;
     private String challenge;
@@ -258,6 +259,7 @@ public final class FakeAuthority implements AuthorityGateway {
 
     @Override
     public Reply adminElevation() {
+        elevationCalls++;
         calls.add("elevate");
         Acct a = live();
         if (a == null) {
@@ -267,14 +269,10 @@ public final class FakeAuthority implements AuthorityGateway {
             return err("DENIED");
         }
         long t = now();
-        if (elevatedUntilMs > t) {
-            elevatedUntilMs = t + elevationMinutes * 60_000L;
-            return ok(view(a));
-        }
-        if (!(mfaAtMs >= 0 && t - mfaAtMs <= 600_000) && activeDevice() < 0) {
+        if (!(mfaAtMs >= 0 && t - mfaAtMs <= 600_000)) {
             return err("ELEVATION_REQUIRES_MFA");
         }
-        elevatedUntilMs = t + elevationMinutes * 60_000L;
+        if (elevatedUntilMs <= t) elevatedUntilMs = t + 300_000L;
         return ok(view(a));
     }
 

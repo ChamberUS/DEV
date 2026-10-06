@@ -22,6 +22,7 @@ final class ByxDataAdapter implements ByxData {
     }
 
     @Override public ByxSnapshot network() { return ctx.byx.snapshot(); }
+    @Override public String accountOperationsUnavailableReason() { return panel.security.ServerAuthorization.REQUIRED; }
 
     @Override public boolean sessionActive() { return ctx.sessions.user().isPresent(); }
 

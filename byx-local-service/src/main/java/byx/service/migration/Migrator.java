@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.BooleanSupplier;
 
 /**
  * Migração da autoridade de autenticação: banco legado (SOMENTE LEITURA) → autoridade do serviço (snapshot AEAD + âncora de rollback + chaves de produção
@@ -64,8 +65,15 @@ public final class Migrator {
     private final SecretStore secrets;
     private final Clock clock;
     private final String serviceRequirement;
+    private final BooleanSupplier profileCurrent;
 
     public Migrator(AuthProfile profile, Path legacyDb, Path providersFile, Path securityFile, LegacySecretSource legacy, SecretStore secrets, Clock clock, String serviceRequirement) {
+        this(profile, legacyDb, providersFile, securityFile, legacy, secrets, clock, serviceRequirement,
+                () -> FinalizePreflight.currentPackagedProfile(clock));
+    }
+
+    Migrator(AuthProfile profile, Path legacyDb, Path providersFile, Path securityFile, LegacySecretSource legacy,
+            SecretStore secrets, Clock clock, String serviceRequirement, BooleanSupplier profileCurrent) {
         this.profile = profile;
         this.legacyDb = legacyDb;
         this.providersFile = providersFile;
@@ -74,6 +82,7 @@ public final class Migrator {
         this.secrets = secrets;
         this.clock = clock;
         this.serviceRequirement = serviceRequirement;
+        this.profileCurrent = profileCurrent;
     }
 
     private Path manifestFile() {
@@ -215,21 +224,7 @@ public final class Migrator {
         } catch (IOException e) {
             throw new MigrationException("providers_unreadable");
         }
-        int minutes = 30; // padrão do painel legado quando a chave não existe
-        Properties sec = new Properties();
-        if (securityFile != null && Files.exists(securityFile)) {
-            try (var in = Files.newInputStream(securityFile)) {
-                sec.load(in);
-            } catch (IOException e) {
-                throw new MigrationException("security_config_unreadable");
-            }
-            try {
-                minutes = Integer.parseInt(sec.getProperty("security.admin.sessionTimeoutMinutes", "30").trim());
-            } catch (NumberFormatException e) {
-                throw new MigrationException("security_config_invalid", "key=security.admin.sessionTimeoutMinutes");
-            }
-        }
-        minutes = Math.max(1, Math.min(ProviderSettings.MAX_ELEVATION_MINUTES, minutes)); // o legado impunha mínimo 1; o serviço limita a 60
+        int minutes = (int) byx.service.auth.AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMinutes();
         ProviderSettings ps = new ProviderSettings(p.getProperty("resend.fromAddress"), p.getProperty("twilio.accountSid"), p.getProperty("twilio.apiKeySid"), p.getProperty("twilio.verifyServiceSid"), minutes);
         List<String> bad = new ArrayList<>();
         if (!ps.emailConfigured() || ps.resendFromAddress().length() > 254 || ps.resendFromAddress().chars().anyMatch(c -> c < 32 || c == 127)) {
@@ -541,6 +536,22 @@ public final class Migrator {
         }
         AuthorityStore store = openStore();
         try {
+            if (store.status() != AuthorityStore.Status.TRUSTED) throw new MigrationException("authority_untrusted");
+            var authority = store.current();
+            if (!st.freeze || !authority.migrationFreeze()) throw new MigrationException("safety_window_inactive");
+            Map<String, Object> verification = verify();
+            boolean providersReady = authority.providers().emailConfigured() && authority.providers().smsConfigured();
+            Object vault = verification.get("vaultSecrets");
+            boolean secretsReady = vault instanceof Map<?, ?> values && values.size() == 2
+                    && values.values().stream().allMatch("PRESENT"::equals);
+            FinalizePreflight.require(new FinalizePreflight.Conditions(
+                    store.status() == AuthorityStore.Status.TRUSTED,
+                    "PASS".equals(verification.get("verification")),
+                    st.freeze && authority.migrationFreeze(),
+                    byx.service.PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED,
+                    profileCurrent.getAsBoolean(),
+                    authority.accounts().stream().anyMatch(a -> a.enabled() && a.role() == Role.ADMIN),
+                    providersReady && secretsReady));
             new AuthorityAdmin(store, new PasswordVerifier(), clock).setFreeze(false);
         } catch (AuthorityException e) {
             throw new MigrationException("authority_write", e.code);

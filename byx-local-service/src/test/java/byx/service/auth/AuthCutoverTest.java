@@ -132,45 +132,55 @@ class AuthCutoverTest {
         assertEquals(Code.OK, begin.code());
     }
 
-    // ---- elevação deslizante -----------------------------------------------------------------------------------------------------------
+    // ---- elevação absoluta -----------------------------------------------------------------------------------------------------------
+
+    @Test void authLimitsMatchTheApprovedContractExactly() {
+        assertEquals(Duration.ofHours(8), AuthLimits.ABSOLUTE_TIMEOUT);
+        assertEquals(Duration.ofMinutes(15), AuthLimits.IDLE_TIMEOUT);
+        assertEquals(Duration.ofMinutes(10), AuthLimits.RECENT_MFA_WINDOW);
+        assertEquals(Duration.ofMinutes(5), AuthLimits.ADMIN_ELEVATION_TIMEOUT);
+        assertFalse(AuthLimits.recentMfa(100, 99));
+    }
 
     @Test
-    void elevationSlidesWithActivityUpToTheAbsoluteSessionLimitAndLapsesWhenIdle() throws Exception {
-        f.admin.setProviders(new ProviderSettings(null, null, null, null, 30)); // janela migrada do legado: 30 min
-        String t = adminLogin();
-        fullMfa(t, f.adminId);
+    void elevationIsFiveMinutesAbsoluteAndActivityNeverExtendsIt() throws Exception {
+        f.admin.setProviders(new ProviderSettings(null, null, null, null, 30));
+        String t = adminLogin(); fullMfa(t, f.adminId);
         assertEquals(Code.OK, f.auth.adminElevation(PEER, t).code());
-        for (int i = 0; i < 8; i++) { // atividade a cada 10 min mantém a elevação (além da janela de MFA recente, que só vale para ELEVAR)
-            f.clock.advance(Duration.ofMinutes(10));
-            assertEquals(Code.OK, f.auth.adminElevation(PEER, t).code(), "slide " + i);
-            assertEquals(true, f.auth.sessionStatus(PEER, t).data().get("elevated"));
+        assertEquals(300L, f.auth.sessionStatus(PEER, t).data().get("elevatedForSec"));
+        for (int i = 1; i < 5; i++) {
+            f.clock.advance(Duration.ofMinutes(1));
+            assertEquals(Code.OK, f.auth.adminElevation(PEER, t).code());
+            assertEquals(300L - i * 60, f.auth.sessionStatus(PEER, t).data().get("elevatedForSec"));
+            assertEquals(Code.OK, f.auth.authorize(PEER, t, "qa.adminOp", null).code());
         }
-        assertTrue(f.auth.sessionStatus(PEER, t).data().get("elevatedForSec") instanceof Long l && l > 25 * 60 && l <= 30 * 60);
-        f.clock.advance(Duration.ofMinutes(31)); // ocioso além da janela: a sessão cai por inatividade de 15 min (e a elevação lapsaria de qualquer forma)
-        assertEquals(Code.AUTH_REQUIRED, f.auth.authorize(PEER, t, "qa.adminOp", null).code());
-        String t2 = adminLogin();
-        fullMfa(t2, f.adminId);
-        f.auth.adminElevation(PEER, t2);
-        f.clock.advance(Duration.ofMinutes(14)); // sessão ainda viva (idle 15), elevação ainda válida
-        f.auth.sessionStatus(PEER, t2);
-        f.clock.advance(Duration.ofMinutes(14));
-        f.auth.sessionStatus(PEER, t2);
-        f.clock.advance(Duration.ofMinutes(14)); // 42 min sem elevar: lapsou (janela 30)
-        assertEquals(Code.DENIED, f.auth.authorize(PEER, t2, "qa.adminOp", null).code());
-        assertEquals(Code.ELEVATION_REQUIRES_MFA, f.auth.adminElevation(PEER, t2).code(), "lapsed elevation needs the second factor (or a trusted device) again");
+        f.clock.advance(Duration.ofMinutes(1));
+        assertEquals(false, f.auth.sessionStatus(PEER, t).data().get("elevated"));
+        assertEquals(Code.DENIED, f.auth.authorize(PEER, t, "qa.adminOp", null).code());
+        assertEquals(Code.OK, f.auth.authorize(PEER, t, "qa.userOp", null).code());
+    }
+
+    @Test
+    void expiredMfaWithTrustedDeviceNeverGrantsElevation() throws Exception {
+        String t = adminLogin(); fullMfa(t, f.adminId);
+        f.auth.adminElevation(PEER, t); f.auth.enrollTrustedDevice(PEER, t);
+        f.clock.advance(AuthLimits.RECENT_MFA_WINDOW.plusSeconds(1));
+        assertEquals(true, f.auth.sessionStatus(PEER, t).data().get("trustedDevice"));
+        assertEquals(false, f.auth.sessionStatus(PEER, t).data().get("mfaRecent"));
+        assertEquals(Code.ELEVATION_REQUIRES_MFA, f.auth.adminElevation(PEER, t).code());
     }
 
     @Test
     void theElevationWindowDefaultsToTheStrictLimitWhenNothingWasMigrated() throws Exception {
         assertEquals(AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), ProviderSettings.NONE.elevationMs());
-        assertEquals(30 * 60_000L, new ProviderSettings(null, null, null, null, 30).elevationMs());
+        assertEquals(AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), new ProviderSettings(null, null, null, null, 30).elevationMs());
         assertEquals(AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis(), new ProviderSettings(null, null, null, null, 999).elevationMs(), "out-of-range values are not honored");
     }
 
     // ---- dispositivo confiável -------------------------------------------------------------------------------------------------------
 
     @Test
-    void trustedDeviceIsEnrolledByFreshMfaThenReducesTheSecondFactorUntilRevokedOrExpired() throws Exception {
+    void trustedDeviceIsEnrolledByFreshMfaButNeverSubstitutesMfaForElevation() throws Exception {
         String t = adminLogin();
         assertEquals(Code.DENIED, f.auth.enrollTrustedDevice(PEER, t).code(), "no enrolment without MFA + elevation");
         fullMfa(t, f.adminId);
@@ -179,17 +189,20 @@ class AuthCutoverTest {
         assertEquals(Code.OK, enrolled.code());
         String device = (String) enrolled.data().get("device");
         assertTrue(device.matches("[0-9a-f]{32}"));
-        // nova sessão sem 2º fator: a elevação passa pelo dispositivo confiável
+        // Nova sessão: confiança existe, porém MFA real continua obrigatório para elevar.
         String t2 = adminLogin();
         assertEquals(true, f.auth.sessionStatus(PEER, t2).data().get("trustedDevice"));
+        assertEquals(false, f.auth.sessionStatus(PEER, t2).data().get("mfaRecent"));
+        assertEquals(Code.ELEVATION_REQUIRES_MFA, f.auth.adminElevation(PEER, t2).code());
+        fullMfa(t2, f.adminId);
         assertEquals(Code.OK, f.auth.adminElevation(PEER, t2).code());
-        assertTrue(f.audit.entries().stream().anyMatch(e -> e.event().equals("ELEVATION_TRUSTED_DEVICE")));
+        assertFalse(f.audit.entries().stream().anyMatch(e -> e.event().equals("ELEVATION_TRUSTED_DEVICE")));
         var list = f.auth.listTrustedDevices(PEER, t2);
         assertEquals(Code.OK, list.code());
         assertTrue(((String) list.data().get("devices")).startsWith(device + ",ACTIVE"));
         // revogar encerra a elevação e a próxima sessão volta a exigir o 2º fator
         assertEquals(Code.OK, f.auth.revokeTrustedDevice(PEER, t2, device).code());
-        assertEquals(Code.ELEVATION_REQUIRES_MFA, f.auth.adminElevation(PEER, t2).code());
+        assertEquals(false, f.auth.sessionStatus(PEER, t2).data().get("elevated"));
         String t3 = adminLogin();
         assertEquals(Code.ELEVATION_REQUIRES_MFA, f.auth.adminElevation(PEER, t3).code());
         // expira

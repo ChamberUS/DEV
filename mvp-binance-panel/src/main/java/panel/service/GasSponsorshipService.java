@@ -24,6 +24,7 @@ public final class GasSponsorshipService {
     }
     private long user() { return sessions.user().filter(s -> s.user().active() && !s.user().mustChangePassword()).orElseThrow(() -> new AccessDeniedException("Authenticated user required")).user().id(); }
     public synchronized GasGrantSnapshot request(String address) throws Exception {
+        panel.security.ServerAuthorization.require("wallet.gas.request");
         var session=sessions.user().orElseThrow();
         var wallet=identity.verified(address).orElseThrow(() -> new AccessDeniedException("Verified wallet required"));
         benefits.refresh(address).get();
@@ -65,6 +66,7 @@ public final class GasSponsorshipService {
         return new GasGrantSnapshot(g.granter(),g.grantee(),g.denom(),e.limit(),g.remaining(),g.expiration(),g.state(),e.txHash(),g.updatedAt());
     }
     public synchronized GasGrantSnapshot refresh(String address) throws Exception {
+        panel.security.ServerAuthorization.require("wallet.gas.refresh");
         if (identity.verified(address).isPresent()) benefits.refresh(address).get();
         synchronized (sessions) {
             long u=user(); var c=identity.network(); var p=policy.get(); p.matches(c);
@@ -82,6 +84,7 @@ public final class GasSponsorshipService {
         }
     }
     public synchronized void revoke(String address) throws Exception {
+        panel.security.ServerAuthorization.require("wallet.gas.revoke");
         synchronized (sessions) {
             long u=user(); var c=identity.network(); var p=policy.get(); p.matches(c);
             var e=repository.own(u,address,p.chainId(),p.genesis()).orElseThrow(() -> new AccessDeniedException("No own grant"));
@@ -94,5 +97,5 @@ public final class GasSponsorshipService {
             } else repository.update(e,"REVOKED",e.txHash());
         }
     }
-    public List<GasGrantRepository.Entry> journal() { user(); return repository.all(); }
+    public List<GasGrantRepository.Entry> journal() { panel.security.ServerAuthorization.require("wallet.gas.journal"); user(); return repository.all(); }
 }

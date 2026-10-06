@@ -386,38 +386,17 @@ public final class AuthService {
             audit.record("ELEVATION_DENIED", ok.account.id());
             return Result.of(Code.DENIED);
         }
-        long window = elevationMs();
+        long window = AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis();
         long absoluteCap = ok.session.createdAtMs + AuthLimits.ABSOLUTE_TIMEOUT.toMillis();
-        if (ok.session.elevatedUntilMs > now) { // elevação AINDA válida: atividade a estende (deslizante), nunca além da sessão absoluta; se lapsou, exige 2º fator ou dispositivo de novo
-            ok.session.elevatedUntilMs = Math.min(now + window, absoluteCap);
-            return new Result(Code.OK, view(ok.account, ok.session));
-        }
-        boolean mfaFresh = ok.session.mfaAtMs >= 0 && now - ok.session.mfaAtMs <= AuthLimits.RECENT_MFA_WINDOW.toMillis();
+        boolean mfaFresh = AuthLimits.recentMfa(ok.session.mfaAtMs, now);
         if (!mfaFresh) {
-            Optional<TrustedDevice> td = activeDevice(ok.account.id(), now);
-            if (td.isEmpty()) {
-                audit.record("ELEVATION_DENIED", ok.account.id());
-                return Result.of(Code.ELEVATION_REQUIRES_MFA);
-            }
-            try {
-                admin.touchDevice(td.get().id());
-            } catch (AuthorityException e) {
-                failClosed();
-                return Result.of(Code.AUTHORITY_UNAVAILABLE);
-            }
-            audit.record("ELEVATION_TRUSTED_DEVICE", ok.account.id());
+            audit.record("ELEVATION_DENIED", ok.account.id());
+            return Result.of(Code.ELEVATION_REQUIRES_MFA);
         }
+        if (ok.session.elevatedUntilMs > now) return new Result(Code.OK, view(ok.account, ok.session));
         ok.session.elevatedUntilMs = Math.min(now + window, absoluteCap);
         audit.record("ELEVATION_GRANTED", ok.account.id());
         return new Result(Code.OK, view(ok.account, ok.session));
-    }
-
-    private long elevationMs() {
-        try {
-            return authority.current().providers().elevationMs();
-        } catch (AuthorityException e) {
-            return AuthLimits.ADMIN_ELEVATION_TIMEOUT.toMillis();
-        }
     }
 
     private Optional<TrustedDevice> activeDevice(String accountId, long now) {
@@ -564,7 +543,7 @@ public final class AuthService {
         if (rule == null || !v.account.role().atLeast(rule.minRole())) {
             return Code.DENIED;
         }
-        if (rule.recentMfa() && (v.session.mfaAtMs < 0 || now - v.session.mfaAtMs > AuthLimits.RECENT_MFA_WINDOW.toMillis())) {
+        if (rule.recentMfa() && !AuthLimits.recentMfa(v.session.mfaAtMs, now)) {
             return Code.DENIED;
         }
         if (rule.elevation() && (v.account.role() != Role.ADMIN || v.session.elevatedUntilMs <= now)) {
@@ -636,7 +615,7 @@ public final class AuthService {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("username", a.username()); // exibição apenas
         m.put("role", a.role().name()); // exibição apenas: a decisão é sempre refeita aqui
-        m.put("mfaRecent", s.mfaAtMs >= 0 && now - s.mfaAtMs <= AuthLimits.RECENT_MFA_WINDOW.toMillis());
+        m.put("mfaRecent", AuthLimits.recentMfa(s.mfaAtMs, now));
         m.put("elevated", s.elevatedUntilMs > now && a.role() == Role.ADMIN);
         m.put("elevatedForSec", s.elevatedUntilMs > now && a.role() == Role.ADMIN ? (s.elevatedUntilMs - now) / 1000 : 0L);
         // apresentação para a UI (a decisão é sempre refeita aqui): identidade estável legada, contato, flags e conclusão do 1º estágio do 2º fator

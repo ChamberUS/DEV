@@ -59,6 +59,7 @@ class MigratorTest {
     private final MapStore backend = new MapStore();
     private FakeLegacy legacy;
     private Migrator m;
+    private boolean profileValid = true;
     private AuthProfile profile;
     private String adminPw = "synthetic-admin-pass-1";
     private String userPw = "synthetic-user-pass-22";
@@ -132,7 +133,7 @@ class MigratorTest {
         legacy.values.put(Item.TWILIO, "FAKE-LEGACY-TWILIO".getBytes(StandardCharsets.UTF_8));
         legacy.values.put(Item.TRUSTED_DEVICE, "FAKE-LEGACY-DEVICE".getBytes(StandardCharsets.UTF_8));
         profile = AuthProfile.production(home); // perfil de produção sobre um HOME TEMPORÁRIO e um cofre de MENTIRA (nada real é tocado)
-        m = new Migrator(profile, db, providers, dir.resolve("security.properties"), legacy, new ScopedSecretStore(backend, SecretId.Scope.PRODUCTION), Clock.systemUTC(), "identifier \"x\" and anchor apple generic and certificate leaf[subject.OU] = \"AAAAAAAAAA\"");
+        m = new Migrator(profile, db, providers, dir.resolve("security.properties"), legacy, new ScopedSecretStore(backend, SecretId.Scope.PRODUCTION), Clock.systemUTC(), "identifier \"x\" and anchor apple generic and certificate leaf[subject.OU] = \"AAAAAAAAAA\"", () -> profileValid);
     }
 
     @AfterEach
@@ -264,7 +265,7 @@ class MigratorTest {
         assertTrue(st.migrationFreeze(), "the safety window is on from the start");
         assertTrue(st.devices().isEmpty(), "no trusted device was migrated");
         assertEquals("BYX <noreply@example.test>", st.providers().resendFromAddress());
-        assertEquals(30, st.providers().adminElevationMinutes(), "the configured admin session window is migrated (legacy: 30 min)");
+        assertEquals(5, st.providers().adminElevationMinutes(), "AuthLimits overrides the legacy 30-minute configuration");
         // o snapshot em disco é cifrado
         String raw = new String(Files.readAllBytes(profile.snapshot()), StandardCharsets.ISO_8859_1);
         assertFalse(raw.contains("syn_admin") || raw.contains("argon2id") || raw.contains("example.test"));
@@ -433,6 +434,47 @@ class MigratorTest {
         assertEquals(3, legacy.values.size(), "legacy items are still there: deletion is a separate, later step");
         assertTrue(Files.exists(db), "panel.db is still there");
         assertEquals("already_cutover", assertThrows(MigrationException.class, () -> m.prepare(Migrator.PREPARE_PHRASE)).code);
+    }
+
+    @Test void finalizeExpiredProfileKeepsSafetyWindowAndPreparedState() throws Exception {
+        m.plan(); m.prepare(Migrator.PREPARE_PHRASE); profileValid = false;
+        assertEquals("provisioning_profile_expired_or_unavailable", assertThrows(MigrationException.class,
+                () -> m.finalizeCutover(Migrator.FINALIZE_PHRASE)).code);
+        assertEquals("PREPARED", m.status().get("status")); assertEquals(true, m.status().get("freeze"));
+    }
+
+    @Test void finalizeRepeatsVerifyAndNeverRepairsChangedSource() throws Exception {
+        m.plan(); m.prepare(Migrator.PREPARE_PHRASE);
+        exec("UPDATE users SET email='different@example.test' WHERE id=2");
+        assertEquals("source_users_changed", assertThrows(MigrationException.class,
+                () -> m.finalizeCutover(Migrator.FINALIZE_PHRASE)).code);
+        assertEquals(true, m.status().get("freeze"));
+    }
+
+    @Test void finalizeMissingProviderSecretDeniesWithoutLiftingFreeze() throws Exception {
+        m.plan(); m.prepare(Migrator.PREPARE_PHRASE); backend.items.remove(profile.twilioId());
+        assertEquals("second_factor_unavailable", assertThrows(MigrationException.class,
+                () -> m.finalizeCutover(Migrator.FINALIZE_PHRASE)).code);
+        assertEquals(true, m.status().get("freeze"));
+    }
+
+    @Test void finalizeInactiveSafetyWindowIsDenied() throws Exception {
+        m.plan(); m.prepare(Migrator.PREPARE_PHRASE);
+        var secrets = new ScopedSecretStore(backend, SecretId.Scope.PRODUCTION);
+        var store = AuthorityStore.open(profile.snapshot(), new SecretStoreAnchor(secrets, profile.anchorId()),
+                new SecretStoreKeyVault(secrets, profile.encryptionKeyId()));
+        new AuthorityAdmin(store, PV, Clock.systemUTC()).setFreeze(false);
+        assertEquals("safety_window_inactive", assertThrows(MigrationException.class,
+                () -> m.finalizeCutover(Migrator.FINALIZE_PHRASE)).code);
+        assertEquals("PREPARED", m.status().get("status"));
+    }
+
+    @Test void finalizeNeedsAnEnabledAdminEvenWhenSourceAndTargetMatch() throws Exception {
+        exec("UPDATE users SET status='DISABLED' WHERE role='ADMIN'");
+        m.plan(); m.prepare(Migrator.PREPARE_PHRASE);
+        assertEquals("enabled_admin_required", assertThrows(MigrationException.class,
+                () -> m.finalizeCutover(Migrator.FINALIZE_PHRASE)).code);
+        assertEquals(true, m.status().get("freeze"));
     }
 
     @Test

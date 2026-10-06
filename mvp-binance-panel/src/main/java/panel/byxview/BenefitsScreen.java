@@ -107,6 +107,8 @@ public final class BenefitsScreen implements View {
         grid.add(left, 0, 0);
         grid.add(right, 1, 0);
         VBox page = Kit.page(14);
+        if (data.accountOperationsUnavailableReason() != null) page.getChildren().add(
+                ByxBadge.of(data.accountOperationsUnavailableReason(), ByxBadge.Tone.NEGATIVE));
         page.getChildren().add(grid);
         scroll = Kit.scroll(page);
         render();
@@ -117,6 +119,7 @@ public final class BenefitsScreen implements View {
     }
 
     private String address() {
+        if (data.accountOperationsUnavailableReason() != null) return null;
         if (!data.sessionActive()) {
             return null;
         }
