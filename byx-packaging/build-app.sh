@@ -32,10 +32,9 @@ rm -rf "$OUT"; mkdir -p "$OUT/input" "$OUT/svc-input"
 echo "== 1. dependências de execução (sem escopo de teste)"
 ( cd "$ROOT/mvp-binance-panel" && mvn -o -q dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory="$OUT/input" )
 cp "$PANEL_JAR" "$OUT/input/"
-BCJAR=$(cd "$OUT/input" && ls bcprov-jdk18on-*.jar | head -1)
-for j in byx-local-service-0.1.0.jar jackson-annotations-2.21.jar jackson-core-2.21.6.jar jackson-databind-2.20.0.jar jna-5.17.0.jar $BCJAR; do
-  if [[ "$j" == byx-local-service-0.1.0.jar ]]; then cp "$SERVICE_JAR" "$OUT/svc-input/"; else cp "$OUT/input/$j" "$OUT/svc-input/"; fi
-done
+# dependências do SERVIÇO: as do próprio projeto (fonte única; não depende do que o painel traz)
+( cd "$ROOT/byx-local-service" && mvn -o -q dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory="$OUT/svc-input" )
+cp "$SERVICE_JAR" "$OUT/svc-input/"
 MODS=java.base,java.desktop,java.naming,java.net.http,java.sql,java.logging,java.xml,java.management,jdk.jfr,jdk.unsupported,jdk.crypto.ec
 
 echo "== 2. app do painel (jpackage, runtime embutido via jlink)"
@@ -67,8 +66,9 @@ s[i+1:i+1]=opts
 open(p,"w").write("\n".join(s)+"\n")
 PY
 }
-HELPERS=("byx-local-service:byx.service.ServiceMain")
-[[ $CANARY -eq 1 ]] && HELPERS+=("byx-auth-qa:byx.service.auth.AuthQaMain")
+# byx-migrate: migrador REAL (identidade do serviço; acessa o cofre do serviço e LÊ o keychain legado): subcomandos como argumento da aplicação, confirmação por stdin
+HELPERS=("byx-local-service:byx.service.ServiceMain" "byx-migrate:byx.service.migration.MigrateMain")
+[[ $CANARY -eq 1 ]] && HELPERS+=("byx-auth-qa:byx.service.auth.AuthQaMain" "byx-migrate-qa:byx.service.migration.MigrateQaMain")
 [[ $CANARY -eq 1 ]] && HELPERS+=("byx-secret-canary:byx.service.secrets.SecretCanaryHarness" "byx-secret-holder:byx.service.secrets.SecretCanaryHolder" "byx-secret-servicereader:byx.service.secrets.SecretCanaryReader")
 mk_helper() { # $1=nome (= executável)  $2=classe principal
   local name="$1" mainclass="$2" tmp="$OUT/helper-$1"; local dest="$CONTENTS/Helpers/$1.app"
@@ -80,6 +80,7 @@ mk_helper() { # $1=nome (= executável)  $2=classe principal
   rm -rf "${dest:?}/Contents/runtime"; cp -cR "$CONTENTS/runtime" "$dest/Contents/runtime" # clone APFS: um runtime em disco
   mkdir -p "$dest/Contents/Frameworks"
   unzip -qjo "$M2/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar" 'com/sun/jna/darwin-x86-64/libjnidispatch.jnilib' -d "$dest/Contents/Frameworks"
+  [[ "$name" == byx-migrate* ]] && unzip -qjo "$M2/org/xerial/sqlite-jdbc/3.46.1.0/sqlite-jdbc-3.46.1.0.jar" 'org/sqlite/native/Mac/x86_64/libsqlitejdbc.dylib' -d "$dest/Contents/Frameworks"
   add_opts "$dest/Contents/app/$name.cfg"
   plutil -remove NSMicrophoneUsageDescription "$dest/Contents/Info.plist"; plutil -replace LSMinimumSystemVersion -string 12.0 "$dest/Contents/Info.plist"
   plutil -insert LSUIElement -bool true "$dest/Contents/Info.plist" # sem ícone no Dock
@@ -101,8 +102,10 @@ harden() { # $1=executável a substituir  $2=.cfg de origem  $3=classe principal
 }
 for h in "${HELPERS[@]}"; do
   n="${h%%:*}"
-  [[ "$n" == byx-local-service || "$n" == byx-auth-qa ]] || continue
-  harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}"
+  case "$n" in
+    byx-local-service|byx-auth-qa) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}";;
+    byx-migrate|byx-migrate-qa) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}" -DPASS_ARGS -DSQLITE_NATIVE;;
+  esac
 done
 harden "$CONTENTS/MacOS/$BYX_APP_NAME" "$CONTENTS/app/$BYX_APP_NAME.cfg" panel.app.Main -DPASS_ARGS -DSQLITE_NATIVE   # o painel: argv só depois da classe principal
 [[ $CANARY -eq 1 ]] && harden "$CONTENTS/MacOS/byx-auth-client" "$CONTENTS/app/byx-auth-client.cfg" panel.localservice.AuthorityQaCli -DPASS_ARGS

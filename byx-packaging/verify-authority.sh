@@ -71,18 +71,42 @@ ADMIN_ID=$(python3 -c "import json;print(json.load(open('$CRED'))['admin_user'][
 USER_ID=$(python3 -c "import json;print(json.load(open('$CRED'))['normal_user']['id'])")
 OUT=$(printf 'login admin_user %s\nelevate\nquit\n' "$CRED" | cli)
 expect "elevação sem segundo fator recente é recusada" "$OUT" "RESULT elevate ELEVATION_REQUIRES_MFA"
-OTPFILE="$AUTH/qa-otp/$ADMIN_ID.otp"
-run_elev() { # uma sessão: login → begin2fa → (espera o arquivo) → verify com o desafio impresso → elevate → status
-  mkfifo "$QA/in.fifo" 2>/dev/null; ( cli < "$QA/in.fifo" > "$QA/elev.out" ) & local p=$!
-  exec 7> "$QA/in.fifo"; echo "login admin_user $CRED" >&7; echo "begin2fa" >&7
-  for i in {1..40}; do grep -q '^CHALLENGE=' "$QA/elev.out" 2>/dev/null && break; sleep 0.25; done
-  local ch=$(sed -n 's/^CHALLENGE=//p' "$QA/elev.out"); echo "verify2fa $ch $OTPFILE" >&7; echo "elevate" >&7; echo "status" >&7
-  echo "verify2fa $ch $OTPFILE" >&7; echo "quit" >&7; exec 7>&-; wait $p; rm -f "$QA/in.fifo"; }
-run_elev
-expect "segundo fator de teste concluído" "$(cat "$QA/elev.out")" "RESULT verify2fa OK"
-expect "ADMIN com MFA recente eleva (propriedade temporária da sessão)" "$(cat "$QA/elev.out")" "RESULT elevate OK"
-expect "estado: ADMIN elevado" "$(cat "$QA/elev.out")" "RESULT status OK role=ADMIN elevated=true"
-expect "reuso do mesmo código (replay) é recusado" "$(tail -3 "$QA/elev.out")" "CHALLENGE_INVALID"
+OTPFILE="$AUTH/qa-otp/$ADMIN_ID.otp"; SMSFILE="$AUTH/qa-otp/$ADMIN_ID.sms"
+OUT=$(printf 'login admin_user %s\nbegin2fa\nverify2fa - %s\nelevate\nstatus\nquit\n' "$CRED" "$OTPFILE" | cli)
+expect "e-mail verificado, mas o SMS ainda é exigido: sem elevação" "$OUT" "RESULT verify2fa OK"
+expect "o 1º estágio pede o 2º (next=SMS)" "$OUT" "next=SMS"
+expect "e-mail sozinho NÃO eleva" "$OUT" "RESULT elevate ELEVATION_REQUIRES_MFA"
+OUT=$(printf 'login admin_user %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\nelevate\nstatus\nverify2fa - %s\nquit\n' "$CRED" "$OTPFILE" "$SMSFILE" "$OTPFILE" | cli)
+expect "segundo fator de dois estágios concluído" "$OUT" "RESULT verifysms OK"
+expect "ADMIN com e-mail+SMS recentes eleva (propriedade temporária da sessão)" "$OUT" "RESULT elevate OK"
+expect "estado: ADMIN elevado" "$OUT" "RESULT status OK role=ADMIN elevated=true"
+expect "reuso do mesmo código (replay) é recusado" "$(echo "$OUT" | tail -2)" "CHALLENGE_INVALID"
+refute "os códigos nunca saem do serviço para a saída do cliente" "$OUT" "$(cat "$OTPFILE")"
+
+echo "== 4b. dispositivo confiável do serviço (inscrever, reduzir o 2º fator, revogar) e trava de migração"
+OUT=$(printf 'login admin_user %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\nelevate\nenroll\ndevices\nquit\n' "$CRED" "$OTPFILE" "$SMSFILE" | cli)
+expect "inscrição do dispositivo (ADMIN elevado + 2º fator fresco)" "$OUT" "RESULT enroll OK"
+DEV=$(echo "$OUT" | sed -n 's/^DEVICES=\([0-9a-f]\{32\}\),ACTIVE.*/\1/p' | head -1)
+[[ ${#DEV} -eq 32 ]] && ok "o dispositivo aparece ATIVO na lista do serviço" || bad "lista de dispositivos" "$OUT"
+OUT=$(printf 'login admin_user %s\nelevate\nstatus\nrevokedev %s\nstatus\nquit\n' "$CRED" "$DEV" | cli)
+expect "nova sessão eleva SEM 2º fator por causa do dispositivo confiável (decidido pelo serviço)" "$OUT" "RESULT elevate OK"
+expect "e a revogação encerra a elevação" "$(echo "$OUT" | tail -2)" "elevated=false"
+OUT=$(printf 'login admin_user %s\nelevate\nquit\n' "$CRED" | cli)
+expect "depois de revogado, o 2º fator volta a ser exigido" "$OUT" "RESULT elevate ELEVATION_REQUIRES_MFA"
+OUT=$(printf 'login normal_user %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\nenroll\nquit\n' "$CRED" "$AUTH/qa-otp/$USER_ID.otp" "$AUTH/qa-otp/$USER_ID.sms" | cli)
+expect "um USER não inscreve dispositivo" "$OUT" "RESULT enroll DENIED"
+stop_svc; touch "$AUTH/qa-freeze"; : > "$QA/svc.log"; start_svc; rm -f "$AUTH/qa-freeze"
+OUT=$(printf 'login admin_user %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\nelevate\nenroll\nchangepw admin_user %s qa-new-password-frozen-1\nlogout\nquit\n' "$CRED" "$OTPFILE" "$SMSFILE" "$CRED" | cli)
+expect "trava de migração: login, 2º fator e elevação seguem funcionando" "$OUT" "RESULT elevate OK"
+expect "trava de migração: inscrição de dispositivo recusada (FROZEN)" "$OUT" "RESULT enroll FROZEN"
+expect "trava de migração: troca de senha recusada (FROZEN)" "$OUT" "RESULT changepw FROZEN"
+stop_svc; touch "$AUTH/qa-unfreeze"; : > "$QA/svc.log"; start_svc; rm -f "$AUTH/qa-unfreeze"
+OUT=$(printf 'login admin_user %s\nchangepw admin_user %s qa-new-password-after-unfreeze-1\nquit\n' "$CRED" "$CRED" | cli)
+expect "depois da validação explícita (sem trava) a troca de senha de teste funciona" "$OUT" "RESULT changepw OK"
+python3 - "$CRED" <<'PY'
+import json,sys
+p=sys.argv[1]; c=json.load(open(p)); c["admin_user"]["password"]="qa-new-password-after-unfreeze-1"; json.dump(c,open(p,"w"))
+PY
 
 echo "== 5. reinício do serviço invalida toda sessão (nenhuma reconstrução automática)"
 ( printf 'login normal_user %s\nprinttoken\nsleep 4000\nquit\n' "$CRED" | cli > "$QA/r.out" ) & RPID=$!

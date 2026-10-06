@@ -139,8 +139,21 @@ int main(int argc, char **argv) {
     args[n++] = cp;
     args[n++] = (char *)MAIN_CLASS;
 #ifdef PASS_ARGS
-    for (int i = 1; i < argc && n < 64 + 255; i++) {
-        args[n++] = argv[i]; /* depois da classe principal: argumento da aplicação */
+    /* Medido: a JVM reexecuta ESTE executável com os argumentos JÁ expandidos (opções, -cp, classe principal e argumentos da aplicação). Nessa segunda entrada nada do que
+     * vem em argv é confiado: as opções são refeitas das constantes acima e só os argumentos DEPOIS da classe principal são reaproveitados como argumentos da aplicação
+     * (se a classe principal não aparecer, nenhum). A validação do selo e a limpeza do ambiente rodam de novo em toda entrada: não há como pulá-las por argv/ambiente. */
+    int first_app = 1;
+    if (argc > 1 && strncmp(argv[1], "-Djava.library.path=", 20) == 0) {
+        first_app = argc;
+        for (int k = 1; k < argc; k++) {
+            if (strcmp(argv[k], MAIN_CLASS) == 0) {
+                first_app = k + 1;
+                break;
+            }
+        }
+    }
+    for (int i = first_app; i < argc && n < 64 + 255; i++) {
+        args[n++] = argv[i]; /* depois da classe principal: argumento da aplicação, nunca opção da JVM */
     }
 #endif
     args[n] = NULL;
