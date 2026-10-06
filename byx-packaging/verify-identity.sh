@@ -109,10 +109,12 @@ OUT=$(JAVA_TOOL_OPTIONS="-Dbyx.attack=1" BYX_LOCAL_SERVICE_HOME="$T" "$APPEXE" -
 check "app assinado com JAVA_TOOL_OPTIONS (injeção): REJEITADO" '! echo "$OUT" | grep -q "^probe.state=CONNECTED"'
 # 6. o app ASSINADO com a configuração do bundle adulterada em disco (selo quebrado)
 C=$(mktemp -d /tmp/idt.XXXX); cp -R "$APP" "$C/"; echo "java-options=-Dbyx.tampered=1" >> "$C/BYX-MVP.app/Contents/app/BYX-MVP.cfg"
-OUT=$(BYX_LOCAL_SERVICE_HOME="$T" "$C/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service 2>&1)
+OUT=$(BYX_LOCAL_SERVICE_HOME="$T" "$C/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service 2>&1); TAMPER_RC=$?
 check "app assinado com bundle adulterado (selo quebrado): REJEITADO" '! echo "$OUT" | grep -q "^probe.state=CONNECTED"'
+# V2.1F-1: o lançador endurecido do painel recusa iniciar (exit 71) ANTES da JVM; a recusa do serviço (peer_bundle_modified) fica como 2ª camada (testes de unidade)
+check "o próprio lançador do painel recusou iniciar com o selo quebrado (exit 71)" '[[ $TAMPER_RC -eq 71 ]]'
 rm -rf "$C"
-check "o serviço registrou as recusas por código fixo, sem segredo" 'grep -q "peer_rejected peer_requirement_failed" "$T.log" && grep -q "peer_rejected peer_env_unsafe" "$T.log" && grep -q "peer_rejected peer_bundle_modified" "$T.log" && ! grep -q "$(cat $T/run/pairing.token)" "$T.log"'
+check "o serviço registrou as recusas por código fixo, sem segredo" 'grep -q "peer_rejected peer_requirement_failed" "$T.log" && grep -q "peer_rejected peer_env_unsafe" "$T.log" && ! grep -q "$(cat $T/run/pairing.token)" "$T.log"'
 
 echo "== CONTROLE: o mesmo cliente Python é perfeito (aceito) num serviço em modo desenvolvimento"
 D=$(mktemp -d /tmp/idd.XXXX)

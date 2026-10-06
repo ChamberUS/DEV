@@ -1,0 +1,21 @@
+service HEAD (last commit touching byx-local-service): 099e07d
+panel HEAD (last commit touching mvp-binance-panel; sources unchanged since the full-suite run): 1326941
+packaging HEAD at bundle build: 2a6ca93 (later commit only updates verify-identity.sh expectations + evidence)
+repo HEAD at bundle build: 2a6ca93
+c8272716079b5391ab15c4bf2ab5baa3bea379cf110e46a9d2c40166d034c277  ../byx-local-service/target/byx-local-service-0.1.0.jar
+8988d369e14b0e9b9b7f81052dc9323af122923441c9865a6fb052424ca44079  ../mvp-binance-panel/target/mvp-binance-panel-0.1.0.jar
+acf712e0233c8bedb113a4f3b230bc3fb34c08eb451011ffd502d4fba961698c  launcher/byx-launcher.c
+== build
+f9ee443cdcf20cd7929300f8ac7f0ee56df764d0d24e572d54d56e35b44bfc99  build/BYX-MVP.app/Contents/MacOS/BYX-MVP
+73fb3d3cd1a4271f9f097f69d40a02e0174fe42d84f171f0f134836ba5b95fc5  build/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/MacOS/byx-local-service
+8988d369e14b0e9b9b7f81052dc9323af122923441c9865a6fb052424ca44079  build/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar
+c8272716079b5391ab15c4bf2ab5baa3bea379cf110e46a9d2c40166d034c277  build/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar
+designated => identifier "com.buynnex.byx" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+designated => identifier "com.buynnex.byx.service" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+== build-canary
+43f13852d7f8b8ea56d76cf87c2f08e18c6c4c4fa397e5e0e47ab89550b72952  build-canary/BYX-MVP.app/Contents/MacOS/BYX-MVP
+caa09c18d558b8f9c4d44e2a8104cff6b1ae19a32fb23db872cffdb0ca86cdaf  build-canary/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/MacOS/byx-local-service
+8988d369e14b0e9b9b7f81052dc9323af122923441c9865a6fb052424ca44079  build-canary/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar
+c8272716079b5391ab15c4bf2ab5baa3bea379cf110e46a9d2c40166d034c277  build-canary/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar
+designated => identifier "com.buynnex.byx" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
+designated => identifier "com.buynnex.byx.service" and anchor apple generic and certificate leaf[subject.OU] = W5Z65G9UP2
