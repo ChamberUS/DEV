@@ -20,6 +20,7 @@ cli() { BYX_LOCAL_SERVICE_HOME="$QA" "$CLI" 2>&1; }   # comandos em stdin
 cleanup() { stop_svc; touch "$AUTH/qa-wipe"; BYX_LOCAL_SERVICE_HOME="$QA" "$SVC" >/dev/null 2>&1; rm -rf "${QA:?}"; }
 trap cleanup EXIT
 mkdir -p "$AUTH"; chmod 700 "$AUTH"; : > "$QA/svc.log"
+touch "$AUTH/qa-reset" # recomeça do zero os itens de TESTE (um QA anterior interrompido pode ter deixado âncora/chave de teste no keychain)
 
 echo "== 0. lançador endurecido e subida"
 start_svc || exit 1

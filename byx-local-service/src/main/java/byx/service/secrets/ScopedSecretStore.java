@@ -18,6 +18,11 @@ public final class ScopedSecretStore implements SecretStore {
         this.scope = scope;
     }
 
+    /** Só diagnóstico do harness de canário: o backend SecItem por baixo, se for ele. */
+    SecItemSecretStore backendIfSecItem() {
+        return backend instanceof ValidatedSecretStore v ? v.backendIfSecItem() : backend instanceof SecItemSecretStore s ? s : null;
+    }
+
     public SecretId.Scope scope() {
         return scope;
     }

@@ -98,7 +98,7 @@ public final class SecretCanaryHarness {
     }
 
     private static SecItemSecretStore unwrap(SecretStore store) {
-        return store instanceof ValidatedSecretStore v ? v.backendIfSecItem() : null;
+        return store instanceof ValidatedSecretStore v ? v.backendIfSecItem() : store instanceof ScopedSecretStore sc ? sc.backendIfSecItem() : null;
     }
 
     private interface Action {

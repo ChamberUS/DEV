@@ -36,6 +36,7 @@ leaks() { # $1=texto  → lista de valores sensíveis encontrados
   local t="$1" v; sec_values | while IFS= read -r v; do [[ -n "$v" && "$t" == *"$v"* ]] && echo "LEAK:${v:0:6}"; done; }
 
 echo "== 0. dados sintéticos"
+M cleanup >/dev/null # remove itens de TESTE (legados sintéticos e alvo) que um QA anterior interrompido possa ter deixado
 OUT=$(M seed); expect "banco, provedores e itens legados SINTÉTICOS criados" "$OUT" "RESULT OK seed"
 OUT=$(M legacy-status); expect "itens legados presentes (3)" "$(echo "$OUT" | grep -c PRESENT)" "3"
 H0=$(dbsum); L0=$(listing)

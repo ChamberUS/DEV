@@ -118,7 +118,7 @@ check "o serviço registrou as recusas por código fixo, sem segredo" 'grep -q "
 
 echo "== CONTROLE: o mesmo cliente Python é perfeito (aceito) num serviço em modo desenvolvimento"
 D=$(mktemp -d /tmp/idd.XXXX)
-CPS="$ROOT/byx-local-service/target/classes:$HOME/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.20.0/jackson-databind-2.20.0.jar:$HOME/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.21.6/jackson-core-2.21.6.jar:$HOME/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.jar:$HOME/.m2/repository/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar"
+CPS="$APP/Contents/Helpers/byx-local-service.app/Contents/app/*" # o mesmo código e as mesmas dependências do helper empacotado, mas num java GENÉRICO (sem identidade)
 BYX_LOCAL_SERVICE_HOME="$D" "$JAVA" -cp "$CPS" byx.service.ServiceMain > "$D.log" 2>&1 &
 for i in {1..60}; do grep -q " started " "$D.log" 2>/dev/null && break; sleep 0.25; done
 check "serviço no java genérico: modo development_unverified" 'grep -q "identity=development_unverified" "$D.log"'
