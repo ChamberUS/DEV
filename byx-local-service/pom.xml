@@ -17,6 +17,12 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.20.0</version>
     </dependency>
+    <!-- identidade do peer no macOS (getsockopt + Security.framework); mesma versão do painel -->
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>5.17.0</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -35,6 +41,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <!-- só os testes de identidade do peer precisam ler o fd do socket; o lançador empacotado define os mesmos flags -->
+          <argLine>--add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</argLine>
+        </configuration>
       </plugin>
     </plugins>
   </build>

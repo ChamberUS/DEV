@@ -12,9 +12,12 @@ import java.util.List;
 public final class PrivateCapabilityGate {
     public static final boolean PRIVATE_CAPABILITIES_ALLOWED = false;
 
-    /** Pré-requisitos (códigos fixos) que ainda não estão satisfeitos; enquanto a lista não for vazia e revisada, a decisão é false. */
+    /**
+     * Pré-requisitos (códigos fixos) AINDA não satisfeitos; enquanto a lista não for vazia e revisada, a decisão é false.
+     * V2.1D satisfez "verified_peer_identity" (identidade do app/peer verificada pelo kernel e pela assinatura de código, só no modo
+     * packaged_verified; o modo development_unverified nunca conta). Satisfazê-lo NÃO abre o gate.
+     */
     public static final List<String> PREREQUISITES = List.of(
-            "verified_peer_identity", // identidade verificável do aplicativo cliente (assinatura/Hardened Runtime), não só posse do segredo de pareamento
             "authority_model_implemented", // uma só autoridade de sessão, identidade autenticada entregue ao serviço, revogação e autorização por operação
             "secure_secret_storage"); // API moderna de itens do chaveiro + controle de acesso ligado ao app assinado (substitui as APIs legadas de arquivo de chaveiro)
 

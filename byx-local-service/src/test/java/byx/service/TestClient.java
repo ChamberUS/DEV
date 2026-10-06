@@ -41,6 +41,13 @@ final class TestClient implements AutoCloseable {
         return JSON.readTree(Frames.read(in, Protocol.MAX_FRAME));
     }
 
+    static void waitFor(java.util.function.BooleanSupplier c, long ms) throws InterruptedException {
+        long end = System.currentTimeMillis() + ms;
+        while (System.currentTimeMillis() < end && !c.getAsBoolean()) {
+            Thread.sleep(15);
+        }
+    }
+
     /** Quadro de evento de mercado (teto próprio, só servidor→cliente em conexão assinada). */
     JsonNode readEvent() throws IOException {
         return JSON.readTree(Frames.read(in, Protocol.MAX_MARKET_FRAME));

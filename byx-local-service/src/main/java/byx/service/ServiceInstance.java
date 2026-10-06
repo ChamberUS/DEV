@@ -1,5 +1,7 @@
 package byx.service;
 
+import byx.service.identity.IdentityPolicy;
+import byx.service.identity.PeerVerifier;
 import byx.service.market.MarketFeed;
 import byx.service.market.MarketSubscriber;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -63,6 +65,7 @@ public final class ServiceInstance implements AutoCloseable {
     private final String instanceId;
     private final Operations operations;
     private final MarketFeed market;
+    private final IdentityPolicy identity;
     private final AtomicInteger subscribers = new AtomicInteger();
     private final JsonMapper mapper = Protocol.mapper();
     private final ServerSocketChannel server;
@@ -119,8 +122,9 @@ public final class ServiceInstance implements AutoCloseable {
         }
     }
 
-    private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market) {
+    private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market, IdentityPolicy identity) {
         this.market = market;
+        this.identity = identity;
         this.limits = limits;
         this.slots = new Semaphore(limits.maxConnections());
         this.dir = dir;
@@ -129,7 +133,7 @@ public final class ServiceInstance implements AutoCloseable {
         byte[] id = new byte[9];
         new SecureRandom().nextBytes(id);
         this.instanceId = Pairing.encode(id);
-        this.operations = new Operations(instanceId, Instant.now(), market);
+        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode());
         this.acceptor = new Thread(this::acceptLoop, "byx-local-accept");
         this.acceptor.setDaemon(true);
     }
@@ -145,6 +149,15 @@ public final class ServiceInstance implements AutoCloseable {
 
     /** market = feed público ETHUSDT (null = capacidade marketData ausente; as operações de mercado ficam não suportadas). O serviço passa a ser dono do feed e o fecha. */
     public static ServiceInstance start(Path home, Limits limits, MarketFeed market) throws IOException {
+        return start(home, limits, market, IdentityPolicy.development());
+    }
+
+    /**
+     * identity = política de identidade do peer. Em PACKAGED_VERIFIED toda conexão precisa vir do app BYX-MVP verificado pelo kernel e
+     * pela assinatura de código (o pairing.token sozinho NÃO basta); em DEVELOPMENT_UNVERIFIED nada é verificado e nenhuma capacidade
+     * privada existe de qualquer forma.
+     */
+    public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity) throws IOException {
         RuntimeDir dir = RuntimeDir.prepare(home);
         dir.removeStaleSocket();
         byte[] secret = dir.writeFreshToken();
@@ -157,10 +170,10 @@ public final class ServiceInstance implements AutoCloseable {
             dir.cleanup();
             throw e;
         }
-        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market);
+        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity);
         s.acceptor.start();
         s.watchdog.scheduleWithFixedDelay(s::enforceDeadlines, 100, 100, TimeUnit.MILLISECONDS);
-        Log.event("started", "protocol=" + Protocol.VERSION);
+        Log.event("started", "protocol=" + Protocol.VERSION + " identity=" + identity.mode().wire);
         return s;
     }
 
@@ -260,8 +273,17 @@ public final class ServiceInstance implements AutoCloseable {
     private void handle(Connection c) {
         try {
             InputStream in = Channels.newInputStream(c.channel);
-            // 1. hello → challenge (o servidor prova que conhece o segredo antes de o cliente provar o dele)
             c.within(limits.handshakeMs());
+            // 0. identidade do app (só no modo empacotado): o kernel diz QUEM é o peer; antes de ler qualquer byte do cliente
+            if (identity.strict()) {
+                PeerVerifier.Verdict v = identity.verifier().verify(c.channel);
+                if (!v.verified()) {
+                    Log.event("peer_rejected", v.reason());
+                    noteFailure();
+                    return;
+                }
+            }
+            // 1. hello → challenge (o servidor prova que conhece o segredo antes de o cliente provar o dele)
             Protocol.Hello hello;
             try {
                 hello = parse(Frames.read(in, Protocol.MAX_FRAME), Protocol.Hello.class);

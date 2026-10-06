@@ -56,6 +56,8 @@ class PrivateCapabilityGateTest {
         assertFalse(PrivateCapabilityGate.allowed("accountData"));
         assertFalse(PrivateCapabilityGate.allowed(null));
         assertFalse(PrivateCapabilityGate.PREREQUISITES.isEmpty());
+        assertFalse(PrivateCapabilityGate.PREREQUISITES.contains("verified_peer_identity"), "V2.1D satisfied the identity prerequisite...");
+        assertFalse(PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED, "...and that alone opens nothing");
         try (TestClient c = paired()) {
             JsonNode caps = c.call("capabilities").path("result");
             assertAllPrivateOff(caps);

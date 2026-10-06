@@ -1,5 +1,7 @@
 # V2.1C — Endurecimento antes de capacidades privadas
 
+> **Atualização V2.1D:** o pré-requisito `verified_peer_identity` foi satisfeito (app empacotado, assinado, identidade do peer verificada pelo kernel e pela assinatura de código; ver [`APP_IDENTITY.md`](APP_IDENTITY.md)). O gate continua `false`: `authority_model_implemented` e `secure_secret_storage` seguem pendentes, e `development_unverified` nunca conta. O trecho "BLOCKED ON APP SIGNING" abaixo descreve o estado de V2.1C.
+
 Estado: **PRIVATE_CAPABILITIES_ALLOWED = false** (constante estática em `PrivateCapabilityGate`). Mercado público (V2.1B) segue congelado e independente desta decisão.
 
 Fora do escopo desta rodada (não implementado): conta Binance, chave/segredo de API, User Data Stream, notificações privadas, sessões remotas, TOTP/recuperação, assinatura/transmissão BYX, migração de login para o serviço, migração de segredos.

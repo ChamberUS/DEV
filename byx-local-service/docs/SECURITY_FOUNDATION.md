@@ -220,3 +220,7 @@ Mapeamento confirmado: `depth` só entrega na rota `/public` e `aggTrade/markPri
 
 ## 11. V2.1C (endurecimento antes de capacidades privadas)
 L4 (limitador persistente), L12 (permissões do banco), L10b (signer de teste removido do produto), a auditoria L11 (Keychain/identidade do app: **BLOCKED ON APP SIGNING**), a decisão estática `PRIVATE_CAPABILITIES_ALLOWED = false` e o modelo de autoridade futuro estão em [`PRIVATE_CAPABILITY_GATE.md`](PRIVATE_CAPABILITY_GATE.md). Nesta tabela, L4, L10b e L12 passam a **corrigidos** (L12 para homes novos; o banco real não foi alterado), L11 continua **não comprovado/BLOQUEADO** por falta de assinatura do app.
+
+
+## 12. V2.1D (empacotamento macOS e identidade do app)
+App `BYX-MVP.app` assinado (Hardened Runtime, runtime Java embutido, único entitlement `allow-jit`) e identidade do peer verificada pelo kernel/Security.framework em modo `packaged_verified`: ver [`APP_IDENTITY.md`](APP_IDENTITY.md). O `pairing.token` deixa de ser a única barreira no modo empacotado; o gate de capacidades privadas continua `false`.

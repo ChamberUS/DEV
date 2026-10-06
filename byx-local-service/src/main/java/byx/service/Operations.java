@@ -2,6 +2,7 @@ package byx.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
+import byx.service.identity.IdentityPolicy;
 import byx.service.market.MarketFeed;
 import byx.service.market.MarketView;
 import java.time.Instant;
@@ -17,8 +18,10 @@ final class Operations {
     private final String instanceId;
     private final Instant startedAt;
     private final MarketFeed market;
+    private final IdentityPolicy.Mode identityMode;
 
-    Operations(String instanceId, Instant startedAt, MarketFeed market) {
+    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode) {
+        this.identityMode = identityMode;
         this.instanceId = instanceId;
         this.startedAt = startedAt;
         this.market = market;
@@ -58,8 +61,9 @@ final class Operations {
                 var unmet = gate.putArray("unmetPrerequisites");
                 PrivateCapabilityGate.PREREQUISITES.forEach(unmet::add);
                 var identity = out.putObject("identity");
-                identity.put("peer", "pairing_secret_same_user");
+                identity.put("peer", identityMode == IdentityPolicy.Mode.PACKAGED_VERIFIED ? "verified_app_code_identity_and_pairing_secret" : "pairing_secret_same_user");
                 identity.put("userAuthentication", "not_implemented");
+                identity.put("appIdentity", identityMode.wire); // packaged_verified | development_unverified (nunca habilita capacidade privada)
                 identity.put("authorization", market != null ? "service_status_and_public_market_data" : "service_status_only");
                 out.put("mode", "development_local_same_user");
                 out.put("privateCapabilities", "blocked_until_user_identity_and_authorization_are_verified_by_this_service");
