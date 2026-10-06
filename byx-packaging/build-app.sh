@@ -32,7 +32,8 @@ rm -rf "$OUT"; mkdir -p "$OUT/input" "$OUT/svc-input"
 echo "== 1. dependências de execução (sem escopo de teste)"
 ( cd "$ROOT/mvp-binance-panel" && mvn -o -q dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory="$OUT/input" )
 cp "$PANEL_JAR" "$OUT/input/"
-for j in byx-local-service-0.1.0.jar jackson-annotations-2.21.jar jackson-core-2.21.6.jar jackson-databind-2.20.0.jar jna-5.17.0.jar; do
+BCJAR=$(cd "$OUT/input" && ls bcprov-jdk18on-*.jar | head -1)
+for j in byx-local-service-0.1.0.jar jackson-annotations-2.21.jar jackson-core-2.21.6.jar jackson-databind-2.20.0.jar jna-5.17.0.jar $BCJAR; do
   if [[ "$j" == byx-local-service-0.1.0.jar ]]; then cp "$SERVICE_JAR" "$OUT/svc-input/"; else cp "$OUT/input/$j" "$OUT/svc-input/"; fi
 done
 MODS=java.base,java.desktop,java.naming,java.net.http,java.sql,java.logging,java.xml,java.management,jdk.jfr,jdk.unsupported,jdk.crypto.ec
@@ -41,7 +42,8 @@ echo "== 2. app do painel (jpackage, runtime embutido via jlink)"
 EXTRA_APP=()
 if [[ $CANARY -eq 1 ]]; then # leitor de TESTE com a identidade e os direitos do PAINEL
   printf 'main-jar=byx-local-service-0.1.0.jar\nmain-class=byx.service.secrets.SecretCanaryReader\n' > "$OUT/reader.properties"
-  cp "$SERVICE_JAR" "$OUT/input/"; EXTRA_APP=(--add-launcher byx-secret-reader="$OUT/reader.properties")
+  printf 'main-jar=mvp-binance-panel-0.1.0.jar\nmain-class=panel.localservice.AuthorityQaCli\n' > "$OUT/authclient.properties"
+  cp "$SERVICE_JAR" "$OUT/input/"; EXTRA_APP=(--add-launcher byx-secret-reader="$OUT/reader.properties" --add-launcher byx-auth-client="$OUT/authclient.properties")
 fi
 jpackage --type app-image --name "$BYX_APP_NAME" --dest "$OUT" --input "$OUT/input" --main-jar mvp-binance-panel-0.1.0.jar --main-class panel.app.Main \
   --app-version "$BYX_BUNDLE_VERSION" --vendor "BYX-MVP" --mac-package-identifier "$BYX_APP_ID" --mac-package-name "$BYX_APP_NAME" --add-modules "$MODS" \
@@ -66,6 +68,7 @@ open(p,"w").write("\n".join(s)+"\n")
 PY
 }
 HELPERS=("byx-local-service:byx.service.ServiceMain")
+[[ $CANARY -eq 1 ]] && HELPERS+=("byx-auth-qa:byx.service.auth.AuthQaMain")
 [[ $CANARY -eq 1 ]] && HELPERS+=("byx-secret-canary:byx.service.secrets.SecretCanaryHarness" "byx-secret-holder:byx.service.secrets.SecretCanaryHolder" "byx-secret-servicereader:byx.service.secrets.SecretCanaryReader")
 mk_helper() { # $1=nome (= executável)  $2=classe principal
   local name="$1" mainclass="$2" tmp="$OUT/helper-$1"; local dest="$CONTENTS/Helpers/$1.app"
@@ -82,6 +85,17 @@ mk_helper() { # $1=nome (= executável)  $2=classe principal
   plutil -insert LSUIElement -bool true "$dest/Contents/Info.plist" # sem ícone no Dock
 }
 for h in "${HELPERS[@]}"; do mk_helper "${h%%:*}" "${h##*:}"; done
+
+echo "== 3b. lançador nativo ENDURECIDO no lugar do lançador genérico (serviço e helper de QA da autoridade)"
+# Medido: com o lançador genérico, JAVA_TOOL_OPTIONS=-Xbootclasspath/a:evil.jar executa código alheio DENTRO do serviço (identidade e keychain do serviço).
+# O lançador novo limpa o ambiente, usa argumentos/classpath/classe CONSTANTES e valida o selo do próprio bundle antes de iniciar a JVM.
+JARS=""; for j in "$OUT/svc-input/"*.jar; do JARS+="\"$(basename "$j")\","; done; JARS="${JARS%,}"
+for h in "${HELPERS[@]}"; do
+  n="${h%%:*}"
+  [[ "$n" == byx-local-service || "$n" == byx-auth-qa ]] || continue
+  clang -arch x86_64 -O2 -Wall -Werror -mmacosx-version-min=12.0 -DMAIN_CLASS="\"${h##*:}\"" -DJAR_LIST="$JARS" -framework Security -framework CoreFoundation \
+    -o "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$HERE/launcher/byx-launcher.c"
+done
 
 echo "== 4. nativos do painel pré-extraídos (nada é extraído em tempo de execução: biblioteca não assinada seria recusada pelo library validation)"
 unzip -qjo "$M2/org/openjfx/javafx-graphics/21.0.5/javafx-graphics-21.0.5-mac.jar" '*.dylib' -d "$CONTENTS/app"
@@ -118,7 +132,7 @@ for h in "${HELPERS[@]}"; do
   sign --identifier "$BYX_SERVICE_ID" -r "$(dr "$BYX_SERVICE_ID")" --entitlements "$SVC_ENT" "$H"
 done
 sign_libs "$APP" "$BYX_APP_ID"
-[[ $CANARY -eq 1 ]] && sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$ENT/app.entitlements" "$CONTENTS/MacOS/byx-secret-reader"
+[[ $CANARY -eq 1 ]] && for x in byx-secret-reader byx-auth-client; do sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$ENT/app.entitlements" "$CONTENTS/MacOS/$x"; done
 sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$ENT/app.entitlements" "$APP"
 
 echo "== 7. verificação"
