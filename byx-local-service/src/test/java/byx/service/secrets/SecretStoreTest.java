@@ -121,6 +121,15 @@ class SecretStoreTest {
     }
 
     @Test
+    void theAvailabilityProbeNeverTargetsTheCanaryOrAnyRealSecret() throws Exception {
+        assertNotEquals(SecretNamespace.service(SecretId.TEST_CANARY), SecretNamespace.PROBE_SERVICE, "a read must never delete the item it is about to read");
+        String src = Files.readString(Path.of("src/main/java/byx/service/secrets/SecItemSecretStore.java"));
+        int p = src.indexOf("private int probe()");
+        String probe = src.substring(p, src.indexOf("private volatile boolean confirmedAvailable"));
+        assertTrue(probe.contains("PROBE_SERVICE") && !probe.contains("SecretNamespace.service("), "the probe is built from the dedicated probe name only");
+    }
+
+    @Test
     void thereIsNoWayToNameAnArbitraryItem() throws Exception {
         // a API só aceita SecretId (enum fechado): não existe método com nome/serviço/conta livres
         for (var m : SecretStore.class.getMethods()) {

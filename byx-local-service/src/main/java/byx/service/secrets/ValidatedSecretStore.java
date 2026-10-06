@@ -14,6 +14,11 @@ public final class ValidatedSecretStore implements SecretStore {
         this.backend = backend;
     }
 
+    /** Só diagnóstico do harness de canário: o backend SecItem, se for ele. */
+    SecItemSecretStore backendIfSecItem() {
+        return backend instanceof SecItemSecretStore s ? s : null;
+    }
+
     private static void requireUsable(SecretId id) throws SecretStoreException {
         if (id == null || !id.usable()) {
             throw new SecretStoreException(SecretStatus.NOT_CONFIGURED);

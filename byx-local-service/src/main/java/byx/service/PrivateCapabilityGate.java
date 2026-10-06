@@ -15,11 +15,13 @@ public final class PrivateCapabilityGate {
     /**
      * Pré-requisitos (códigos fixos) AINDA não satisfeitos; enquanto a lista não for vazia e revisada, a decisão é false.
      * V2.1D satisfez "verified_peer_identity" (identidade do app/peer verificada pelo kernel e pela assinatura de código, só no modo
-     * packaged_verified; o modo development_unverified nunca conta). Satisfazê-lo NÃO abre o gate.
+     * packaged_verified; o modo development_unverified nunca conta). V2.1E-1 satisfez "secure_secret_storage": o helper empacotado do
+     * serviço (perfil próprio) escreve/lê/atualiza/apaga um canário no keychain de proteção de dados, e painel, Java genérico, Python,
+     * impostores ad-hoc e quem tem o pairing.token NÃO o leem (matriz real com controle positivo). Satisfazê-los NÃO abre o gate: resta
+     * a autoridade de autenticação.
      */
     public static final List<String> PREREQUISITES = List.of(
-            "authority_model_implemented", // uma só autoridade de sessão, identidade autenticada entregue ao serviço, revogação e autorização por operação
-            "secure_secret_storage"); // V2.1E: código do cofre moderno pronto e testado, mas o canário NÃO foi escrito pelo serviço (BLOCKED ON PROVISIONING / FINAL BUNDLE ID REQUIRED); continua pendente // API moderna de itens do chaveiro + controle de acesso ligado ao app assinado (substitui as APIs legadas de arquivo de chaveiro)
+            "authority_model_implemented"); // uma só autoridade de sessão, identidade autenticada entregue ao serviço, revogação e autorização por operação
 
     private PrivateCapabilityGate() {
     }

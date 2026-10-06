@@ -9,6 +9,8 @@ package byx.service.secrets;
 final class SecretNamespace {
     static final String TEST = "invalid.byx-canary-test";
     static final String ACCOUNT = "byx";
+    /** Item de SONDA de disponibilidade: nome dedicado que nunca é criado (a sonda só o apaga: -34018 sem entitlement, -25300 com). Nunca o canário nem um segredo. */
+    static final String PROBE_SERVICE = TEST + "/availability-probe";
 
     private SecretNamespace() {
     }

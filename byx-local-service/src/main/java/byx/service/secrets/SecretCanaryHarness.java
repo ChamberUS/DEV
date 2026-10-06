@@ -48,6 +48,9 @@ public final class SecretCanaryHarness {
                     }
                 });
             }
+            if (code == 0) {
+                code = step("inspect", () -> inspect(store));
+            }
         }
         // limpeza SEMPRE (mesmo após falha): e relata se o item de teste ficou
         int cleanup = step("cleanup.delete", () -> store.delete(SecretId.TEST_CANARY));
@@ -61,6 +64,41 @@ public final class SecretCanaryHarness {
         }
         System.out.println("canary.result=" + (code == 0 && absent == 0 ? "OK" : "BLOCKED"));
         return code != 0 ? 2 : absent != 0 ? 3 : 0;
+    }
+
+    /** Atributos do item (nunca o valor): grupo de acesso EFETIVO contra o ESPERADO (application-identifier assinado), sincronização e acessibilidade. */
+    private static void inspect(SecretStore store) throws SecretStoreException {
+        SecItemSecretStore real = unwrap(store);
+        if (real == null) {
+            System.out.println("canary.inspect=SKIPPED(no SecItem backend)");
+            return;
+        }
+        String expected;
+        java.util.Optional<SecItemSecretStore.Inspection> opt;
+        try {
+            expected = real.selfApplicationIdentifier();
+            opt = real.inspect(SecretId.TEST_CANARY);
+        } catch (RuntimeException | LinkageError e) {
+            System.out.println("canary.inspect.detail=exception:" + e.getClass().getSimpleName()); // só a classe (não secreta)
+            throw new SecretStoreException(SecretStatus.ERROR);
+        }
+        if (opt.isEmpty()) {
+            System.out.println("canary.inspect.detail=attribute query found no item (expectedGroup=" + expected + ")");
+            throw new SecretStoreException(SecretStatus.ERROR);
+        }
+        var found = opt.get();
+        System.out.println("canary.accessGroup.expected=" + expected);
+        System.out.println("canary.accessGroup.actual=" + found.accessGroup());
+        System.out.println("canary.accessGroup.match=" + (expected != null && expected.equals(found.accessGroup())));
+        System.out.println("canary.synchronizable=" + found.synchronizable());
+        System.out.println("canary.accessible.whenUnlockedThisDeviceOnly=" + found.accessibleWhenUnlockedThisDeviceOnly());
+        if (!Boolean.FALSE.equals(found.synchronizable()) || !found.accessibleWhenUnlockedThisDeviceOnly()) {
+            throw new SecretStoreException(SecretStatus.ERROR);
+        }
+    }
+
+    private static SecItemSecretStore unwrap(SecretStore store) {
+        return store instanceof ValidatedSecretStore v ? v.backendIfSecItem() : null;
     }
 
     private interface Action {

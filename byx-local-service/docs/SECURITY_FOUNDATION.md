@@ -228,3 +228,7 @@ App `BYX-MVP.app` assinado (Hardened Runtime, runtime Java embutido, único enti
 
 ## 13. V2.1E (armazenamento seguro de segredos)
 API interna tipada (`SecretId`/`SecretBytes`/`SecretStore`) sobre `SecItem*` (proteção de dados), sem IPC de segredo. Estado: **BLOCKED ON PROVISIONING** e **FINAL BUNDLE ID REQUIRED**; nada permanente criado, nenhum segredo real tocado. Ver [`SECURE_SECRET_STORE.md`](SECURE_SECRET_STORE.md).
+
+
+## 14. V2.1E-1 (IDs finais, provisioning e prova do canário)
+IDs finais `com.buynnex.byx[.service]`; perfil de desenvolvimento (Personal Team, 7 dias); helper aninhado; CRUD do canário no keychain de proteção de dados e matriz negativa real aprovados (18 PASS/0 FAIL/1 SKIP); identidade do app reverificada (29 PASS). `secure_secret_storage` satisfeito; o gate continua `false` (autoridade pendente). Ver [`SECURE_SECRET_STORE.md`](SECURE_SECRET_STORE.md).

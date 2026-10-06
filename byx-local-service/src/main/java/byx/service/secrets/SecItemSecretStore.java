@@ -46,6 +46,14 @@ public final class SecItemSecretStore implements SecretStore {
         Pointer CFDataGetBytePtr(Pointer data);
 
         void CFRelease(Pointer p);
+
+        Pointer CFDictionaryGetValue(Pointer dict, Pointer key);
+
+        byte CFStringGetCString(Pointer s, byte[] buffer, long size, int encoding);
+
+        byte CFBooleanGetValue(Pointer b);
+
+        byte CFEqual(Pointer a, Pointer b);
     }
 
     interface Sec extends Library {
@@ -56,6 +64,10 @@ public final class SecItemSecretStore implements SecretStore {
         int SecItemUpdate(Pointer query, Pointer attributesToUpdate);
 
         int SecItemDelete(Pointer query);
+
+        Pointer SecTaskCreateFromSelf(Pointer allocator);
+
+        Pointer SecTaskCopyValueForEntitlement(Pointer task, Pointer entitlement, PointerByReference error);
     }
 
     private static final String SEC_PATH = "/System/Library/Frameworks/Security.framework/Security";
@@ -74,6 +86,9 @@ public final class SecItemSecretStore implements SecretStore {
     private final Pointer kDataProtection;
     private final Pointer kSynchronizable;
     private final Pointer kReturnData;
+    private final Pointer kReturnAttributes;
+    private final Pointer kAccessGroup;
+    private final Pointer kSynchronizableAny;
     private final Pointer kMatchLimit;
     private final Pointer kMatchLimitOne;
     private final Pointer kTrue;
@@ -99,6 +114,9 @@ public final class SecItemSecretStore implements SecretStore {
         kDataProtection = global(s, "kSecUseDataProtectionKeychain");
         kSynchronizable = global(s, "kSecAttrSynchronizable");
         kReturnData = global(s, "kSecReturnData");
+        kReturnAttributes = global(s, "kSecReturnAttributes");
+        kAccessGroup = global(s, "kSecAttrAccessGroup");
+        kSynchronizableAny = global(s, "kSecAttrSynchronizableAny");
         kMatchLimit = global(s, "kSecMatchLimit");
         kMatchLimitOne = global(s, "kSecMatchLimitOne");
         kTrue = global(c, "kCFBooleanTrue");
@@ -176,24 +194,25 @@ public final class SecItemSecretStore implements SecretStore {
 
     /**
      * Sonda de disponibilidade. ATENÇÃO (medido): sem o entitlement, {@code SecItemCopyMatching} devolve "não encontrado" (-25300) como se
-     * o item simplesmente não existisse; só {@code SecItemAdd}/{@code SecItemDelete} devolvem -34018. Por isso a sonda é um DELETE do
-     * item canário de teste (nunca toca segredo de produto): 0 ou "não encontrado" = o keychain de proteção de dados está acessível.
+     * o item simplesmente não existisse; só {@code SecItemAdd}/{@code SecItemDelete} devolvem -34018. Por isso a sonda é um DELETE de um item
+     * de SONDA dedicado e inexistente (nunca o canário, nunca segredo): 0 ou "não encontrado" = o keychain de proteção de dados está acessível.
      */
     private int probe() {
+        Pointer service = cfString(SecretNamespace.PROBE_SERVICE);
+        Pointer account = cfString(SecretNamespace.ACCOUNT);
         try {
-            int[] os = new int[1];
-            run(SecretId.TEST_CANARY, b -> {
-                Pointer q = dict(b[0], b[1]);
-                try {
-                    os[0] = sec.SecItemDelete(q);
-                } finally {
-                    release(q);
-                }
-                return os[0];
-            });
-            return os[0];
-        } catch (SecretStoreException | RuntimeException | LinkageError e) {
+            Pointer[][] b = base(null, service, account);
+            Pointer q = dict(b[0], b[1]);
+            try {
+                return sec.SecItemDelete(q); // item de sonda inexistente: nunca toca o canário nem segredo algum
+            } finally {
+                release(q);
+            }
+        } catch (RuntimeException | LinkageError e) {
             return Integer.MIN_VALUE;
+        } finally {
+            release(service);
+            release(account);
         }
     }
 
@@ -211,6 +230,75 @@ public final class SecItemSecretStore implements SecretStore {
         }
         SecretStatus s = os == Integer.MIN_VALUE ? SecretStatus.ERROR : map(os);
         throw new SecretStoreException(s == SecretStatus.SECURE_STORAGE_AVAILABLE ? SecretStatus.ERROR : s, os == Integer.MIN_VALUE ? 0 : os);
+    }
+
+
+    /** Atributos NÃO secretos de um item (nunca o valor): grupo de acesso efetivo, sincronizável e se a acessibilidade é a esperada. */
+    public record Inspection(String accessGroup, Boolean synchronizable, boolean accessibleWhenUnlockedThisDeviceOnly) {
+    }
+
+    /** Valor do entitlement com.apple.application-identifier do PRÓPRIO processo (lido da assinatura), ou null. */
+    public String selfApplicationIdentifier() {
+        Pointer task = sec.SecTaskCreateFromSelf(null);
+        if (task == null) {
+            return null;
+        }
+        Pointer key = cfString("com.apple.application-identifier");
+        try {
+            Pointer v = sec.SecTaskCopyValueForEntitlement(task, key, null);
+            try {
+                return v == null ? null : javaString(v);
+            } finally {
+                release(v);
+            }
+        } finally {
+            release(key);
+            release(task);
+        }
+    }
+
+    private String javaString(Pointer cfString) {
+        byte[] buf = new byte[512];
+        if (cf.CFStringGetCString(cfString, buf, buf.length, CF_UTF8) == 0) {
+            return null;
+        }
+        int n = 0;
+        while (n < buf.length && buf[n] != 0) {
+            n++;
+        }
+        return new String(buf, 0, n, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    /** Consulta SÓ de atributos (sem kSecReturnData) com sincronizável "qualquer" para enxergar o valor real do atributo. Vazio se o item não existe. */
+    public Optional<Inspection> inspect(SecretId id) throws SecretStoreException {
+        ensureAvailable();
+        PointerByReference out = new PointerByReference();
+        int os = run(id, b -> {
+            Pointer[] keys = new Pointer[] {kClass, kService, kAccount, kDataProtection, kSynchronizable, kReturnAttributes, kMatchLimit};
+            Pointer[] vals = new Pointer[] {kClassGeneric, null, null, kTrue, kSynchronizableAny, kTrue, kMatchLimitOne};
+            vals[1] = b[1][1];
+            vals[2] = b[1][2];
+            Pointer q = dict(keys, vals);
+            try {
+                return sec.SecItemCopyMatching(q, out);
+            } finally {
+                release(q);
+            }
+        });
+        if (os == ERR_NOT_FOUND) {
+            return Optional.empty();
+        }
+        check(os);
+        Pointer attrs = out.getValue();
+        try {
+            Pointer group = cf.CFDictionaryGetValue(attrs, kAccessGroup);
+            Pointer sync = cf.CFDictionaryGetValue(attrs, kSynchronizable);
+            Pointer acc = cf.CFDictionaryGetValue(attrs, kAccessible);
+            return Optional.of(new Inspection(group == null ? null : javaString(group), sync == null ? null : cf.CFBooleanGetValue(sync) != 0,
+                    acc != null && cf.CFEqual(acc, kAccessibleWhenUnlockedThisDeviceOnly) != 0));
+        } finally {
+            release(attrs);
+        }
     }
 
     @Override

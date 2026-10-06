@@ -57,7 +57,9 @@ class PrivateCapabilityGateTest {
         assertFalse(PrivateCapabilityGate.allowed(null));
         assertFalse(PrivateCapabilityGate.PREREQUISITES.isEmpty());
         assertFalse(PrivateCapabilityGate.PREREQUISITES.contains("verified_peer_identity"), "V2.1D satisfied the identity prerequisite...");
-        assertFalse(PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED, "...and that alone opens nothing");
+        assertFalse(PrivateCapabilityGate.PREREQUISITES.contains("secure_secret_storage"), "V2.1E-1 satisfied secure storage (canary matrix passed)...");
+        assertEquals(List.of("authority_model_implemented"), PrivateCapabilityGate.PREREQUISITES, "...but the authority model is still unmet");
+        assertFalse(PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED, "...so nothing opens");
         try (TestClient c = paired()) {
             JsonNode caps = c.call("capabilities").path("result");
             assertAllPrivateOff(caps);
