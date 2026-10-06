@@ -247,7 +247,22 @@ class SecretStoreTest {
             for (Path f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
                 String code = Files.readString(f).replaceAll("(?s)/\\*.*?\\*/", "").replaceAll("//.*", "");
                 for (String banned : List.of("SecKeychain", "SecAccess", "SecTrustedApplication", "kSecAttrSynchronizable, kCFBooleanTrue")) {
+                    // ÚNICA exceção: o caminho de MIGRAÇÃO lê os itens legados fixos do painel antigo (nada é criado/alterado/apagado fora do namespace de teste)
+                    if (banned.equals("SecKeychain") && f.toString().endsWith("migration/LegacyKeychain.java")) {
+                        continue;
+                    }
                     assertFalse(code.contains(banned), f + " must not use " + banned);
+                }
+            }
+        }
+        String legacy = Files.readString(Path.of("src/main/java/byx/service/migration/LegacyKeychain.java")).replaceAll("(?s)/\\*.*?\\*/", "").replaceAll("//.*", "");
+        assertFalse(legacy.contains("SecKeychainItemModifyAttributesAndData") || legacy.contains("SecKeychainItemCreateFromContent"), "the legacy path never modifies an existing item");
+        assertTrue(legacy.contains("requireTest()") && legacy.indexOf("SecKeychainAddGenericPassword") > legacy.indexOf("void addForTest") && legacy.indexOf("SecKeychainItemDelete") > legacy.indexOf("void deleteForTest"),
+                "creating or deleting legacy items exists only in the test-only methods, which refuse the real names");
+        try (var files = Files.walk(Path.of("src/main/java"))) {
+            for (Path f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
+                if (!f.toString().contains("/migration/") && Files.readString(f).contains("LegacyKeychain")) {
+                    throw new AssertionError(f + " reaches the legacy keychain outside the migration package");
                 }
             }
         }
