@@ -20,8 +20,10 @@ import java.util.function.UnaryOperator;
  * Armazenamento da AUTORIDADE (contas, papéis, habilitação, versão de credencial, verificadores de senha) com integridade que NÃO depende de
  * permissão de arquivo contra processo do mesmo usuário:
  * <ul>
- *   <li>o arquivo é {estado versionado + HMAC-SHA256}; a chave do MAC e a versão monotônica vivem na {@link Anchor} (cofre só do serviço);</li>
- *   <li>edição de papel/habilitação/versão de credencial, inserção de conta, troca de hash ⇒ MAC inválido ⇒ não confiável;</li>
+ *   <li>o arquivo é um snapshot CIFRADO e autenticado (AES-256-GCM; cabeçalho com versão no AAD; nonce novo por gravação) com chave AEAD própria no
+ *       {@link EncryptionKeyVault} (cofre só do serviço), INDEPENDENTE da chave do MAC; a chave do MAC, a versão monotônica e o MAC do estado vivem na {@link Anchor};</li>
+ *   <li>o AEAD dá confidencialidade e integridade do texto cifrado, MAS NÃO rollback: a versão monotônica da âncora continua indispensável;</li>
+ *   <li>qualquer alteração do arquivo (bits, etiqueta, nonce, cabeçalho/versão, truncamento) ⇒ autenticação falha ⇒ não confiável; sem a chave nada é legível nem forjável;</li>
  *   <li>ROLLBACK para um instantâneo antigo (MAC válido) ⇒ versão do arquivo &lt; versão da âncora ⇒ não confiável;</li>
  *   <li>arquivo apagado com âncora presente, âncora ausente com arquivo presente, versão à frente demais, formato inválido, symlink ⇒ não confiável;</li>
  *   <li>janela de queda: arquivo na versão v+1 e âncora em v é aceito e a âncora é reparada (o serviço escreve o arquivo ANTES da âncora);</li>
@@ -33,23 +35,26 @@ import java.util.function.UnaryOperator;
 public final class AuthorityStore {
     public enum Status { UNINITIALIZED, TRUSTED, UNTRUSTED }
 
-    private static final long MAX_FILE = 8L * 1024 * 1024;
+    private static final long MAX_FILE = AuthorityCodec.MAX_FILE;
     private final Path file;
     private final Anchor anchor;
+    private final EncryptionKeyVault vault;
     private final SecureRandom random = new SecureRandom();
     private AuthorityState state;
     private byte[] key;
+    private byte[] encKey;
     private Status status = Status.UNINITIALIZED;
     private String reason = "uninitialized";
     private Object stamp;
 
-    private AuthorityStore(Path file, Anchor anchor) {
+    private AuthorityStore(Path file, Anchor anchor, EncryptionKeyVault vault) {
         this.file = file;
         this.anchor = anchor;
+        this.vault = vault;
     }
 
-    public static AuthorityStore open(Path file, Anchor anchor) {
-        AuthorityStore s = new AuthorityStore(file, anchor);
+    public static AuthorityStore open(Path file, Anchor anchor, EncryptionKeyVault vault) {
+        AuthorityStore s = new AuthorityStore(file, anchor, vault);
         s.load();
         return s;
     }
@@ -70,6 +75,10 @@ public final class AuthorityStore {
             java.util.Arrays.fill(key, (byte) 0);
         }
         key = null;
+        if (encKey != null) {
+            java.util.Arrays.fill(encKey, (byte) 0);
+        }
+        encKey = null;
         Log.event("authority_untrusted", why);
     }
 
@@ -107,24 +116,42 @@ public final class AuthorityStore {
                 return;
             }
             Object st = stampOf();
-            byte[] bytes = Files.readAllBytes(file);
-            AuthorityCodec.Parsed p = AuthorityCodec.parse(bytes);
-            byte[] computed = AuthorityCodec.mac(a.get().key(), AuthorityCodec.canonical(p.state()));
-            if (!MessageDigest.isEqual(computed, p.declaredMac())) {
-                untrusted("mac_invalid");
+            byte[] ek;
+            try {
+                Optional<byte[]> got = vault.read();
+                if (got.isEmpty()) {
+                    untrusted("enckey_missing");
+                    return;
+                }
+                ek = got.get();
+            } catch (EncryptionKeyVault.VaultException e) {
+                untrusted("enckey_unavailable");
                 return;
             }
+            byte[] bytes = Files.readAllBytes(file);
+            AuthorityCodec.Opened p;
+            try {
+                p = AuthorityCodec.open(bytes, ek, a.get().key());
+            } catch (AuthorityCodec.FormatException e) {
+                java.util.Arrays.fill(ek, (byte) 0);
+                untrusted(e.code);
+                return;
+            }
+            byte[] computed = p.headMac();
             long v = p.state().version();
             long av = a.get().version();
             if (v < av) {
+                java.util.Arrays.fill(ek, (byte) 0);
                 untrusted("rollback");
                 return;
             }
             if (v == av && !MessageDigest.isEqual(computed, a.get().headMac())) {
+                java.util.Arrays.fill(ek, (byte) 0);
                 untrusted("mac_invalid");
                 return;
             }
             if (v > av + 1) {
+                java.util.Arrays.fill(ek, (byte) 0);
                 untrusted("version_ahead");
                 return;
             }
@@ -132,17 +159,17 @@ public final class AuthorityStore {
                 try {
                     anchor.write(new AnchorData(a.get().key(), v, computed));
                 } catch (Anchor.AnchorException e) {
+                    java.util.Arrays.fill(ek, (byte) 0);
                     untrusted("anchor_unavailable");
                     return;
                 }
             }
+            encKey = ek;
             key = a.get().key();
             state = p.state();
             stamp = st;
             status = Status.TRUSTED;
             reason = "ok";
-        } catch (AuthorityCodec.FormatException e) {
-            untrusted("format_invalid");
         } catch (IOException | RuntimeException e) {
             untrusted("io_error");
         }
@@ -162,15 +189,22 @@ public final class AuthorityStore {
         }
         byte[] k = new byte[32];
         random.nextBytes(k);
+        byte[] ek = new byte[32]; // chave AEAD independente (nunca derivada da chave MAC)
+        random.nextBytes(ek);
         AuthorityState first = new AuthorityState(1, java.util.List.of());
         byte[] mac = AuthorityCodec.mac(k, AuthorityCodec.canonical(first));
         try {
-            writeFileAtomic(AuthorityCodec.encodeFile(first, k));
+            vault.write(ek); // chave antes do arquivo: uma chave órfã (queda) é inofensiva e é substituída aqui
+            writeFileAtomic(AuthorityCodec.seal(first, ek, random));
             anchor.write(new AnchorData(k, 1, mac)); // se cair aqui: arquivo sem âncora => não confiável (recuperação manual), nunca silenciosa
         } catch (IOException e) {
             throw new AuthorityException("io_error");
         } catch (Anchor.AnchorException e) {
             throw new AuthorityException("anchor_unavailable");
+        } catch (EncryptionKeyVault.VaultException e) {
+            throw new AuthorityException("enckey_unavailable");
+        } finally {
+            java.util.Arrays.fill(ek, (byte) 0);
         }
         load();
         if (status != Status.TRUSTED) {
@@ -207,12 +241,14 @@ public final class AuthorityStore {
         AuthorityState next = new AuthorityState(cur.version() + 1, proposed.accounts());
         byte[] canon = AuthorityCodec.canonical(next);
         byte[] mac = AuthorityCodec.mac(key, canon);
-        byte[] fileBytes = AuthorityCodec.encodeFile(next, key);
         try {
-            AuthorityCodec.parse(fileBytes); // invariantes (ids/usernames únicos, domínios) validados pelo mesmo parser que o carregamento usa
+            AuthorityCodec.parseState(canon); // invariantes (ids/usernames únicos, domínios) validados pelo mesmo parser que o carregamento usa
         } catch (AuthorityCodec.FormatException e) {
             throw new AuthorityException("invalid_state");
+        } finally {
+            java.util.Arrays.fill(canon, (byte) 0);
         }
+        byte[] fileBytes = AuthorityCodec.seal(next, encKey, random); // nonce novo a cada gravação
         try {
             writeFileAtomic(fileBytes);
         } catch (IOException e) {

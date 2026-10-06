@@ -57,6 +57,7 @@ final class AuthFixture implements AutoCloseable {
     final Path dir;
     final TestClock clock = new TestClock();
     final MemoryAnchor anchor = new MemoryAnchor();
+    final MemoryKeyVault vault = new MemoryKeyVault();
     final Path file;
     final AuthorityStore store;
     final AuthorityAdmin admin;
@@ -72,8 +73,8 @@ final class AuthFixture implements AutoCloseable {
 
     AuthFixture() throws Exception {
         dir = Files.createTempDirectory(Path.of("/tmp"), "af");
-        file = dir.resolve("authority").resolve("authority.json");
-        store = AuthorityStore.open(file, anchor);
+        file = dir.resolve("authority").resolve("authority.bin");
+        store = AuthorityStore.open(file, anchor, vault);
         store.initialize();
         admin = new AuthorityAdmin(store, PW, clock);
         adminId = admin.createAccount("ADMIN_USER", adminPw.toCharArray(), Role.ADMIN).id();

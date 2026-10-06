@@ -8,19 +8,22 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.crypto.Cipher;
 import javax.crypto.Mac;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Codificação CANÔNICA do estado de autoridade e seu MAC (HMAC-SHA256, primitiva padrão; sem cifra nem protocolo próprio). O MAC cobre os
  * bytes canônicos reconstruídos a partir dos VALORES decodificados (campos desconhecidos, duplicados ou fora do domínio são recusados),
- * com rótulo de domínio e versão de formato. Formato do arquivo: {"format":1,"state":{...},"mac":"<base64url>"}.
+ * com rótulo de domínio e versão de formato. O ARQUIVO é um snapshot CIFRADO (AES-256-GCM, JCA): ver {@link #seal}/{@link #open}.
  */
 final class AuthorityCodec {
     static final int FORMAT = 1;
@@ -35,8 +38,15 @@ final class AuthorityCodec {
     }
 
     static final class FormatException extends Exception {
+        final String code;
+
         FormatException() {
-            super("format_invalid", null, false, false);
+            this("format_invalid");
+        }
+
+        FormatException(String code) {
+            super(code, null, false, false); // sem causa nem pilha: nada do conteúdo vaza por exceção
+            this.code = code;
         }
     }
 
@@ -74,30 +84,99 @@ final class AuthorityCodec {
         }
     }
 
-    static byte[] encodeFile(AuthorityState s, byte[] key) {
-        byte[] canon = canonical(s);
+    // ---- snapshot cifrado: magic(4) | formatVersion(2) | authorityVersion(8) | nonce(12) | ciphertext+tag(GCM, 128 bits) ----------------------
+    static final byte[] MAGIC = {'B', 'Y', 'X', 'A'};
+    static final int FORMAT_VERSION = 2;
+    static final int HEADER = 4 + 2 + 8;
+    static final int NONCE = 12;
+    static final int TAG_BITS = 128;
+    static final int MIN_FILE = HEADER + NONCE + TAG_BITS / 8 + 2;
+    static final int MAX_FILE = 8 * 1024 * 1024;
+    private static final byte[] AAD_LABEL = "byx-authority-aead-v1\u0000".getBytes(StandardCharsets.UTF_8);
+
+    /** O cabeçalho (magic, versão de formato, versão da autoridade) participa do AAD: trocá-lo invalida a etiqueta. */
+    private static byte[] aad(byte[] header) {
+        byte[] out = new byte[AAD_LABEL.length + header.length];
+        System.arraycopy(AAD_LABEL, 0, out, 0, AAD_LABEL.length);
+        System.arraycopy(header, 0, out, AAD_LABEL.length, header.length);
+        return out;
+    }
+
+    /** Cifra o estado canônico (AES-256-GCM, nonce NOVO de 96 bits por gravação, SecureRandom). Zera o texto claro depois. */
+    static byte[] seal(AuthorityState s, byte[] encKey, SecureRandom random) {
+        byte[] plain = canonical(s);
+        byte[] header = new byte[HEADER];
+        System.arraycopy(MAGIC, 0, header, 0, 4);
+        header[4] = (byte) (FORMAT_VERSION >>> 8);
+        header[5] = (byte) FORMAT_VERSION;
+        for (int i = 0; i < 8; i++) {
+            header[6 + i] = (byte) (s.version() >>> (56 - 8 * i));
+        }
+        byte[] nonce = new byte[NONCE];
+        random.nextBytes(nonce);
         try {
-            ObjectNode root = JSON.createObjectNode();
-            root.put("format", FORMAT);
-            root.set("state", JSON.readTree(canon));
-            root.put("mac", Base64.getUrlEncoder().withoutPadding().encodeToString(mac(key, canon)));
-            return JSON.writeValueAsBytes(root);
-        } catch (java.io.IOException e) {
-            throw new IllegalStateException("encode");
+            Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+            c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(encKey, "AES"), new GCMParameterSpec(TAG_BITS, nonce));
+            c.updateAAD(aad(header));
+            byte[] ct = c.doFinal(plain);
+            byte[] out = new byte[HEADER + NONCE + ct.length];
+            System.arraycopy(header, 0, out, 0, HEADER);
+            System.arraycopy(nonce, 0, out, HEADER, NONCE);
+            System.arraycopy(ct, 0, out, HEADER + NONCE, ct.length);
+            return out;
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("seal");
+        } finally {
+            java.util.Arrays.fill(plain, (byte) 0);
         }
     }
 
-    /** Resultado do parse: estado + o MAC declarado no arquivo. */
-    record Parsed(AuthorityState state, byte[] declaredMac) {
+    /** Resultado de abrir: o estado e o MAC (HMAC com a chave de MAC) do estado canônico, para a comparação com a âncora. */
+    record Opened(AuthorityState state, byte[] headMac) {
     }
 
-    static Parsed parse(byte[] file) throws FormatException {
-        try {
-            JsonNode root = JSON.readTree(file);
-            if (root == null || !root.isObject() || root.size() != 3 || !root.path("format").isInt() || root.path("format").asInt() != FORMAT || !root.path("mac").isTextual()) {
-                throw new FormatException();
+    /** Valida limites ANTES de decifrar; qualquer falha de autenticação é "decrypt_failed" (sem detalhe). */
+    static Opened open(byte[] file, byte[] encKey, byte[] macKey) throws FormatException {
+        if (file.length < MIN_FILE || file.length > MAX_FILE) {
+            throw new FormatException("format_invalid");
+        }
+        for (int i = 0; i < 4; i++) {
+            if (file[i] != MAGIC[i]) {
+                throw new FormatException("format_invalid");
             }
-            JsonNode st = root.get("state");
+        }
+        if ((((file[4] & 0xFF) << 8) | (file[5] & 0xFF)) != FORMAT_VERSION) {
+            throw new FormatException("format_invalid");
+        }
+        long headerVersion = 0;
+        for (int i = 0; i < 8; i++) {
+            headerVersion = (headerVersion << 8) | (file[6 + i] & 0xFFL);
+        }
+        byte[] header = java.util.Arrays.copyOfRange(file, 0, HEADER);
+        byte[] plain = null;
+        try {
+            Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+            c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(encKey, "AES"), new GCMParameterSpec(TAG_BITS, java.util.Arrays.copyOfRange(file, HEADER, HEADER + NONCE)));
+            c.updateAAD(aad(header));
+            plain = c.doFinal(file, HEADER + NONCE, file.length - HEADER - NONCE);
+            AuthorityState st = parseState(plain);
+            if (st.version() != headerVersion) {
+                throw new FormatException("format_invalid");
+            }
+            return new Opened(st, mac(macKey, canonical(st)));
+        } catch (GeneralSecurityException e) {
+            throw new FormatException("decrypt_failed");
+        } finally {
+            if (plain != null) {
+                java.util.Arrays.fill(plain, (byte) 0);
+            }
+        }
+    }
+
+    /** Parse estrito do estado canônico (texto claro já autenticado). */
+    static AuthorityState parseState(byte[] plain) throws FormatException {
+        try {
+            JsonNode st = JSON.readTree(plain);
             if (st == null || !st.isObject() || st.size() != 2 || !st.path("version").isIntegralNumber() || !st.path("accounts").isArray()) {
                 throw new FormatException();
             }
@@ -133,7 +212,7 @@ final class AuthorityCodec {
                 }
                 accounts.add(new Account(id, username, role, n.get("enabled").asBoolean(), cv, hash, created));
             }
-            return new Parsed(new AuthorityState(version, accounts), Base64.getUrlDecoder().decode(root.get("mac").asText()));
+            return new AuthorityState(version, accounts);
         } catch (java.io.IOException | IllegalArgumentException e) {
             throw new FormatException();
         }

@@ -75,4 +75,18 @@ class AuthIsolationTest {
         }
         assertTrue(Files.readString(MAIN.resolve("byx/service/auth/SessionStore.java")).contains("SHA-256"), "only a hash of the token is stored");
     }
+
+    @Test
+    void theSnapshotUsesOnlyJcaAesGcmAndTheKeyOnlyLivesInTheVault() throws IOException {
+        String codec = Files.readString(MAIN.resolve("byx/service/auth/AuthorityCodec.java"));
+        assertTrue(codec.contains("AES/GCM/NoPadding"), "standard AEAD");
+        for (String weak : new String[] {"/ECB", "/CBC", "DESede", "\"DES\"", "RC4", "Blowfish", "NoPadding\")" + "; // custom"}) {
+            assertFalse(codec.contains(weak), "no weak or home-made cipher: " + weak);
+        }
+        assertEquals(Set.of("byx/service/auth/AuthQaMain.java", "byx/service/auth/AuthorityStore.java", "byx/service/auth/EncryptionKeyVault.java", "byx/service/auth/MemoryKeyVault.java",
+                "byx/service/auth/SecretStoreKeyVault.java"), filesContaining("EncryptionKeyVault"), "the key is reached only through the typed vault");
+        String store = Files.readString(MAIN.resolve("byx/service/auth/AuthorityStore.java"));
+        assertFalse(store.contains("derivedKey(\"enc") || store.contains("mac(key, \"enc"), "the AEAD key is never derived from the MAC key");
+        assertFalse(Files.readString(MAIN.resolve("byx/service/auth/AuthQaMain.java")).contains("encKey"), "the QA main never handles the key");
+    }
 }

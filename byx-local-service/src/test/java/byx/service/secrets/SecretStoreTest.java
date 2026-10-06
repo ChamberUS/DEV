@@ -107,7 +107,7 @@ class SecretStoreTest {
     @Test
     void onlyTheTestIdsAreUsableInThisPhase() throws Exception {
         for (SecretId id : SecretId.values()) {
-            assertEquals(id == SecretId.TEST_CANARY || id == SecretId.AUTHORITY_TEST_ANCHOR, id.usable(), id.name());
+            assertEquals(id == SecretId.TEST_CANARY || id == SecretId.AUTHORITY_TEST_ANCHOR || id == SecretId.AUTHORITY_TEST_ENCRYPTION_KEY, id.usable(), id.name());
             if (!id.usable()) {
                 try (SecretBytes v = SecretBytes.random(16)) {
                     assertEquals(SecretStatus.NOT_CONFIGURED, assertThrows(SecretStoreException.class, () -> store.write(id, v)).status(), id.name());

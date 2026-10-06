@@ -67,9 +67,11 @@ public final class AuthQaMain {
         Files.createDirectories(qa, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
         SecretStore secrets = SecretStores.system();
         Anchor anchor = new SecretStoreAnchor(secrets, SecretId.AUTHORITY_TEST_ANCHOR);
+        EncryptionKeyVault vault = new SecretStoreKeyVault(secrets, SecretId.AUTHORITY_TEST_ENCRYPTION_KEY);
         if (Files.exists(qa.resolve("qa-wipe"))) { // limpeza final do QA: remove o item de teste do keychain e os arquivos de teste; não sobe serviço
             secrets.delete(SecretId.AUTHORITY_TEST_ANCHOR);
-            for (String f : new String[] {"authority.json", "ratelimit.json", "qa-credentials.json", "qa-wipe"}) {
+            secrets.delete(SecretId.AUTHORITY_TEST_ENCRYPTION_KEY);
+            for (String f : new String[] {"authority.bin", "ratelimit.json", "qa-credentials.json", "qa-wipe"}) {
                 Files.deleteIfExists(qa.resolve(f));
             }
             System.out.println("qa wiped");
@@ -78,11 +80,12 @@ public final class AuthQaMain {
         Path reset = qa.resolve("qa-reset");
         if (Files.exists(reset)) { // QA: recomeça do zero (só o item de teste e o arquivo de teste)
             secrets.delete(SecretId.AUTHORITY_TEST_ANCHOR);
-            Files.deleteIfExists(qa.resolve("authority.json"));
+            secrets.delete(SecretId.AUTHORITY_TEST_ENCRYPTION_KEY);
+            Files.deleteIfExists(qa.resolve("authority.bin"));
             Files.deleteIfExists(qa.resolve("ratelimit.json"));
             Files.deleteIfExists(reset);
         }
-        AuthorityStore store = AuthorityStore.open(qa.resolve("authority.json"), anchor);
+        AuthorityStore store = AuthorityStore.open(qa.resolve("authority.bin"), anchor, vault);
         PasswordVerifier pw = new PasswordVerifier();
         Clock clock = Clock.systemUTC();
         if (store.status() == AuthorityStore.Status.UNINITIALIZED) {

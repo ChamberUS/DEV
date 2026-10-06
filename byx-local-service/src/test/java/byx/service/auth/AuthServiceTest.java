@@ -134,7 +134,7 @@ class AuthServiceTest {
     void serviceRestartInvalidatesEverySessionAndNothingRebuildsPrivilege() throws Exception {
         String token = AuthFixture.token(f.loginAdmin(PEER_A));
         assertEquals(Code.OK, f.auth.sessionStatus(PEER_A, token).code());
-        AuthService restarted = f.newService(AuthorityStore.open(f.file, f.anchor)); // "reinício": novo processo, mesma autoridade
+        AuthService restarted = f.newService(AuthorityStore.open(f.file, f.anchor, f.vault)); // "reinício": novo processo, mesma autoridade
         assertEquals(Code.AUTH_REQUIRED, restarted.sessionStatus(PEER_A, token).code());
         assertEquals(Code.AUTH_REQUIRED, restarted.adminElevation(PEER_A, token).code());
         assertEquals(Code.AUTH_REQUIRED, restarted.authorize(PEER_A, token, "qa.userOp", null).code());
@@ -221,13 +221,15 @@ class AuthServiceTest {
     @Test
     void tamperingWithTheAuthorityFailsClosedAndRevokesEverySession() throws Exception {
         String token = AuthFixture.token(f.loginAdmin(PEER_A));
-        String ok = java.nio.file.Files.readString(f.file);
-        java.nio.file.Files.writeString(f.file, ok.replace("\"role\":\"USER\"", "\"role\":\"ADMIN\""));
+        byte[] ok = java.nio.file.Files.readAllBytes(f.file);
+        byte[] bad = ok.clone();
+        bad[bad.length - 5] ^= 1; // adulteração do snapshot cifrado
+        java.nio.file.Files.write(f.file, bad);
         assertEquals(Code.AUTHORITY_UNAVAILABLE, f.auth.sessionStatus(PEER_A, token).code());
         assertEquals(Code.AUTHORITY_UNAVAILABLE, f.loginUser(PEER_A).code(), "no login on an untrusted authority");
-        java.nio.file.Files.writeString(f.file, ok); // o atacante "conserta" o arquivo
+        java.nio.file.Files.write(f.file, ok); // o atacante "conserta" o arquivo
         assertEquals(Code.AUTHORITY_UNAVAILABLE, f.auth.sessionStatus(PEER_A, token).code(), "untrusted is sticky: restoring the bytes does not silently re-trust it");
-        AuthService restarted = f.newService(AuthorityStore.open(f.file, f.anchor)); // só um reinício (nova verificação completa) reconfia
+        AuthService restarted = f.newService(AuthorityStore.open(f.file, f.anchor, f.vault)); // só um reinício (nova verificação completa) reconfia
         assertEquals(Code.AUTH_REQUIRED, restarted.sessionStatus(PEER_A, token).code(), "and the old session is gone: no privilege resurrection");
         assertEquals(Code.OK, restarted.login(PEER_A, "normal_user", f.userPw.toCharArray()).code());
     }
