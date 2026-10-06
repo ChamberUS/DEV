@@ -24,8 +24,8 @@ import panel.ui.trader.CandleChart;
 /**
  * Painel do gráfico V2. O {@link CandleChart} existente é preservado (mesmo desenho, mesmos dados); o V2 só
  * traz o contêiner, o tratamento dos eixos, o estado de espera e a sobreposição de STALE. Sem feed há
- * grade e o texto "Waiting for market data": nenhum candle é criado, nenhum preço animado. Um {@link TraderSnapshot}
- * não tem horário por candle, então o eixo de tempo só aparece (como "--:--") no estado de espera.
+ * grade e o texto "Waiting for market data": nenhum candle é criado, nenhum preço animado. O candle agora
+ * traz o horário real de abertura, e o eixo de tempo mostra esses horários; sem horário o eixo só aparece ("--:--") na espera.
  */
 final class ChartPanel extends VBox {
     private final MotionService motion;
@@ -35,6 +35,8 @@ final class ChartPanel extends VBox {
     private final Placeholder placeholder;
     private final Label overlay = Fx.label("", "byx-stale-chip", "byx-desk-chart-overlay");
     private final HBox timeRow = new HBox();
+    private final List<Label> axisLabels = new ArrayList<>();
+    private static final java.time.format.DateTimeFormatter AXIS_TIME = java.time.format.DateTimeFormatter.ofPattern("HH:mm").withZone(java.time.ZoneId.systemDefault());
     private CandleChart chart;
     private List<TraderSnapshot.Candle> shown;
 
@@ -59,7 +61,9 @@ final class ChartPanel extends VBox {
             if (i > 0) {
                 timeRow.getChildren().add(Fx.spacer());
             }
-            timeRow.getChildren().add(Fx.label("--:--", "byx-desk-axis"));
+            Label axis = Fx.label("--:--", "byx-desk-axis");
+            axisLabels.add(axis);
+            timeRow.getChildren().add(axis);
         }
         getChildren().addAll(top, plot, timeRow);
         setMinSize(0, 0);
@@ -109,7 +113,20 @@ final class ChartPanel extends VBox {
             Fx.visible(chart, candles);
         }
         Fx.visible(placeholder, !candles);
-        Fx.shown(timeRow, !candles);
+        // eixo de tempo: horários REAIS de abertura dos candles (hora local); sem horário (dados sem timestamp) o eixo some
+        boolean timed = candles && t.candles.get(0).openTimeMs() > 0;
+        Fx.shown(timeRow, !candles || timed);
+        if (timed) {
+            int n = t.candles.size();
+            for (int k = 0; k < axisLabels.size(); k++) {
+                long ms = t.candles.get((int) Math.round(k * (n - 1) / (double) (axisLabels.size() - 1))).openTimeMs();
+                Fx.text(axisLabels.get(k), AXIS_TIME.format(java.time.Instant.ofEpochMilli(ms)));
+            }
+        } else if (!candles) {
+            for (Label axis : axisLabels) {
+                Fx.text(axis, "--:--");
+            }
+        }
         if (!candles) {
             placeholder.apply(feed, t.candles.isEmpty() || !feed.showsMarketData(), motion);
         }

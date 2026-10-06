@@ -52,6 +52,10 @@ final class OrderBookPanel extends VBox {
         return levels;
     }
 
+    Label messageLabel() {
+        return message;
+    }
+
     GridRow midRow() {
         return mid;
     }
@@ -93,13 +97,21 @@ final class OrderBookPanel extends VBox {
 
     /** book só vale quando feed.showsMarketData(); fora disso os parâmetros de dados são ignorados. */
     void apply(DeskModel.Feed feed, DeskModel.Book book) {
+        apply(feed, book, null);
+    }
+
+    /** note = o book local não está consistente (re-sincronizando): nunca se mostra book velho como válido. */
+    void apply(DeskModel.Feed feed, DeskModel.Book book, String note) {
+        if (note != null && feed.showsMarketData()) {
+            book = new DeskModel.Book(java.util.List.of(), java.util.List.of(), null, null);
+        }
         boolean data = feed.showsMarketData() && !book.empty();
         boolean skeleton = feed.waiting();
         // sem dado e sem espera: mensagem (caído, erro, indisponível) ou "feed vivo sem book"
         boolean msg = !data && !feed.waiting();
         Fx.visible(rows, !msg);
         Fx.shown(message, msg);
-        Fx.text(message, !msg ? "" : feed.showsMarketData() ? "No order book levels received yet."
+        Fx.text(message, !msg ? "" : feed.showsMarketData() ? (note != null ? note : "No order book levels received yet.")
                 : "No market data available · " + feed.label);
         Fx.shown(stale, feed.looksStale());
         Fx.cls(rows, "stale", feed.looksStale());

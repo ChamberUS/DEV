@@ -70,7 +70,7 @@ public final class LocalServiceClient {
         return env != null && !env.isBlank() ? Path.of(env) : Path.of(System.getProperty("user.home"), ".byx-local-service");
     }
 
-    private static final class Fail extends Exception {
+    static final class Fail extends Exception {
         final LocalServiceStatus.State state;
         final String code;
 
@@ -140,6 +140,65 @@ public final class LocalServiceClient {
     }
 
     private LocalServiceStatus talk(SocketChannel ch, Path socket, byte[] secret, boolean everConnected, Instant at) throws IOException, Fail {
+        Paired paired = pair(ch, socket, secret);
+        InputStream in = paired.in();
+        OutputStream out = paired.out();
+        JsonNode health = call(in, out, "health");
+        JsonNode version = call(in, out, "version");
+        JsonNode caps = call(in, out, "capabilities");
+        String instance = text(health, "instanceId");
+        String ver = text(version, "version");
+        if (!"ok".equals(text(health, "status")) || instance == null || !INSTANCE.matcher(instance).matches() || ver == null || !VERSION.matcher(ver).matches()
+                || !version.path("protocolMin").isInt() || !version.path("protocolMax").isInt() || !health.path("uptimeSeconds").isNumber()) {
+            throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "contract_violation");
+        }
+        int min = version.path("protocolMin").asInt();
+        int max = version.path("protocolMax").asInt();
+        if (SUPPORTED_PROTOCOL < min || SUPPORTED_PROTOCOL > max) {
+            throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "protocol_out_of_range");
+        }
+        // Só o dado PÚBLICO de mercado é honrado quando o serviço o declara (capacidade, distinta do estado do feed). As capacidades
+        // privadas continuam falsas aqui, qualquer que seja o que o serviço declare: o painel só as honrará em lote posterior, depois que
+        // identidade do usuário e autorização no serviço forem demonstradas.
+        Map<String, Boolean> features = new LinkedHashMap<>();
+        for (String name : new String[] {"marketData", "notifications", "accountData", "adminOperations"}) {
+            features.put(name, false);
+        }
+        JsonNode declared = caps.path("features").path("marketData");
+        features.put("marketData", declared.isBoolean() && declared.asBoolean());
+        return new LocalServiceStatus(LocalServiceStatus.State.CONNECTED, "ok", true, ver, SUPPORTED_PROTOCOL, Math.max(0, health.path("uptimeSeconds").asLong()),
+                instance, Map.copyOf(features), at);
+    }
+
+    /**
+     * Abre um canal NOVO e pareado (mesma política de arquivos privados e mesma prova mútua da sondagem). Quem chama fecha o canal e
+     * impõe o prazo. O segredo é lido de novo a cada chamada e zerado em seguida.
+     */
+    Paired openPaired(java.util.function.Consumer<SocketChannel> created) throws IOException, Fail {
+        Path socket = run.resolve("service.sock");
+        byte[] secret = loadSecret(socket);
+        SocketChannel ch = SocketChannel.open(StandardProtocolFamily.UNIX);
+        created.accept(ch); // o chamador arma o prazo do handshake sobre este canal
+        try {
+            return pair(ch, socket, secret);
+        } catch (IOException | Fail | RuntimeException e) {
+            try {
+                ch.close();
+            } catch (IOException ignored) {
+                // nada
+            }
+            throw e;
+        } finally {
+            java.util.Arrays.fill(secret, (byte) 0);
+        }
+    }
+
+    /** Canal já pareado: handshake concluído (o servidor provou o segredo e aceitou a nossa prova). */
+    record Paired(SocketChannel channel, InputStream in, OutputStream out) {
+    }
+
+    /** Conecta, confere a prova do SERVIDOR antes de mandar a nossa e devolve os fluxos prontos para pedidos. */
+    private Paired pair(SocketChannel ch, Path socket, byte[] secret) throws IOException, Fail {
         ch.connect(UnixDomainSocketAddress.of(socket));
         InputStream in = Channels.newInputStream(ch);
         OutputStream out = Channels.newOutputStream(ch);
@@ -165,28 +224,7 @@ public final class LocalServiceClient {
         if (!"ready".equals(text(ready, "type"))) {
             throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "unexpected_handshake");
         }
-        JsonNode health = call(in, out, "health");
-        JsonNode version = call(in, out, "version");
-        JsonNode caps = call(in, out, "capabilities");
-        String instance = text(health, "instanceId");
-        String ver = text(version, "version");
-        if (!"ok".equals(text(health, "status")) || instance == null || !INSTANCE.matcher(instance).matches() || ver == null || !VERSION.matcher(ver).matches()
-                || !version.path("protocolMin").isInt() || !version.path("protocolMax").isInt() || !health.path("uptimeSeconds").isNumber()) {
-            throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "contract_violation");
-        }
-        int min = version.path("protocolMin").asInt();
-        int max = version.path("protocolMax").asInt();
-        if (SUPPORTED_PROTOCOL < min || SUPPORTED_PROTOCOL > max) {
-            throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "protocol_out_of_range");
-        }
-        // Fundação: nenhuma capacidade além do estado é aceita, qualquer que seja o que o serviço declare. O painel só passa a honrar uma
-        // capacidade privada em lote posterior, depois que identidade do usuário e autorização no serviço forem demonstradas.
-        Map<String, Boolean> features = new LinkedHashMap<>();
-        for (String name : new String[] {"marketData", "notifications", "accountData", "adminOperations"}) {
-            features.put(name, false);
-        }
-        return new LocalServiceStatus(LocalServiceStatus.State.CONNECTED, "ok", true, ver, SUPPORTED_PROTOCOL, Math.max(0, health.path("uptimeSeconds").asLong()),
-                instance, Map.copyOf(features), at);
+        return new Paired(ch, in, out);
     }
 
     private static JsonNode call(InputStream in, OutputStream out, String op) throws IOException, Fail {
@@ -253,7 +291,7 @@ public final class LocalServiceClient {
 
     // ---- quadros ---------------------------------------------------------------------------------------------------------
 
-    private static void send(OutputStream out, String json) throws IOException {
+    static void send(OutputStream out, String json) throws IOException {
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         if (body.length == 0 || body.length > MAX_FRAME) {
             throw new IOException("frame_size");
@@ -269,12 +307,17 @@ public final class LocalServiceClient {
     }
 
     private static JsonNode read(InputStream in) throws IOException, Fail {
+        return read(in, MAX_FRAME);
+    }
+
+    /** Leitura de quadro com teto explícito (o tamanho declarado é validado ANTES de alocar o corpo). */
+    static JsonNode read(InputStream in, int maxFrame) throws IOException, Fail {
         byte[] header = in.readNBytes(4);
         if (header.length < 4) {
             throw new EOFException("closed");
         }
         int len = ((header[0] & 0xFF) << 24) | ((header[1] & 0xFF) << 16) | ((header[2] & 0xFF) << 8) | (header[3] & 0xFF);
-        if (len <= 0 || len > MAX_FRAME) { // tamanho validado antes de alocar: resposta hostil não consome memória
+        if (len <= 0 || len > maxFrame) { // tamanho validado antes de alocar: resposta hostil não consome memória
             throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "frame_size");
         }
         byte[] body = in.readNBytes(len);

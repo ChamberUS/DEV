@@ -312,7 +312,22 @@ public final class DeskModel {
         }
     }
 
-    /** tradeRows = Time, Symbol, Side, Size, Price, Fee (mesma fonte da aba Trades; ver auditoria §4.1). */
+    /** Negociações públicas (aggTrade) já formatadas: hora local, lado do agressor, tamanho e preço. Nunca fills de conta. */
+    public static List<Trade> marketTrades(List<TraderSnapshot.MarketTrade> src, int n) {
+        List<Trade> out = new ArrayList<>(Math.min(n, src.size()));
+        for (TraderSnapshot.MarketTrade t : src.subList(0, Math.min(n, src.size()))) {
+            out.add(new Trade(Fmt.time(t.time()), t.buy() ? "BUY" : "SELL", String.format(Locale.US, "%.3f", t.size()), Fmt.price(t.price())));
+        }
+        return out;
+    }
+
+    /** Texto do book quando o feed está vivo mas o book não é consistente (null = nenhuma nota). */
+    public static String bookNote(TraderSnapshot t) {
+        return t.bookState == null || "LIVE".equals(t.bookState) ? null
+                : "RESYNCING".equals(t.bookState) ? "Order book resynchronizing…" : "Order book syncing…";
+    }
+
+    /** tradeRows = Time, Symbol, Side, Size, Price, Fee (fills da conta; a aba Trades usa esta fonte, Recent Trades NÃO). */
     public static List<Trade> trades(List<String[]> rows, int n) {
         List<Trade> out = new ArrayList<>(Math.min(n, rows.size()));
         for (String[] r : rows.subList(0, Math.min(n, rows.size()))) {
@@ -331,7 +346,7 @@ public final class DeskModel {
     public static int fingerprint(TraderSnapshot t) {
         return Objects.hash(t.source, t.loading, t.mode, t.trading, t.account, t.botState, t.strategy, t.strategyStatus,
                 t.signal, t.backendOnline, t.symbol, t.market, t.feed, t.feedUpdatedAt, t.price, t.change24hPct, t.high24h,
-                t.low24h, t.volume24h, t.asks, t.bids, t.candles, t.equity, t.dailyPnl, t.exposure, t.drawdown,
+                t.low24h, t.volume24h, t.markPrice, t.indexPrice, t.bookState, t.marketTrades, t.asks, t.bids, t.candles, t.equity, t.dailyPnl, t.exposure, t.drawdown,
                 t.positions, t.orders, rows(t.positionRows), rows(t.orderRows), rows(t.tradeRows), rows(t.signalRows),
                 rows(t.activityRows));
     }

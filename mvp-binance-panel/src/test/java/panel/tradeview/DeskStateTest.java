@@ -1,6 +1,7 @@
 package panel.tradeview;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -100,7 +101,8 @@ class DeskStateTest {
             assertEquals(best, asks.stream().mapToDouble(GridRow::depthFraction).max().orElse(0), 1e-9, "bars answer to the real totals");
             assertTrue(d.desk.book().midRow().cell(0).getText().matches("[\\d,]+\\.\\d\\d"));
             assertTrue(d.desk.trades().rows().stream().noneMatch(GridRow::skeleton));
-            assertEquals(t.tradeRows.getFirst()[4], d.desk.trades().rows().getFirst().cell(0).getText());
+            assertEquals(Fmt.price(t.marketTrades.getFirst().price()), d.desk.trades().rows().getFirst().cell(0).getText(), "Recent Trades come from the public market feed");
+            assertNotEquals(t.tradeRows.getFirst()[4], d.desk.trades().rows().getFirst().cell(0).getText(), "...never from account fills");
             // sem conta continua N/A
             assertEquals("N/A", d.desk.metrics().cells().get(0).value().getText());
             assertEquals("<1 s", d.desk.metrics().cells().get(4).value().getText());

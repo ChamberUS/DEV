@@ -105,6 +105,7 @@ public class PanelApp extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> ctx.adminAccess.touch());
         stage.focusedProperty().addListener((o, a, focused) -> { if (focused) ctx.refreshSystemMotion(); });
         ctx.refreshSystemMotion();
+        ctx.onMarketData = this::onMarketTick;
         ctx.onLocalService = r -> Platform.runLater(() -> recovery.retryFinished("service", panel.systemview.SystemStatusModel.serviceState(r)));
         stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(stage.isShowing() && !iconified));
         stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing && !stage.isIconified()));
@@ -144,7 +145,7 @@ public class PanelApp extends Application {
     }
 
     @Override
-    public void stop() { ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
+    public void stop() { ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
 
     private void applyDensity() {
         if (shell != null) shell.content().setComfortable("COMFORTABLE".equals(ctx.settings.density));
@@ -154,6 +155,7 @@ public class PanelApp extends Application {
 
     private void showEntry(String message) {
         mainActive = false;
+        ctx.market.stop(); // logout/troca de usuário cancela a assinatura de mercado
         ctx.localService.stop();
         closeShell();
         if (activeView != null) { activeView.onHide(); activeView = null; }
@@ -323,6 +325,7 @@ public class PanelApp extends Application {
         lastView.put(false, "overview");
         mainActive = true;
         ctx.localService.start(); // sondagem do serviço local: só leitura de estado, nunca navega
+        ctx.market.start(); // assinatura tipada do mercado público (ETHUSDT) no serviço local
         // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
         lastDisplayed = null;
         previousRoute = null;
@@ -651,6 +654,32 @@ public class PanelApp extends Application {
             next.onShow();
         }
         chrome(ctx.research.snapshot.get());
+    }
+
+    private String lastMarketFeed;
+    private boolean marketTickPending;
+
+    /** Dado de mercado novo (thread do cliente → FX, coalescido). Só o Trading é tocado; o dock só quando o estado do feed muda. */
+    private void onMarketTick() {
+        synchronized (this) {
+            if (marketTickPending) return;
+            marketTickPending = true;
+        }
+        Platform.runLater(() -> {
+            synchronized (this) { marketTickPending = false; }
+            if (!mainActive) return;
+            Snapshot s = ctx.research.snapshot.get();
+            ctx.trading.update(s);
+            for (String id : new String[] {"t-desk", "t-markets"}) {
+                View v = views.get(id);
+                if (v != null && v == activeView) v.onSnapshot(s); // fora de vista, o Desk se atualiza ao ser exibido
+            }
+            String feed = ctx.trading.snapshot.get().feed;
+            if (!java.util.Objects.equals(feed, lastMarketFeed)) {
+                lastMarketFeed = feed;
+                chrome(s); // dock/status refletem a mudança de estado do feed
+            }
+        });
     }
 
     private void render(Snapshot s) {

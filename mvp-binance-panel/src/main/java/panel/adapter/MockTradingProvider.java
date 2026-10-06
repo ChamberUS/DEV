@@ -55,6 +55,7 @@ public class MockTradingProvider implements TradingProvider {
         t.positions = 1;
         t.orderRows.add(new String[] {"14:02:11", "BTCUSDT", "LIMIT", "BUY", "0.010", String.format("%,.2f", p - 15), "NEW"});
         t.orders = 1;
+        t.marketTrades.add(new TraderSnapshot.MarketTrade(java.time.Instant.now(), p - 40, 0.010, true)); // fictício, como todo o modo Mock
         t.tradeRows.add(new String[] {"14:01:58", "BTCUSDT", "BUY", "0.010", String.format("%,.2f", p - 40), "0.16"});
         t.signalRows.add(new String[] {"14:02:00", "BTCUSDT", "NEUTRAL", "Microstructure Alpha v1", "0.12"});
         t.activityRows.add(new String[] {"14:02:11", "INFO", "Mock: placed limit order"});

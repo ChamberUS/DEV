@@ -272,8 +272,8 @@ public final class TradingDesk extends GridPane implements View {
         if (changed) {
             applied++;
             chart.apply(t, feed);
-            book.apply(feed, DeskModel.book(t.asks, t.bids, book.levels()));
-            trades.apply(feed, DeskModel.trades(t.tradeRows, trades.count()));
+            book.apply(feed, DeskModel.book(t.asks, t.bids, book.levels()), DeskModel.bookNote(t));
+            trades.apply(feed, DeskModel.marketTrades(t.marketTrades, trades.count()));
             botStrip.apply(t);
             botRows.apply(t);
             botFull.apply(t);

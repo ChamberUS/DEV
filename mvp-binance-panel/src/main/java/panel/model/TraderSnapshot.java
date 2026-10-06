@@ -10,7 +10,15 @@ public class TraderSnapshot {
     public record Level(double price, double size) {
     }
 
-    public record Candle(double open, double high, double low, double close) {
+    /** openTimeMs = abertura real do candle (epoch ms); 0 = desconhecido (dados que não trazem horário). */
+    public record Candle(double open, double high, double low, double close, long openTimeMs) {
+        public Candle(double open, double high, double low, double close) {
+            this(open, high, low, close, 0L);
+        }
+    }
+
+    /** Negociação pública do mercado (aggTrade). buy = o lado agressor comprou. Não é fill de conta. */
+    public record MarketTrade(java.time.Instant time, double price, double size, boolean buy) {
     }
 
     public DataSource source = DataSource.REAL;
@@ -35,7 +43,15 @@ public class TraderSnapshot {
     public Double change24hPct;
     public Double high24h;
     public Double low24h;
+    /** Volume da janela móvel de 24 h (não o dia UTC). Do feed público: em USDT (quote). */
     public Double volume24h;
+    /** Mark price (distinto do último preço negociado). */
+    public Double markPrice;
+    public Double indexPrice;
+    /** Estado do book local do serviço (SYNCING / LIVE / RESYNCING); null = não informado. */
+    public String bookState;
+    /** Negociações públicas recentes, mais novas primeiro. Separadas dos fills da conta (tradeRows). */
+    public List<MarketTrade> marketTrades = new ArrayList<>();
     public List<Level> asks = new ArrayList<>();
     public List<Level> bids = new ArrayList<>();
     public List<Candle> candles = new ArrayList<>();

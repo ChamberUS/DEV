@@ -9,8 +9,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
- * Recent Trades V2: n linhas (Price | Size | Time). A fonte é a mesma do blotter Trades (auditoria §4.1):
- * sem feed e sem trades a lista é esqueleto/mensagem, nunca tick inventado. Direção: preço verde (BUY) ou
+ * Recent Trades V2: n linhas (Price | Size | Time). A fonte é o aggTrade PÚBLICO do mercado (não os fills da conta, que ficam no
+ * blotter Trades): sem feed e sem trades a lista é esqueleto/mensagem, nunca tick inventado. Direção: preço verde (BUY) ou
  * vermelho (SELL); o texto do lado continua legível no tooltip da linha.
  */
 final class RecentTradesPanel extends VBox {

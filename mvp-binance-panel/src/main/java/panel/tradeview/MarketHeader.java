@@ -25,10 +25,11 @@ final class MarketHeader extends HBox {
     private final Label venue = Fx.label("Binance USD-M Futures", "byx-desk-venue");
     private final Label price = Fx.label("—", "byx-desk-price", "na");
     private final Label change = Fx.label("24h N/A", "byx-desk-change");
+    private final Stat mark = new Stat("Mark price");
     private final Stat high = new Stat("24h high");
     private final Stat low = new Stat("24h low");
-    private final Stat volume = new Stat("24h volume");
-    private final HBox stats = Fx.row(18, high, low, volume);
+    private final Stat volume = new Stat("24h volume (USDT)"); // janela móvel de 24 h, em USDT
+    private final HBox stats = Fx.row(18, mark, high, low, volume);
     private final Label liveBadge = ByxBadge.of("LIVE OFF", ByxBadge.Tone.NEUTRAL);
     private final ByxStatusDot dot;
     private final Label status = Fx.label(DeskModel.WAITING_TEXT, "byx-desk-status-text");
@@ -102,10 +103,11 @@ final class MarketHeader extends HBox {
         Fx.text(change, hasChange ? DeskModel.change24h(t) : "24h N/A");
         Fx.tone(change, hasChange ? (t.change24hPct < 0 ? "neg" : t.change24hPct > 0 ? "pos" : null) : null, "neg", "pos");
         Fx.cls(change, "stale", hasChange && feed.looksStale());
-        boolean day = data && DeskModel.hasDayStats(t);
+        boolean day = data && (DeskModel.hasDayStats(t) || t.markPrice != null);
         statsWanted = day;
         syncStats();
         if (day) {
+            mark.set(t.markPrice == null ? Fmt.NA : Fmt.price(t.markPrice), feed.looksStale()); // distinto do último preço negociado
             high.set(t.high24h == null ? Fmt.NA : Fmt.price(t.high24h), feed.looksStale());
             low.set(t.low24h == null ? Fmt.NA : Fmt.price(t.low24h), feed.looksStale());
             volume.set(DeskModel.volume(t.volume24h), feed.looksStale());

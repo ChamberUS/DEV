@@ -57,6 +57,9 @@ final class DeskFixtures {
             t.asks.add(new Level(c + 0.05 * (i + 1), 0.2 + r.nextDouble() * 3));
             t.bids.add(new Level(c - 0.05 * i, 0.2 + r.nextDouble() * 3));
         }
+        for (int i = 0; i < 12; i++) { // trades PÚBLICOS do mercado (Recent Trades), distintos dos fills da conta
+            t.marketTrades.add(new panel.model.TraderSnapshot.MarketTrade(NOW.minusSeconds(i), c + (r.nextDouble() - 0.5), 0.01 + r.nextDouble(), i % 3 != 0));
+        }
         for (int i = 0; i < 12; i++) {
             t.tradeRows.add(new String[] {"12:00:" + String.format(java.util.Locale.US, "%02d", 59 - i), "ETHUSDT", i % 3 == 0 ? "SELL" : "BUY",
                     String.format(java.util.Locale.US, "%.3f", 0.01 + r.nextDouble()), String.format(java.util.Locale.US, "%,.2f", c + (r.nextDouble() - 0.5)), "0.02"});

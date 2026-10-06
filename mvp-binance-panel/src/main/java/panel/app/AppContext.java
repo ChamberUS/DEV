@@ -108,7 +108,11 @@ public class AppContext {
     public volatile Consumer<panel.localservice.LocalServiceStatus> onLocalService = s -> { };
     public final panel.localservice.LocalServiceMonitor localService = new panel.localservice.LocalServiceMonitor(
             new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome()), s -> onLocalService.accept(s));
-    public final TradingService trading = new TradingService(settings, new ResearchModeTradingProvider(), new MockTradingProvider());
+    /** Mercado público ETHUSDT via serviço local (nunca direto da Binance). Cada lote de dados avisa a UI, que atualiza só o Trading. */
+    public volatile Runnable onMarketData = () -> { };
+    public final panel.localservice.MarketFeedClient market = new panel.localservice.MarketFeedClient(
+            new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome()), () -> onMarketData.run());
+    public final TradingService trading = new TradingService(settings, new ResearchModeTradingProvider(market::snapshot), new MockTradingProvider());
     public final MotionService motion = new MotionService();
     public final ViewTransitionService transitions = new ViewTransitionService(motion);
     public final AnimationRepository icons = new AnimationRepository(motion);
