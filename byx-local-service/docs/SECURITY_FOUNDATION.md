@@ -83,7 +83,7 @@ Qualquer processo do **mesmo usuário** consegue ler `pairing.token` e conectar;
 
 Protocolo versão 1: quadro = 4 bytes de tamanho (big-endian) + JSON UTF-8.
 
-- **Operações (allowlist fechada):** `health`, `version`, `capabilities`. Sem argumentos. Qualquer outra → `unsupported_operation` (a conexão continua), antes de qualquer efeito. Não existe proxy, shell, leitura de arquivo, URL, SQL, assinatura ou "execute".
+- **Operações (allowlist fechada):** `health`, `version`, `capabilities` e, só se o serviço foi montado com o feed de mercado (V2.1B, seção 10), `market.status`, `market.subscribe`, `market.unsubscribe`. Sem argumentos. Qualquer outra → `unsupported_operation` (a conexão continua), antes de qualquer efeito. Não existe proxy, shell, leitura de arquivo, URL, SQL, assinatura ou "execute".
 - **DTOs estritos:** Jackson com `FAIL_ON_UNKNOWN_PROPERTIES`, sem lixo após o JSON, sem chaves duplicadas, sem coerção de escalares (`"1"` não vira `1`: bug achado pelos testes e corrigido), profundidade ≤ 8, strings ≤ 1024; ids `[A-Za-z0-9_-]{1,64}`.
 - **Respostas não sensíveis:** `health` (status, uptime, id da instância aleatório), `version` (serviço, versão, faixa de protocolo), `capabilities` (operações, recursos todos falsos, modo e identidade declarados). Nenhum caminho local, usuário, versão de Java/SO, variável de ambiente ou segredo (TESTED).
 - **Limites:** quadro ≤ 8 KiB (o tamanho é validado **antes** de alocar/ler o corpo), ≤ 8 conexões simultâneas (excedente recusado), 1 pedido por vez por conexão (sem fila), ≤ 1000 pedidos por conexão; handshake 3 s, leitura 5 s, ocioso 30 s; cinco provas falhas em 10 s → 2 s de recusa na porta.
@@ -182,3 +182,37 @@ O painel sonda sozinho (a cada 10 s, só com sessão) e mostra "Local service" e
 | `mvp-binance-panel` (HEAD isolado `d4faccf`, checkout limpo sem os arquivos de captura acima) | **não** foi feito o build completo: foram rodados compilação e 78 testes direcionados (`FinalSafetyTest`, `PrivilegeRevalidationTest`, `LoginAuditSafetyTest`, `ProductionOtpIsolationTest`, `LocalServiceClientTest`, `SystemScreensTest`, `AuthSecurityTest`, `TrustedDeviceSecurityTest`): 0 falhas | HEAD isolado compila e passa esses testes; **não** é um build completo reproduzido |
 
 Observações: depois do `package` completo, o único ajuste foi no `FinalSafetyTest` (a exceção do resolver de captura passa a existir só se o arquivo existir, para o HEAD isolado não depender de arquivos não commitados); `FinalSafetyTest` foi rodado nas duas composições (com e sem o resolver). O resolver de captura e os demais arquivos de captura não foram modificados nem commitados por este trabalho. QAs do app real depois das correções (composição com os arquivos de captura): `AuthFlowQa`, `ShellNavigationQa` (idle de 5 s), `FinalQa` public/unsaved/system/onboarding/prodauth, todos 0 falhas.
+
+
+## 10. V2.1B — mercado público Binance (ETHUSDT, USDⓈ-M Futures)
+
+**Escopo.** Somente dado público de mercado. Sem conta, chave, segredo, User Data Stream, ordens, posições, notificações privadas, TOTP ou recuperação. A rota `/private` e qualquer endpoint assinado são recusados pela allowlist e testados.
+
+**Arquitetura.** `painel → socket Unix local (protocolo tipado) → byx-local-service → Binance pública`. O painel nunca abre conexão com a Binance (há um teste que varre o código do painel). O serviço é o único dono do feed e não compartilha estado com a captura científica (`mvp-binance`, gravador, `.part`, `CaptureRuntimeResolver`): são dois consumidores independentes da Binance.
+
+**Contrato Binance usado (documentação oficial atual, conferida ao vivo em 2026-10-06).**
+
+| Rota | Stream | Observação |
+|---|---|---|
+| `wss://fstream.binance.com/public/stream?streams=ethusdt@depth@100ms` | depth diferencial | PUBLIC (alta frequência) |
+| `wss://fstream.binance.com/market/stream?streams=ethusdt@aggTrade/ethusdt@markPrice@1s/ethusdt@ticker/ethusdt@kline_1m` | trades agregados, mark price, ticker 24 h, kline 1 m | MARKET (regular) |
+| `GET https://fapi.binance.com/fapi/v1/depth?symbol=ETHUSDT&limit=1000` | snapshot do book (peso 20) | só para sincronizar/ressincronizar |
+| `GET https://fapi.binance.com/fapi/v1/klines?symbol=ETHUSDT&interval=1m&limit=120` | bootstrap dos candles (peso 1) | uma vez por conexão MARKET |
+
+Mapeamento confirmado: `depth` só entrega na rota `/public` e `aggTrade/markPrice/ticker/kline` só na `/market` (o inverso não entrega nada). Duas conexões é o mínimo. Diferenças/observações registradas: o payload atual traz `ps` e `st` (st=1 USDⓈ-M, st=2 COIN-M; `depth` traz `ps`, os demais `st`, `kline` nenhum), validados **quando presentes**; o exemplo da documentação mostra `ps` de outro par, mas ao vivo `ps` é o próprio `ETHUSDT`; a regra de alinhamento do futures é `U <= lastUpdateId && u >= lastUpdateId` (não a `lastUpdateId+1` do spot). Limites documentados: conexão válida por 24 h, ping do servidor a cada 3 min (pong em até 10 min — o cliente HTTP da JVM responde sozinho), no máximo 10 mensagens/s de entrada (o serviço só envia pong), 1024 streams por conexão (usamos 1 e 4).
+
+**Allowlist.** Comparação EXATA com 4 URIs fixas (`Allowlist`): outro host, host parecido (`…binance.com.evil.com`, userinfo), caminho, esquema (`http`, `ws`), porta, símbolo, `limit`, query extra ou fragmento, `/private`, order/account/listenKey/assinatura — tudo recusado antes de abrir socket (testes dinâmicos). Redirecionamento HTTP desligado (3xx é erro; o alvo nunca é requisitado), TLS padrão da JVM sem contexto/verificador próprio, nenhum cabeçalho de credencial, corpo REST ≤ 256 KiB (também por `Content-Length`), mensagem WebSocket ≤ 128 KiB.
+
+**Book local (procedimento oficial).** Buffer de eventos → snapshot REST → descarta `u < lastUpdateId` → primeiro evento com `U <= lastUpdateId <= u` → daí em diante `pu == u` do evento anterior; quantidade 0 remove o nível; evento fora de contiguidade, book cruzado, buffer > 1500 eventos, símbolo ou `st`/`ps` errado, evento malformado ⇒ book invalidado, `RESYNCING`, novo snapshot (com espaçamento 1 s → 60 s e recuo crescente). Nunca interpola, nunca fabrica id, nunca mostra book como vivo depois de lacuna (`topBids/topAsks` vazios fora de LIVE). Internamente ≤ 1500 níveis por lado.
+
+**Reconexão e rotação de 24 h.** Recuo exponencial com jitter (1 s → 60 s, metade fixa + metade aleatória), nunca laço agressivo. Rotação programada a 23 h (+ jitter ≤ 10 min por conexão) e fechamento esperado perto das 24 h reconectam já, sem contar como falha. Silêncio > 30 s recicla a conexão. Depois de reconectar o estado volta a CONNECTING/RECONNECTING e só é LIVE com book alinhado + candles + ticker. 418/429 (REST ou handshake): toda atividade pausa (mín. 60 s, dobra a cada reincidência, respeita `Retry-After`, teto 2 h), estado `ERROR rate_limited`, fail-closed. O feed só existe enquanto há assinante local (e 30 s depois); sem painel, nenhuma conexão com a Binance.
+
+**Protocolo local.** `market.status` (estado leve, não inicia o feed), `market.subscribe` (sem argumento; a resposta precede o primeiro evento), `market.unsubscribe`. Eventos tipados `state`, `book` (top 20/lado, **sempre snapshot consistente, nunca delta**), `trades` (≤ 50, mais novos primeiro), `candles` (≤ 120, completo ao assinar e quando a estrutura muda) e `candle` (a vela em andamento). Sem fila: o assinante só guarda versões já enviadas e a cada 250 ms envia o que mudou da visão mais nova do feed ⇒ memória constante, preço/trades coalescidos, book nunca com delta perdido. Batimento de estado a cada 2 s. Cliente lento: a escrita tem prazo (5 s) e o watchdog fecha SÓ aquela conexão; o feed nunca bloqueia. Fechar a conexão cancela a assinatura; ≤ 4 assinantes e 1 por conexão (reconectar localmente não acumula).
+
+**Limites.** Pedidos/respostas/handshake continuam ≤ 8 KiB. Eventos de mercado (só servidor→cliente em conexão assinada) ≤ 16 KiB (`Protocol.MAX_MARKET_FRAME`; pior caso medido por teste: ~8 KiB de candles); o leitor recusa o cabeçalho acima disso antes de alocar. Fila interna do feed 4096 (estouro ⇒ a conexão é abortada e reconectada, a fila acumulada é descartada), publicação ≤ 10 visões/s, REST uma requisição por vez.
+
+**Capacidade vs estado.** `capabilities.features.marketData` = `true` só quando o serviço é montado com o feed (`ServiceMain`); sem feed continua `false` e as operações `market.*` são `unsupported_operation`. `marketData=true` com `feed=DISCONNECTED` é válido. O painel honra `marketData` e nada mais (conta, notificações e administração seguem falsas por construção).
+
+**Logs.** Só eventos e códigos fixos; nenhum corpo, URL, cabeçalho, caminho ou conteúdo de mensagem (teste com canário). 
+
+**Testes (serviço).** `AllowlistTest`, `MarketEventsTest`, `DepthBookTest`, `MarketFeedTest`, `ServiceMarketIpcTest`; fumaça manual opt-in contra a Binance real fora da suíte.

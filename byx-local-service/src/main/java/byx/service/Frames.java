@@ -40,7 +40,12 @@ public final class Frames {
     }
 
     public static void write(OutputStream out, byte[] body) throws IOException {
-        if (body.length == 0 || body.length > Protocol.MAX_FRAME) {
+        write(out, body, Protocol.MAX_FRAME);
+    }
+
+    /** Escrita com teto explícito (eventos de mercado têm um teto próprio, maior e fixo: {@link Protocol#MAX_MARKET_FRAME}). */
+    public static void write(OutputStream out, byte[] body, int max) throws IOException {
+        if (body.length == 0 || body.length > max) {
             throw new FrameException("frame_size");
         }
         byte[] frame = new byte[4 + body.length];

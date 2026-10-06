@@ -41,6 +41,11 @@ final class TestClient implements AutoCloseable {
         return JSON.readTree(Frames.read(in, Protocol.MAX_FRAME));
     }
 
+    /** Quadro de evento de mercado (teto próprio, só servidor→cliente em conexão assinada). */
+    JsonNode readEvent() throws IOException {
+        return JSON.readTree(Frames.read(in, Protocol.MAX_MARKET_FRAME));
+    }
+
     /** Handshake completo. verifyServer=false simula um cliente que não confere o servidor (para testar só o lado do servidor). */
     JsonNode handshake(byte[] secret, boolean verifyServer) throws IOException {
         byte[] n = new byte[16];

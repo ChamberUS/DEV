@@ -1,5 +1,7 @@
 package byx.service;
 
+import byx.service.market.MarketFeed;
+import byx.service.market.MarketSubscriber;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Serviço local: escuta SOMENTE num socket Unix (sem porta TCP, sem IPv4/IPv6, sem Host/Origin porque navegadores não falam este
@@ -37,14 +40,20 @@ public final class ServiceInstance implements AutoCloseable {
     public static final long READ_TIMEOUT_MS = 5_000;
     public static final long IDLE_TIMEOUT_MS = 30_000;
     static final int MAX_REQUESTS_PER_CONNECTION = 1_000;
+    /** Assinaturas de mercado simultâneas (uma por conexão). Um reconectar local não acumula: a conexão antiga é cancelada ao cair. */
+    public static final int MAX_SUBSCRIBERS = 4;
     static final int FAILURES_BEFORE_THROTTLE = 5;
     static final long THROTTLE_WINDOW_MS = 10_000;
     static final long THROTTLE_PENALTY_MS = 2_000;
 
     /** Limites por instância (os padrões são os de produção; testes usam valores curtos para provar o comportamento sem esperar). */
-    public record Limits(int maxConnections, long handshakeMs, long readMs, long idleMs) {
+    public record Limits(int maxConnections, long handshakeMs, long readMs, long idleMs, long writeMs) {
+        public Limits(int maxConnections, long handshakeMs, long readMs, long idleMs) {
+            this(maxConnections, handshakeMs, readMs, idleMs, readMs);
+        }
+
         public static Limits defaults() {
-            return new Limits(MAX_CONNECTIONS, HANDSHAKE_TIMEOUT_MS, READ_TIMEOUT_MS, IDLE_TIMEOUT_MS);
+            return new Limits(MAX_CONNECTIONS, HANDSHAKE_TIMEOUT_MS, READ_TIMEOUT_MS, IDLE_TIMEOUT_MS, 5_000);
         }
     }
 
@@ -53,6 +62,8 @@ public final class ServiceInstance implements AutoCloseable {
     private final byte[] secret;
     private final String instanceId;
     private final Operations operations;
+    private final MarketFeed market;
+    private final AtomicInteger subscribers = new AtomicInteger();
     private final JsonMapper mapper = Protocol.mapper();
     private final ServerSocketChannel server;
     private final ExecutorService workers = Executors.newCachedThreadPool(r -> {
@@ -75,18 +86,41 @@ public final class ServiceInstance implements AutoCloseable {
 
     private static final class Connection {
         final SocketChannel channel;
-        volatile long deadlineNanos = Long.MAX_VALUE;
+        final OutputStream out;
+        final Object writeLock = new Object();
+        volatile long deadlineNanos = Long.MAX_VALUE; // leitura
+        volatile long writeDeadlineNanos = Long.MAX_VALUE;
+        volatile MarketSubscriber subscriber;
+        volatile boolean subscribed;
 
         Connection(SocketChannel c) {
             this.channel = c;
+            this.out = Channels.newOutputStream(c);
         }
 
         void within(long ms) {
             deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(ms);
         }
+
+        void noReadDeadline() {
+            deadlineNanos = Long.MAX_VALUE;
+        }
+
+        /** Escrita serializada (resposta e eventos usam a mesma conexão) e com prazo: cliente que não lê tem a conexão fechada pelo watchdog. */
+        void write(byte[] body, int max, long ms) throws IOException {
+            synchronized (writeLock) {
+                writeDeadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(ms);
+                try {
+                    Frames.write(out, body, max);
+                } finally {
+                    writeDeadlineNanos = Long.MAX_VALUE;
+                }
+            }
+        }
     }
 
-    private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits) {
+    private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market) {
+        this.market = market;
         this.limits = limits;
         this.slots = new Semaphore(limits.maxConnections());
         this.dir = dir;
@@ -95,7 +129,7 @@ public final class ServiceInstance implements AutoCloseable {
         byte[] id = new byte[9];
         new SecureRandom().nextBytes(id);
         this.instanceId = Pairing.encode(id);
-        this.operations = new Operations(instanceId, Instant.now());
+        this.operations = new Operations(instanceId, Instant.now(), market);
         this.acceptor = new Thread(this::acceptLoop, "byx-local-accept");
         this.acceptor.setDaemon(true);
     }
@@ -106,6 +140,11 @@ public final class ServiceInstance implements AutoCloseable {
     }
 
     public static ServiceInstance start(Path home, Limits limits) throws IOException {
+        return start(home, limits, null);
+    }
+
+    /** market = feed público ETHUSDT (null = capacidade marketData ausente; as operações de mercado ficam não suportadas). O serviço passa a ser dono do feed e o fecha. */
+    public static ServiceInstance start(Path home, Limits limits, MarketFeed market) throws IOException {
         RuntimeDir dir = RuntimeDir.prepare(home);
         dir.removeStaleSocket();
         byte[] secret = dir.writeFreshToken();
@@ -118,7 +157,7 @@ public final class ServiceInstance implements AutoCloseable {
             dir.cleanup();
             throw e;
         }
-        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits);
+        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market);
         s.acceptor.start();
         s.watchdog.scheduleWithFixedDelay(s::enforceDeadlines, 100, 100, TimeUnit.MILLISECONDS);
         Log.event("started", "protocol=" + Protocol.VERSION);
@@ -144,7 +183,7 @@ public final class ServiceInstance implements AutoCloseable {
     private void enforceDeadlines() {
         long now = System.nanoTime();
         for (Connection c : connections) {
-            if (now - c.deadlineNanos > 0) {
+            if (now - c.deadlineNanos > 0 || now - c.writeDeadlineNanos > 0) {
                 closeQuietly(c.channel);
             }
         }
@@ -170,6 +209,7 @@ public final class ServiceInstance implements AutoCloseable {
                     try {
                         handle(c);
                     } finally {
+                        stopSubscription(c);
                         connections.remove(c);
                         slots.release();
                         closeQuietly(ch);
@@ -205,8 +245,8 @@ public final class ServiceInstance implements AutoCloseable {
         return value;
     }
 
-    private void send(OutputStream out, ObjectNode n) throws IOException {
-        Frames.write(out, mapper.writeValueAsBytes(n));
+    private void send(Connection c, ObjectNode n) throws IOException {
+        c.write(mapper.writeValueAsBytes(n), Protocol.MAX_FRAME, limits.writeMs());
     }
 
     private ObjectNode error(String code) {
@@ -220,19 +260,18 @@ public final class ServiceInstance implements AutoCloseable {
     private void handle(Connection c) {
         try {
             InputStream in = Channels.newInputStream(c.channel);
-            OutputStream out = Channels.newOutputStream(c.channel);
             // 1. hello → challenge (o servidor prova que conhece o segredo antes de o cliente provar o dele)
             c.within(limits.handshakeMs());
             Protocol.Hello hello;
             try {
                 hello = parse(Frames.read(in, Protocol.MAX_FRAME), Protocol.Hello.class);
             } catch (JsonProcessingException e) {
-                send(out, error("bad_request"));
+                send(c, error("bad_request"));
                 noteFailure();
                 return;
             }
             if (hello.v() != Protocol.VERSION || !"hello".equals(hello.type()) || hello.clientNonce() == null || !Protocol.NONCE.matcher(hello.clientNonce()).matches()) {
-                send(out, error(hello.v() != Protocol.VERSION ? "unsupported_version" : "bad_request"));
+                send(c, error(hello.v() != Protocol.VERSION ? "unsupported_version" : "bad_request"));
                 noteFailure();
                 return;
             }
@@ -244,19 +283,19 @@ public final class ServiceInstance implements AutoCloseable {
             challenge.put("type", "challenge");
             challenge.put("serverNonce", serverNonce);
             challenge.put("serverProof", Pairing.serverProof(secret, hello.clientNonce(), serverNonce));
-            send(out, challenge);
+            send(c, challenge);
             // 2. auth: prova do cliente
             Protocol.Auth auth;
             try {
                 auth = parse(Frames.read(in, Protocol.MAX_FRAME), Protocol.Auth.class);
             } catch (JsonProcessingException e) {
-                send(out, error("bad_request"));
+                send(c, error("bad_request"));
                 noteFailure();
                 return;
             }
             if (auth.v() != Protocol.VERSION || !"auth".equals(auth.type()) || auth.clientProof() == null || !Protocol.PROOF.matcher(auth.clientProof()).matches()
                     || !Pairing.equal(auth.clientProof(), Pairing.clientProof(secret, hello.clientNonce(), serverNonce))) {
-                send(out, error("auth_failed"));
+                send(c, error("auth_failed"));
                 noteFailure();
                 Log.event("auth_failed", null);
                 return;
@@ -265,35 +304,55 @@ public final class ServiceInstance implements AutoCloseable {
             ready.put("v", Protocol.VERSION);
             ready.put("type", "ready");
             ready.put("instanceId", instanceId);
-            send(out, ready);
+            send(c, ready);
             // 3. pedidos: um por vez, só a allowlist
             for (int i = 0; i < MAX_REQUESTS_PER_CONNECTION; i++) {
-                c.within(limits.idleMs());
+                if (c.subscribed) {
+                    c.noReadDeadline();
+                } else {
+                    c.within(limits.idleMs());
+                }
                 byte[] frame = Frames.read(in, Protocol.MAX_FRAME);
                 c.within(limits.readMs());
                 Protocol.Request req;
                 try {
                     req = parse(frame, Protocol.Request.class);
                 } catch (JsonProcessingException e) {
-                    send(out, error("bad_request"));
+                    send(c, error("bad_request"));
                     return;
                 }
                 if (req.v() != Protocol.VERSION || req.id() == null || !Protocol.REQUEST_ID.matcher(req.id()).matches() || req.op() == null) {
-                    send(out, error("bad_request"));
+                    send(c, error("bad_request"));
                     return;
                 }
                 ObjectNode resp = mapper.createObjectNode();
                 resp.put("v", Protocol.VERSION);
                 resp.put("id", req.id());
-                if (!Protocol.OPERATIONS.contains(req.op())) {
+                if (!operations.supports(req.op())) {
                     resp.put("ok", false);
                     resp.putObject("error").put("code", "unsupported_operation");
                     Log.event("denied", "unsupported_operation");
+                } else if ("market.subscribe".equals(req.op())) {
+                    if (c.subscribed || subscribers.get() >= MAX_SUBSCRIBERS) {
+                        resp.put("ok", false);
+                        resp.putObject("error").put("code", c.subscribed ? "already_subscribed" : "too_many_subscribers");
+                    } else {
+                        resp.put("ok", true);
+                        resp.putObject("result").put("streaming", true);
+                        send(c, resp); // a resposta precede o primeiro evento
+                        startSubscription(c);
+                        c.noReadDeadline(); // assinante não precisa mandar nada; o serviço envia batimento a cada 2 s
+                        continue;
+                    }
+                } else if ("market.unsubscribe".equals(req.op())) {
+                    stopSubscription(c);
+                    resp.put("ok", true);
+                    resp.putObject("result").put("streaming", false);
                 } else {
                     resp.put("ok", true);
                     operations.run(req.op(), resp.putObject("result"));
                 }
-                send(out, resp);
+                send(c, resp);
             }
         } catch (Frames.FrameException e) {
             Log.event("closed", e.code);
@@ -302,6 +361,36 @@ public final class ServiceInstance implements AutoCloseable {
         } catch (RuntimeException e) {
             Log.event("closed", "internal_error");
         }
+    }
+
+    private void startSubscription(Connection c) {
+        subscribers.incrementAndGet();
+        market.acquire();
+        MarketSubscriber sub = new MarketSubscriber(market, body -> c.write(body, Protocol.MAX_MARKET_FRAME, limits.writeMs()), mapper);
+        c.subscriber = sub;
+        c.subscribed = true;
+        Thread t = new Thread(sub, "byx-market-sub");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /** Idempotente: cancela o assinante e devolve a referência do feed (que para sozinho após o tempo de graça sem assinantes). */
+    private void stopSubscription(Connection c) {
+        MarketSubscriber sub;
+        synchronized (c) {
+            sub = c.subscriber;
+            c.subscriber = null;
+            c.subscribed = false;
+        }
+        if (sub != null) {
+            sub.cancel();
+            subscribers.decrementAndGet();
+            market.release();
+        }
+    }
+
+    public int activeSubscribers() {
+        return subscribers.get();
     }
 
     private static void closeQuietly(java.nio.channels.Channel c) {
@@ -324,6 +413,9 @@ public final class ServiceInstance implements AutoCloseable {
         }
         watchdog.shutdownNow();
         workers.shutdownNow();
+        if (market != null) {
+            market.close();
+        }
         dir.cleanup(); // remove socket e segredo: um cliente com o segredo antigo não conecta a lugar nenhum
         Log.event("stopped", null);
         stopped.countDown();
