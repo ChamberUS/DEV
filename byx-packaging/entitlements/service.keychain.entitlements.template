@@ -4,16 +4,12 @@
 <dict>
     <key>com.apple.security.cs.allow-jit</key>
     <true/>
-    <!-- MODELO FUTURO, NÃO USADO ainda e NÃO TESTADO: só vale com o ID FINAL e um perfil de provisionamento que autorize estes direitos
-         (TN3137: os direitos de grupo do keychain de proteção de dados "devem ser autorizados por um perfil"; sem o perfil o processo é
-         encerrado no lançamento, como medido em experiments/dp-keychain). Só o HELPER DO SERVIÇO recebe o grupo; o painel NÃO. -->
+    <!-- Menor privilégio (V2.1E-1): o helper do serviço recebe SÓ o seu application-identifier (que é o grupo de acesso PADRÃO do keychain de
+         proteção de dados) e o team-identifier. SEM keychain-access-groups explícito, SEM App Groups. Os valores vêm do PERFIL de
+         provisionamento (build-app.sh os extrai e confere), nunca de suposição. O painel não recebe nenhum destes direitos. -->
     <key>com.apple.application-identifier</key>
-    <string>__TEAM__.__APP_ID__</string>
+    <string>__APPLICATION_IDENTIFIER__</string>
     <key>com.apple.developer.team-identifier</key>
     <string>__TEAM__</string>
-    <key>keychain-access-groups</key>
-    <array>
-        <string>__TEAM__.__SERVICE_ID__</string>
-    </array>
 </dict>
 </plist>

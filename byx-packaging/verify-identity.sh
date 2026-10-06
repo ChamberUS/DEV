@@ -5,7 +5,7 @@
 set -u
 HERE="${0:A:h}"; ROOT="${HERE:h}"
 source "$HERE/identity.env" # BYX_APP_ID / BYX_SERVICE_ID: fonte única
-APP="$HERE/build/BYX-MVP.app"; APPEXE="$APP/Contents/MacOS/BYX-MVP"; SVCEXE="$APP/Contents/MacOS/byx-local-service"
+APP="$HERE/build/BYX-MVP.app"; APPEXE="$APP/Contents/MacOS/BYX-MVP"; SVCEXE="$APP/Contents/Helpers/byx-local-service.app/Contents/MacOS/byx-local-service"; HELPERAPP="$APP/Contents/Helpers/byx-local-service.app"
 JAVA_HOME="${JAVA_HOME:-$HOME/dev/tools/jdk-21.0.12.1+1/Contents/Home}"; JAVA="$JAVA_HOME/bin/java"
 export BYX_APP_ID BYX_TEAM="$(codesign -dvv "$APP" 2>&1 | awk -F= '/^TeamIdentifier/ {print $2}')"
 PASS=0; FAIL=0
@@ -57,8 +57,19 @@ check "Team ID presente ($TEAM)" '[[ -n "$TEAM" && "$TEAM" != "not set" ]]'
 check "Hardened Runtime ligado (flag runtime)" 'codesign -dv "$APP" 2>&1 | grep -q "flags=0x10000(runtime)"'
 check "runtime Java EMBUTIDO no bundle (não usa o java global)" '[[ -n "$(find "$APP/Contents/runtime" -name libjvm.dylib | head -1)" ]] && ! otool -L "$APPEXE" | grep -q "/Users/.*/jdk"'
 check "o executável do serviço tem identificador próprio" 'codesign -dv "$SVCEXE" 2>&1 | grep -q "^Identifier=$BYX_SERVICE_ID"'
-check "entitlements = somente allow-jit" '[[ "$(codesign -d --entitlements - "$APP" 2>&1 | grep -c "\[Key\]")" == "1" ]] && codesign -d --entitlements - "$APP" 2>&1 | grep -q allow-jit'
-check "sem disable-library-validation / debugger / dyld-env" '! codesign -d --entitlements - "$APP" 2>&1 | grep -qE "disable-library-validation|cs.debugger|allow-dyld-environment|get-task-allow"'
+check "painel: entitlements = somente allow-jit (sem application-identifier, sem keychain)" '[[ "$(codesign -d --entitlements - "$APP" 2>&1 | grep -c "\[Key\]")" == "1" ]] && codesign -d --entitlements - "$APP" 2>&1 | grep -q allow-jit'
+check "sem disable-library-validation / debugger / dyld-env / get-task-allow (painel e serviço)" '! codesign -d --entitlements - "$APP" "$HELPERAPP" 2>&1 | grep -qE "disable-library-validation|cs.debugger|allow-dyld-environment|get-task-allow"'
+SVC_KEYS=$(codesign -d --entitlements - "$HELPERAPP" 2>&1 | grep -c "\[Key\]")
+if [[ -f "$HELPERAPP/Contents/embedded.provisionprofile" ]]; then
+  check "serviço: SÓ application-identifier + team-identifier + allow-jit (sem keychain-access-groups/App Groups)" '[[ "$SVC_KEYS" == "3" ]] && codesign -d --entitlements - "$HELPERAPP" 2>&1 | grep -q "com.apple.application-identifier" && codesign -d --entitlements - "$HELPERAPP" 2>&1 | grep -q "com.apple.developer.team-identifier" && ! codesign -d --entitlements - "$HELPERAPP" 2>&1 | grep -qE "keychain-access-groups|application-groups"'
+  check "perfil embutido só no helper do serviço (o painel não tem perfil)" '[[ ! -e "$APP/Contents/embedded.provisionprofile" ]]'
+  ent_val() { codesign -d --entitlements - "$1" 2>&1 | awk '/application-identifier/ {f=1; next} f && /\[String\]/ {sub(/.*\[String\] */,""); print; exit}'; }
+  echo "      painel  application-identifier: $(ent_val "$APP")(nenhum)"
+  echo "      serviço application-identifier: $(ent_val "$HELPERAPP")"
+  echo "      Team ID: $TEAM"
+else
+  check "serviço: entitlements = somente allow-jit (sem perfil)" '[[ "$SVC_KEYS" == "1" ]]'
+fi
 
 echo "== serviço EMPACOTADO (identidade própria verificada)"
 T=$(mktemp -d /tmp/idv.XXXX); stop_services
