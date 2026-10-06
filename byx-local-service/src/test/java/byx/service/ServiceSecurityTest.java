@@ -92,6 +92,51 @@ class ServiceSecurityTest {
         assertStillHealthy();
     }
 
+    /** Prova capturada numa conexão não vale em outra: o desafio do servidor é novo a cada conexão e a prova cobre os dois nonces. */
+    @Test
+    void aValidProofCapturedOnOneConnectionIsUselessOnAnother() throws Exception {
+        byte[] secret = TestClient.readToken(home);
+        String cn = Pairing.encode(new byte[16]);
+        String capturedProof;
+        String firstServerNonce;
+        try (TestClient a = new TestClient(service.runtimeDir().socket())) {
+            a.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"" + cn + "\"}");
+            JsonNode ch = a.readJson();
+            firstServerNonce = ch.path("serverNonce").asText();
+            capturedProof = Pairing.clientProof(secret, cn, firstServerNonce);
+            a.sendJson("{\"v\":1,\"type\":\"auth\",\"clientProof\":\"" + capturedProof + "\"}");
+            assertEquals("ready", a.readJson().path("type").asText(), "the legitimate conversation worked");
+            try (TestClient b = new TestClient(service.runtimeDir().socket())) { // uma conexão autenticada NÃO autentica outra
+                b.sendJson("{\"v\":1,\"id\":\"x\",\"op\":\"health\"}");
+                assertEquals("bad_request", b.readJson().path("code").asText());
+            }
+            try (TestClient b = new TestClient(service.runtimeDir().socket())) { // replay: mesmo nonce de cliente, prova antiga
+                b.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"" + cn + "\"}");
+                JsonNode ch2 = b.readJson();
+                assertNotEquals(firstServerNonce, ch2.path("serverNonce").asText(), "a fresh server nonce per connection");
+                b.sendJson("{\"v\":1,\"type\":\"auth\",\"clientProof\":\"" + capturedProof + "\"}");
+                assertEquals("auth_failed", b.readJson().path("code").asText(), "the replayed proof is rejected");
+            }
+            try (TestClient b = new TestClient(service.runtimeDir().socket())) { // prova calculada com outro nonce de cliente não vale
+                b.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"" + cn + "\"}");
+                String sn = b.readJson().path("serverNonce").asText();
+                b.sendJson("{\"v\":1,\"type\":\"auth\",\"clientProof\":\"" + Pairing.clientProof(secret, Pairing.encode(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}), sn) + "\"}");
+                assertEquals("auth_failed", b.readJson().path("code").asText(), "the proof is bound to this connection's nonces");
+            }
+            // a conexão A segue autenticada e as outras não herdaram nada
+            assertTrue(a.call("health").path("ok").asBoolean());
+        }
+        // nonces do servidor não se repetem entre conexões
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (int i = 0; i < 6; i++) {
+            try (TestClient c = new TestClient(service.runtimeDir().socket())) {
+                c.sendJson("{\"v\":1,\"type\":\"hello\",\"clientNonce\":\"" + cn + "\"}");
+                assertTrue(seen.add(c.readJson().path("serverNonce").asText()));
+            }
+        }
+        assertStillHealthy();
+    }
+
     @Test
     void requestsBeforeAuthenticationAreRefused() throws Exception {
         try (TestClient c = new TestClient(service.runtimeDir().socket())) {
