@@ -6,6 +6,9 @@
  *   2. os argumentos da JVM, o classpath e a classe principal são CONSTANTES compiladas (o .cfg mutável e o argv são ignorados);
  *   3. o selo do PRÓPRIO bundle (jars, runtime, bibliotecas, Info.plist, perfil) é validado, de forma estrita e com código aninhado,
  *      ANTES de iniciar a JVM; selo quebrado ⇒ não inicia.
+ * Parametrizado em build-time (um só código para serviço e painel): MAIN_CLASS, JAR_LIST, e opcionalmente PASS_ARGS (argv do chamador entra
+ * SOMENTE depois da classe principal, ou seja, como argumento da aplicação e nunca como opção da JVM; sem PASS_ARGS é ignorado) e
+ * SQLITE_NATIVE (propriedades do driver SQLite do painel, apontando para Contents/Frameworks do próprio bundle).
  * Limite (documentado): quem troca arquivos do bundle DEPOIS da validação e antes de a JVM ler o jar (TOCTOU) não é detectado;
  * instale em local sem escrita para o usuário comum (/Applications).
  */
@@ -69,8 +72,10 @@ static int own_seal_ok(const char *bundle) {
 }
 
 int main(int argc, char **argv) {
+#ifndef PASS_ARGS
     (void)argc;
     (void)argv; /* argumentos do chamador são ignorados: nada de argv controla a JVM */
+#endif
     scrub_environment();
     char exe[PATH_MAX];
     uint32_t size = sizeof exe;
@@ -101,21 +106,43 @@ int main(int argc, char **argv) {
         fputs("launcher: libjli\n", stderr);
         return 72;
     }
-    char cp[PATH_MAX * 4] = "";
+    char cp[PATH_MAX * 16] = "";
     const char *jars[] = {JAR_LIST, NULL};
     for (int i = 0; jars[i]; i++) {
         size_t used = strlen(cp);
-        snprintf(cp + used, sizeof cp - used, "%s%s/%s", i ? ":" : "", app, jars[i]);
+        if (snprintf(cp + used, sizeof cp - used, "%s%s/%s", i ? ":" : "", app, jars[i]) >= (int)(sizeof cp - used)) {
+            fputs("launcher: classpath too long\n", stderr);
+            return 73;
+        }
     }
     char libpath[PATH_MAX + 32], jnapath[PATH_MAX + 32];
     snprintf(libpath, sizeof libpath, "-Djava.library.path=%s", frameworks);
     snprintf(jnapath, sizeof jnapath, "-Djna.boot.library.path=%s", frameworks);
-    char *args[] = {(char *)"byx-service", libpath, jnapath, (char *)"-Djna.nosys=true", (char *)"-Dfile.encoding=UTF-8", (char *)"-XX:+DisableAttachMechanism",
-                    (char *)"--add-opens=java.base/sun.nio.ch=ALL-UNNAMED", (char *)"--add-opens=java.base/java.io=ALL-UNNAMED",
-                    (char *)"-Dbyx.launcher=native-hardened", (char *)"-cp", cp, (char *)MAIN_CLASS, NULL};
+    char *args[64 + 256];
     int n = 0;
-    while (args[n]) {
-        n++;
+    args[n++] = (char *)"byx-launcher";
+    args[n++] = libpath;
+    args[n++] = jnapath;
+    args[n++] = (char *)"-Djna.nosys=true";
+    args[n++] = (char *)"-Dfile.encoding=UTF-8";
+    args[n++] = (char *)"-XX:+DisableAttachMechanism";
+    args[n++] = (char *)"--add-opens=java.base/sun.nio.ch=ALL-UNNAMED";
+    args[n++] = (char *)"--add-opens=java.base/java.io=ALL-UNNAMED";
+#ifdef SQLITE_NATIVE
+    char sqlpath[PATH_MAX + 32];
+    snprintf(sqlpath, sizeof sqlpath, "-Dorg.sqlite.lib.path=%s", frameworks);
+    args[n++] = sqlpath;
+    args[n++] = (char *)"-Dorg.sqlite.lib.name=libsqlitejdbc.dylib";
+#endif
+    args[n++] = (char *)"-Dbyx.launcher=native-hardened";
+    args[n++] = (char *)"-cp";
+    args[n++] = cp;
+    args[n++] = (char *)MAIN_CLASS;
+#ifdef PASS_ARGS
+    for (int i = 1; i < argc && n < 64 + 255; i++) {
+        args[n++] = argv[i]; /* depois da classe principal: argumento da aplicação */
     }
-    return launch(n, args, 0, NULL, 0, NULL, "", "", "byx-service", "byx-service", 0, 0, 0, 0);
+#endif
+    args[n] = NULL;
+    return launch(n, args, 0, NULL, 0, NULL, "", "", "byx-launcher", "byx-launcher", 0, 0, 0, 0);
 }

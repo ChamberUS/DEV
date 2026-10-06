@@ -86,17 +86,26 @@ mk_helper() { # $1=nome (= executável)  $2=classe principal
 }
 for h in "${HELPERS[@]}"; do mk_helper "${h%%:*}" "${h##*:}"; done
 
-echo "== 3b. lançador nativo ENDURECIDO no lugar do lançador genérico (serviço e helper de QA da autoridade)"
-# Medido: com o lançador genérico, JAVA_TOOL_OPTIONS=-Xbootclasspath/a:evil.jar executa código alheio DENTRO do serviço (identidade e keychain do serviço).
-# O lançador novo limpa o ambiente, usa argumentos/classpath/classe CONSTANTES e valida o selo do próprio bundle antes de iniciar a JVM.
-JARS=""; for j in "$OUT/svc-input/"*.jar; do JARS+="\"$(basename "$j")\","; done; JARS="${JARS%,}"
+echo "== 3b. lançador nativo ENDURECIDO (um só código, parametrizado em build-time) no lugar do lançador genérico: serviço, helper de QA e PAINEL"
+# Medido: com o lançador genérico, JAVA_TOOL_OPTIONS=-Xbootclasspath/a:evil.jar executa código alheio DENTRO do processo (identidade e keychain). O lançador novo limpa o
+# ambiente, usa argumentos/classpath/classe CONSTANTES (o .cfg mutável é ignorado) e valida o selo do próprio bundle antes de iniciar a JVM.
+jars_of() { # $1=arquivo .cfg do jpackage -> lista de literais C com os jars do classpath, NA ORDEM do .cfg (fonte única)
+  python3 - "$1" <<'PY'
+import sys
+print(",".join('"%s"' % l.split("/",1)[1].strip() for l in open(sys.argv[1]) if l.startswith("app.classpath=")))
+PY
+}
+harden() { # $1=executável a substituir  $2=.cfg de origem  $3=classe principal  $4...=opções -D extras de build (PASS_ARGS, SQLITE_NATIVE)
+  local exe="$1" cfg="$2" mc="$3"; shift 3
+  clang -arch x86_64 -O2 -Wall -Werror -mmacosx-version-min=12.0 -DMAIN_CLASS="\"$mc\"" -DJAR_LIST="$(jars_of "$cfg")" "$@" -framework Security -framework CoreFoundation -o "$exe" "$HERE/launcher/byx-launcher.c"
+}
 for h in "${HELPERS[@]}"; do
   n="${h%%:*}"
   [[ "$n" == byx-local-service || "$n" == byx-auth-qa ]] || continue
-  clang -arch x86_64 -O2 -Wall -Werror -mmacosx-version-min=12.0 -DMAIN_CLASS="\"${h##*:}\"" -DJAR_LIST="$JARS" -framework Security -framework CoreFoundation \
-    -o "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$HERE/launcher/byx-launcher.c"
+  harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}"
 done
-
+harden "$CONTENTS/MacOS/$BYX_APP_NAME" "$CONTENTS/app/$BYX_APP_NAME.cfg" panel.app.Main -DPASS_ARGS -DSQLITE_NATIVE   # o painel: argv só depois da classe principal
+[[ $CANARY -eq 1 ]] && harden "$CONTENTS/MacOS/byx-auth-client" "$CONTENTS/app/byx-auth-client.cfg" panel.localservice.AuthorityQaCli -DPASS_ARGS
 echo "== 4. nativos do painel pré-extraídos (nada é extraído em tempo de execução: biblioteca não assinada seria recusada pelo library validation)"
 unzip -qjo "$M2/org/openjfx/javafx-graphics/21.0.5/javafx-graphics-21.0.5-mac.jar" '*.dylib' -d "$CONTENTS/app"
 unzip -qjo "$M2/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar" 'com/sun/jna/darwin-x86-64/libjnidispatch.jnilib' -d "$CONTENTS/Frameworks"

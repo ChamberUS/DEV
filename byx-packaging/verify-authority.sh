@@ -26,8 +26,10 @@ start_svc || exit 1
 expect "serviço de QA sobe com identidade verificada e autoridade confiável" "$(cat "$QA/svc.log")" "auth_qa authority=trusted"
 expect "modo de identidade empacotado e verificado" "$(cat "$QA/svc.log")" "identity=packaged_verified"
 [[ "$(stat -f %Lp "$CRED")" == 600 ]] && ok "arquivo de credenciais de teste é 0600" || bad "credenciais 0600" "$(stat -f %Lp "$CRED")"
-[[ "$(stat -f %Lp "$AUTH/authority.json")" == 600 ]] && ok "arquivo da autoridade é 0600" || bad "autoridade 0600" ""
-refute "autoridade em disco não contém senha em claro" "$(cat "$AUTH/authority.json")" "$(python3 -c "import json;print(json.load(open('$CRED'))['normal_user']['password'])")"
+[[ "$(stat -f %Lp "$AUTH/authority.bin")" == 600 ]] && ok "arquivo da autoridade é 0600" || bad "autoridade 0600" ""
+python3 "$HERE/authority-probes/confidentiality.py" "$AUTH/authority.bin" "$CRED" && ok "snapshot CIFRADO: cópia, hex-dump e strings do arquivo (mesmo usuário) não acham usuário, papel, verificador, senha nem estrutura" || bad "confidencialidade do snapshot" "ver saída"
+strings -a -n 4 "$AUTH/authority.bin" | grep -qiE "admin|normal_user|argon2|role|username|passwordHash" && bad "strings acha texto estrutural" "$(strings -a -n 4 "$AUTH/authority.bin" | head -3)" || ok "strings(1) não acha texto estrutural"
+[[ "$(head -c 4 "$AUTH/authority.bin")" == "BYXA" ]] && ok "só o magic fixo é legível" || bad "magic" ""
 
 echo "== 1. login legítimo, estado e logout (cliente com a identidade do painel)"
 OUT=$(printf 'login normal_user %s\nstatus\nprinttoken\nlogout\nstatus\nquit\n' "$CRED" | cli)
@@ -92,17 +94,19 @@ wait $RPID
 OUT=$(printf 'login normal_user %s\nquit\n' "$CRED" | cli); expect "novo login após o reinício funciona (login novo, não persistente)" "$OUT" "RESULT login OK"
 
 echo "== 6. adulteração da autoridade com a âncora REAL no keychain do serviço"
-AF="$AUTH/authority.json"; cp "$AF" "$QA/authority.v0"
+AF="$AUTH/authority.bin"; cp "$AF" "$QA/authority.v0"
 tamper() { # $1=descrição $2=modo (authority-probes/tamper.py)
   stop_svc; cp "$QA/authority.good" "$AF"; python3 "$HERE/authority-probes/tamper.py" "$AF" "$2" || { bad "$1" "edição falhou"; return; }
   : > "$QA/svc.log"; start_svc; local o=$(printf 'login normal_user %s\nquit\n' "$CRED" | cli)
   expect "$1: serviço detecta e falha fechado" "$(cat "$QA/svc.log")" "authority=untrusted"; expect "$1: login → AUTHORITY_UNAVAILABLE" "$o" "RESULT login AUTHORITY_UNAVAILABLE"; }
 cp "$AF" "$QA/authority.good"
-tamper "edição de papel (USER→ADMIN)" role
-tamper "reativar conta desabilitada" reenable
-tamper "mudança de credentialVersion" credversion
-tamper "inserção de admin falso" insert
-tamper "troca de hash de senha" hash
+tamper "bit do texto cifrado" ciphertext
+tamper "etiqueta GCM" tag
+tamper "nonce" nonce
+tamper "versão da autoridade no cabeçalho (AAD)" version
+tamper "texto cifrado truncado" truncate
+tamper "texto cifrado acima do limite" oversize
+tamper "formato antigo em claro / lixo" garbage
 stop_svc; cp "$QA/authority.good" "$AF"; : > "$QA/svc.log"; start_svc
 expect "arquivo original restaurado após reinício: confiável de novo" "$(cat "$QA/svc.log")" "authority=trusted"
 OUT=$(printf 'login normal_user %s\nchangepw normal_user %s %s\nquit\n' "$CRED" "$CRED" "qa-new-password-$RANDOM-xyz" | cli)
@@ -138,5 +142,61 @@ BYX_LOCAL_SERVICE_HOME="$QA" "$T/BYX-MVP.app/Contents/Helpers/byx-auth-qa.app/Co
 [[ $RC -eq 71 ]] && ok "jar do serviço alterado → lançador recusa (exit 71)" || bad "bundle adulterado" "exit=$RC $(cat "$T/out")"
 expect "mensagem fixa, sem caminhos" "$(cat "$T/out")" "bundle seal invalid"
 rm -rf "${T:?}"
+
+echo "== 9. PAINEL endurecido: injeção, DYLD, adulteração do bundle, e aceito pelo serviço endurecido"
+PANEL="$APP/Contents/MacOS/BYX-MVP"
+start_svc
+OUT=$(BYX_LOCAL_SERVICE_HOME="$QA" "$PANEL" --probe-service 2>&1)
+expect "painel endurecido (lançador nativo) é ACEITO pelo serviço endurecido" "$OUT" "probe.state=CONNECTED"
+expect "o painel se vê como packaged_verified" "$OUT" "probe.selfIdentity=packaged_verified"
+EVP="$QA/evilpanel"; mkdir -p "$EVP/src/panel/app" "$EVP/classes"
+cat > "$EVP/src/panel/app/Main.java" <<'JV'
+package panel.app;
+public final class Main { public static void main(String[] a) throws Exception { java.nio.file.Files.writeString(java.nio.file.Path.of(System.getenv("EVIL_MARKER")), "EXECUTED"); } }
+JV
+javac -d "$EVP/classes" "$EVP/src/panel/app/Main.java" && (cd "$EVP/classes" && jar cf "$EVP/evil.jar" .)
+PCP=$(python3 - "$APP/Contents/app/BYX-MVP.cfg" "$APP/Contents/app" <<'PY'
+import sys
+print(":".join(sys.argv[2]+"/"+l.split("/",1)[1].strip() for l in open(sys.argv[1]) if l.startswith("app.classpath=")))
+PY
+)
+rm -f -- "$QA"/marker.p.*(N)
+EVIL_MARKER="$QA/marker.p.control" java -Xbootclasspath/a:"$EVP/evil.jar" -cp "$PCP" panel.app.Main >/dev/null 2>&1
+[[ -f "$QA/marker.p.control" ]] && ok "controle positivo (painel): JAVA_TOOL_OPTIONS/-Xbootclasspath hostil roda num java genérico" || bad "controle positivo painel" ""
+for V in JAVA_TOOL_OPTIONS _JAVA_OPTIONS JDK_JAVA_OPTIONS; do
+  rm -f "$QA/marker.p.$V"
+  env EVIL_MARKER="$QA/marker.p.$V" "$V=-Xbootclasspath/a:$EVP/evil.jar" BYX_LOCAL_SERVICE_HOME="$QA" "$PANEL" --probe-service >/dev/null 2>&1
+  [[ ! -f "$QA/marker.p.$V" ]] && ok "painel endurecido: código injetado por $V NÃO executou" || bad "injeção $V no painel" "marcador criado"
+done
+# DYLD_INSERT_LIBRARIES: controle positivo num executável sem Hardened Runtime; o painel endurecido não carrega
+cat > "$QA/dy.c" <<'CC'
+#include <stdlib.h>
+#include <stdio.h>
+__attribute__((constructor)) static void hit(void) { const char *m = getenv("EVIL_MARKER"); if (m) { FILE *f = fopen(m, "w"); if (f) { fputs("DYLD", f); fclose(f); } } }
+CC
+cat > "$QA/dyhost.c" <<'CC'
+int main(void) { return 0; }
+CC
+clang -arch x86_64 -dynamiclib -o "$QA/evil.dylib" "$QA/dy.c" && clang -arch x86_64 -o "$QA/dyhost" "$QA/dyhost.c"
+rm -f "$QA/marker.dyld.control" "$QA/marker.dyld.panel"
+EVIL_MARKER="$QA/marker.dyld.control" DYLD_INSERT_LIBRARIES="$QA/evil.dylib" "$QA/dyhost" >/dev/null 2>&1
+[[ -f "$QA/marker.dyld.control" ]] && ok "controle positivo: DYLD_INSERT_LIBRARIES carrega a biblioteca hostil num executável comum" || bad "controle DYLD" "marcador ausente"
+EVIL_MARKER="$QA/marker.dyld.panel" DYLD_INSERT_LIBRARIES="$QA/evil.dylib" BYX_LOCAL_SERVICE_HOME="$QA" "$PANEL" --probe-service >/dev/null 2>&1
+[[ ! -f "$QA/marker.dyld.panel" ]] && ok "painel endurecido: DYLD_INSERT_LIBRARIES não carregou a biblioteca hostil" || bad "DYLD no painel" "marcador criado"
+stop_svc
+T="$(mktemp -d /tmp/byx-authqa-tamper.XXXXXX)"; cp -cR "$APP" "$T/BYX-MVP.app"
+J=$(ls "$T"/BYX-MVP.app/Contents/app/mvp-binance-panel-*.jar | head -1); printf 'x' >> "$J"
+"$T/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service > "$T/out" 2>&1; RC=$?
+[[ $RC -eq 71 ]] && ok "painel com jar alterado → lançador recusa (exit 71)" || bad "painel adulterado (jar)" "exit=$RC"
+cp -c "$APP/Contents/app/mvp-binance-panel-0.1.0.jar" "$J"
+echo "java-options=-Dtampered=1" >> "$T/BYX-MVP.app/Contents/app/BYX-MVP.cfg"
+"$T/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service > "$T/out2" 2>&1; RC=$?
+[[ $RC -eq 71 ]] && ok "painel com .cfg alterado → lançador recusa (exit 71)" || bad "painel adulterado (cfg)" "exit=$RC"
+expect "mensagem fixa, sem caminhos" "$(cat "$T/out2")" "bundle seal invalid"
+rm -rf "${T:?}"
+T2="$(mktemp -d /tmp/byx-authqa-clean.XXXXXX)"; cp -cR "$APP" "$T2/BYX-MVP.app"; start_svc
+[[ -S "$QA/run/service.sock" ]] && OUT=$(BYX_LOCAL_SERVICE_HOME="$QA" "$T2/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service 2>&1)
+expect "cópia LIMPA do bundle (restaurado) inicia e conecta normalmente" "$OUT" "probe.state=CONNECTED"
+stop_svc; rm -rf "${T2:?}"
 
 echo; echo "RESUMO: $PASS PASS, $FAIL FAIL"; [[ $FAIL -eq 0 ]]
