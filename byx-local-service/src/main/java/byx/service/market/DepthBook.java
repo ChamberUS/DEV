@@ -33,14 +33,31 @@ final class DepthBook {
     private State state = State.NO_SNAPSHOT;
     private long snapshotId;
     private long lastU = -1;
-    private String reason = "";
+    private MarketReason why = MarketReason.BOOK_START;
+    /** Diagnóstico numérico da última invalidação por lógica de sequência (só U/u/pu e contagens; nunca texto da rede). */
+    private String detail = "";
+    private long generation;
 
     State state() {
         return state;
     }
 
+    /** Código legado da última invalidação (contratos existentes). */
     String reason() {
-        return reason;
+        return why.code;
+    }
+
+    MarketReason reasonEnum() {
+        return why;
+    }
+
+    String detail() {
+        return detail;
+    }
+
+    /** Geração do book: sobe a cada invalidação (opaca; só para correlacionar eventos). */
+    long generation() {
+        return generation;
     }
 
     long lastUpdateId() {
@@ -48,13 +65,19 @@ final class DepthBook {
     }
 
     /** Invalida tudo e volta a guardar eventos até o próximo snapshot. */
-    void invalidate(String why) {
+    void invalidate(String legacyCode) {
+        invalidate(MarketReason.fromCode(legacyCode));
+    }
+
+    void invalidate(MarketReason reason) {
         bids.clear();
         asks.clear();
         buffer.clear();
         state = State.NO_SNAPSHOT;
         lastU = -1;
-        reason = why;
+        why = reason;
+        detail = "";
+        generation++;
     }
 
     /** Evento do stream. NO_SNAPSHOT: só guarda (com teto). SYNCING/LIVE: aplica com a regra de continuidade. */
@@ -62,7 +85,7 @@ final class DepthBook {
         switch (state) {
             case NO_SNAPSHOT -> {
                 if (buffer.size() >= MAX_BUFFERED_EVENTS) {
-                    return resync("buffer_overflow");
+                    return resync(MarketReason.DEPTH_BUFFER_OVERFLOW, "buffered=" + buffer.size());
                 }
                 buffer.addLast(e);
                 return Verdict.OK;
@@ -90,7 +113,7 @@ final class DepthBook {
             put(asks, l);
         }
         if (crossed()) {
-            return resync("crossed_snapshot");
+            return resync(MarketReason.DEPTH_CROSSED_SNAPSHOT, "");
         }
         snapshotId = s.lastUpdateId();
         state = State.SYNCING;
@@ -111,19 +134,19 @@ final class DepthBook {
         }
         if (e.firstId() > snapshotId) {
             // o stream já passou do snapshot sem cobri-lo: sequência não alinhável, precisa de snapshot mais novo
-            return resyncNewer("snapshot_behind_stream");
+            return resyncNewer(MarketReason.SNAPSHOT_BEHIND_STREAM, "U=" + e.firstId() + " u=" + e.lastId() + " snap=" + snapshotId);
         }
         apply(e); // U <= L <= u
         state = State.LIVE;
-        return crossed() ? resync("crossed_book") : Verdict.OK;
+        return crossed() ? resync(MarketReason.DEPTH_CROSSED_BOOK, "") : Verdict.OK;
     }
 
     private Verdict next(Depth e) {
         if (e.prevId() != lastU) {
-            return resync("sequence_gap");
+            return resync(MarketReason.DEPTH_SEQUENCE_GAP, "U=" + e.firstId() + " u=" + e.lastId() + " pu=" + e.prevId() + " expected_pu=" + lastU);
         }
         apply(e);
-        return crossed() ? resync("crossed_book") : Verdict.OK;
+        return crossed() ? resync(MarketReason.DEPTH_CROSSED_BOOK, "") : Verdict.OK;
     }
 
     private void apply(Depth e) {
@@ -156,13 +179,15 @@ final class DepthBook {
         return !bids.isEmpty() && !asks.isEmpty() && bids.firstKey().compareTo(asks.firstKey()) >= 0;
     }
 
-    private Verdict resync(String why) {
-        invalidate(why);
+    private Verdict resync(MarketReason reason, String numbers) {
+        invalidate(reason);
+        detail = numbers;
         return Verdict.NEED_RESYNC;
     }
 
-    private Verdict resyncNewer(String why) {
-        invalidate(why);
+    private Verdict resyncNewer(MarketReason reason, String numbers) {
+        invalidate(reason);
+        detail = numbers;
         return Verdict.NEED_NEWER_SNAPSHOT;
     }
 

@@ -266,7 +266,7 @@ public final class MarketFeed implements AutoCloseable {
     }
 
     private void resetData() {
-        book.invalidate("start");
+        book.invalidate(MarketReason.BOOK_START);
         bookLiveOnce = false;
         snapshotInflight = false;
         wantSnapshot = false;
@@ -359,7 +359,7 @@ public final class MarketFeed implements AutoCloseable {
         c.lastMsg = now;
         c.wasStable = false;
         if (c == pub) {
-            book.invalidate("connecting");
+            book.invalidate(MarketReason.BOOK_CONNECTING);
             bookLiveOnce = false;
             wantSnapshot = true;
             snapshotNotBefore = Math.max(snapshotNotBefore, now);
@@ -372,13 +372,19 @@ public final class MarketFeed implements AutoCloseable {
         pump();
     }
 
+    /** Razão tipada da perda (códigos de transporte conhecidos; qualquer outro vira OTHER, nunca o texto recebido). */
+    private static MarketReason lostReason(String code) {
+        MarketReason r = MarketReason.fromCode(code);
+        return r == MarketReason.OTHER ? MarketReason.TRANSPORT_ERROR : r;
+    }
+
     private void lost(Conn c, String code, int closeCode, int status) {
         long now = clock.getAsLong();
         boolean wasOpen = c.open;
         c.open = false;
         closeHandle(c);
         if (c == pub) {
-            book.invalidate("connection_lost");
+            book.invalidate(MarketReason.BOOK_CONNECTION_LOST);
             snapshotInflight = false;
         }
         boolean aged = wasOpen && now - c.openedAt >= cfg.rotateMs() - cfg.rotateJitterMs();
@@ -395,7 +401,8 @@ public final class MarketFeed implements AutoCloseable {
         } else {
             c.failures++;
             c.retryAt = now + backoff(c.failures);
-            Log.event("market_connection_lost", code);
+            Log.event("market_connection_lost", "code=" + code + " reason=" + lostReason(code) + " conn=" + c.name + " gen=" + c.gen + " close=" + closeCode + " status=" + status
+                    + " open_s=" + (wasOpen ? (now - c.openedAt) / 1000 : -1));
         }
         dirty = true;
     }
@@ -423,9 +430,13 @@ public final class MarketFeed implements AutoCloseable {
 
     private void message(Conn c, String text) {
         c.lastMsg = clock.getAsLong();
+        MarketStream where = c == pub ? MarketStream.DEPTH : MarketStream.UNKNOWN_MARKET; // antes do envelope só a conexão é conhecida
         try {
             Envelope env = MarketEvents.envelope(text);
             JsonNode d = env.data();
+            if (c != pub) {
+                where = MarketStream.of(env.stream());
+            }
             if (c == pub) {
                 if (!PUB_STREAM.equals(env.stream())) {
                     throw new MarketException("unexpected_stream");
@@ -456,9 +467,11 @@ public final class MarketFeed implements AutoCloseable {
             }
         } catch (MarketException e) {
             rejected++;
-            Log.event("market_rejected", e.code);
+            // diagnóstico mínimo: classe de stream, razão tipada, conexão/geração opacas, geração do book e tamanho do frame; nunca o conteúdo
+            Log.event("market_rejected", "code=" + e.code + " reason=" + e.reason + " stream=" + where + " conn=" + c.name + " gen=" + c.gen
+                    + (c == pub ? " bookgen=" + book.generation() : "") + " bytes=" + text.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
             if (c == pub) {
-                invalidateBook("rejected_event");
+                invalidateBook(MarketReason.REJECTED_FRAME);
             }
         }
         dirty = true;
@@ -479,13 +492,20 @@ public final class MarketFeed implements AutoCloseable {
             resyncStreak++;
             snapshotNotBefore = Math.max(snapshotNotBefore, clock.getAsLong() + snapshotDelay());
             wantSnapshot = true;
-            Log.event("market_book_resync", book.reason());
+            logResync();
         }
         vBook++;
     }
 
-    private void invalidateBook(String why) {
+    /** Resync por lógica de SEQUÊNCIA/estado do book (nunca confundido com rejeição de parsing, que tem o próprio evento). */
+    private void logResync() {
+        Log.event("market_book_resync", "code=" + book.reason() + " reason=" + book.reasonEnum() + " stream=" + MarketStream.DEPTH + " conn=" + pub.name + " gen=" + pub.gen
+                + " bookgen=" + book.generation() + (book.detail().isEmpty() ? "" : " " + book.detail()));
+    }
+
+    private void invalidateBook(MarketReason why) {
         book.invalidate(why);
+        Log.event("market_book_resync", "code=" + why.code + " reason=" + why + " stream=" + MarketStream.DEPTH + " conn=" + pub.name + " gen=" + pub.gen + " bookgen=" + book.generation());
         resyncs++;
         resyncStreak++;
         snapshotNotBefore = Math.max(snapshotNotBefore, clock.getAsLong() + snapshotDelay());
@@ -628,7 +648,7 @@ public final class MarketFeed implements AutoCloseable {
                 dirty = true;
                 return;
             } catch (MarketException e) {
-                Log.event("market_rest_rejected", e.code);
+                Log.event("market_rest_rejected", "code=" + e.code + " reason=" + e.reason + " stream=" + MarketStream.REST_DEPTH + " bytes=" + resp.body().length);
             }
         }
         resyncStreak++;
@@ -655,7 +675,7 @@ public final class MarketFeed implements AutoCloseable {
                 dirty = true;
                 return;
             } catch (MarketException e) {
-                Log.event("market_rest_rejected", e.code);
+                Log.event("market_rest_rejected", "code=" + e.code + " reason=" + e.reason + " stream=" + MarketStream.REST_KLINES + " bytes=" + resp.body().length);
             }
         }
         klinesFailures++;
@@ -710,7 +730,7 @@ public final class MarketFeed implements AutoCloseable {
         c.open = false;
         c.planned = false;
         if (c == pub) {
-            book.invalidate(planned ? "rotation" : "reconnect");
+            book.invalidate(planned ? MarketReason.BOOK_ROTATION : MarketReason.BOOK_RECONNECT);
             snapshotInflight = false;
         }
         long now = clock.getAsLong();
