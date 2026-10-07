@@ -1,0 +1,13 @@
+V2.1G Stage 4: real auth cutover FINALIZE (2026-10-06 23:08 local)
+authorized by owner (chat) after Stage 3B PASS (real login, email OTP, SMS OTP, ADMIN elevation, absolute 5-min expiry, no renewal by activity); app closed, service stopped, no byx processes at finalize time
+stage 3B audit (types only): LOGIN_FAILED(typo) LOGIN_OK LOGIN_OK OTP_SENT OTP_OK SMS_SENT SMS_OK ELEVATION_GRANTED(22:58:37); no ELEVATION_DENIED, no second ELEVATION_GRANTED, no trusted device; no explicit LOGOUT event (the service stopped 23:07:20 and its in-memory sessions ended)
+preflight: embedded in `byx-migrate finalize` (authority trusted, verify PASS, freeze active, private gate closed, profile current, ADMIN enabled, providers+vault ready) -> passed
+command: echo FINALIZE-CUTOVER | byx-migrate finalize -> RESULT OK finalize
+state: migration PREPARED -> CUTOVER_VERIFIED ; freeze true -> false ; legacy ACTIVE -> ROLLBACK_ONLY ; trustedDevice NOT_MIGRATED_LEGACY_PRESERVED (unchanged)
+post verify (read-only): verification=PASS; vault RESEND_API_KEY/TWILIO_API_SECRET PRESENT; audit: 1 ADMIN enabled
+files modified by finalize: authority.bin (be709fdf...dfa461d -> 006c35cf...a834742f) and migration-state.json (40637493...acb09 -> 7cc15eef...e9256f); unchanged: migration-manifest.json, ratelimit.bin, audit.log, panel.db
+keychain: the rollback anchor item of the service (production) is rewritten with the new authority version by the authority write; metadata only, no values read; no legacy item touched
+panel.db sha before/after: a75769d78cd65a333898831aecc34df1b165a6ab9a0ca9e9627b31ae03c7f7fc (no wal/shm/journal)
+legacy keychain (attributes only): resend PRESENT, twilio PRESENT, trusted-device PRESENT; nothing deleted
+bundle: codesign --verify --deep --strict OK; panel jar fb48f5a7...; profile valid until 2026-10-13T16:49:55Z; no rebuild, no suites rerun
+private gate: PRIVATE_CAPABILITIES_ALLOWED=false EXPLICIT_REVIEW_REQUIRED=true (unchanged)
