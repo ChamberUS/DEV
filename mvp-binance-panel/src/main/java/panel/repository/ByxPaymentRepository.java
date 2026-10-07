@@ -10,7 +10,7 @@ import java.sql.*;
 public final class ByxPaymentRepository {
     private final Database db;
     public ByxPaymentRepository(Database db){this.db=db;db.with(c->{try(var s=c.createStatement()){
-        s.execute("CREATE TABLE IF NOT EXISTS byx_payment_intents(id TEXT PRIMARY KEY,user_id INTEGER NOT NULL,wallet TEXT NOT NULL,chain_id TEXT NOT NULL,genesis TEXT NOT NULL,recipient TEXT NOT NULL,amount TEXT NOT NULL,purpose TEXT NOT NULL,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,status TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id))");
+        s.execute("CREATE TABLE IF NOT EXISTS byx_payment_intents(id TEXT PRIMARY KEY,user_id INTEGER NOT NULL,wallet TEXT NOT NULL,chain_id TEXT NOT NULL,genesis TEXT NOT NULL,recipient TEXT NOT NULL,amount TEXT NOT NULL,purpose TEXT NOT NULL,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,status TEXT NOT NULL)");
         s.execute("CREATE TABLE IF NOT EXISTS byx_payment_receipts(intent_id TEXT PRIMARY KEY,user_id INTEGER NOT NULL,wallet TEXT NOT NULL,chain_id TEXT NOT NULL,genesis TEXT NOT NULL,tx_hash TEXT NOT NULL,height INTEGER NOT NULL,amount TEXT NOT NULL,confirmed_at TEXT NOT NULL,starts_at TEXT NOT NULL,expires_at TEXT NOT NULL,UNIQUE(chain_id,genesis,tx_hash),FOREIGN KEY(intent_id) REFERENCES byx_payment_intents(id))");
     }return null;});}
     public void create(PaymentIntent i){db.with(c->{try(var q=c.prepareStatement("INSERT INTO byx_payment_intents VALUES(?,?,?,?,?,?,?,?,?,?,?)")){

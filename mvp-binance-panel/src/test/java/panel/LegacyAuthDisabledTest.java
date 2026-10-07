@@ -41,8 +41,8 @@ class LegacyAuthDisabledTest {
 
     @Test
     void noProductCodeReadsOrWritesTheLegacyUserStoreOrItsAuthTables() throws IOException {
-        // única leitura permitida: o leitor do HISTÓRICO legado de auditoria mascara linhas antigas consultando nomes da tabela antiga (SELECT apenas; nunca autentica)
-        assertEquals(Set.of("security/SecurityAuditService.java"), filesContaining("(?i)(FROM|INTO|UPDATE)\\s+users\\b"), "only the legacy history reader looks at the users table");
+        // única leitura permitida: o leitor SOMENTE-LEITURA/imutável do HISTÓRICO legado (LegacyPanelDb) consulta nomes da tabela antiga para mascarar linhas antigas consultando nomes da tabela antiga (SELECT apenas; nunca autentica)
+        assertEquals(Set.of("security/LegacyPanelDb.java"), filesContaining("(?i)(FROM|INTO|UPDATE)\\s+users\\b"), "only the legacy history reader looks at the users table");
         assertEquals(Set.of(), filesContaining("(?i)(INSERT\\s+INTO|UPDATE|DELETE\\s+FROM)\\s+users\\b"), "nothing ever WRITES the legacy users table");
         assertEquals(Set.of(), filesContaining("(?i)(FROM|INTO|UPDATE)\\s+(trusted_devices|rate_limits)\\b"), "no query on the legacy auth tables");
         assertEquals(Set.of(), filesContaining("\\b(UserRepository|SqliteUserRepository|PasswordHasher|OtpService|MacOsKeychainSecretStore|SecKeychain)\\b"));

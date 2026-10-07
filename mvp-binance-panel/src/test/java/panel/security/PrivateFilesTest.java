@@ -47,10 +47,10 @@ class PrivateFilesTest {
     @Test
     void newHomeIsCreated0700AndTheDatabase0600() throws Exception {
         Path dir = root.resolve("home");
-        Path db = dir.resolve("panel.db");
-        try (Database d = Database.open(db)) {
+        Path db = dir.resolve("runtime.db");
+        try (Database d = Database.openRuntime(db)) {
             d.with(c -> {
-                c.createStatement().executeUpdate("INSERT INTO audit_log(ts,event,actor,detail) VALUES ('t','e','a','d')");
+                c.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS probe(x TEXT)");
                 return null;
             });
         }
@@ -61,12 +61,12 @@ class PrivateFilesTest {
     @Test
     void sqliteAuxiliaryFilesInheritTheMainFileMode() throws Exception {
         Path dir = root.resolve("home");
-        Path db = dir.resolve("panel.db");
-        try (Database d = Database.open(db)) {
+        Path db = dir.resolve("runtime.db");
+        try (Database d = Database.openRuntime(db)) {
             d.with(c -> { // WAL liga -wal e -shm
                 try (var s = c.createStatement()) {
                     s.execute("PRAGMA journal_mode=WAL");
-                    s.executeUpdate("INSERT INTO audit_log(ts,event,actor,detail) VALUES ('t','e','a','d')");
+                    s.executeUpdate("CREATE TABLE IF NOT EXISTS probe(x TEXT)");
                 }
                 return null;
             });
@@ -74,7 +74,7 @@ class PrivateFilesTest {
             try (var l = Files.list(dir)) {
                 names = l.map(p -> p.getFileName().toString()).sorted().toList();
             }
-            assertTrue(names.contains("panel.db-wal") && names.contains("panel.db-shm"), "WAL files exist while open: " + names);
+            assertTrue(names.contains("runtime.db-wal") && names.contains("runtime.db-shm"), "WAL files exist while open: " + names);
             for (String n : names) {
                 assertEquals("rw-------", mode(dir.resolve(n)), n);
             }
@@ -83,9 +83,9 @@ class PrivateFilesTest {
                 try (var s = c.createStatement()) {
                     s.execute("PRAGMA journal_mode=DELETE");
                     c.setAutoCommit(false);
-                    s.executeUpdate("INSERT INTO audit_log(ts,event,actor,detail) VALUES ('t2','e','a','d')");
+                    s.executeUpdate("INSERT INTO probe VALUES('t2')");
                     try {
-                        assertEquals("rw-------", mode(dir.resolve("panel.db-journal")));
+                        assertEquals("rw-------", mode(dir.resolve("runtime.db-journal")));
                     } catch (Exception e) {
                         throw new java.sql.SQLException(e);
                     }
@@ -103,8 +103,8 @@ class PrivateFilesTest {
             Path dir = root.resolve("d-" + perm);
             Files.createDirectory(dir);
             Files.setPosixFilePermissions(dir, PosixFilePermissions.fromString(perm));
-            assertEquals("directory_writable_by_others", code(() -> Database.open(dir.resolve("panel.db"))), perm);
-            assertFalse(Files.exists(dir.resolve("panel.db")), "nothing was created in an unsafe directory");
+            assertEquals("directory_writable_by_others", code(() -> Database.openRuntime(dir.resolve("runtime.db"))), perm);
+            assertFalse(Files.exists(dir.resolve("runtime.db")), "nothing was created in an unsafe directory");
         }
     }
 
@@ -114,15 +114,15 @@ class PrivateFilesTest {
         Files.createDirectory(real, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
         Path link = root.resolve("link");
         Files.createSymbolicLink(link, real);
-        assertEquals("directory_is_symlink", code(() -> Database.open(link.resolve("panel.db"))));
-        assertFalse(Files.exists(real.resolve("panel.db")));
+        assertEquals("directory_is_symlink", code(() -> Database.openRuntime(link.resolve("runtime.db"))));
+        assertFalse(Files.exists(real.resolve("runtime.db")));
     }
 
     @Test
     void directoryOwnedBySomeoneElseIsRefused() {
         // /Library pertence ao root: a verificação é só de metadados e recusa ANTES de criar qualquer coisa
-        assertEquals("directory_wrong_owner", code(() -> Database.open(Path.of("/Library/byx-test-panel.db"))));
-        assertFalse(Files.exists(Path.of("/Library/byx-test-panel.db")));
+        assertEquals("directory_wrong_owner", code(() -> Database.openRuntime(Path.of("/Library/byx-test-runtime.db"))));
+        assertFalse(Files.exists(Path.of("/Library/byx-test-runtime.db")));
     }
 
     @Test
@@ -131,22 +131,22 @@ class PrivateFilesTest {
         Files.createDirectory(dir, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
         Path target = root.resolve("elsewhere.db");
         Files.createFile(target, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
-        Files.createSymbolicLink(dir.resolve("panel.db"), target);
-        assertEquals("file_not_regular", code(() -> Database.open(dir.resolve("panel.db"))));
+        Files.createSymbolicLink(dir.resolve("runtime.db"), target);
+        assertEquals("file_not_regular", code(() -> Database.openRuntime(dir.resolve("runtime.db"))));
         Path sub = dir.resolve("sub.db");
         Files.createDirectory(sub);
-        assertEquals("file_not_regular", code(() -> Database.open(sub)));
+        assertEquals("file_not_regular", code(() -> Database.openRuntime(sub)));
     }
 
     @Test
     void anExistingDatabaseIsNeverModifiedByOpenButIsReportedAndCanBeTightenedExplicitly() throws Exception {
         Path dir = root.resolve("home");
         Files.createDirectory(dir, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
-        Path db = dir.resolve("panel.db");
+        Path db = dir.resolve("runtime.db");
         Files.createFile(db, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r--r--")));
         Path bystander = dir.resolve("settings.properties"); // arquivo que NÃO é do banco
         Files.createFile(bystander, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r--r--")));
-        try (Database ignored = Database.open(db)) {
+        try (Database ignored = Database.openRuntime(db)) {
             assertEquals("rw-r--r--", mode(db), "open does not change an existing database");
         }
         assertEquals("rw-r--r--", mode(bystander), "unrelated files are never touched");
@@ -162,16 +162,16 @@ class PrivateFilesTest {
         Path dir = root.resolve("home");
         Files.createDirectory(dir);
         Files.setPosixFilePermissions(dir, PosixFilePermissions.fromString("rwxr-xr-x"));
-        try (Database ignored = Database.open(dir.resolve("panel.db"))) {
+        try (Database ignored = Database.openRuntime(dir.resolve("runtime.db"))) {
             assertEquals("rwxr-xr-x", mode(dir), "an existing directory is not chmod-ed behind the user's back");
-            assertEquals("rw-------", mode(dir.resolve("panel.db")), "the NEW database is private regardless");
+            assertEquals("rw-------", mode(dir.resolve("runtime.db")), "the NEW database is private regardless");
         }
-        assertEquals(List.of("directory_open_bits"), PrivateFiles.audit(dir, dir.resolve("panel.db")));
+        assertEquals(List.of("directory_open_bits"), PrivateFiles.audit(dir, dir.resolve("runtime.db")));
     }
 
     @Test
     void errorMessagesNeverCarryPaths() {
-        var e = assertThrows(PrivateFiles.InsecureStorageException.class, () -> Database.open(Path.of("/Library/x.db")));
+        var e = assertThrows(PrivateFiles.InsecureStorageException.class, () -> Database.openRuntime(Path.of("/Library/x.db")));
         assertFalse(e.getMessage().contains("Library"));
     }
 }

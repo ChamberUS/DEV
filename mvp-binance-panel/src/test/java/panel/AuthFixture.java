@@ -40,7 +40,7 @@ class AuthFixture {
 
     final MutableClock clock = new MutableClock();
     final Database db = Database.inMemory();
-    final SecurityAuditService audit = new SecurityAuditService(db, clock);
+    final SecurityAuditService audit = new SecurityAuditService(panel.security.LegacyAuditHistory.UNAVAILABLE, clock);
     final SessionManager sessions = new SessionManager();
     /** Dublê da autoridade do serviço (os códigos de 2º fator são determinísticos: lastCode()). */
     final FakeAuthority authority = new FakeAuthority(clock);

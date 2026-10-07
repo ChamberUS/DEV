@@ -6,21 +6,37 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/** Banco SQLite local do painel (usuários e auditoria). Uma conexão serializada. */
+/**
+ * Banco de RUNTIME do painel (dados BYX não-auth). NÃO é o banco legado: {@code panel.db} é a fonte de rollback e o produto nunca o abre por aqui (nome recusado,
+ * sem DDL/INSERT/UPDATE/DELETE contra ele; o histórico legado só é lido por {@link LegacyPanelDb}, somente leitura e imutável). Auth, sessão, OTP, segredos e
+ * dispositivos confiáveis vivem no serviço local e NUNCA neste banco. A versão do esquema é explícita ({@code PRAGMA user_version}); uma versão mais nova que a
+ * conhecida falha fechado. Os repositórios criam as próprias tabelas (sem chave estrangeira para tabelas de auth: {@code user_id} é a identidade estável legada
+ * que o serviço apresenta, sem vínculo físico).
+ */
 public class Database implements AutoCloseable {
+    public static final int RUNTIME_SCHEMA_VERSION = 1;
+    public static final String RUNTIME_FILE_NAME = "runtime.db";
+    /** Nome do banco legado: recusado aqui, sempre. */
+    static final String LEGACY_FILE_NAME = "panel.db";
+
     private final Connection connection;
 
     private Database(Connection c) {
         this.connection = c;
     }
 
-    public static Database open(Path file) {
+    /** Abre (ou cria, 0700/0600, sem seguir symlink) o banco de runtime. Recusa o nome do banco legado. */
+    public static Database openRuntime(Path file) {
+        Path abs = file.toAbsolutePath();
+        if (LEGACY_FILE_NAME.equals(abs.getFileName().toString())) {
+            throw new IllegalArgumentException("legacy_database_refused");
+        }
         try {
-            PrivateFiles.prepareDirectory(file.toAbsolutePath().getParent()); // L12: 0700 novo; falha fechada se fora da política
-            PrivateFiles.prepareFile(file.toAbsolutePath()); // L12: 0600 novo (antes do SQLite); existente não é alterado
-            return init(DriverManager.getConnection("jdbc:sqlite:" + file.toAbsolutePath()));
-        } catch (PrivateFiles.InsecureStorageException e) {
-            throw e; // não continua em silêncio e não vira "banco indisponível"
+            PrivateFiles.prepareDirectory(abs.getParent()); // 0700 novo; falha fechada se fora da política
+            PrivateFiles.prepareFile(abs); // 0600 novo (antes do SQLite); existente não é alterado
+            return init(DriverManager.getConnection("jdbc:sqlite:" + abs));
+        } catch (IllegalStateException e) {
+            throw e; // política de arquivo (InsecureStorageException) ou esquema novo demais: não continua em silêncio e não vira "banco indisponível"
         } catch (Exception e) {
             throw new IllegalStateException("Could not open local database", e);
         }
@@ -36,39 +52,17 @@ public class Database implements AutoCloseable {
 
     private static Database init(Connection c) throws SQLException {
         try (Statement s = c.createStatement()) {
-            s.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                      username TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                      email TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                      password_hash TEXT NOT NULL,
-                      role TEXT NOT NULL,
-                      status TEXT NOT NULL,
-                      phone TEXT,
-                      email_verified INTEGER NOT NULL DEFAULT 0,
-                      phone_verified INTEGER NOT NULL DEFAULT 0,
-                      must_change_password INTEGER NOT NULL DEFAULT 0,
-                      created_at TEXT NOT NULL,
-                      updated_at TEXT NOT NULL,
-                      last_login_at TEXT)""");
-            s.execute("""
-                    CREATE TABLE IF NOT EXISTS trusted_devices (
-                      device_id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, display_name TEXT NOT NULL,
-                      token_hash TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, last_used_at TEXT NOT NULL,
-                      expires_at TEXT NOT NULL, revoked_at TEXT,
-                      FOREIGN KEY(user_id) REFERENCES users(id))""");
-            // L4: estado do limitador de autenticação (só impressão do assunto + contadores; nunca o texto digitado) e o sal local dela
-            s.execute("""
-                    CREATE TABLE IF NOT EXISTS rate_limits (
-                      subject TEXT PRIMARY KEY, failures INTEGER NOT NULL, last_at INTEGER NOT NULL, next_allowed_at INTEGER NOT NULL)""");
-            s.execute("CREATE TABLE IF NOT EXISTS meta (name TEXT PRIMARY KEY, value TEXT NOT NULL)");
-            s.execute("""
-                    CREATE TABLE IF NOT EXISTS audit_log (
-                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                      ts TEXT NOT NULL,
-                      event TEXT NOT NULL,
-                      actor TEXT,
-                      detail TEXT)""");
+            int version;
+            try (var r = s.executeQuery("PRAGMA user_version")) {
+                version = r.next() ? r.getInt(1) : 0;
+            }
+            if (version > RUNTIME_SCHEMA_VERSION) {
+                c.close();
+                throw new IllegalStateException("runtime_schema_too_new");
+            }
+            if (version < RUNTIME_SCHEMA_VERSION) {
+                s.execute("PRAGMA user_version=" + RUNTIME_SCHEMA_VERSION);
+            }
         }
         return new Database(c);
     }

@@ -28,12 +28,18 @@ import panel.user.UserService;
 
 /** Composição das dependências; as telas recebem apenas este contexto. */
 public class AppContext {
-    private static final Path DB_FILE = Path.of(System.getProperty("user.home"), ".mvp-binance-panel", "panel.db");
+    /** Resolvido na CONSTRUÇÃO (não na carga da classe): testes com home temporário nunca tocam o home real. */
+    private static Path appHome() {
+        return Path.of(System.getProperty("user.home"), ".mvp-binance-panel");
+    }
 
     public final Settings settings = Settings.load();
     private final Clock clock = Clock.systemUTC();
-    private final Database db = Database.open(DB_FILE);
-    public final SecurityAuditService audit = new SecurityAuditService(db, clock);
+    private final Database db = Database.openRuntime(appHome().resolve(Database.RUNTIME_FILE_NAME));
+    /** Legado (panel.db, rollback-only): SÓ leitura imutável do histórico de auditoria; nunca read-write, nunca DDL, nunca recriado. */
+    private final panel.security.LegacyAuditHistory legacyHistory = panel.security.LegacyPanelDb.openReadOnly(appHome().resolve("panel.db")).map(h -> (panel.security.LegacyAuditHistory) h)
+            .orElse(panel.security.LegacyAuditHistory.UNAVAILABLE);
+    public final SecurityAuditService audit = new SecurityAuditService(legacyHistory, clock);
     public final SessionManager sessions = new SessionManager();
     /**
      * A autenticação é do SERVIÇO local (autoridade). O painel só a apresenta: não há banco de usuários, hash de senha, limitador, provedor de OTP, keychain legado nem

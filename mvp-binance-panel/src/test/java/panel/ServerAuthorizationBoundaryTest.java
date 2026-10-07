@@ -105,7 +105,7 @@ class ServerAuthorizationBoundaryTest {
         assertEquals(ServerAuthorization.REQUIRED + ": settings.persist", e.getMessage());
         assertDenied(ServerOperation.SETTINGS_PREFERENCES_PERSIST, () -> ServerAuthorization.require(ServerOperation.SETTINGS_PREFERENCES_PERSIST));
         elevate();
-        var audit = new panel.security.SecurityAuditService(auth.db, auth.clock);
+        var audit = new panel.security.SecurityAuditService(panel.security.LegacyAuditHistory.UNAVAILABLE, auth.clock);
         assertDenied(ServerOperation.LEGACY_SECURITY_AUDIT_WRITE, () -> audit.record(panel.security.AuditEvent.values()[0], "actor", "detail"));
     }
 
@@ -168,7 +168,7 @@ class ServerAuthorizationBoundaryTest {
         assertDenied(ServerOperation.WALLET_GAS_REVOKE, () -> gas.revoke(ADDRESS));
         assertDenied(ServerOperation.WALLET_TREASURY_READ, () -> new TreasuryService(identity(), null, null, new GasGrantRepository(auth.db), () -> null, auth.clock).refresh());
         assertThrows(IOException.class, () -> new panel.model.Settings().save());
-        assertDenied(ServerOperation.LEGACY_SECURITY_AUDIT_WRITE, () -> new panel.security.SecurityAuditService(auth.db, auth.clock).record(panel.security.AuditEvent.values()[0], "a", "d"));
+        assertDenied(ServerOperation.LEGACY_SECURITY_AUDIT_WRITE, () -> new panel.security.SecurityAuditService(panel.security.LegacyAuditHistory.UNAVAILABLE, auth.clock).record(panel.security.AuditEvent.values()[0], "a", "d"));
     }
 
     @Test void benefitsAndEntitlementsReadsAreAlsoBoundByTheProductionAuthorizer() {

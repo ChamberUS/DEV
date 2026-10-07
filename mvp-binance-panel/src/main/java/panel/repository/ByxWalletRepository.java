@@ -14,8 +14,7 @@ public final class ByxWalletRepository {
               user_id INTEGER NOT NULL, address TEXT NOT NULL, public_key TEXT NOT NULL,
               chain_id TEXT NOT NULL, genesis_fingerprint TEXT NOT NULL,
               verified_at TEXT NOT NULL, last_verified_at TEXT NOT NULL, revoked_at TEXT,
-              PRIMARY KEY(user_id,address,chain_id,genesis_fingerprint),
-              FOREIGN KEY(user_id) REFERENCES users(id))
+              PRIMARY KEY(user_id,address,chain_id,genesis_fingerprint))
             """); } return null; });
     }
     public List<VerifiedWallet> list(long userId) {

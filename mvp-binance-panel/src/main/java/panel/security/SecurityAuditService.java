@@ -1,7 +1,5 @@
 package panel.security;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,25 +9,18 @@ public class SecurityAuditService {
     public record Entry(String ts, String event, String actor, String detail) {
     }
 
-    private final Database db;
+    private final LegacyAuditHistory history;
     private final Clock clock;
 
-    public SecurityAuditService(Database db, Clock clock) {
-        this.db = db;
+    /** O histórico legado é SOMENTE leitura; a escrita de auditoria é do serviço (aqui sempre negada). */
+    public SecurityAuditService(LegacyAuditHistory history, Clock clock) {
+        this.history = history == null ? LegacyAuditHistory.UNAVAILABLE : history;
         this.clock = clock;
     }
 
     public void record(AuditEvent event, String actor, String detail) {
         ServerAuthorization.require(ServerOperation.LEGACY_SECURITY_AUDIT_WRITE);
-        db.with(c -> {
-            try (PreparedStatement ps = c.prepareStatement("INSERT INTO audit_log(ts,event,actor,detail) VALUES (?,?,?,?)")) {
-                ps.setString(1, clock.instant().toString());
-                ps.setString(2, event.name());
-                ps.setString(3, safe(actor));
-                ps.setString(4, safe(detail));
-                return ps.executeUpdate();
-            }
-        });
+        throw new AccessDeniedException("legacy audit history is read-only"); // inalcançável com DENY_ALL; nunca escreve no banco legado
     }
 
     private static String safe(String value) {
@@ -46,44 +37,26 @@ public class SecurityAuditService {
      * Linhas antigas de LOGIN_FAILED guardaram o identificador digitado (que pode ter sido uma senha). Elas NÃO são apagadas nem
      * reescritas: só são mascaradas na leitura quando o ator não é um usuário existente nem um formato seguro.
      */
-    private Entry present(java.sql.Connection c, Entry e) throws java.sql.SQLException {
+    private Entry present(Entry e) {
         if(!AuditEvent.LOGIN_FAILED.name().equals(e.event())||e.actor()==null)return e;
         if(e.actor().startsWith("attempt:")||e.actor().startsWith("user:")||e.actor().equals("-"))return e;
-        if(SAFE_ACTOR.matcher(e.actor()).matches()) {
-            try(PreparedStatement ps=c.prepareStatement("SELECT 1 FROM users WHERE username=? COLLATE NOCASE")) {
-                ps.setString(1,e.actor());
-                try(ResultSet r=ps.executeQuery()) { if(r.next())return e; }
-            }
-        }
+        if(SAFE_ACTOR.matcher(e.actor()).matches() && history.legacyUsernameExists(e.actor()))return e;
         return new Entry(e.ts(),e.event(),"legacy-attempt",e.detail());
     }
 
+    private List<Entry> entries(List<String[]> rows) {
+        List<Entry> l = new ArrayList<>();
+        for (String[] r : rows) {
+            l.add(present(new Entry(r[0], r[1], r[2], r[3])));
+        }
+        return l;
+    }
+
     public List<Entry> recent(int limit) {
-        return db.with(c -> {
-            List<Entry> l = new ArrayList<>();
-            try (PreparedStatement ps = c.prepareStatement("SELECT ts,event,actor,detail FROM audit_log ORDER BY id DESC LIMIT ?")) {
-                ps.setInt(1, limit);
-                ResultSet r = ps.executeQuery();
-                while (r.next()) {
-                    l.add(present(c, new Entry(r.getString(1), r.getString(2), r.getString(3), r.getString(4))));
-                }
-            }
-            return l;
-        });
+        return entries(history.recent(limit));
     }
 
     public List<Entry> recentFor(String actor, int limit) {
-        return db.with(c -> {
-            List<Entry> l = new ArrayList<>();
-            try (PreparedStatement ps = c.prepareStatement("SELECT ts,event,actor,detail FROM audit_log WHERE actor=? COLLATE NOCASE ORDER BY id DESC LIMIT ?")) {
-                ps.setString(1, actor);
-                ps.setInt(2, limit);
-                ResultSet r = ps.executeQuery();
-                while (r.next()) {
-                    l.add(present(c, new Entry(r.getString(1), r.getString(2), r.getString(3), r.getString(4))));
-                }
-            }
-            return l;
-        });
+        return entries(history.recentFor(actor, limit));
     }
 }

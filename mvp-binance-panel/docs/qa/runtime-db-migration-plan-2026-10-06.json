@@ -1,0 +1,168 @@
+{
+  "kind": "runtime-db-migration-plan",
+  "sourceSha256": "a75769d78cd65a333898831aecc34df1b165a6ab9a0ca9e9627b31ae03c7f7fc",
+  "sourceSidecars": "",
+  "sourceUserVersion": 0,
+  "targetSchemaVersion": 1,
+  "targetFile": "runtime.db",
+  "tables": [
+    {
+      "table": "audit_log",
+      "rows": 136,
+      "decision": "DROP_HISTORY_STAYS_LEGACY",
+      "columns": [
+        "id",
+        "ts",
+        "event",
+        "actor",
+        "detail"
+      ]
+    },
+    {
+      "table": "byx_gas_grants",
+      "rows": 0,
+      "decision": "COPY_TRANSFORM",
+      "columns": [
+        "user_id",
+        "address",
+        "chain",
+        "genesis",
+        "granter",
+        "spend_limit",
+        "expiration",
+        "state",
+        "tx_hash",
+        "remaining"
+      ],
+      "transformation": "drop FOREIGN KEY to users; user_id kept as the stable legacy user id (no physical FK)"
+    },
+    {
+      "table": "byx_payment_intents",
+      "rows": 0,
+      "decision": "COPY_TRANSFORM",
+      "columns": [
+        "id",
+        "user_id",
+        "wallet",
+        "chain_id",
+        "genesis",
+        "recipient",
+        "amount",
+        "purpose",
+        "created_at",
+        "expires_at",
+        "status"
+      ],
+      "transformation": "drop FOREIGN KEY to users; user_id kept as the stable legacy user id (no physical FK)"
+    },
+    {
+      "table": "byx_payment_receipts",
+      "rows": 0,
+      "decision": "COPY_TRANSFORM",
+      "columns": [
+        "intent_id",
+        "user_id",
+        "wallet",
+        "chain_id",
+        "genesis",
+        "tx_hash",
+        "height",
+        "amount",
+        "confirmed_at",
+        "starts_at",
+        "expires_at"
+      ],
+      "transformation": "drop FOREIGN KEY to users; user_id kept as the stable legacy user id (no physical FK)"
+    },
+    {
+      "table": "meta",
+      "rows": 1,
+      "decision": "DROP_AUTH",
+      "columns": [
+        "name",
+        "value"
+      ]
+    },
+    {
+      "table": "rate_limits",
+      "rows": 0,
+      "decision": "DROP_AUTH",
+      "columns": [
+        "subject",
+        "failures",
+        "last_at",
+        "next_allowed_at"
+      ]
+    },
+    {
+      "table": "sqlite_sequence",
+      "rows": 2,
+      "decision": "DROP_INTERNAL",
+      "columns": [
+        "name",
+        "seq"
+      ]
+    },
+    {
+      "table": "trusted_devices",
+      "rows": 1,
+      "decision": "DROP_AUTH",
+      "columns": [
+        "device_id",
+        "user_id",
+        "display_name",
+        "token_hash",
+        "created_at",
+        "last_used_at",
+        "expires_at",
+        "revoked_at"
+      ]
+    },
+    {
+      "table": "users",
+      "rows": 1,
+      "decision": "DROP_AUTH",
+      "columns": [
+        "id",
+        "username",
+        "email",
+        "password_hash",
+        "role",
+        "status",
+        "phone",
+        "email_verified",
+        "phone_verified",
+        "must_change_password",
+        "created_at",
+        "updated_at",
+        "last_login_at"
+      ]
+    },
+    {
+      "table": "verified_wallets",
+      "rows": 0,
+      "decision": "COPY_TRANSFORM",
+      "columns": [
+        "user_id",
+        "address",
+        "public_key",
+        "chain_id",
+        "genesis_fingerprint",
+        "verified_at",
+        "last_verified_at",
+        "revoked_at"
+      ],
+      "transformation": "drop FOREIGN KEY to users; user_id kept as the stable legacy user id (no physical FK)"
+    }
+  ],
+  "sourceSchemaFingerprint": "348dddf5a099397b07bcd8c7d035c5e0e1b0aa60a1b644dbf0feaee3691420c7",
+  "allowlistedButAbsent": [],
+  "skippedTables": [
+    "audit_log",
+    "meta",
+    "rate_limits",
+    "sqlite_sequence",
+    "trusted_devices",
+    "users"
+  ]
+}

@@ -167,8 +167,8 @@ class ByxWalletOwnershipTest {
     }
     @Test void databasePersistsOnlyPermittedPublicColumns(@TempDir Path dir) throws Exception {
         var file=dir.resolve("wallets.db");var proof=valid();var w=identity.verify(proof);
-        try(var db=Database.open(file)){new ByxWalletRepository(db).save(w);}
-        try(var db=Database.open(file)){
+        try(var db=Database.openRuntime(file)){new ByxWalletRepository(db).save(w);}
+        try(var db=Database.openRuntime(file)){
             assertEquals(w,new ByxWalletRepository(db).list(w.userId()).get(0));
             var columns=db.with(c->{var result=new HashSet<String>();try(var s=c.createStatement();var rs=s.executeQuery("PRAGMA table_info(verified_wallets)")){while(rs.next())result.add(rs.getString("name"));}return result;});
             assertEquals(Set.of("user_id","address","public_key","chain_id","genesis_fingerprint","verified_at","last_verified_at","revoked_at"),columns);

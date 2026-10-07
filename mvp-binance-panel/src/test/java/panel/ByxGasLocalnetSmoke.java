@@ -26,7 +26,7 @@ public final class ByxGasLocalnetSmoke {
         var gateway=new CosmosByxChainGateway(clock);var policy=GasSponsorshipPolicy.load();
         try(var benefits=new ByxBenefitsService(identity,gateway,clock,ByxBenefitsService.defaults())) {
             var gasGateway=new LocalnetGasTestSigner(clock,true,Path.of("scripts/byx_gas_test.py"));
-            var journalDb=panel.security.Database.open(root.resolve("evidence/gas-journal.db"));
+            var journalDb=panel.security.Database.openRuntime(root.resolve("evidence/gas-journal.db"));
             var repo=new GasGrantRepository(journalDb);
             var service=new GasSponsorshipService(auth.sessions,identity,benefits,repo,gasGateway,()->policy,clock);
             var before=benefits.refresh(config.observedAddress()).get();ByxLocalnetSmoke.check(before.tier().equals("PLUS"),"PLUS TEST wallet required");

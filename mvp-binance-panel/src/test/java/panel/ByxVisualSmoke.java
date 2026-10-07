@@ -97,7 +97,7 @@ public final class ByxVisualSmoke {
                             shot("entitlements-free"); walletFlow();
                         });
                     } else if(Boolean.getBoolean("byx.treasury.qa")) {
-                        try(var journal=panel.security.Database.open(localnetRoot.resolve("evidence/gas-journal.db"))) {
+                        try(var journal=panel.security.Database.openRuntime(localnetRoot.resolve("evidence/gas-journal.db"))) {
                             var repo=new panel.repository.GasGrantRepository(journal);
                             for(var row:repo.all()) {context.byxGasJournal.claim(row);context.byxGasJournal.update(row,row.state(),row.txHash());context.byxGasJournal.observed(row,row.remaining());}
                         }

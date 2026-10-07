@@ -17,7 +17,7 @@ public final class ByxTreasuryLocalnetSmoke {
         var auth=AuthFixture.ready();auth.seedAdmin();auth.auth.login("boss","correct-horse-1".toCharArray());
         var identity=new ByxWalletIdentityService(auth.sessions,new ByxWalletRepository(auth.db),()->config,clock);
         var policy=GasSponsorshipPolicy.load();var chain=new CosmosByxChainGateway(clock);
-        try(var db=panel.security.Database.open(root.resolve("evidence/gas-journal.db"))) {
+        try(var db=panel.security.Database.openRuntime(root.resolve("evidence/gas-journal.db"))) {
             var journal=new GasGrantRepository(db);
             var snapshot=new TreasuryService(identity,chain,new CosmosGasGrantGateway(clock),journal,()->policy,clock).refresh();
             ByxLocalnetSmoke.check(snapshot.realAssets().equals("NONE / NOT CONFIGURED"),"No real assets");
