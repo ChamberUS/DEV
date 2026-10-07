@@ -1,0 +1,13 @@
+V2.1G Stage 3A final evidence (2026-10-06, local -03)
+authorized by owner (chat): LOGIN_OK ~21:45 (session ended by service shutdown ~21:52, not an explicit logout); LOGIN_OK ~21:55 + LOGOUT ~21:56
+audit.log (7 events, types only): 4x LOGIN_FAILED, 2x LOGIN_OK, 1x LOGOUT; no SECOND_FACTOR, no ADMIN_ELEVATION, no trusted-device event; trustedDevice=NOT_MIGRATED_LEGACY_PRESERVED
+market_started: public ETHUSDT feed only (Allowlist: 2 wss + 2 GET, exact URI match, no auth header, no auth/secrets/identity import); triggered by the panel's market.subscribe
+login mutation: LoginAuthorityMutationTest (synthetic) proves only lastLoginAtMs + version+1 + new nonce/MAC/anchor change; docs corrected
+authority baseline (post Stage 3A, app closed): aa893242f54cc85bec9d5dce2e8527d4abc2c427fb07f2cdc1abfd145784250a
+byx-migrate verify: PASS (PREPARED, freeze=true, legacy=ACTIVE, vault Resend/Twilio PRESENT); audit: 1 ADMIN enabled
+panel.db sha: a75769d78cd65a333898831aecc34df1b165a6ab9a0ca9e9627b31ae03c7f7fc ; legacy resend/twilio/trusted-device PRESENT
+panel jar before seam: 3649ca619b999dd587f538ab0aec8ec59887bcd5db7127bb1410fec8c24c9682
+panel jar after  seam: 8752dc1487fa152cdfb2c77db55cb2d50040ff6cb0f14432af2b8f4bfebfc3b4 (build/ and build-canary/ bundles identical; no Fake*, DenyAll present)
+panel suite: 551 tests, 0 failures, 0 errors, 1 skipped (pre-existing capture-live)
+packaged cutover QA: 23 PASS 0 FAIL ; identity QA: 29 PASS 0 FAIL
+PRIVATE_CAPABILITIES_ALLOWED=false EXPLICIT_REVIEW_REQUIRED=true
