@@ -104,8 +104,14 @@ public final class TxPorts {
     public static final class TxSignRequest {
         private final TxKey key;
         private final TxQuote quote;
+        private final TxIntent.BankSendIntent intent;
 
-        TxSignRequest(TxKey key, TxQuote quote) {
+        TxSignRequest(TxKey key, TxQuote quote, TxIntent.BankSendIntent intent) {
+            if (!intent.digest().equals(quote.intentDigest()) || !intent.memo().digest().equals(quote.memoDigest())
+                    || !intent.recipient().equals(quote.recipient()) || !intent.amount().equals(quote.amount()) || !key.address().equals(quote.sender())) {
+                throw new TxException(TxError.QUOTE_MISMATCH);
+            }
+            this.intent = intent;
             this.key = key;
             this.quote = quote;
         }
@@ -116,6 +122,10 @@ public final class TxPorts {
 
         public TxQuote quote() {
             return quote;
+        }
+
+        public TxIntent.BankSendIntent intent() {
+            return intent;
         }
 
         public GasLimit gasLimit() {

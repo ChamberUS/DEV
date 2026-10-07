@@ -388,7 +388,7 @@ public final class TxService {
         audit.event(TxAudit.Type.TX_SIGN_REQUEST, prefix(op.id.value()), prefix(q.id().value()), null);
         SignedTx signed;
         try {
-            signed = signer.sign(new TxSignRequest(key, q)); // a requisição é montada AQUI, só com valores da cotação guardada
+            signed = signer.sign(new TxSignRequest(key, q, (TxIntent.BankSendIntent) op.intent)); // a requisição é montada AQUI, só com valores da cotação guardada
             if (signed == null || signed.bytes() == null || signed.txHash() == null || !signed.txHash().matches("[0-9A-F]{64}")) {
                 throw new TxSignerException();
             }

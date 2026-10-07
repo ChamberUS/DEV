@@ -1,0 +1,82 @@
+{
+  "status": "READY_FOR_KEY_CUSTODY_DESIGN",
+  "realTx": "DISABLED",
+  "r1Commit": "22cab56",
+  "fullServiceSuite": {
+    "invocations": 1,
+    "tests": 405,
+    "initialFailures": 2,
+    "initialErrors": 0,
+    "failureCause": "JAVA_TOOL_OPTIONS rejected by peer_env_unsafe",
+    "cleanPeerTargetedRerun": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0
+    },
+    "uniqueTestsPassingAcrossRuns": 405
+  },
+  "targetedSignerClient": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0
+  },
+  "finalRealProcessVector": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  "go": {
+    "vector": "PASS",
+    "determinism": "PASS",
+    "protocol": "PASS",
+    "canonicalAsciiAddress": "PASS",
+    "vet": "PASS"
+  },
+  "defaultJar": {
+    "sha256": "8961393bf16fb12b81029d33409f546439afc355d1018eb532aa6119798c349c",
+    "profile": "PRODUCTION_DISABLED",
+    "helperPresent": false,
+    "syntheticResourcesPresent": false
+  },
+  "gates": {
+    "privateGateAllowed": false,
+    "explicitReviewRequired": true,
+    "txMasterGate": false,
+    "productionSigner": "UNAVAILABLE",
+    "realKeyProvider": "UNIMPLEMENTED",
+    "keychain": "UNIMPLEMENTED",
+    "wallet": "UNIMPLEMENTED",
+    "realBroadcastTransport": "ABSENT"
+  },
+  "capture": {
+    "supervisor": 10657,
+    "collector": 96558,
+    "beginGrowth3sBytes": 57240,
+    "middleGrowth3sBytes": 41673,
+    "endGrowth3sBytes": 20779,
+    "status": "RUNNING",
+    "intervention": false
+  },
+  "performance": {
+    "cachedStartupDenyMedianMs": 13.796,
+    "syntheticSignProcessMedianMs": 42.906,
+    "firstGoSignMs": 12.47,
+    "serviceExchangeObservedMs": [
+      77.175882,
+      804.102362
+    ],
+    "verificationObservedMs": [
+      2.789804,
+      4.165602
+    ],
+    "developmentPeakRssBytes": {
+      "deny": 2818048,
+      "synthetic": 9015296
+    },
+    "finalBinaryBytes": {
+      "unavailable": 5180176,
+      "nonDistributableTest": 6258992
+    },
+    "scope": "small offline observations; cold launch/provider effects; not throughput or guarantees"
+  }
+}

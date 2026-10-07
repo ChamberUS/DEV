@@ -109,7 +109,7 @@ class TxNoBypassGuardTest {
         assertEquals(1, constructions);
         String ports = Files.readString(MAIN.resolve("byx/service/tx/TxPorts.java"));
         assertTrue(ports.contains("public static final class TxSignRequest"));
-        assertTrue(ports.contains("        TxSignRequest(TxKey key, TxQuote quote)"));
+        assertTrue(ports.contains("        TxSignRequest(TxKey key, TxQuote quote, TxIntent.BankSendIntent intent)"));
         assertFalse(ports.contains("public TxSignRequest(") || ports.contains("protected TxSignRequest("));
     }
 
