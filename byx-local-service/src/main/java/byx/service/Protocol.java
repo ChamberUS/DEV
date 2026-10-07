@@ -22,6 +22,11 @@ public final class Protocol {
      */
     public static final Set<String> MARKET_OPERATIONS = Set.of("market.status", "market.subscribe", "market.unsubscribe");
     /**
+     * Operações PÚBLICAS e SOMENTE LEITURA da chain BYX, sem argumentos: o painel nunca escolhe host, porta, caminho, consulta ou denom. Sem escrita, sem proxy, sem operação genérica. Sempre atendidas;
+     * enquanto o nó não estiver configurado (produção hoje) respondem NOT_CONFIGURED. Separadas das capacidades PRIVADAS (não dependem do gate privado e não o afetam).
+     */
+    public static final Set<String> CHAIN_OPERATIONS = Set.of("byx.status", "byx.denomMetadata", "byx.supply");
+    /**
      * Teto dos quadros de EVENTO de mercado enviados pelo serviço depois de market.subscribe (candles 120 × ~60 B é o maior payload, ~8 KiB).
      * Vale só para servidor→cliente em conexão assinada; pedidos, respostas e handshake continuam em {@link #MAX_FRAME}.
      */

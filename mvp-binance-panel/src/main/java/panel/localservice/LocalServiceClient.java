@@ -51,6 +51,8 @@ public final class LocalServiceClient {
     private static final Pattern INSTANCE = Pattern.compile("[A-Za-z0-9_-]{1,32}");
     private static final Pattern VERSION = Pattern.compile("[0-9A-Za-z.+_-]{1,32}");
     private static final Set<String> OPERATIONS = Set.of("health", "version", "capabilities");
+    /** Operações PÚBLICAS e somente leitura da chain, sem argumentos: o painel nunca envia host, porta, caminho nem consulta. */
+    static final Set<String> CHAIN_OPERATIONS = Set.of("byx.status", "byx.denomMetadata", "byx.supply");
     private static final JsonMapper JSON = new JsonMapper();
     private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "local-service-timeout");
@@ -253,12 +255,42 @@ public final class LocalServiceClient {
         if (!OPERATIONS.contains(op)) {
             throw new IllegalArgumentException("not allowlisted");
         }
-        send(out, "{\"v\":1,\"id\":\"p-" + op + "\",\"op\":\"" + op + "\"}");
+        return callWithId(in, out, op, "p-" + op);
+    }
+
+    private static JsonNode callWithId(InputStream in, OutputStream out, String op, String id) throws IOException, Fail {
+        send(out, "{\"v\":1,\"id\":\"" + id + "\",\"op\":\"" + op + "\"}");
         JsonNode r = read(in);
-        if (!r.path("ok").isBoolean() || !r.path("ok").asBoolean() || !("p-" + op).equals(text(r, "id")) || !r.path("result").isObject()) {
+        if (!r.path("ok").isBoolean() || !r.path("ok").asBoolean() || !id.equals(text(r, "id")) || !r.path("result").isObject()) {
             throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "contract_violation");
         }
         return r.path("result");
+    }
+
+    /** Uma operação PÚBLICA da chain: canal novo e pareado, prazo total, sem argumentos. A lista é fechada; qualquer outra operação é recusada aqui. */
+    JsonNode chainCall(String op) throws IOException, Fail {
+        if (!CHAIN_OPERATIONS.contains(op)) {
+            throw new IllegalArgumentException("not allowlisted");
+        }
+        Path socket = run.resolve("service.sock");
+        byte[] secret = loadSecret(socket);
+        try (SocketChannel ch = SocketChannel.open(StandardProtocolFamily.UNIX)) {
+            ScheduledFuture<?> guard = TIMER.schedule(() -> {
+                try {
+                    ch.close(); // prazo total: fecha o canal e destrava qualquer leitura
+                } catch (IOException ignored) {
+                    // nada
+                }
+            }, TOTAL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            try {
+                Paired paired = pair(ch, socket, secret);
+                return callWithId(paired.in(), paired.out(), op, "c-" + op.replace('.', '_'));
+            } finally {
+                guard.cancel(false);
+            }
+        } finally {
+            java.util.Arrays.fill(secret, (byte) 0);
+        }
     }
 
     // ---- arquivos de pareamento (política: privados, do usuário atual, sem symlink) ----------------------------------

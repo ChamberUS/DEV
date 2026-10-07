@@ -73,7 +73,9 @@ public class AppContext {
     public final AdminAccessService adminAccess = new AdminAccessService(sessions, authority, auth, trustedDevices, clock);
     public final UserService userService = new UserService(authority, auth, sessions);
     public final panel.service.ByxNetworkService byx = new panel.service.ByxNetworkService(
-            new panel.adapter.CosmosByxChainGateway(clock), adminAccess::requireAdmin, clock);
+            // a leitura pública da chain é DO SERVIÇO (IPC verificado): o painel não conhece endpoint, host nem porta da chain
+            new panel.adapter.ServiceChainGateway(new panel.localservice.ChainStatusClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome())), clock),
+            adminAccess::requireAdmin, clock);
     public final panel.service.ByxWalletIdentityService byxWallets = new panel.service.ByxWalletIdentityService(
             sessions, new panel.repository.ByxWalletRepository(db), byx, clock);
     public final panel.service.ByxBenefitsService byxBenefits = new panel.service.ByxBenefitsService(

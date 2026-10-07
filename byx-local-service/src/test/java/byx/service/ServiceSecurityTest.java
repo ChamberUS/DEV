@@ -64,7 +64,8 @@ class ServiceSecurityTest {
             JsonNode caps = c.call("capabilities");
             assertTrue(health.path("ok").asBoolean() && "ok".equals(health.path("result").path("status").asText()));
             assertEquals(1, version.path("result").path("protocolMax").asInt());
-            assertEquals(List.of("capabilities", "health", "version"), TestClient.JSON.convertValue(caps.path("result").path("operations"), List.class));
+            // as 3 operações PÚBLICAS e somente leitura da chain (byx.*) são parte do contrato; nenhuma é privada, de escrita ou genérica
+            assertEquals(List.of("byx.denomMetadata", "byx.status", "byx.supply", "capabilities", "health", "version"), TestClient.JSON.convertValue(caps.path("result").path("operations"), List.class));
             JsonNode features = caps.path("result").path("features");
             for (String f : List.of("marketData", "notifications", "accountData", "adminOperations")) {
                 assertFalse(features.path(f).asBoolean(true), f + " is blocked in the foundation");

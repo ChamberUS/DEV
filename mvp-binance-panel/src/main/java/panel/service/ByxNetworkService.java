@@ -38,7 +38,7 @@ public final class ByxNetworkService implements AutoCloseable {
     }
     public synchronized CompletableFuture<ByxSnapshot> refresh() {
         if (pending != null && !pending.isDone()) return pending;
-        if (!active || config == null) return CompletableFuture.completedFuture(snapshot());
+        if (!active || config == null && !gateway.ownsEndpoint()) return CompletableFuture.completedFuture(snapshot());
         ByxConfig selected = config; long version = generation;
         pending = CompletableFuture.supplyAsync(() -> {
             ByxSnapshot result;
@@ -46,7 +46,7 @@ public final class ByxNetworkService implements AutoCloseable {
             catch (Exception e) {
                 if (e instanceof InterruptedException) Thread.currentThread().interrupt();
                 synchronized (this) {
-                    result = cached.updatedAt() == null ? ByxSnapshot.unknown(gateway.source(), selected.environment(),
+                    result = cached.updatedAt() == null ? ByxSnapshot.unknown(gateway.source(), selected == null ? "LOCALNET" : selected.environment(),
                             "OFFLINE", "Node unavailable or invalid response; balance UNKNOWN") : cached.stale("OFFLINE", "Node unavailable; cached data");
                 }
             }

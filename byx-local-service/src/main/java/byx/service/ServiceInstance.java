@@ -126,8 +126,11 @@ public final class ServiceInstance implements AutoCloseable {
         }
     }
 
+    private final byx.service.chain.ChainConnector chain;
+
     private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc,
-            PeerKeys.Provider peerKeys) {
+            PeerKeys.Provider peerKeys, byx.service.chain.ChainConnector chain) {
+        this.chain = chain;
         this.authIpc = authIpc;
         this.peerKeys = peerKeys;
         this.market = market;
@@ -140,7 +143,7 @@ public final class ServiceInstance implements AutoCloseable {
         byte[] id = new byte[9];
         new SecureRandom().nextBytes(id);
         this.instanceId = Pairing.encode(id);
-        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode(), authIpc != null);
+        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode(), authIpc != null, chain);
         this.acceptor = new Thread(this::acceptLoop, "byx-local-accept");
         this.acceptor.setDaemon(true);
     }
@@ -173,6 +176,12 @@ public final class ServiceInstance implements AutoCloseable {
      * do peer pelo kernel (produção: {@link PeerKeys#kernel()}; testes injetam).
      */
     public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys) throws IOException {
+        return start(home, limits, market, identity, authIpc, peerKeys, byx.service.chain.ChainConnector.notConfigured());
+    }
+
+    /** chain = conector da chain pública local (somente leitura). O serviço passa a ser dono dele e o fecha. Produção: {@code ChainConnector.notConfigured()}. */
+    public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys,
+            byx.service.chain.ChainConnector chain) throws IOException {
         RuntimeDir dir = RuntimeDir.prepare(home);
         dir.removeStaleSocket();
         byte[] secret = dir.writeFreshToken();
@@ -185,7 +194,7 @@ public final class ServiceInstance implements AutoCloseable {
             dir.cleanup();
             throw e;
         }
-        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys);
+        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys, chain);
         s.acceptor.start();
         s.watchdog.scheduleWithFixedDelay(s::enforceDeadlines, 100, 100, TimeUnit.MILLISECONDS);
         Log.event("started", "protocol=" + Protocol.VERSION + " identity=" + identity.mode().wire);
@@ -460,6 +469,7 @@ public final class ServiceInstance implements AutoCloseable {
         }
         watchdog.shutdownNow();
         workers.shutdownNow();
+        chain.close();
         if (market != null) {
             market.close();
         }

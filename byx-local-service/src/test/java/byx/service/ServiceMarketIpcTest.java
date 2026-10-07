@@ -77,7 +77,7 @@ class ServiceMarketIpcTest {
             assertFalse(caps.path("features").path("notifications").asBoolean(true));
             assertFalse(caps.path("features").path("adminOperations").asBoolean(true));
             List<?> ops = TestClient.JSON.convertValue(caps.path("operations"), List.class);
-            assertEquals(List.of("capabilities", "health", "market.status", "market.subscribe", "market.unsubscribe", "version"), ops);
+            assertEquals(List.of("byx.denomMetadata", "byx.status", "byx.supply", "capabilities", "health", "market.status", "market.subscribe", "market.unsubscribe", "version"), ops);
             JsonNode st = c.call("market.status").path("result");
             assertEquals("DISCONNECTED", st.path("feed").asText(), "marketData=true with feed=DISCONNECTED is valid");
             assertEquals(0, st.path("subscribers").asInt());

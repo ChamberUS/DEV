@@ -1,6 +1,5 @@
 package panel.byxview;
 
-import java.net.URI;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +19,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 import panel.design.ByxBadge;
-import panel.design.ByxButton;
-import panel.design.ByxField;
-import panel.model.ByxConfig;
 import panel.model.ByxSnapshot;
 import panel.model.Snapshot;
 import panel.motion.MotionService;
@@ -59,7 +55,7 @@ public final class NetworkScreen implements View {
     private final Label observedAddress = Kit.muted("No wallet linked");
     private final Label observedBalance = ByxBadge.of("BALANCE · —", ByxBadge.Tone.NEUTRAL);
     private final VBox adminBody = new VBox(10);
-    private final Label adminBadge = ByxBadge.of("PERMISSION REQUIRED", ByxBadge.Tone.INFO);
+    private final Label adminBadge = ByxBadge.of("READ-ONLY", ByxBadge.Tone.INFO);
     private final Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> render()));
     private NetworkModel.State state;
     private boolean visible;
@@ -132,7 +128,7 @@ public final class NetworkScreen implements View {
         VBox legendPanel = Kit.panel("Network states", states);
         VBox observed = Kit.panel("Observed wallet", observedAddress, observedBalance);
         observed.setId("network-observed");
-        VBox admin = Kit.panel(null, Kit.titled("LOCALNET connection", adminBadge), adminBody);
+        VBox admin = Kit.panel(null, Kit.titled("Node connection", adminBadge), adminBody);
         admin.setId("network-admin");
         VBox right = new VBox(14, legendPanel, observed, admin);
 
@@ -166,7 +162,14 @@ public final class NetworkScreen implements View {
         return rings;
     }
 
+    private long lastRefreshMs;
+
     private void render() {
+        long nowMs = clock.millis();
+        if (visible && nowMs - lastRefreshMs >= 5_000) {
+            lastRefreshMs = nowMs;
+            data.refreshNetwork(); // assíncrono: o serviço decide endpoint e rotas; a tela só relê o status mínimo
+        }
         ByxSnapshot s = data.network();
         NetworkModel.State st = NetworkModel.state(s);
         boolean changed = !s.equals(last);
@@ -175,10 +178,11 @@ public final class NetworkScreen implements View {
             state = st;
             Fx.text(stateText, st.text);
             Fx.cls(rings, "byx-net-off", st == NetworkModel.State.OFFLINE);
-            Fx.cls(rings, "byx-net-bad", st == NetworkModel.State.IDENTITY_MISMATCH);
+            Fx.cls(rings, "byx-net-bad", st == NetworkModel.State.IDENTITY_MISMATCH || st == NetworkModel.State.ERROR);
             Fx.cls(rings, "byx-net-warn", st == NetworkModel.State.STALE || st == NetworkModel.State.DEGRADED);
             for (Label b : legend) {
-                Fx.cls(b, "byx-legend-dim", st != NetworkModel.State.AWAITING_NODE && b.getUserData() != st);
+                boolean waiting = st == NetworkModel.State.AWAITING_NODE || st == NetworkModel.State.NOT_CONFIGURED || st == NetworkModel.State.CONNECTING || st == NetworkModel.State.ERROR;
+                Fx.cls(b, "byx-legend-dim", !waiting && b.getUserData() != st);
             }
             stateText.setAccessibleText("Network state: " + st.text);
         }
@@ -213,46 +217,19 @@ public final class NetworkScreen implements View {
         motion.reference.setBreathing(rings, on, MotionTokens.LIVE, MotionTokens.CSS_EASE_IN_OUT);
     }
 
+    /**
+     * O endpoint do nó é do SERVIÇO local (configuração empacotada); o painel NUNCA recebe nem envia host, porta, chain ID esperado ou denom. Esta área é só informativa e igual para qualquer papel:
+     * nada de formulário de endpoint, de botão de transação ou de conexão de carteira.
+     */
     private void syncAdmin() {
-        boolean admin = data.admin();
-        if (admin == adminShown) {
+        if (adminShown) {
             return;
         }
-        adminShown = admin;
+        adminShown = true;
         adminBody.getChildren().clear();
-        adminBadge.setVisible(!admin);
-        adminBadge.setManaged(!admin);
-        if (!admin) {
-            adminBody.getChildren().add(Kit.muted("Endpoint and technical details require an active admin session in Research."));
-            return;
-        }
-        ByxConfig current = data.config();
-        ByxField rest = ByxField.text("REST endpoint");
-        ByxField rpcField = ByxField.text("RPC endpoint");
-        ByxField chainField = ByxField.text("Expected chain ID");
-        ByxField genesis = ByxField.text("Genesis SHA-256 (canonical)");
-        ByxField address = ByxField.text("Observed address");
-        if (current != null) {
-            rest.input().setText(current.endpoint().toString());
-            rpcField.input().setText(current.rpcEndpoint().toString());
-            chainField.input().setText(current.expectedChainId());
-            genesis.input().setText(current.genesisFingerprint());
-            address.input().setText(current.observedAddress());
-        }
-        ByxButton apply = new ByxButton("Verify local test network", ByxButton.Variant.SECONDARY, motion);
-        apply.setOnAction(e -> {
-            try {
-                data.configure(new ByxConfig(URI.create(rest.input().getText().trim()), URI.create(rpcField.input().getText().trim()),
-                        "LOCALNET", chainField.input().getText().trim(), genesis.input().getText().trim(), "ubyx", "BYX", 6,
-                        "BANK_METADATA", address.input().getText().trim()));
-                rest.setError(null);
-                data.refreshNetwork();
-            } catch (RuntimeException ex) {
-                rest.setError(ex.getMessage() == null ? "Invalid configuration" : ex.getMessage());
-            }
-        });
-        adminBody.getChildren().addAll(Kit.muted("Session only. LOCALNET read-only node; nothing is signed or sent."), rest, rpcField, chainField,
-                genesis, address, apply);
+        adminBadge.setVisible(false);
+        adminBadge.setManaged(false);
+        adminBody.getChildren().add(Kit.muted("Read-only public node data. The node endpoint is owned by the local service package and cannot be changed from this panel. Nothing is signed or sent."));
     }
 
     @Override

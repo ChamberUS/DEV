@@ -216,11 +216,11 @@ class ByxScreensTest {
             String empty = texts(screen.node());
             assertTrue(empty.contains("AWAITING NODE") || empty.contains("Awaiting node") || empty.toUpperCase().contains("AWAITING NODE"));
             assertTrue(empty.contains("NO FEED"));
-            assertTrue(empty.contains("PERMISSION REQUIRED"), "endpoint configuration needs an admin session");
+            assertTrue(empty.contains("READ-ONLY") && !empty.contains("PERMISSION REQUIRED"), "the endpoint is owned by the service: no admin form, same read-only note for everyone");
             data.network = snap("ONLINE", "VERIFIED", "FRESH", false, "42");
             screen.onShow();
             String live = texts(screen.node());
-            assertTrue(live.contains("byx-local-1") && live.contains("42") && live.contains("HEALTHY"));
+            assertTrue(live.contains("byx-local-1") && live.contains("42") && live.contains("LIVE"));
             assertTrue(live.contains("Not reported"), "hash and tx count are not read from the node");
             screen.dispose();
         });
@@ -303,4 +303,43 @@ class ByxScreensTest {
         String adapter = Files.readString(Path.of("src/main/java/panel/app/ByxDataAdapter.java"));
         assertFalse(adapter.contains("request(") || adapter.contains("revoke(") || adapter.contains("create("));
     }
+
+    @Test
+    void networkScreenShowsTheReadOnlyServiceStatesWithoutAnyEndpointFormOrTransactionControl() throws Exception {
+        DeskHarness.fx(() -> {
+            long block = CLOCK.instant().minusSeconds(3).toEpochMilli();
+            String[][] cases = {{"NOT_CONFIGURED", "NOT CONFIGURED"}, {"CONNECTING", "CONNECTING"}, {"OFFLINE", "OFFLINE"}, {"SYNCING", "SYNCING"}, {"LIVE", "LIVE"},
+                    {"NETWORK_MISMATCH", "NETWORK MISMATCH"}, {"ERROR", "ERROR"}};
+            for (String[] c : cases) {
+                boolean block3 = c[0].equals("LIVE") || c[0].equals("SYNCING");
+                Stub data = new Stub();
+                data.network = panel.adapter.ServiceChainGateway.toSnapshot(new panel.localservice.ChainStatusClient.View(c[0], !c[0].equals("NOT_CONFIGURED"), block3 || c[0].equals("NETWORK_MISMATCH"),
+                        block3 || c[0].equals("NETWORK_MISMATCH") ? "byx" : null, block3 ? 100L : null, block3 ? c[0].equals("SYNCING") : null, block3 ? block : null, block3, "NONE"), CLOCK.instant());
+                NetworkScreen screen = new NetworkScreen(new MotionService(), CLOCK, data);
+                show(screen.node());
+                screen.onShow();
+                String t = texts(screen.node());
+                assertTrue(t.contains(c[1]), c[0] + " → " + c[1] + "\n" + t);
+                assertEquals(c[0].equals("LIVE"), t.contains("LIVE") && screen.state() == NetworkModel.State.HEALTHY, "LIVE only for a LIVE node: " + c[0]);
+                assertFalse(t.toLowerCase().matches("(?s).*\\b(send|transfer|sign|broadcast|connect wallet|swap|mainnet)\\b.*"), "no transaction wording: " + c[0]);
+                assertEquals(0, countControls(screen.node()), "no input field and no button: the panel does not send hosts, ports or transactions");
+                assertTrue(t.contains("owned by the local service") || t.contains("Read-only public node data"));
+                screen.dispose();
+            }
+        });
+    }
+
+    private static int countControls(Node n) {
+        int count = n instanceof javafx.scene.control.TextInputControl || n instanceof javafx.scene.control.ButtonBase ? 1 : 0;
+        if (n instanceof javafx.scene.control.ScrollPane sp && sp.getContent() != null) {
+            count += countControls(sp.getContent());
+        }
+        if (n instanceof Parent p) {
+            for (Node c : p.getChildrenUnmodifiable()) {
+                count += countControls(c);
+            }
+        }
+        return count;
+    }
 }
+

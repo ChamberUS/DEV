@@ -20,8 +20,10 @@ final class Operations {
     private final MarketFeed market;
     private final IdentityPolicy.Mode identityMode;
     private final boolean authentication;
+    private final byx.service.chain.ChainConnector chain;
 
-    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode, boolean authentication) {
+    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode, boolean authentication, byx.service.chain.ChainConnector chain) {
+        this.chain = chain;
         this.authentication = authentication;
         this.identityMode = identityMode;
         this.instanceId = instanceId;
@@ -30,7 +32,7 @@ final class Operations {
     }
 
     boolean supports(String op) {
-        return Protocol.OPERATIONS.contains(op) || authentication && byx.service.auth.AuthIpc.OPERATIONS.contains(op) || market != null && Protocol.MARKET_OPERATIONS.contains(op);
+        return Protocol.OPERATIONS.contains(op) || authentication && byx.service.auth.AuthIpc.OPERATIONS.contains(op) || market != null && Protocol.MARKET_OPERATIONS.contains(op) || Protocol.CHAIN_OPERATIONS.contains(op);
     }
 
     ObjectNode run(String op, ObjectNode out) {
@@ -48,14 +50,17 @@ final class Operations {
             }
             case "capabilities" -> {
                 var ops = out.putArray("operations");
-                java.util.stream.Stream.concat(Protocol.OPERATIONS.stream(), market == null ? java.util.stream.Stream.<String>empty() : Protocol.MARKET_OPERATIONS.stream())
-                        .sorted().forEach(ops::add);
+                java.util.stream.Stream.concat(java.util.stream.Stream.concat(Protocol.OPERATIONS.stream(), market == null ? java.util.stream.Stream.<String>empty() : Protocol.MARKET_OPERATIONS.stream()),
+                        Protocol.CHAIN_OPERATIONS.stream()).sorted().forEach(ops::add);
                 if (authentication) {
                     byx.service.auth.AuthIpc.OPERATIONS.stream().sorted().forEach(ops::add);
                 }
                 var features = out.putObject("features");
                 // CAPACIDADE suportada (feed montado), distinta do ESTADO do feed (market.status): marketData=true com feed=DISCONNECTED é válido
                 features.put("marketData", market != null);
+                // leitura PÚBLICA da chain: capacidade suportada (sempre) e configuração (hoje não); independente do gate privado
+                features.put("chainRead", true);
+                features.put("chainConfigured", chain.configured());
                 // autenticação: só a composição de QA da autoridade a monta (o produto não: o app normal segue o fluxo atual)
                 features.put("authentication", authentication);
                 // capacidades PRIVADAS: vêm da decisão estática PrivateCapabilityGate (false), nunca de configuração, ambiente ou pedido
@@ -83,6 +88,51 @@ final class Operations {
                 identity.put("authorization", market != null ? "service_status_and_public_market_data" : "service_status_only");
                 out.put("mode", "development_local_same_user");
                 out.put("privateCapabilities", "blocked_until_user_identity_and_authorization_are_verified_by_this_service");
+            }
+            case "byx.status" -> {
+                byx.service.chain.ChainStatus s = chain.status();
+                out.put("state", s.state().name());
+                out.put("configured", s.configured());
+                out.put("reachable", s.reachable());
+                out.put("networkMatch", s.networkMatch());
+                out.put("reason", s.reason().name());
+                out.put("generation", s.generation());
+                out.put("updatedAtMs", s.updatedAtMs());
+                out.put("nowMs", System.currentTimeMillis());
+                if (s.chainId() != null) {
+                    out.put("chainId", s.chainId());
+                }
+                if (s.latestHeight() != null) {
+                    out.put("latestHeight", s.latestHeight());
+                }
+                if (s.catchingUp() != null) {
+                    out.put("catchingUp", s.catchingUp());
+                }
+                if (s.blockTimeMs() != null) {
+                    out.put("blockTimeMs", s.blockTimeMs());
+                }
+            }
+            case "byx.denomMetadata" -> {
+                chain.status(); // dispara a atualização se vencida; a resposta usa só o que já foi VERIFICADO
+                var d = chain.denomMetadata();
+                out.put("available", d.isPresent());
+                d.ifPresent(m -> {
+                    out.put("base", m.base());
+                    out.put("display", m.display());
+                    out.put("exponent", m.exponent());
+                });
+            }
+            case "byx.supply" -> {
+                chain.status();
+                var s = chain.supply();
+                var d = chain.denomMetadata();
+                boolean ok = s.isPresent() && d.isPresent();
+                out.put("available", ok);
+                if (ok) {
+                    out.put("denom", d.get().base());
+                    out.put("baseUnits", s.get().toString()); // inteiro em unidades-base: sem ponto flutuante
+                    out.put("display", d.get().format(s.get()) + " " + d.get().display());
+                }
             }
             case "market.status" -> {
                 MarketView v = market.view();

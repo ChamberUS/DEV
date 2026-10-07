@@ -28,6 +28,8 @@ final class FakeService implements AutoCloseable {
     final Path home;
     final byte[] tokenSecret;
     volatile Mode mode;
+    /** Resposta de byx.status (só teste). */
+    volatile String chainResult = "{\"state\":\"NOT_CONFIGURED\",\"configured\":false,\"reachable\":false,\"networkMatch\":false,\"reason\":\"NOT_CONFIGURED\",\"generation\":0,\"updatedAtMs\":1,\"nowMs\":2}";
     final AtomicInteger authFramesSeen = new AtomicInteger();
     private final ServerSocketChannel server;
     private final Thread thread;
@@ -134,6 +136,7 @@ final class FakeService implements AutoCloseable {
                     return;
                 }
                 String result = switch (op) {
+                    case "byx.status" -> chainResult;
                     case "health" -> "{\"status\":\"ok\",\"uptimeSeconds\":7,\"instanceId\":\"inst1\"}";
                     case "version" -> mode == Mode.INCOMPATIBLE_PROTOCOL
                             ? "{\"service\":\"x\",\"version\":\"0.1.0\",\"protocolMin\":2,\"protocolMax\":3}"
