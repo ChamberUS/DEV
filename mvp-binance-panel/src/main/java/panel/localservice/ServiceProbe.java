@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.PrintStream;
 
 /**
- * Sonda de linha de comando do serviço local, SEM JavaFX: {@code BYX-MVP --probe-service [--market] [--ensure-service] [--chain] [--capture]}. Roda no MESMO executável assinado do
+ * Sonda de linha de comando do serviço local, SEM JavaFX: {@code BYX-MVP --probe-service [--market] [--ensure-service] [--chain] [--capture] [--tx]}. Roda no MESMO executável assinado do
  * app (mesma identidade de código), serve à demonstração automatizada da identidade do peer e imprime só pares chave=valor não sensíveis.
  * Não lê banco, Keychain, sessão nem login e não habilita nada.
  */
@@ -43,6 +43,20 @@ public final class ServiceProbe {
                     out.println("probe.service.authentication=" + caps.path("features").path("authentication").asText("?"));
                     for (String f : new String[] {"accountData", "notifications", "adminOperations", "secretIntegrations"}) {
                         out.println("probe.service." + f + "=" + caps.path("features").path(f).asText("?"));
+                    }
+                    // transações: gate mestre próprio, política, assinante e transporte (só rótulos fixos do serviço)
+                    out.println("probe.service.txMutations=" + caps.path("features").path("txMutations").asText("?"));
+                    out.println("probe.tx.mutationsAllowed=" + caps.path("tx").path("mutationsAllowed").asText("?"));
+                    out.println("probe.tx.policy=" + caps.path("tx").path("policy").asText("?"));
+                    out.println("probe.tx.signer=" + caps.path("tx").path("signer").asText("?"));
+                    out.println("probe.tx.transport=" + caps.path("tx").path("transport").asText("?"));
+                    if (java.util.Arrays.asList(args).contains("--tx")) {
+                        // chamada DIRETA ao IPC, sem UI e sem sessão real: em produção a resposta tem de ser TX_DISABLED
+                        for (String op : new String[] {"tx.prepareBankSend", "tx.getStatus"}) {
+                            LocalServiceClient.send(p.out(), "{\"v\":1,\"id\":\"p-tx\",\"op\":\"" + op + "\",\"session\":\"" + "A".repeat(43) + "\",\"operation\":\"" + "0".repeat(32) + "\"}");
+                            JsonNode r = LocalServiceClient.read(p.in(), LocalServiceClient.MAX_FRAME);
+                            out.println("probe.tx.direct." + op + "=" + (r.path("ok").asBoolean(false) ? "OK" : r.path("error").path("code").asText("?")));
+                        }
                     }
                 }
             } catch (Exception e) {

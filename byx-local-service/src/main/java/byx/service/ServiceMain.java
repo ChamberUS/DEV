@@ -28,7 +28,8 @@ public final class ServiceMain {
             var secrets = profile.secrets();
             var composed = byx.service.auth.AuthComposition.compose(profile, secrets, java.time.Clock.systemUTC(),
                     byx.service.auth.AuthComposition.realProviders(profile, secrets, byx.service.auth.HttpTransport.jdk()));
-            service = ServiceInstance.start(home, ServiceInstance.Limits.defaults(), feed, identity, new byx.service.auth.AuthIpc(composed.auth()), byx.service.identity.PeerKeys.kernel(), byx.service.chain.ChainConnector.production());
+            var chain = byx.service.chain.ChainConnector.production();
+            service = ServiceInstance.start(home, ServiceInstance.Limits.defaults(), feed, identity, new byx.service.auth.AuthIpc(composed.auth()), byx.service.identity.PeerKeys.kernel(), chain, byx.service.tx.TxProduction.disabled(composed.auth(), ServiceInstance.txChain(chain)));
         } catch (RuntimeDir.InsecureException e) {
             System.err.println("refusing to start: " + e.getMessage());
             System.exit(3);

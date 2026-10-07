@@ -217,6 +217,31 @@ public final class AuthorityClient implements AuthorityGateway, AutoCloseable {
     }
 
     @Override
+    public Reply txPrepareBankSend(String operation, String sender, String recipient, String amountUbyx, String memo, String feeMode) {
+        return sessionCall("tx.prepareBankSend", "operation", operation, "sender", sender, "recipient", recipient, "amountUbyx", amountUbyx, "memo", memo, "feeMode", feeMode);
+    }
+
+    @Override
+    public Reply txGetQuote(String operation, String quote) {
+        return sessionCall("tx.getQuote", "operation", operation, "quote", quote);
+    }
+
+    @Override
+    public Reply txConfirm(String operation, String quote) {
+        return sessionCall("tx.confirm", "operation", operation, "quote", quote);
+    }
+
+    @Override
+    public Reply txGetStatus(String operation) {
+        return sessionCall("tx.getStatus", "operation", operation);
+    }
+
+    @Override
+    public Reply txCancel(String operation) {
+        return sessionCall("tx.cancel", "operation", operation);
+    }
+
+    @Override
     public Reply logout() {
         Reply r = sessionCall("auth.logout");
         forgetSession(); // o painel esquece o token de qualquer forma

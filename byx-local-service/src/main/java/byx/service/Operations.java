@@ -21,9 +21,12 @@ final class Operations {
     private final IdentityPolicy.Mode identityMode;
     private final boolean authentication;
     private final byx.service.chain.ChainConnector chain;
+    private final byx.service.tx.TxService tx;
 
-    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode, boolean authentication, byx.service.chain.ChainConnector chain) {
+    Operations(String instanceId, Instant startedAt, MarketFeed market, IdentityPolicy.Mode identityMode, boolean authentication, byx.service.chain.ChainConnector chain,
+            byx.service.tx.TxService tx) {
         this.chain = chain;
+        this.tx = tx;
         this.authentication = authentication;
         this.identityMode = identityMode;
         this.instanceId = instanceId;
@@ -51,7 +54,7 @@ final class Operations {
             case "capabilities" -> {
                 var ops = out.putArray("operations");
                 java.util.stream.Stream.concat(java.util.stream.Stream.concat(Protocol.OPERATIONS.stream(), market == null ? java.util.stream.Stream.<String>empty() : Protocol.MARKET_OPERATIONS.stream()),
-                        java.util.stream.Stream.concat(Protocol.CHAIN_OPERATIONS.stream(), ChainReadIpc.OPERATIONS.stream())).sorted().forEach(ops::add);
+                        java.util.stream.Stream.concat(java.util.stream.Stream.concat(Protocol.CHAIN_OPERATIONS.stream(), ChainReadIpc.OPERATIONS.stream()), byx.service.tx.TxIpc.OPERATIONS.stream())).sorted().forEach(ops::add);
                 if (authentication) {
                     byx.service.auth.AuthIpc.OPERATIONS.stream().sorted().forEach(ops::add);
                 }
@@ -67,6 +70,13 @@ final class Operations {
                 for (PrivateCapability c : PrivateCapability.values()) {
                     features.put(c.wire(), PrivateCapabilityGate.available(c));
                 }
+                // transações: gate MESTRE próprio (independente do privado). Só booleanos/rótulos fixos; nada de configuração.
+                features.put("txMutations", tx.enabled());
+                var txo = out.putObject("tx");
+                txo.put("mutationsAllowed", tx.gate().mutationsAllowed());
+                txo.put("policy", tx.policyName());
+                txo.put("signer", tx.signerAvailable() ? "AVAILABLE" : "UNAVAILABLE");
+                txo.put("transport", tx.transportName());
                 var gate = out.putObject("privateGate");
                 gate.put("allowed", PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED);
                 gate.put("privateMasterAllowed", PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED);

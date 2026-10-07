@@ -35,6 +35,7 @@ public final class CommandPalette {
         result.add(new Command("t-chain-data", "Open BYX Chain data", ""));
         if (qa) {
             result.add(new Command("t-mascot-gallery", "Open Mascot gallery (QA)", ""));
+            result.add(new Command("t-tx-lab", "Open Transaction Lab (QA, fake TX)", ""));
         }
         if (admin) {
             String state = verified ? "" : "Admin verification required";

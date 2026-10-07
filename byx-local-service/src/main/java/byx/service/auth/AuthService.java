@@ -192,6 +192,23 @@ public final class AuthService {
 
     // ---- operações ---------------------------------------------------------------------------------------------------------------
 
+    /** Sessão resolvida para outros módulos do SERVIÇO (ex.: transações): id opaco (hash), conta, papel atual e estado de MFA/elevação. Sem token, sem segredo. */
+    public record ResolvedSession(String sessionId, String accountId, long peerKey, boolean admin, boolean recentMfa, boolean elevated) {
+    }
+
+    /** Revalida a sessão como qualquer operação (peer, validade, conta habilitada, versão de credencial) e a descreve. Vazio = não autenticado. */
+    public Optional<ResolvedSession> resolveSession(long peerKey, String token) {
+        Object v = validate(peerKey, token);
+        if (v instanceof Result) {
+            return Optional.empty();
+        }
+        Valid ok = (Valid) v;
+        long now = clock.millis();
+        boolean mfa = AuthLimits.recentMfa(ok.session.mfaAtMs, now);
+        boolean elevated = ok.session.elevatedUntilMs > now;
+        return Optional.of(new ResolvedSession(ok.session.id, ok.account.id(), peerKey, ok.account.role() == Role.ADMIN, mfa, elevated));
+    }
+
     public Result sessionStatus(long peerKey, String token) {
         Object v = validate(peerKey, token);
         if (v instanceof Result r) {

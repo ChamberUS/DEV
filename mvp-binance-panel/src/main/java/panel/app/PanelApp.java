@@ -50,10 +50,16 @@ public class PanelApp extends Application {
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
-            "t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery",
+            "t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery", "t-tx-lab",
             "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
             "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts",
             "sys-status", "sys-unavailable");
+    /** Thread de trabalho do Transaction Lab (QA): nenhuma chamada ao serviço na thread FX. */
+    private static final java.util.concurrent.Executor TX_LAB_WORKER = r -> {
+        Thread t = new Thread(r, "tx-lab");
+        t.setDaemon(true);
+        t.start();
+    };
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -318,6 +324,9 @@ public class PanelApp extends Application {
         views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData));
         views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
         views.put("t-mascot-gallery", new panel.mascot.MascotGallery(ctx.motion, panel.mascot.MascotAssets.shared())); // vazio até ser aberto (lazy); só aparece na palette em LOCAL_QA
+        if (qaBuild()) { // Transaction Lab (sintético): só em LOCAL_QA; no build DEFAULT a tela nem é construída e o serviço responde TX_DISABLED a tudo
+            views.put("t-tx-lab", new panel.txview.TransactionLab(ctx.motion, panel.txview.TxLabService.over(ctx.authority), TX_LAB_WORKER, Platform::runLater, System::currentTimeMillis));
+        }
         views.put("t-chain-data", new panel.byxview.ChainDataScreen(ctx.motion, clock, new panel.localservice.ModuleReadClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome())), byxData));
         // LEGACY / NO V2 REFERENCE: vincular e revogar a posse (prova externa); o V2 de BYX é somente leitura
         views.put("t-wallet-verify", new panel.ui.ByxWalletView(ctx));
@@ -694,7 +703,7 @@ public class PanelApp extends Application {
         lastDisplayed = id;
         if (id.equals("sys-unavailable")) ((panel.systemview.PageUnavailableScreen) views.get(id)).setRequested(unavailableRequested);
         boolean toTrader = !panel.shell.ShellRoutes.isResearch(id);
-        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery", "t-wallet-verify").contains(id);
+        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery", "t-tx-lab", "t-wallet-verify").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
         byxWorkspace = toByx;
         trader = toTrader;

@@ -54,6 +54,30 @@ public interface AuthorityGateway {
         return false;
     }
 
+    // ---- transações (V2.1R): superfície FECHADA e tipada do serviço. O painel só PEDE; o token de sessão fica no cliente. Padrão (dublês): TX_DISABLED. ----
+
+    /** Prepara uma cotação de bank send. amountUbyx é inteiro decimal em ubyx (nunca BYX decimal); operation = id de idempotência (32 hex) escolhido pelo painel. */
+    default Reply txPrepareBankSend(String operation, String sender, String recipient, String amountUbyx, String memo, String feeMode) {
+        return new Reply(false, "TX_DISABLED", null);
+    }
+
+    default Reply txGetQuote(String operation, String quote) {
+        return new Reply(false, "TX_DISABLED", null);
+    }
+
+    /** Pede a confirmação: o serviço revalida tudo; o painel não autoriza nada. */
+    default Reply txConfirm(String operation, String quote) {
+        return new Reply(false, "TX_DISABLED", null);
+    }
+
+    default Reply txGetStatus(String operation) {
+        return new Reply(false, "TX_DISABLED", null);
+    }
+
+    default Reply txCancel(String operation) {
+        return new Reply(false, "TX_DISABLED", null);
+    }
+
     boolean hasSession();
 
     /** O painel esquece o token (a sessão já não vale no serviço ou o painel saiu). */

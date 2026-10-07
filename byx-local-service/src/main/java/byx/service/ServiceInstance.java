@@ -128,9 +128,21 @@ public final class ServiceInstance implements AutoCloseable {
 
     private final byx.service.chain.ChainConnector chain;
 
+    private final byx.service.tx.TxIpc txIpc;
+
+    /** Leitura SOMENTE de status da chain para as transações (id + geração + vivo). Fica aqui porque só este arquivo e o ServiceMain podem tocar o conector. */
+    public static byx.service.tx.TxPorts.TxChain txChain(byx.service.chain.ChainConnector connector) {
+        return () -> {
+            byx.service.chain.ChainStatus st = connector.status();
+            return new byx.service.tx.TxPorts.TxChainView(st.chainId() == null ? "" : st.chainId(), new byx.service.tx.TxValues.ChainGeneration(Math.max(0, st.generation())),
+                    st.state() == byx.service.chain.ChainState.LIVE);
+        };
+    }
+
     private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc,
-            PeerKeys.Provider peerKeys, byx.service.chain.ChainConnector chain) {
+            PeerKeys.Provider peerKeys, byx.service.chain.ChainConnector chain, byx.service.tx.TxIpc txIpc) {
         this.chain = chain;
+        this.txIpc = txIpc;
         this.authIpc = authIpc;
         this.peerKeys = peerKeys;
         this.market = market;
@@ -143,7 +155,7 @@ public final class ServiceInstance implements AutoCloseable {
         byte[] id = new byte[9];
         new SecureRandom().nextBytes(id);
         this.instanceId = Pairing.encode(id);
-        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode(), authIpc != null, chain);
+        this.operations = new Operations(instanceId, Instant.now(), market, identity.mode(), authIpc != null, chain, txIpc.service());
         this.acceptor = new Thread(this::acceptLoop, "byx-local-accept");
         this.acceptor.setDaemon(true);
     }
@@ -182,6 +194,15 @@ public final class ServiceInstance implements AutoCloseable {
     /** chain = conector da chain pública local (somente leitura). O serviço passa a ser dono dele e o fecha. Produção: {@code ChainConnector.notConfigured()}. */
     public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys,
             byx.service.chain.ChainConnector chain) throws IOException {
+        return start(home, limits, market, identity, authIpc, peerKeys, chain, byx.service.tx.TxProduction.disabled(null, txChain(chain)));
+    }
+
+    /**
+     * txIpc = superfície de transação. Produção: {@link byx.service.tx.TxProduction#disabled} (gate falso, política TX_DISABLED, sem assinante nem transporte).
+     * Só código de teste passa um TxIpc com portas habilitadas (injeção de construtor; nenhum caminho de ambiente/propriedade/arquivo).
+     */
+    public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys,
+            byx.service.chain.ChainConnector chain, byx.service.tx.TxIpc txIpc) throws IOException {
         RuntimeDir dir = RuntimeDir.prepare(home);
         dir.removeStaleSocket();
         byte[] secret = dir.writeFreshToken();
@@ -194,7 +215,7 @@ public final class ServiceInstance implements AutoCloseable {
             dir.cleanup();
             throw e;
         }
-        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys, chain);
+        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys, chain, txIpc);
         s.acceptor.start();
         s.watchdog.scheduleWithFixedDelay(s::enforceDeadlines, 100, 100, TimeUnit.MILLISECONDS);
         Log.event("started", "protocol=" + Protocol.VERSION + " identity=" + identity.mode().wire);
@@ -368,7 +389,7 @@ public final class ServiceInstance implements AutoCloseable {
                         throw new com.fasterxml.jackson.databind.JsonMappingException(null, "not a request");
                     }
                     // auth.* tem DTOs tipados por operação (AuthIpc valida o conjunto fechado de campos); o resto segue o Request estrito
-                    req = AuthIpc.handles(tree.path("op").asText()) || ChainReadIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
+                    req = AuthIpc.handles(tree.path("op").asText()) || ChainReadIpc.handles(tree.path("op").asText()) || byx.service.tx.TxIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
                             : mapper.treeToValue(tree, Protocol.Request.class);
                 } catch (JsonProcessingException e) {
                     send(c, error("bad_request"));
@@ -384,6 +405,9 @@ public final class ServiceInstance implements AutoCloseable {
                 if (AuthIpc.handles(req.op()) && authIpc != null) {
                     AuthIpc.Reply r = authIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree);
                     AuthIpc.write(r, resp);
+                } else if (byx.service.tx.TxIpc.handles(req.op())) {
+                    // transações: superfície tipada e fechada; desligada em produção (TX_DISABLED antes de qualquer validação)
+                    txIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree, resp);
                 } else if (ChainReadIpc.handles(req.op())) {
                     resp.put("ok", true);
                     ChainReadIpc.run(chain, req.op(), tree, resp.putObject("result"));

@@ -1,7 +1,7 @@
 package byx.service.chain;
 
 /** Validação LOCAL de endereço bech32 (checksum BIP-173, como o Cosmos SDK) com prefixo fixo; nenhuma correção silenciosa. Falha local = nenhuma requisição de rede. */
-final class Bech32 {
+public final class Bech32 {
     static final String PREFIX = "byx";
     private static final String CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
     private static final int[] GEN = {0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3};
@@ -9,7 +9,7 @@ final class Bech32 {
     private Bech32() { }
 
     /** Endereço BYX válido: minúsculo, prefixo "byx", separador "1", checksum correto e payload de 20 ou 32 bytes. */
-    static boolean isValidAddress(String s) {
+    public static boolean isValidAddress(String s) {
         if (s == null || s.length() < 14 || s.length() > 90 || !s.equals(s.toLowerCase(java.util.Locale.ROOT))) {
             return false;
         }

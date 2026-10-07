@@ -63,7 +63,8 @@ public final class ShellRoutes {
         add("t-wallet", ShellContext.BYX, "Wallet", "Wallet", "wallet", 2);
         add("t-benefits", ShellContext.BYX, "Benefits", "Benefits", "benefits", 3);
         add("t-treasury", ShellContext.BYX, "Treasury", "Treasury", "treasury", 4);
-                add("t-mascot-gallery", ShellContext.BYX, "Mascot gallery", null, null, -1); // DEV (LOCAL_QA): só pela command palette
+        add("t-mascot-gallery", ShellContext.BYX, "Mascot gallery", null, null, -1); // DEV (LOCAL_QA): só pela command palette
+        add("t-tx-lab", ShellContext.BYX, "Transaction Lab", null, null, -1); // DEV (LOCAL_QA, SINTÉTICO): só pela command palette; nunca no rail
         add("t-wallet-verify", ShellContext.BYX, "Verify wallet ownership", null, null, -1);
         // Account (não é workspace): Profile existe; Settings fica no pé de todo rail
         add("t-profile", ShellContext.ACCOUNT, "Profile", "Profile", "profile", 0);
