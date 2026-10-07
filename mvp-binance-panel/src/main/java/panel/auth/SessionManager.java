@@ -44,7 +44,8 @@ public class SessionManager {
 
     public synchronized void updateUser(User u) {
         if (user != null && user.user().id() == u.id()) {
-            user = new UserSession(u, user.loggedInAt());
+            // atualizar a APRESENTAÇÃO do mesmo usuário não é uma nova sessão: a identidade (id) é estável; só login/logout a trocam
+            user = new UserSession(u, user.loggedInAt(), user.id());
         }
     }
 

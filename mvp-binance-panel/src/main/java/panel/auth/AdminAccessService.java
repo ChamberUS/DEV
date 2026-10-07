@@ -119,7 +119,15 @@ public class AdminAccessService implements AdminGate {
 
     /** Compatibilidade da UI: confiança do dispositivo nunca substitui MFA recente na elevação. */
     public boolean tryTrustedDevice() {
-        if (evaluate() != AccessDecision.REQUIRES_2FA) {
+        if (sessions.user().isEmpty()) {
+            return false;
+        }
+        Optional<JsonNode> st = refresh();
+        if (st.isEmpty() || !"ADMIN".equals(st.get().path("role").asText()) || st.get().path("elevated").asBoolean(false)) {
+            return false;
+        }
+        // contato verificado e dispositivo confiável NÃO são MFA: sem MFA recente o serviço negaria (e auditaria) à toa; a verificação de 2º fator é o único caminho
+        if (!st.get().path("mfaRecent").asBoolean(false)) {
             return false;
         }
         AuthorityGateway.Reply r = gateway.adminElevation();

@@ -18,7 +18,7 @@ public record User(long id, String username, String email, String passwordHash, 
     }
 
     public String maskedEmail() {
-        int at = email.indexOf('@');
+        int at = email == null ? -1 : email.indexOf('@');
         if (at < 1) {
             return "••••";
         }

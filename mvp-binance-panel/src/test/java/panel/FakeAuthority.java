@@ -36,6 +36,13 @@ public final class FakeAuthority implements AuthorityGateway {
     public volatile boolean unavailable;
     public volatile int elevationMinutes = 5;
     public volatile int elevationCalls;
+    /** Só teste: sobrescreve as flags de contato verificado que o serviço real apresenta (null = padrão do dublê). */
+    public volatile Boolean emailVerifiedOverride;
+    public volatile Boolean phoneVerifiedOverride;
+    /** Só teste: roda na thread que chamou adminElevation, ANTES da decisão (permite intercalar eventos de forma determinística). */
+    public volatile Runnable beforeElevation;
+    /** Só teste: roda no início de sessionStatus, na thread chamadora (o check de dispositivo roda em "trusted-device-check"). */
+    public volatile Runnable beforeStatus;
     private String emailCode;
     private String smsCode;
     private String challenge;
@@ -126,8 +133,8 @@ public final class FakeAuthority implements AuthorityGateway {
         n.put("userId", a.id());
         n.put("email", a.email());
         n.put("phone", a.phone() == null ? "" : a.phone());
-        n.put("emailVerified", true);
-        n.put("phoneVerified", a.phone() != null);
+        n.put("emailVerified", emailVerifiedOverride != null ? emailVerifiedOverride : true);
+        n.put("phoneVerified", phoneVerifiedOverride != null ? phoneVerifiedOverride : a.phone() != null);
         n.put("mustChangePassword", a.mustChange());
         n.put("lastLoginAtMs", 0);
         n.put("createdAtMs", 1_700_000_000_000L);
@@ -179,6 +186,8 @@ public final class FakeAuthority implements AuthorityGateway {
     @Override
     public Reply sessionStatus() {
         calls.add("status");
+        Runnable hook = beforeStatus;
+        if (hook != null) hook.run();
         if (unavailable) {
             return new Reply(false, "connection_closed", null);
         }
@@ -261,6 +270,8 @@ public final class FakeAuthority implements AuthorityGateway {
     public Reply adminElevation() {
         elevationCalls++;
         calls.add("elevate");
+        Runnable hook = beforeElevation;
+        if (hook != null) hook.run();
         Acct a = live();
         if (a == null) {
             return err("AUTH_REQUIRED");

@@ -479,14 +479,18 @@ public class PanelApp extends Application {
                     boolean trusted = result;
                     javafx.application.Platform.runLater(() -> {
                         checkingTrustedDevice = false;
-                        if (ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
-                        panel.nav.Navigator.Ticket latest = router.pending();
-                        if (latest == null) return; // o usuário navegou para outro lugar enquanto a verificação rodava
-                        String latestDestination = views.containsKey(latest.target()) ? latest.target() : "overview";
-                        if (trusted && ctx.adminAccess.hasValidAdminSession()) {
-                            updateLock(true);
-                            router.complete(latest, latestDestination);
-                        } else showTwoFactor(latest, latestDestination);
+                        try {
+                            if (ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
+                            panel.nav.Navigator.Ticket latest = router.pending();
+                            if (latest == null) return; // o usuário navegou para outro lugar enquanto a verificação rodava
+                            String latestDestination = views.containsKey(latest.target()) ? latest.target() : "overview";
+                            if (trusted && ctx.adminAccess.hasValidAdminSession()) {
+                                updateLock(true);
+                                router.complete(latest, latestDestination);
+                            } else showTwoFactor(latest, latestDestination);
+                        } catch (RuntimeException e) {
+                            researchGateFailed(e);
+                        }
                     });
                 }, "trusted-device-check");
                 check.setDaemon(true); check.start();
@@ -503,6 +507,14 @@ public class PanelApp extends Application {
             }
         }
         return panel.shell.ShellRouter.Decision.DENY;
+    }
+
+    /** Falha ao abrir a verificação do Research: fail-closed. Código fixo, sem mensagem da exceção (pode ter contato/código); o Research segue bloqueado. */
+    private void researchGateFailed(Throwable error) {
+        System.err.println("BYX_RESEARCH_GATE_ERROR code=overlay_open_failed type=" + error.getClass().getSimpleName());
+        closeTwoFactor();
+        router.cancelPending();
+        if (shell != null) toast(ToastType.ERROR, "Admin verification could not be opened. Research stays locked.");
     }
 
     /** Compatibilidade com os harnesses de QA: verificação para o pedido pendente atual. */
