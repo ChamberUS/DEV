@@ -131,4 +131,32 @@ class ChainStatusClientTest {
             assertThrows(IllegalArgumentException.class, () -> client.chainCall(op), op);
         }
     }
+
+    @Test
+    void denomAndSupplyFactsAreParsedStrictlyAndFormattedWithIntegersOnly() throws Exception {
+        var ok = ChainStatusClient.parseFacts(JSON.readTree("{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":6}"),
+                JSON.readTree("{\"available\":true,\"denom\":\"ubyx\",\"baseUnits\":\"1000239758\",\"display\":\"1000.239758 BYX\"}")).orElseThrow();
+        assertEquals("ubyx", ok.baseDenom());
+        assertEquals("BYX", ok.displayDenom());
+        assertEquals(6, ok.exponent());
+        assertEquals("1000.239758", ok.supplyDisplay(), "formatted by the panel from integer base units, not trusted from the service text");
+        for (String[] bad : new String[][] {
+                {"{\"available\":false}", "{\"available\":true,\"denom\":\"ubyx\",\"baseUnits\":\"1\"}"},
+                {"{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":6}", "{\"available\":false}"},
+                {"{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":6}", "{\"available\":true,\"denom\":\"other\",\"baseUnits\":\"1\"}"},
+                {"{\"available\":true,\"base\":\"UBYX\",\"display\":\"BYX\",\"exponent\":6}", "{\"available\":true,\"denom\":\"UBYX\",\"baseUnits\":\"1\"}"},
+                {"{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":19}", "{\"available\":true,\"denom\":\"ubyx\",\"baseUnits\":\"1\"}"},
+                {"{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":6}", "{\"available\":true,\"denom\":\"ubyx\",\"baseUnits\":\"-5\"}"},
+                {"{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":6}", "{\"available\":true,\"denom\":\"ubyx\",\"baseUnits\":\"1.5\"}"},
+                {"{\"available\":true,\"base\":\"ubyx\",\"display\":\"BYX\",\"exponent\":6}", "{\"available\":true,\"denom\":\"ubyx\",\"baseUnits\":\"1e9\"}"}}) {
+            assertTrue(ChainStatusClient.parseFacts(JSON.readTree(bad[0]), JSON.readTree(bad[1])).isEmpty(), bad[1]);
+        }
+    }
+
+    @Test
+    void theGenerationIsReadAndBounded() throws Exception {
+        assertEquals(3, parse(LIVE.replace("\"generation\":1", "\"generation\":3")).generation());
+        assertEquals(0, parse(LIVE.replace("\"generation\":1", "\"generation\":\"x\"")).generation());
+        assertEquals(1_000_000, parse(LIVE.replace("\"generation\":1", "\"generation\":2147483647")).generation());
+    }
 }

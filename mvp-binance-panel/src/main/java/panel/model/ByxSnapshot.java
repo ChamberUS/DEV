@@ -6,12 +6,19 @@ import java.time.Instant;
 
 public record ByxSnapshot(String source, String environment, String connection, String identity,
         String freshness, Boolean syncing, String chainId, String height, Instant blockTime,
-        String address, BigInteger balance, String denom, int decimals, Instant updatedAt, String message, String chainState) {
+        String address, BigInteger balance, String denom, int decimals, Instant updatedAt, String message, String chainState, ChainFacts chainFacts) {
     /** Construtor legado (estado da chain não informado pelo serviço). */
     public ByxSnapshot(String source, String environment, String connection, String identity,
             String freshness, Boolean syncing, String chainId, String height, Instant blockTime,
             String address, BigInteger balance, String denom, int decimals, Instant updatedAt, String message) {
-        this(source, environment, connection, identity, freshness, syncing, chainId, height, blockTime, address, balance, denom, decimals, updatedAt, message, null);
+        this(source, environment, connection, identity, freshness, syncing, chainId, height, blockTime, address, balance, denom, decimals, updatedAt, message, null, null);
+    }
+
+    /** Estado informado pelo serviço, sem fatos de denom/suprimento. */
+    public ByxSnapshot(String source, String environment, String connection, String identity,
+            String freshness, Boolean syncing, String chainId, String height, Instant blockTime,
+            String address, BigInteger balance, String denom, int decimals, Instant updatedAt, String message, String chainState) {
+        this(source, environment, connection, identity, freshness, syncing, chainId, height, blockTime, address, balance, denom, decimals, updatedAt, message, chainState, null);
     }
 
     public String execution() { return "DISABLED"; }
@@ -24,6 +31,6 @@ public record ByxSnapshot(String source, String environment, String connection, 
     }
     public ByxSnapshot stale(String connection, String message) {
         return new ByxSnapshot(source, environment, connection, identity, "STALE", syncing, chainId,
-                height, blockTime, address, balance, denom, decimals, updatedAt, message, chainState == null ? null : "STALE");
+                height, blockTime, address, balance, denom, decimals, updatedAt, message, chainState == null ? null : "STALE", chainFacts);
     }
 }

@@ -57,9 +57,15 @@ public final class ChainConnector implements AutoCloseable {
         }) : null;
     }
 
-    /** Produção: sem configuração, sem transporte, sem thread. */
+    /** Explicitamente DESABILITADO (sem configuração, sem transporte, sem thread): perfil PRODUCTION_DISABLED. */
     public static ChainConnector notConfigured() {
-        return new ChainConnector(ChainConfig.production(), null, Timing.production(), System::currentTimeMillis);
+        return new ChainConnector(Optional.empty(), null, Timing.production(), System::currentTimeMillis);
+    }
+
+    /** Conector do artefato: usa o perfil tipado {@link ChainProfile#ACTIVE} e o transporte de loopback (sem nenhuma entrada externa). */
+    public static ChainConnector production() {
+        Optional<ChainConfig> config = ChainConfig.production();
+        return new ChainConnector(config, config.isPresent() ? LoopbackHttp.production() : null, Timing.production(), System::currentTimeMillis);
     }
 
     private ChainStatus connecting() {

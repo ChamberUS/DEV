@@ -92,4 +92,20 @@ class ServiceChainGatewayTest {
             return state.equals("LIVE") || state.equals("SYNCING") || state.equals("STALE");
         }
     }
+
+    @Test
+    void exactSupplyFormattingNeverUsesFloatingPoint() {
+        assertEquals("0.000000", panel.util.DenomFormat.format(java.math.BigInteger.ZERO, 6));
+        assertEquals("0.000001", panel.util.DenomFormat.format(java.math.BigInteger.ONE, 6));
+        assertEquals("123456789012345678901234567890.123456", panel.util.DenomFormat.format(new java.math.BigInteger("123456789012345678901234567890123456"), 6));
+        assertEquals("7", panel.util.DenomFormat.format(java.math.BigInteger.valueOf(7), 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> panel.util.DenomFormat.format(java.math.BigInteger.valueOf(-1), 6));
+        var facts = new panel.model.ChainFacts("ubyx", "BYX", 6, new java.math.BigInteger("1000239758"));
+        ByxSnapshot live = ServiceChainGateway.toSnapshot(new ChainStatusClient.View("LIVE", true, true, "byx", 5L, false, NOW.minusSeconds(2).toEpochMilli(), true, "NONE", 1), facts, NOW);
+        assertEquals("1000.239758 BYX", NetworkModel.supply(live));
+        assertEquals("ubyx", NetworkModel.baseDenom(live));
+        assertEquals("6", NetworkModel.exponent(live));
+        ByxSnapshot mismatch = ServiceChainGateway.toSnapshot(new ChainStatusClient.View("NETWORK_MISMATCH", true, true, "x", null, null, null, false, "NETWORK_MISMATCH", 1), facts, NOW);
+        assertEquals(NetworkModel.NONE, NetworkModel.supply(mismatch), "a mismatched network never shows facts");
+    }
 }

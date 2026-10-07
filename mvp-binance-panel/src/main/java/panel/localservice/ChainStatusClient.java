@@ -12,12 +12,51 @@ public final class ChainStatusClient {
     public static final Set<String> STATES = Set.of("NOT_CONFIGURED", "CONNECTING", "OFFLINE", "SYNCING", "LIVE", "STALE", "NETWORK_MISMATCH", "ERROR");
     private static final Pattern CHAIN_ID = Pattern.compile("[A-Za-z0-9_.-]{1,64}");
     private static final Pattern REASON = Pattern.compile("[A-Z_]{1,32}");
+    private static final Pattern BASE = Pattern.compile("[a-z][a-z0-9]{2,31}");
+    private static final Pattern DISPLAY = Pattern.compile("[A-Za-z][A-Za-z0-9]{1,31}");
+    private static final Pattern UNITS = Pattern.compile("[0-9]{1,40}");
 
     /** Status mínimo recebido do serviço (sem JSON cru). */
-    public record View(String state, boolean configured, boolean reachable, String chainId, Long latestHeight, Boolean catchingUp, Long blockTimeMs, boolean networkMatch, String reason) {
+    public record View(String state, boolean configured, boolean reachable, String chainId, Long latestHeight, Boolean catchingUp, Long blockTimeMs, boolean networkMatch, String reason,
+            int generation) {
+        public View(String state, boolean configured, boolean reachable, String chainId, Long latestHeight, Boolean catchingUp, Long blockTimeMs, boolean networkMatch, String reason) {
+            this(state, configured, reachable, chainId, latestHeight, catchingUp, blockTimeMs, networkMatch, reason, 0);
+        }
+
         /** Falha de comunicação ou contrato violado: nunca saudável. */
         public static View error(String reason) {
-            return new View("ERROR", false, false, null, null, null, null, false, reason);
+            return new View("ERROR", false, false, null, null, null, null, false, reason, 0);
+        }
+    }
+
+    /** Fatos públicos de denom e suprimento (o painel formata o suprimento sozinho, com inteiros). */
+    public static java.util.Optional<panel.model.ChainFacts> parseFacts(JsonNode denom, JsonNode supply) {
+        try {
+            if (!denom.path("available").asBoolean(false) || !supply.path("available").asBoolean(false)) {
+                return java.util.Optional.empty();
+            }
+            String base = denom.path("base").asText("");
+            String display = denom.path("display").asText("");
+            if (!BASE.matcher(base).matches() || !DISPLAY.matcher(display).matches() || !denom.path("exponent").isIntegralNumber()
+                    || denom.path("exponent").asInt(-1) < 0 || denom.path("exponent").asInt() > 18 || !base.equals(supply.path("denom").asText(""))) {
+                return java.util.Optional.empty();
+            }
+            String units = supply.path("baseUnits").asText("");
+            if (!UNITS.matcher(units).matches()) {
+                return java.util.Optional.empty();
+            }
+            return java.util.Optional.of(new panel.model.ChainFacts(base, display, denom.path("exponent").asInt(), new java.math.BigInteger(units)));
+        } catch (RuntimeException e) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    /** Bloqueante. Vazio se o serviço não verificou o denom/suprimento (nunca inventa valor). */
+    public java.util.Optional<panel.model.ChainFacts> facts() {
+        try {
+            return parseFacts(client.chainCall("byx.denomMetadata"), client.chainCall("byx.supply"));
+        } catch (Exception e) {
+            return java.util.Optional.empty();
         }
     }
 
@@ -80,7 +119,8 @@ public final class ChainStatusClient {
             if (carriesHeight != (height != null && blockTime != null) || carriesHeight && !match || !carriesHeight && height != null) {
                 return View.error("CONTRACT_VIOLATION");
             }
-            return new View(state, r.path("configured").asBoolean(), r.path("reachable").asBoolean(), chainId, height, catching, blockTime, match, reason);
+            int generation = r.path("generation").isIntegralNumber() ? Math.max(0, Math.min(1_000_000, r.path("generation").asInt())) : 0;
+            return new View(state, r.path("configured").asBoolean(), r.path("reachable").asBoolean(), chainId, height, catching, blockTime, match, reason, generation);
         } catch (RuntimeException e) {
             return View.error("CONTRACT_VIOLATION");
         }

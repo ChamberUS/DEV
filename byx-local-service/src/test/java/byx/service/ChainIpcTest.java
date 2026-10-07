@@ -182,12 +182,12 @@ class ChainIpcTest {
         for (String f : List.of("PrivateCapabilityGate.java", "PrivateCapability.java", "PrivateOperation.java", "auth/AuthService.java", "auth/AuthPolicy.java")) {
             assertFalse(Files.readString(Path.of("src/main/java/byx/service/" + f)).contains("byx.service.chain"), f);
         }
-        // só o ChainConfig/ChainEndpoint constroem configuração/origem; produção só compõe notConfigured()
+        // só ChainConfig/ChainEndpoint/ChainProfile constroem configuração/origem; o artefato só compõe ChainConnector.production()
         try (var files = Files.walk(Path.of("src/main/java"))) {
             for (Path f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
                 String rel = Path.of("src/main/java/byx/service").relativize(f).toString();
                 String src = Files.readString(f);
-                if (!rel.equals("chain/ChainConfig.java") && !rel.equals("chain/ChainEndpoint.java")) {
+                if (!rel.equals("chain/ChainConfig.java") && !rel.equals("chain/ChainEndpoint.java") && !rel.equals("chain/ChainProfile.java")) {
                     assertFalse(src.contains("ChainConfig.of(") || src.contains("new ChainConfig(") || src.contains("ChainEndpoint.parse(") || src.contains("new ChainEndpoint("), rel + " must not build a node configuration");
                 }
                 if (!rel.startsWith("chain/") && !rel.equals("ServiceMain.java") && !rel.equals("ServiceInstance.java") && !rel.equals("Operations.java")) {
@@ -196,9 +196,9 @@ class ChainIpcTest {
             }
         }
         String main = Files.readString(Path.of("src/main/java/byx/service/ServiceMain.java"));
-        assertTrue(main.contains("ChainConnector.notConfigured()") && !main.contains("LoopbackHttp") && !main.contains("ChainConfig"), "production composes only the not-configured connector");
+        assertTrue(main.contains("ChainConnector.production()") && !main.contains("LoopbackHttp") && !main.contains("ChainConfig") && !main.contains("ChainEndpoint"), "production composes only the typed-profile connector");
         String ops = Files.readString(Path.of("src/main/java/byx/service/Operations.java"));
         assertFalse(ops.contains("getenv") || ops.contains("getProperty"), "the answers read no environment or property");
-        assertTrue(ChainConnectorTestAccess.productionIsNotConfigured());
+        assertTrue(ChainConnectorTestAccess.productionProfileIsTheTypedLocalQa());
     }
 }

@@ -104,6 +104,23 @@ public final class NetworkModel {
         return "UNVERIFIED".equals(s.identity()) && "UNKNOWN".equals(s.connection()) ? NONE : value(s.identity());
     }
 
+    public static String baseDenom(ByxSnapshot s) {
+        return s.chainFacts() == null ? NONE : s.chainFacts().baseDenom();
+    }
+
+    public static String displayDenom(ByxSnapshot s) {
+        return s.chainFacts() == null ? NONE : s.chainFacts().displayDenom();
+    }
+
+    public static String exponent(ByxSnapshot s) {
+        return s.chainFacts() == null ? NONE : Integer.toString(s.chainFacts().exponent());
+    }
+
+    /** Suprimento total em texto decimal EXATO com o denom de exibição; "—" se o serviço não o verificou. */
+    public static String supply(ByxSnapshot s) {
+        return s.chainFacts() == null ? NONE : s.chainFacts().supplyDisplay() + " " + s.chainFacts().displayDenom();
+    }
+
     public static String environment(ByxSnapshot s) {
         return "UNKNOWN".equals(s.environment()) ? NONE : value(s.environment());
     }

@@ -48,6 +48,10 @@ public final class NetworkScreen implements View {
     private final KvRow sync = new KvRow("Sync");
     private final KvRow env = new KvRow("Environment");
     private final KvRow identity = new KvRow("Network identity");
+    private final KvRow baseDenom = new KvRow("Base denom");
+    private final KvRow displayDenom = new KvRow("Display denom");
+    private final KvRow exponent = new KvRow("Exponent");
+    private final KvRow supply = new KvRow("Total supply");
     private final Label blocksBadge = ByxBadge.of("NO FEED", ByxBadge.Tone.NEUTRAL);
     private final List<Label> cells = new ArrayList<>();
     private final Label blocksNote = Kit.muted("Blocks appear when the LOCALNET node answers.");
@@ -87,7 +91,7 @@ public final class NetworkScreen implements View {
         VBox emblem = new VBox(8, rings, stateText);
         emblem.setAlignment(Pos.CENTER);
         emblem.setMinWidth(200);
-        VBox facts = new VBox(0, chain, height, latest, fresh, rpc, sync, env, identity);
+        VBox facts = new VBox(0, chain, height, latest, fresh, rpc, sync, env, identity, baseDenom, displayDenom, exponent, supply);
         HBox nodeCard = new HBox(24, emblem, facts);
         nodeCard.setAlignment(Pos.CENTER_LEFT);
         nodeCard.getStyleClass().add("byx-panel");
@@ -196,6 +200,10 @@ public final class NetworkScreen implements View {
             sync.set(NetworkModel.sync(s), false, null);
             env.set(NetworkModel.environment(s), false, null);
             identity.set(NetworkModel.identity(s), false, "UNVERIFIED".equals(s.identity()) && "ONLINE".equals(s.connection()) ? "neg" : null);
+            baseDenom.set(NetworkModel.baseDenom(s), true, null);
+            displayDenom.set(NetworkModel.displayDenom(s), false, null);
+            exponent.set(NetworkModel.exponent(s), false, null);
+            supply.set(NetworkModel.supply(s), true, null);
             boolean hasBlock = s.height() != null;
             Fx.text(blocksBadge, hasBlock ? "LATEST ONLY" : "NO FEED");
             Fx.text(cells.get(0), NetworkModel.value(s.height()));

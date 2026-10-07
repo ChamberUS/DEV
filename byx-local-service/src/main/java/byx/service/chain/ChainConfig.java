@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Configuração TIPADA do nó local público: RPC e REST (gRPC e WebSocket ficam para quando o contrato da chain fechar), chain id esperado e modelo de denom. Produção: NÃO CONFIGURADO
- * ({@link #production()} vazio) até o contrato da chain estar pronto e uma configuração empacotada ser revisada; nenhum host vem do painel, de ambiente, de propriedade nem de arquivo do usuário.
+ * Configuração TIPADA do nó local público: RPC e REST (gRPC e WebSocket ficam para quando for necessário), chain id esperado e modelo de denom. O artefato usa só as configurações de
+ * {@link ChainProfile} (constantes de compilação); nenhum host vem do painel, de ambiente, de propriedade nem de arquivo do usuário.
  */
 public record ChainConfig(ChainEndpoint rpc, ChainEndpoint rest, String expectedChainId, DenomModel denom) {
     private static final Pattern CHAIN_ID = Pattern.compile("[A-Za-z0-9_.-]{1,64}");
@@ -16,9 +16,9 @@ public record ChainConfig(ChainEndpoint rpc, ChainEndpoint rest, String expected
         }
     }
 
-    /** Produção: sem configuração (NOT_CONFIGURED/DISABLED). */
+    /** Configuração do perfil ativo do artefato ({@link ChainProfile#ACTIVE}); vazia se o perfil for PRODUCTION_DISABLED. */
     public static Optional<ChainConfig> production() {
-        return Optional.empty();
+        return ChainProfile.ACTIVE.config();
     }
 
     /** Validação completa de origens e chain id (usada por testes com servidor falso em 127.0.0.1; produção não a chama). */

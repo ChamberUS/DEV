@@ -341,5 +341,27 @@ class ByxScreensTest {
         }
         return count;
     }
-}
 
+    @Test
+    void networkScreenShowsDenomExponentAndSupplyFromTheVerifiedServiceFactsAndDashesWithoutThem() throws Exception {
+        DeskHarness.fx(() -> {
+            long block = CLOCK.instant().minusSeconds(3).toEpochMilli();
+            var live = new panel.localservice.ChainStatusClient.View("LIVE", true, true, "byx", 321L, false, block, true, "NONE", 2);
+            Stub data = new Stub();
+            data.network = panel.adapter.ServiceChainGateway.toSnapshot(live, new panel.model.ChainFacts("ubyx", "BYX", 6, new java.math.BigInteger("1000239758")), CLOCK.instant());
+            NetworkScreen screen = new NetworkScreen(new MotionService(), CLOCK, data);
+            show(screen.node());
+            screen.onShow();
+            String t = texts(screen.node());
+            for (String expected : new String[] {"LIVE", "byx", "321", "Base denom", "ubyx", "Display denom", "Exponent", "6", "Total supply", "1000.239758 BYX", "Caught up"}) {
+                assertTrue(t.contains(expected), expected + "\n" + t);
+            }
+            assertFalse(t.toUpperCase().contains("USD"));
+            data.network = panel.adapter.ServiceChainGateway.toSnapshot(live, null, CLOCK.instant());
+            screen.onSnapshot(null);
+            String bare = texts(screen.node());
+            assertTrue(bare.contains("Total supply") && !bare.contains("1000.239758"), "no verified facts: nothing invented");
+            screen.dispose();
+        });
+    }
+}
