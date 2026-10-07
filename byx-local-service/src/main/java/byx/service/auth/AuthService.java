@@ -561,8 +561,12 @@ public final class AuthService {
         if (rule.ownership() && !v.account.id().equals(ownerAccountId)) {
             return Code.DENIED;
         }
-        if (rule.privateCapability() && !PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED) {
-            return Code.DENIED;
+        if (rule.capability() != null) {
+            // todas as demais verificações da regra já passaram (authorized); peerVerified/secretConfigured não estão ligados aqui: ficam FALSE (nega) até a revisão que habilitar uma capacidade
+            // os ligar. O gate nega por mestre=false, por capacidade não habilitada e por capacidade não implementada, independentemente.
+            if (!PrivateCapabilityGate.decide(PrivateCapabilityGate.Config.PRODUCTION, rule.capability(), new PrivateCapabilityGate.Facts(false, false, true))) {
+                return Code.DENIED;
+            }
         }
         return Code.OK;
     }

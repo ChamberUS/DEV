@@ -59,12 +59,20 @@ final class Operations {
                 // autenticação: só a composição de QA da autoridade a monta (o produto não: o app normal segue o fluxo atual)
                 features.put("authentication", authentication);
                 // capacidades PRIVADAS: vêm da decisão estática PrivateCapabilityGate (false), nunca de configuração, ambiente ou pedido
-                features.put("notifications", PrivateCapabilityGate.allowed("notifications"));
-                features.put("accountData", PrivateCapabilityGate.allowed("accountData"));
-                features.put("adminOperations", PrivateCapabilityGate.allowed("adminOperations"));
-                features.put("secretIntegrations", PrivateCapabilityGate.allowed("secretIntegrations"));
+                for (PrivateCapability c : PrivateCapability.values()) {
+                    features.put(c.wire(), PrivateCapabilityGate.available(c));
+                }
                 var gate = out.putObject("privateGate");
                 gate.put("allowed", PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED);
+                gate.put("privateMasterAllowed", PrivateCapabilityGate.PRIVATE_CAPABILITIES_ALLOWED);
+                // estado separado por capacidade (configured != allowed). Só booleanos fixos: nenhum motivo sensível, nenhum segredo, nenhum identificador externo
+                var per = gate.putObject("capabilities");
+                for (PrivateCapability c : PrivateCapability.values()) {
+                    var o = per.putObject(c.wire());
+                    o.put("available", c.implemented());
+                    o.put("configured", PrivateCapabilityGate.configured(c));
+                    o.put("allowed", PrivateCapabilityGate.available(c));
+                }
                 gate.put("reviewRequired", PrivateCapabilityGate.EXPLICIT_REVIEW_REQUIRED);
                 var unmet = gate.putArray("unmetPrerequisites");
                 PrivateCapabilityGate.PREREQUISITES.forEach(unmet::add);

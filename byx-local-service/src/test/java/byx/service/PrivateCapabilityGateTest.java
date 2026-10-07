@@ -137,4 +137,46 @@ class PrivateCapabilityGateTest {
         assertFalse(gate.replaceAll("(?s)/\\*.*?\\*/", "").contains("getenv"), "the gate reads no environment");
         assertFalse(gate.replaceAll("(?s)/\\*.*?\\*/", "").contains("getProperty"), "the gate reads no property");
     }
+
+    @Test
+    void capabilitiesShowEachPrivateCapabilitySeparatelyAndConfiguredIsNeverAllowed() throws Exception {
+        try (TestClient c = paired()) {
+            JsonNode gate = c.call("capabilities").path("result").path("privateGate");
+            assertFalse(gate.path("privateMasterAllowed").asBoolean(true), "the master switch is off");
+            assertFalse(gate.path("allowed").asBoolean(true));
+            JsonNode per = gate.path("capabilities");
+            assertEquals(4, per.size());
+            for (String f : PRIVATE) {
+                JsonNode one = per.path(f);
+                assertTrue(one.isObject(), f);
+                assertEquals(java.util.Set.of("available", "configured", "allowed"), new java.util.TreeSet<String>(iterator(one.fieldNames())), f + ": only fixed booleans, no reason text");
+                assertFalse(one.path("allowed").asBoolean(true), f);
+                assertFalse(one.path("available").asBoolean(true), f + " is not implemented");
+                assertFalse(one.path("configured").asBoolean(true), f + " has no credential: configured=false, allowed=false");
+            }
+            String dump = gate.toString().toLowerCase().replace("secretintegrations", ""); // o nome da capacidade em si não é vazamento
+            for (String leak : List.of("secret", "credential", "key", "binance", "reason", "host")) {
+                assertFalse(dump.contains(leak), "capabilities reveals " + leak);
+            }
+        }
+    }
+
+    @Test
+    void theFutureTypedPrivateOperationsAndGenericProxiesAreUnsupportedOverIpc() throws Exception {
+        try (TestClient c = paired()) {
+            for (PrivateOperation op : PrivateOperation.values()) {
+                assertEquals("unsupported_operation", c.call(op.wire()).path("error").path("code").asText(), op.wire());
+            }
+            for (String op : List.of("http.request", "binance.request", "proxy", "rawQuery", "signedRequest", "execute", "dumpSecret", "notification.send", "notifications.send", "account.credential.get")) {
+                assertEquals("unsupported_operation", c.call(op).path("error").path("code").asText(), op);
+            }
+        }
+    }
+
+    private static List<String> iterator(java.util.Iterator<String> it) {
+        List<String> out = new java.util.ArrayList<>();
+        it.forEachRemaining(out::add);
+        return out;
+    }
 }
+
