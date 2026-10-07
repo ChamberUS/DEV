@@ -1,7 +1,6 @@
 package byx.service.migration;
 
 import byx.service.auth.AuthProfile;
-import byx.service.auth.PasswordVerifier;
 import byx.service.identity.AppIdentity;
 import byx.service.identity.PeerIdentity;
 import byx.service.secrets.SecretId;
@@ -79,7 +78,6 @@ public final class MigrateQaMain {
     private static void seed(Path legacyDir, Path db, Path providers, LegacyKeychain legacy) throws Exception {
         Files.createDirectories(legacyDir, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
         Files.deleteIfExists(db);
-        PasswordVerifier pv = new PasswordVerifier();
         try (Connection c = DriverManager.getConnection("jdbc:sqlite:" + db); Statement st = c.createStatement()) {
             st.execute("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE COLLATE NOCASE, email TEXT NOT NULL UNIQUE COLLATE NOCASE, password_hash TEXT NOT NULL, "
                     + "role TEXT NOT NULL, status TEXT NOT NULL, phone TEXT, email_verified INTEGER NOT NULL DEFAULT 0, phone_verified INTEGER NOT NULL DEFAULT 0, "
