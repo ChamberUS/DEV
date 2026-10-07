@@ -1,0 +1,71 @@
+== 0. dados sintéticos
+PASS  banco, provedores e itens legados SINTÉTICOS criados
+PASS  itens legados presentes (3)
+== 1. auditoria SOMENTE LEITURA
+PASS  contagens: 3 usuários, 1 ADMIN, 1 desabilitado
+PASS  papéis
+PASS  estados
+PASS  algoritmo do verificador (só metadados)
+PASS  normalização visível (1 usuário vira minúscula)
+PASS  dispositivo confiável apenas contado
+PASS  a auditoria não imprime hash, senha, e-mail, telefone, token nem segredo
+PASS  banco legado byte a byte idêntico após a auditoria
+PASS  nenhum arquivo auxiliar (journal/wal) foi criado ao lado do banco
+PASS  a auditoria não escreveu autoridade nenhuma
+== 2. manifesto (sem segredos) e fonte alterada
+PASS  plano gravado
+PASS  manifesto tem manifestVersion
+PASS  manifesto tem dbSha256
+PASS  manifesto tem usersDigest
+PASS  manifesto tem authorityFormatVersion
+PASS  manifesto tem serviceCodeRequirement
+PASS  manifesto tem com.buynnex.byx.service
+PASS  manifesto tem NOT_MIGRATED_INVALIDATED_AT_CUTOVER_LEGACY_PRESERVED
+PASS  o manifesto não contém verificador, senha, e-mail, telefone nem segredo
+PASS  manifesto 0600
+PASS  legado alterado depois do plano: prepare PARA
+PASS  e nada foi escrito
+== 3. preparar: confirmação, importação, verificação, segredos
+PASS  sem a frase exata nada acontece
+PASS  nenhuma autoridade sem a confirmação
+PASS  preparado
+PASS  segredo Resend copiado (lido uma vez do legado → cofre do serviço → relido e comparado)
+PASS  segredo Twilio copiado
+PASS  dispositivo confiável legado NÃO migrado
+PASS  janela de segurança ligada desde o início
+PASS  a saída do prepare não contém valor sensível
+PASS  banco legado intacto e sem arquivos novos depois do prepare
+PASS  itens legados continuam presentes (nada apagado)
+PASS  snapshot da autoridade migrada é cifrado (sem 'qa_admin')
+PASS  snapshot da autoridade migrada é cifrado (sem 'qa_user')
+PASS  snapshot da autoridade migrada é cifrado (sem 'argon2')
+PASS  snapshot da autoridade migrada é cifrado (sem 'example.test')
+PASS  snapshot da autoridade migrada é cifrado (sem '+5511')
+PASS  o arquivo de estado não contém segredo
+PASS  verificação fonte × alvo
+PASS  segredos de produção presentes no cofre
+PASS  novo plano sobre autoridade já importada é recusado
+== 4. a autoridade MIGRADA serve o login com a senha ANTIGA (sem nunca pedir a senha para migrar)
+PASS  senha antiga do administrador funciona
+PASS  senha antiga do usuário funciona (USER, ninguém foi promovido)
+PASS  conta desabilitada continua desabilitada (mesmo com a senha certa)
+PASS  janela de segurança: troca de senha recusada (FROZEN)
+PASS  auditoria do serviço persistida (0600, encadeada)
+PASS  eventos de login no serviço
+PASS  evento de troca recusada na janela
+PASS  a auditoria do serviço não contém senha, e-mail, hash nem token
+PASS  nem nomes digitados
+== 5. finalizar o cutover só depois da validação explícita
+PASS  sem a frase não finaliza
+PASS  cutover verificado
+PASS  legado vira ROLLBACK_ONLY
+PASS  trava removida
+PASS  o legado AINDA existe (a exclusão é uma etapa separada)
+PASS  banco legado continua intacto
+PASS  prepare depois do cutover é recusado
+PASS  fora da janela a troca de senha funciona
+== 6. limpeza
+PASS  itens de teste removidos
+PASS  nenhum item legado sintético restou
+
+RESUMO: 62 PASS, 0 FAIL

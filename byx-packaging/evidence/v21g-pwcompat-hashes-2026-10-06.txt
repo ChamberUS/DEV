@@ -1,0 +1,9 @@
+built from repo HEAD d5ab284 (service fix da5c83c included); verify-authority.sh updated afterwards (test script only)
+fefc53e266d01a9cda03ca88724e7cb689c3cbca7c55998d6eae973871a8e162  ../byx-local-service/target/byx-local-service-0.1.0.jar
+3649ca619b999dd587f538ab0aec8ec59887bcd5db7127bb1410fec8c24c9682  ../mvp-binance-panel/target/mvp-binance-panel-0.1.0.jar
+86d6e01f3a7d2b4611b9719d874b04f2a079938903f7e4383ce650887a99a0de  launcher/byx-launcher.c
+56ea978c4a10d829f6711babec29f19ca463e89c687ec07667a8cfe0d249a2b4  build/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/MacOS/byx-local-service
+bb3d360bb9176a920f533b07920ba29ab3daf17487bdc38372eb969d76019de3  build/BYX-MVP.app/Contents/Helpers/byx-migrate.app/Contents/MacOS/byx-migrate
+55415276f09c21903df721841df1e9b3a66a9dfcc06804fa93d4a68a87c18bfe  build/BYX-MVP.app/Contents/MacOS/BYX-MVP
+service tests: 225 run, 0 failures
+panel tests: 531 run, 0 failures, 68 errors (SERVER_AUTHORIZATION_REQUIRED from commit d1eca78, not from the password fix), 1 skipped

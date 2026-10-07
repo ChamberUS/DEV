@@ -89,11 +89,14 @@ OUT=$(printf 'login admin_user %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\n
 expect "inscrição do dispositivo (ADMIN elevado + 2º fator fresco)" "$OUT" "RESULT enroll OK"
 DEV=$(echo "$OUT" | sed -n 's/^DEVICES=\([0-9a-f]\{32\}\),ACTIVE.*/\1/p' | head -1)
 [[ ${#DEV} -eq 32 ]] && ok "o dispositivo aparece ATIVO na lista do serviço" || bad "lista de dispositivos" "$OUT"
-OUT=$(printf 'login admin_user %s\nelevate\nstatus\nrevokedev %s\nstatus\nquit\n' "$CRED" "$DEV" | cli)
-expect "nova sessão eleva SEM 2º fator por causa do dispositivo confiável (decidido pelo serviço)" "$OUT" "RESULT elevate OK"
-expect "e a revogação encerra a elevação" "$(echo "$OUT" | tail -2)" "elevated=false"
-OUT=$(printf 'login admin_user %s\nelevate\nquit\n' "$CRED" | cli)
-expect "depois de revogado, o 2º fator volta a ser exigido" "$OUT" "RESULT elevate ELEVATION_REQUIRES_MFA"
+# d1eca78 (revisão de segurança): o dispositivo confiável NÃO reduz mais o 2º fator para a elevação; a elevação exige MFA recente e é ABSOLUTA (5 min, sem deslizar)
+OUT=$(printf 'login admin_user %s\nelevate\nstatus\nquit\n' "$CRED" | cli)
+expect "dispositivo confiável inscrito NÃO substitui o 2º fator: a elevação continua exigindo MFA" "$OUT" "RESULT elevate ELEVATION_REQUIRES_MFA"
+expect "o serviço informa o dispositivo, mas não o usa para elevar" "$OUT" "trustedDevice=true"
+OUT=$(printf 'login admin_user %s\nrevokedev %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\nelevate\nrevokedev %s\nstatus\nquit\n' "$CRED" "$DEV" "$OTPFILE" "$SMSFILE" "$DEV" | cli)
+expect "revogar exige elevação de administrador (sem ela: DENIED)" "$OUT" "RESULT revokedev DENIED"
+expect "elevado (2º fator real), a revogação do dispositivo funciona" "$OUT" "RESULT revokedev OK"
+expect "depois de revogado, o dispositivo deixa de constar" "$(echo "$OUT" | tail -2)" "trustedDevice=false"
 OUT=$(printf 'login normal_user %s\nbegin2fa\nverify2fa - %s\nsms\nverifysms %s\nenroll\nquit\n' "$CRED" "$AUTH/qa-otp/$USER_ID.otp" "$AUTH/qa-otp/$USER_ID.sms" | cli)
 expect "um USER não inscreve dispositivo" "$OUT" "RESULT enroll DENIED"
 stop_svc; touch "$AUTH/qa-freeze"; : > "$QA/svc.log"; start_svc; rm -f "$AUTH/qa-freeze"
