@@ -44,6 +44,8 @@ public final class RuntimeMigrator {
             "audit_log", Decision.DROP_HISTORY_STAYS_LEGACY, "sqlite_sequence", Decision.DROP_INTERNAL);
     private static final java.util.regex.Pattern SENSITIVE_COLUMN = java.util.regex.Pattern.compile("(?i).*(password|passwd|verifier|secret|otp|session|credential|api_?key|private).*");
     public static final String PREPARE_PHRASE = "PREPARE-RUNTIME-DB";
+    /** SHA-256 de zero linhas. */
+    private static final String EMPTY_DIGEST = HexFormat.of().formatHex(sha().digest());
     static final String STATE_TABLE = "runtime_migration";
     private static final ObjectMapper JSON = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -217,10 +219,11 @@ public final class RuntimeMigrator {
                 long a = srcTables.contains(table) ? count(src, table) : 0;
                 long b = present.contains(table) ? count(dst, table) : 0;
                 if (a != b) throw new MigrationException("count_mismatch_" + table);
-                String da = srcTables.contains(table) ? digest(src, table) : "";
-                String db = present.contains(table) ? digest(dst, table) : "";
+                // tabela ausente = tabela vazia (o alvo sempre cria as quatro; a fonte pode não ter alguma): compara com o digest de zero linhas
+                String da = srcTables.contains(table) ? digest(src, table) : EMPTY_DIGEST;
+                String db = present.contains(table) ? digest(dst, table) : EMPTY_DIGEST;
                 if (!da.equals(db)) throw new MigrationException("content_mismatch_" + table);
-                tables.putObject(table).put("rows", a).put("contentDigest", da.isEmpty() ? "-" : da);
+                tables.putObject(table).put("rows", a).put("contentDigest", da);
             }
             for (String t : present) {
                 if (t.equals(STATE_TABLE)) continue;

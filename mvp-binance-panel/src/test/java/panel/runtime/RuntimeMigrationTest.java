@@ -176,4 +176,15 @@ class RuntimeMigrationTest {
         for (String t : RuntimeMigrator.ALLOWLIST) assertEquals(0, r.get("rowsCopied").get(t).asInt());
         assertEquals("PASS", RuntimeMigrator.verify(src, target).get("verification").asText());
     }
+
+    @Test
+    void aSourceWithoutSomeAllowlistedTableMigratesAndVerifies() throws Exception {
+        Path src = source();
+        for (String t : List.of("byx_gas_grants", "byx_payment_receipts", "byx_payment_intents")) LegacyPanelFixture.drop(src, t);
+        Path target = dir.resolve("runtime.db");
+        var r = RuntimeMigrator.prepare(src, target, RuntimeMigrator.PREPARE_PHRASE);
+        assertEquals(0, r.get("rowsCopied").get("byx_gas_grants").asInt());
+        assertEquals(1, r.get("rowsCopied").get("verified_wallets").asInt());
+        assertEquals("PASS", RuntimeMigrator.verify(src, target).get("verification").asText(), "an absent source table is an empty one");
+    }
 }
