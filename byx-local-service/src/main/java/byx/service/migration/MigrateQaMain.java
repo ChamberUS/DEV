@@ -100,7 +100,7 @@ public final class MigrateQaMain {
                     p.setString(2, u[1]);
                     String password = "qa-" + java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(r);
                     creds.putObject(u[0].toLowerCase()).put("password", password); // senhas SINTÉTICAS de teste, em arquivo 0600 do diretório de QA (para provar o login com a senha antiga)
-                    p.setString(3, pv.hash(password.toCharArray()));
+                    p.setString(3, LegacyPanelHash.hash(password.toCharArray(), 19_456, 2, 1)); // formato EXATO do painel legado (não o do serviço): é o que o QA anterior não cobria
                     p.setString(4, u[2]);
                     p.setString(5, u[3]);
                     p.setString(6, u[4]);

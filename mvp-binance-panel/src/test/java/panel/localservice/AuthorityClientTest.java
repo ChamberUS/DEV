@@ -45,4 +45,13 @@ class AuthorityClientTest {
             assertFalse(src.contains(forbidden), "the client has no way to send " + forbidden);
         }
     }
+
+    @Test
+    void theLoginRequestCarriesTheLiteralPasswordAndTheTypedIdentifierUnderTheFieldNamesTheServiceExpects() throws IOException {
+        String client = Files.readString(Path.of("src/main/java/panel/localservice/AuthorityClient.java"));
+        assertTrue(client.contains("call(\"auth.password\", \"username\", identifier, \"password\", new String(password))"), "identifier -> username, password verbatim (no trim, no case folding, no normalization)");
+        String auth = Files.readString(Path.of("src/main/java/panel/auth/AuthService.java"));
+        assertTrue(auth.contains("identifier == null ? \"\" : identifier.trim()"), "only the IDENTIFIER is trimmed, never the password");
+        assertFalse(auth.contains("password.trim") || auth.contains("toLowerCase") || auth.contains("Normalizer"), "the panel never alters the password");
+    }
 }

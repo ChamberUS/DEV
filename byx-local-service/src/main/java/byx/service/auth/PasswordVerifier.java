@@ -48,7 +48,9 @@ public final class PasswordVerifier {
     public String hash(char[] password) {
         byte[] salt = new byte[SALT_BYTES];
         random.nextBytes(salt);
-        byte[] out = derive(password, salt, params.memoryKb(), params.iterations(), params.parallelism());
+        byte[] pwBytes = exactBytes(password);
+        byte[] out = derive(pwBytes, salt, params.memoryKb(), params.iterations(), params.parallelism());
+        Arrays.fill(pwBytes, (byte) 0);
         Base64.Encoder b64 = Base64.getEncoder().withoutPadding();
         String phc = "$argon2id$v=19$m=" + params.memoryKb() + ",t=" + params.iterations() + ",p=" + params.parallelism() + "$" + b64.encodeToString(salt) + "$"
                 + b64.encodeToString(out);
@@ -123,9 +125,21 @@ public final class PasswordVerifier {
             if (salt.length < 8 || salt.length > 64 || expected.length != HASH_BYTES) {
                 return false;
             }
-            byte[] got = derive(password, salt, m, t, p);
-            boolean ok = MessageDigest.isEqual(expected, got);
-            Arrays.fill(got, (byte) 0);
+            // DOIS formatos de bytes da senha são aceitos, sempre calculados (custo e tempo não dependem do hash armazenado):
+            //  - EXATO: os bytes UTF-8 da senha (hashes criados por este serviço);
+            //  - LEGADO do painel antigo: o painel fazia UTF_8.encode(...).array(), isto é, TODO o array de apoio do ByteBuffer, que tem capacidade
+            //    (int)(n*1,1) e portanto termina com bytes NUL de preenchimento sempre que n >= 10 (a política antiga exigia >= 10). Os verificadores
+            //    migrados foram gerados assim. Sem aceitar este formato nenhuma senha migrada de 10+ caracteres jamais confere.
+            // Seguro: senhas com NUL são recusadas antes (AuthService), então o candidato com preenchimento nunca colide com outra senha digitável.
+            byte[] exact = exactBytes(password);
+            byte[] legacy = legacyPaddedBytes(password);
+            byte[] gotExact = derive(exact, salt, m, t, p);
+            byte[] gotLegacy = Arrays.equals(exact, legacy) ? gotExact : derive(legacy, salt, m, t, p);
+            boolean ok = MessageDigest.isEqual(expected, gotExact) | MessageDigest.isEqual(expected, gotLegacy);
+            Arrays.fill(gotExact, (byte) 0);
+            Arrays.fill(gotLegacy, (byte) 0);
+            Arrays.fill(exact, (byte) 0);
+            Arrays.fill(legacy, (byte) 0);
             return ok;
         } catch (RuntimeException e) {
             return false;
@@ -143,21 +157,34 @@ public final class PasswordVerifier {
         return DERIVATIONS.get();
     }
 
-    private static byte[] derive(char[] password, byte[] salt, int m, int t, int p) {
+    /** Bytes UTF-8 exatos da senha (sem preenchimento). */
+    public static byte[] exactBytes(char[] password) {
+        java.nio.ByteBuffer bb = StandardCharsets.UTF_8.encode(java.nio.CharBuffer.wrap(password));
+        byte[] out = new byte[bb.remaining()];
+        bb.get(out);
+        if (bb.hasArray()) {
+            Arrays.fill(bb.array(), (byte) 0);
+        }
+        return out;
+    }
+
+    /** Reproduz EXATAMENTE o painel legado: {@code UTF_8.encode(CharBuffer.wrap(senha)).array()} (array de apoio inteiro, com os NUL de preenchimento). */
+    public static byte[] legacyPaddedBytes(char[] password) {
+        java.nio.ByteBuffer bb = StandardCharsets.UTF_8.encode(java.nio.CharBuffer.wrap(password));
+        byte[] backing = bb.array();
+        byte[] out = backing.clone();
+        Arrays.fill(backing, (byte) 0);
+        return out;
+    }
+
+    private static byte[] derive(byte[] pw, byte[] salt, int m, int t, int p) {
         DERIVATIONS.incrementAndGet();
         Argon2Parameters params = new Argon2Parameters.Builder(Argon2Parameters.ARGON2_id).withVersion(Argon2Parameters.ARGON2_VERSION_13)
                 .withMemoryAsKB(m).withIterations(t).withParallelism(p).withSalt(salt).build();
         Argon2BytesGenerator gen = new Argon2BytesGenerator();
         gen.init(params);
-        java.nio.ByteBuffer bb = StandardCharsets.UTF_8.encode(java.nio.CharBuffer.wrap(password));
-        byte[] pw = new byte[bb.remaining()];
-        bb.get(pw);
-        if (bb.hasArray()) {
-            Arrays.fill(bb.array(), (byte) 0);
-        }
         byte[] out = new byte[HASH_BYTES];
         gen.generateBytes(pw, out);
-        Arrays.fill(pw, (byte) 0);
         return out;
     }
 }

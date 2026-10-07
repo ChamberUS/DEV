@@ -123,8 +123,8 @@ class MigratorTest {
         db = dir.resolve("panel.db");
         providers = dir.resolve("providers.properties");
         home = dir.resolve("svc-home");
-        adminHash = PV.hash(adminPw.toCharArray());
-        userHash = PV.hash(userPw.toCharArray());
+        adminHash = LegacyPanelHash.hash(adminPw.toCharArray(), 1024, 1, 1); // hashes no formato EXATO do painel legado
+        userHash = LegacyPanelHash.hash(userPw.toCharArray(), 1024, 1, 1);
         createLegacy(true);
         Files.writeString(providers, "resend.fromAddress=BYX <noreply@example.test>\ntwilio.accountSid=AC" + "1".repeat(32) + "\ntwilio.apiKeySid=SK" + "2".repeat(32) + "\ntwilio.verifyServiceSid=VA" + "3".repeat(32) + "\n");
         Files.writeString(dir.resolve("security.properties"), "security.admin.sessionTimeoutMinutes=30\nsecurity.dev.mode=ignored\n");

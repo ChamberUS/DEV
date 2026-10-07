@@ -62,9 +62,10 @@ class AuthServiceTest {
             assertEquals(Code.INVALID_CREDENTIALS, r.code());
             assertEquals(wrong.data(), r.data(), "same shape: nothing reveals whether the account exists or is enabled");
         }
-        assertEquals(1, afterWrong - before, "one Argon2 derivation for a wrong password...");
-        assertEquals(1, afterUnknown - afterWrong, "...the same for an unknown account (dummy verifier)...");
-        assertEquals(1, afterDisabled - afterUnknown, "...and for a disabled account");
+        long cost = afterWrong - before;
+        assertTrue(cost == 1 || cost == 2, "one derivation per accepted byte format (1 for short ASCII, 2 when the legacy padded form differs)");
+        assertEquals(cost, afterUnknown - afterWrong, "...exactly the same for an unknown account (dummy verifier)...");
+        assertEquals(cost, afterDisabled - afterUnknown, "...and for a disabled account");
     }
 
     @Test

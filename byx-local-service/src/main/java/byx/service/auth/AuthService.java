@@ -92,7 +92,7 @@ public final class AuthService {
                 failClosed();
                 return Result.of(Code.AUTHORITY_UNAVAILABLE);
             }
-            if (password == null || password.length == 0 || new String(password).getBytes(StandardCharsets.UTF_8).length > AuthLimits.PASSWORD_MAX_BYTES) {
+            if (password == null || password.length == 0 || containsNul(password) || new String(password).getBytes(StandardCharsets.UTF_8).length > AuthLimits.PASSWORD_MAX_BYTES) {
                 passwords.verifyDummy(new char[] {'x'});
                 limiter.recordFailure("login", name);
                 audit.record("LOGIN_FAILED", "-");
@@ -129,6 +129,15 @@ public final class AuthService {
                 Arrays.fill(password, '\0');
             }
         }
+    }
+
+    private static boolean containsNul(char[] c) {
+        for (char x : c) {
+            if (x == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---- validação a cada uso (revalidação contra a AUTORIDADE) ------------------------------------------------------------------
@@ -501,7 +510,7 @@ public final class AuthService {
                 audit.record("PASSWORD_CHANGE_FAILED", ok.account.id());
                 return Result.of(Code.INVALID_CREDENTIALS);
             }
-            if (next == null || next.length < AuthLimits.PASSWORD_MIN_CHARS || new String(next).getBytes(StandardCharsets.UTF_8).length > AuthLimits.PASSWORD_MAX_BYTES
+            if (next == null || containsNul(next) || next.length < AuthLimits.PASSWORD_MIN_CHARS || new String(next).getBytes(StandardCharsets.UTF_8).length > AuthLimits.PASSWORD_MAX_BYTES
                     || Arrays.equals(next, current)) {
                 return Result.of(Code.WEAK_PASSWORD);
             }
