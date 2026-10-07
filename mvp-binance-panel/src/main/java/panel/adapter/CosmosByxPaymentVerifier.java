@@ -12,11 +12,25 @@ import panel.model.*;
 /** Checks a confirmed bank transfer against the audited local REST/RPC node. No signing. */
 public final class CosmosByxPaymentVerifier implements ByxPaymentVerifier {
     private final Clock clock;
-    private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
+    /** Criado no primeiro uso: montar o HttpClient (TLS) custa ~100 ms e estes adaptadores não são usados antes do login. */
+    private volatile HttpClient http;
+    private HttpClient http() {
+        HttpClient c = http;
+        if (c == null) {
+            synchronized (this) {
+                c = http;
+                if (c == null) {
+                    c = http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
+                }
+            }
+        }
+        return c;
+    }
+
     private final ObjectMapper json=new ObjectMapper();
     public CosmosByxPaymentVerifier(Clock clock){this.clock=clock;}
     private JsonNode get(URI origin,String path) throws Exception {
-        var response=http.send(HttpRequest.newBuilder(origin.resolve(path)).timeout(Duration.ofSeconds(3)).GET().build(),HttpResponse.BodyHandlers.ofString());
+        var response=http().send(HttpRequest.newBuilder(origin.resolve(path)).timeout(Duration.ofSeconds(3)).GET().build(),HttpResponse.BodyHandlers.ofString());
         if(response.statusCode()!=200)throw new java.io.IOException("Payment confirmation unavailable");
         return json.readTree(response.body());
     }

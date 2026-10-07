@@ -101,6 +101,11 @@ public final class AuthorityClient implements AuthorityGateway, AutoCloseable {
     }
 
     @Override
+    public boolean launchesBundledService() {
+        return true;
+    }
+
+    @Override
     public boolean hasSession() {
         return token != null;
     }

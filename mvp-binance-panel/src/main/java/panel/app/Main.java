@@ -15,6 +15,8 @@ public final class Main {
             Application.launch(GalleryApp.class, args); // DEV ONLY: galeria de controles V2
             return;
         }
+        StartupTrace.mark("Main.main");
+        StartupWarmup.start(); // em paralelo à subida do toolkit JavaFX
         Application.launch(PanelApp.class, args);
     }
 }

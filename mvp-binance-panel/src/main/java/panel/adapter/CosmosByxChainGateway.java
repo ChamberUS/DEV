@@ -13,15 +13,28 @@ import panel.model.ByxConfig;
 import panel.model.ByxSnapshot;
 
 public final class CosmosByxChainGateway implements ByxChainGateway {
-    private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2))
-            .followRedirects(HttpClient.Redirect.NEVER).build();
+    /** Criado no primeiro uso: montar o HttpClient (TLS) custa ~100 ms e estes adaptadores não são usados antes do login. */
+    private volatile HttpClient client;
+    private HttpClient client() {
+        HttpClient c = client;
+        if (c == null) {
+            synchronized (this) {
+                c = client;
+                if (c == null) {
+                    c = client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
+                }
+            }
+        }
+        return c;
+    }
+
     private final ObjectMapper json = new ObjectMapper();
     private final Clock clock;
     public CosmosByxChainGateway(Clock clock) { this.clock = clock; }
     public String source() { return "LIVE_NODE"; }
     private JsonNode get(URI origin, String path) throws Exception {
         var request = HttpRequest.newBuilder(origin.resolve(path)).timeout(Duration.ofSeconds(3)).GET().build();
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        var response = client().send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) throw new java.io.IOException("Read endpoint unavailable");
         return json.readTree(response.body());
     }

@@ -51,6 +51,16 @@ public final class AuthScreens {
 
     private static final PseudoClass ERROR = PseudoClass.getPseudoClass("error");
 
+    /**
+     * Prontidão do serviço local de autenticação, só para a APRESENTAÇÃO do login: enquanto STARTING o botão não aceita envio e diz o
+     * que está acontecendo (os campos continuam editáveis, a janela não congela); UNAVAILABLE mostra o aviso e "Retry". A segurança
+     * não depende disso: o envio continua passando pela mesma verificação de pareamento/identidade do serviço.
+     */
+    public enum ServiceReadiness { STARTING, READY, UNAVAILABLE }
+
+    private ServiceReadiness readiness = ServiceReadiness.READY; // padrão: sem bloqueio (testes e contextos sem serviço próprio)
+    private Runnable retryService = () -> { };
+
     private final MotionService motion;
     private final Services services;
     private final Consumer<String> request;
@@ -165,7 +175,27 @@ public final class AuthScreens {
 
     // ---------------------------------------------------------------- login
 
+    /** Chamado pelo roteador: o serviço está subindo / pronto / indisponível. Reavalia o formulário se o login está na tela. */
+    public void setServiceReadiness(ServiceReadiness r, Runnable retry) {
+        readiness = r;
+        retryService = retry == null ? () -> { } : retry;
+        if (LOGIN.equals(route)) {
+            renderLogin();
+        }
+    }
+
+    public ServiceReadiness serviceReadiness() {
+        return readiness;
+    }
+
     private void submit() {
+        if (readiness == ServiceReadiness.STARTING) {
+            return; // o botão já está desabilitado; um Enter no campo não envia antes do serviço
+        }
+        if (readiness == ServiceReadiness.UNAVAILABLE) {
+            retryService.run(); // "Retry" tenta subir o serviço de novo, não envia credenciais
+            return;
+        }
         String id = identifier.input().getText();
         char[] pw = password.input().getText().toCharArray();
         password.input().clear(); // a senha não fica no modelo de UI
@@ -181,11 +211,14 @@ public final class AuthScreens {
         identifier.setDisable(busy);
         password.setDisable(busy);
         signIn.setLoading(s == LoginController.State.LOADING);
-        signIn.setDisable(s == LoginController.State.RATE_LIMITED || s == LoginController.State.SUCCESS);
+        boolean starting = readiness == ServiceReadiness.STARTING;
+        boolean serviceDown = readiness == ServiceReadiness.UNAVAILABLE && s == LoginController.State.DEFAULT;
+        signIn.setDisable(s == LoginController.State.RATE_LIMITED || s == LoginController.State.SUCCESS || starting);
         boolean invalid = s == LoginController.State.INVALID;
         password.input().pseudoClassStateChanged(ERROR, invalid); // como a referência: só a senha marcada
         signIn.setText(switch (s) {
             case LOADING -> "Signing in…";
+            case DEFAULT -> starting ? "Starting local service…" : serviceDown ? "Retry" : "Sign in";
             case UNAVAILABLE -> "Retry";
             case RATE_LIMITED -> "Try again in " + clock(login.retryAfter());
             default -> "Sign in";
@@ -210,7 +243,9 @@ public final class AuthScreens {
             case UNAVAILABLE -> new ByxBanner(ByxBanner.Kind.WARNING, "Sign-in unavailable",
                     "The local account store could not be read. Nothing was changed.");
             case RATE_LIMITED -> new ByxBanner(ByxBanner.Kind.WARNING, "Too many attempts", "Wait before trying again.");
-            default -> notice == null ? null : new ByxBanner(ByxBanner.Kind.INFO, "Notice", notice);
+            default -> serviceDown ? new ByxBanner(ByxBanner.Kind.WARNING, "Local service unavailable",
+                    "BYX-MVP could not reach its local service. Nothing was changed. Retry to continue.")
+                    : notice == null ? null : new ByxBanner(ByxBanner.Kind.INFO, "Notice", notice);
         };
         if (banner != null) {
             nodes.add(banner);
@@ -218,7 +253,7 @@ public final class AuthScreens {
         nodes.add(identifier);
         nodes.add(password);
         nodes.add(signIn);
-        nodes.add(note("Accounts are created by an administrator."));
+        nodes.add(note(starting ? "Starting the local service. Sign-in is enabled as soon as it is ready." : "Accounts are created by an administrator."));
         layout.show("Sign in", nodes);
         if (s == LoginController.State.RATE_LIMITED && countdown == null) {
             startCountdown();

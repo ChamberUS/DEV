@@ -24,11 +24,18 @@ public final class SystemStatusModel {
     }
 
     public record Inputs(Snapshot research, TraderSnapshot trading, ByxSnapshot network, boolean sessionActive, boolean adminSession,
-            boolean walletLinked, boolean researchAvailable, panel.localservice.LocalServiceStatus service) {
+            boolean walletLinked, boolean researchAvailable, panel.localservice.LocalServiceStatus service, panel.model.ScientificCapture capture) {
+        /** Sem captura científica observada ainda. */
+        public Inputs(Snapshot research, TraderSnapshot trading, ByxSnapshot network, boolean sessionActive, boolean adminSession, boolean walletLinked,
+                boolean researchAvailable, panel.localservice.LocalServiceStatus service) {
+            this(research, trading, network, sessionActive, adminSession, walletLinked, researchAvailable, service, panel.model.ScientificCapture.unknown("not observed yet"));
+        }
+
         /** Sem serviço local conhecido (ainda não sondado). */
         public Inputs(Snapshot research, TraderSnapshot trading, ByxSnapshot network, boolean sessionActive, boolean adminSession, boolean walletLinked,
                 boolean researchAvailable) {
-            this(research, trading, network, sessionActive, adminSession, walletLinked, researchAvailable, panel.localservice.LocalServiceStatus.unknown());
+            this(research, trading, network, sessionActive, adminSession, walletLinked, researchAvailable, panel.localservice.LocalServiceStatus.unknown(),
+                    panel.model.ScientificCapture.unknown("not observed yet"));
         }
     }
 
@@ -44,14 +51,15 @@ public final class SystemStatusModel {
         boolean feedExpected = (boolean) feed[1];
         out.add(new Component("feed", "Market feed", feedState, feedExpected, feedReason(feedState, feedExpected, in.trading().feed),
                 in.trading().feedUpdatedAt, false));
-        Object[] cap = DockModel.capture(s.capture.recorder());
+        Object[] cap = DockModel.capture(in.capture());
         StatusState capState = (StatusState) cap[0];
         boolean capExpected = (boolean) cap[1];
-        out.add(new Component("capture", "Capture", capState, capExpected, switch (capState) {
-            case OPERATIONAL -> "The recorder is running.";
-            case UNAVAILABLE -> capExpected ? "The recorder is stopped. Nothing is expected to be capturing." : "The recorder is not reachable.";
-            default -> "The recorder state can not be read.";
-        }, s.captureStatusAt, false));
+        out.add(new Component("capture", "Scientific capture", capState, capExpected, switch (capState) {
+            case OPERATIONAL -> "The scientific recorder is running.";
+            case DEGRADED -> "The recorder is running with a current risk: " + (in.capture().reason() == null ? "see Capture." : in.capture().reason() + ".");
+            case UNAVAILABLE -> "The scientific recorder is stopped.";
+            default -> "The recorder state can not be confirmed" + (in.capture() == null || in.capture().reason() == null ? "." : " (" + in.capture().reason() + ").");
+        }, in.capture() == null ? null : in.capture().checkedAt(), false));
         StatusState research = !in.researchAvailable() ? StatusState.UNAVAILABLE : backend == StatusState.OPERATIONAL ? StatusState.OPERATIONAL : StatusState.UNKNOWN;
         out.add(new Component("research", "Research", research, !in.researchAvailable(), !in.researchAvailable()
                 ? "Research is available to administrators only." : research == StatusState.OPERATIONAL

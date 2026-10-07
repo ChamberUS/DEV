@@ -41,14 +41,19 @@ public final class DockModel {
         };
     }
 
-    public static Object[] capture(String recorder) {
-        if (recorder == null) {
+    /**
+     * Captura CIENTÍFICA (fonte autoritativa, não o antigo panel_status): verde RUNNING, âmbar DEGRADED, cinza UNKNOWN (nunca vira
+     * "parada" sem prova), vermelho STOPPED. O booleano do par é "esperado"; uma captura parada nunca é esperada.
+     */
+    public static Object[] capture(panel.model.ScientificCapture cap) {
+        if (cap == null) {
             return new Object[] {StatusState.UNKNOWN, false};
         }
-        return switch (recorder.toUpperCase(Locale.ROOT)) {
-            case "RUNNING" -> new Object[] {StatusState.OPERATIONAL, false};
-            case "STOPPED" -> new Object[] {StatusState.UNAVAILABLE, true};
-            default -> new Object[] {StatusState.UNKNOWN, false};
+        return switch (cap.status()) {
+            case RUNNING -> new Object[] {StatusState.OPERATIONAL, false};
+            case DEGRADED -> new Object[] {StatusState.DEGRADED, false};
+            case STOPPED -> new Object[] {StatusState.UNAVAILABLE, false};
+            case UNKNOWN -> new Object[] {StatusState.UNKNOWN, false};
         };
     }
 
@@ -78,14 +83,14 @@ public final class DockModel {
      * quem pode abrir Capture (admin).
      */
     public static List<StatusDock.Group> build(Snapshot s, TraderSnapshot t, ByxSnapshot network, String walletText,
-            boolean adminSession, boolean captureRoute) {
+            boolean adminSession, boolean captureRoute, panel.model.ScientificCapture scientific) {
         Object[] feed = feed(t.feed);
-        Object[] cap = capture(s.capture.recorder());
+        Object[] cap = capture(scientific);
         List<StatusDock.Item> health = List.of(
                 StatusDock.Item.status("backend", "Backend", backend(s), false, STATUS_ROUTE, null),
                 StatusDock.Item.status("feed", "Market feed", (StatusState) feed[0], (boolean) feed[1], "t-markets", null),
-                StatusDock.Item.status("capture", "Capture", (StatusState) cap[0], (boolean) cap[1],
-                        captureRoute ? "capture" : STATUS_ROUTE, null),
+                StatusDock.Item.status("capture", "Sci. capture", (StatusState) cap[0], (boolean) cap[1],
+                        captureRoute ? "capture" : STATUS_ROUTE, scientific == null ? null : "Scientific capture: " + scientific.summary()),
                 StatusDock.Item.status("network", "Network", network(network.connection()), false, "t-byx", null));
         boolean liveOff = !"ENABLED".equalsIgnoreCase(t.trading);
         List<StatusDock.Item> mode = List.of(

@@ -81,11 +81,12 @@ public class PanelApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        this.ctx = createContext();
+        StartupTrace.mark("PanelApp.start enter");
+        StartupTrace.heartbeat();
+        this.ctx = StartupTrace.time("createContext (AppContext)", this::createContext);
         this.stage = stage;
-        for (String f : new String[] {"SchibstedGrotesk-Regular", "SchibstedGrotesk-SemiBold", "Inter-Regular", "Inter-Medium", "Inter-SemiBold", "Inter-Bold", "JetBrainsMono-Regular", "JetBrainsMono-Medium", "JetBrainsMono-SemiBold", "JetBrainsMono-Bold"}) {
-            Font.loadFont(getClass().getResourceAsStream("/fonts/" + f + ".ttf"), 13);
-        }
+        // fontes do tema V2 (login): uma vez, pelo carregador do tema; as do tema legado (Inter, JetBrains Mono Bold) só depois da 1ª imagem
+        StartupTrace.time("fonts (V2)", () -> { panel.design.ByxFonts.load(); return null; });
         EmptyState.init(ctx.icons);
         Ui.init(ctx.motion);
         panel.ui.Dialogs.init(ctx.motion);
@@ -94,7 +95,7 @@ public class PanelApp extends Application {
         ctx.motion.setActive(false);
         Scene scene = new Scene(rootStack, 1440, 900);
         // cena: só o tema V2; as folhas legadas valem apenas dentro de LegacyHost
-        panel.design.ByxTheme.apply(scene);
+        StartupTrace.time("ByxTheme.apply", () -> { panel.design.ByxTheme.apply(scene); return null; });
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (mainActive && new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K,
                     javafx.scene.input.KeyCombination.SHORTCUT_DOWN).match(e)) {
@@ -115,9 +116,19 @@ public class PanelApp extends Application {
         stage.setMinWidth(1100);
         stage.setMinHeight(700);
         applyDensity();
-        showEntry(null);
+        StartupTrace.time("showEntry (login scene)", () -> { showEntry(null); return null; });
         stage.show();
-        Platform.runLater(() -> runtimeDiagnostics(scene));
+        StartupTrace.mark("stage.show() returned");
+        Platform.runLater(() -> {
+            StartupTrace.mark("first pulse after show");
+            StartupTrace.time("fonts (legacy theme)", () -> {
+                for (String f : new String[] {"Inter-Regular", "Inter-Medium", "Inter-SemiBold", "Inter-Bold", "JetBrainsMono-Bold"}) {
+                    Font.loadFont(getClass().getResourceAsStream("/fonts/" + f + ".ttf"), 13);
+                }
+                return null;
+            });
+            runtimeDiagnostics(scene);
+        });
     }
 
     private void runtimeDiagnostics(Scene scene) {
@@ -145,7 +156,7 @@ public class PanelApp extends Application {
     }
 
     @Override
-    public void stop() { ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
+    public void stop() { ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.scientificCapture.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
 
     private void applyDensity() {
         if (shell != null) shell.content().setComfortable("COMFORTABLE".equals(ctx.settings.density));
@@ -157,9 +168,7 @@ public class PanelApp extends Application {
         mainActive = false;
         ctx.market.stop(); // logout/troca de usuário cancela a assinatura de mercado
         ctx.localService.stop();
-        Thread launcher = new Thread(ctx.authority::ensureService, "service-launcher"); // a autenticação depende do serviço do próprio bundle: inicia se preciso
-        launcher.setDaemon(true);
-        launcher.start();
+        ctx.scientificCapture.stop();
         closeShell();
         if (activeView != null) { activeView.onHide(); activeView = null; }
         router.reset();
@@ -172,17 +181,48 @@ public class PanelApp extends Application {
         mustChangeUser = null;
         if (authScreens != null) authScreens.dispose();
         disposePublic();
-        authScreens = new panel.authview.AuthScreens(ctx.motion, authServices(), this::show, this::afterLogin,
+        authScreens = StartupTrace.time("AuthScreens construct", () -> new panel.authview.AuthScreens(ctx.motion, authServices(), this::show, this::afterLogin,
                 this::afterPasswordChanged, this::showEntry, this::show,
-                ctx.developmentLabel);
+                ctx.developmentLabel));
         rootStack.getChildren().setAll(authScreens.node());
+        startAuthService(authScreens); // a autenticação depende do serviço do próprio bundle: inicia se preciso, FORA da thread FX
         lastDisplayed = null;
         previousRoute = null;
         recovery.reset();
         boolean noAccounts = ctx.auth.firstRun();
         var situation = panel.systemview.FirstRunModel.resolve(noAccounts, ctx.settings.onboardingCompleted, false, message != null && message.toLowerCase().contains("expired"));
-        show(!noAccounts ? panel.authview.AuthScreens.LOGIN : panel.systemview.FirstRunModel.showsWelcome(situation)
-                ? panel.authview.AuthScreens.WELCOME : panel.authview.AuthScreens.SETUP);
+        StartupTrace.time("show(LOGIN)", () -> { show(!noAccounts ? panel.authview.AuthScreens.LOGIN : panel.systemview.FirstRunModel.showsWelcome(situation)
+                ? panel.authview.AuthScreens.WELCOME : panel.authview.AuthScreens.SETUP); return null; });
+    }
+
+    /**
+     * Garante o serviço local numa thread própria (até 25 s, limite do ServiceLauncher) e informa o login: "Starting local service…" →
+     * "Sign in" ou "Retry". Só apresenta; a autenticação continua passando pelo mesmo canal verificado. Resultado de um login já
+     * descartado (logout/troca de tela) é ignorado.
+     */
+    private void startAuthService(panel.authview.AuthScreens screens) {
+        if (!ctx.authority.launchesBundledService()) {
+            return; // autoridade injetada (teste/QA): não há serviço do bundle para subir, o login não é bloqueado
+        }
+        screens.setServiceReadiness(panel.authview.AuthScreens.ServiceReadiness.STARTING, () -> startAuthService(screens));
+        Thread launcher = new Thread(() -> {
+            boolean ok;
+            try {
+                ok = ctx.authority.ensureService();
+            } catch (RuntimeException e) {
+                ok = false;
+            }
+            boolean ready = ok;
+            Platform.runLater(() -> {
+                if (authScreens == screens) {
+                    StartupTrace.mark("auth service " + (ready ? "READY" : "UNAVAILABLE"));
+                    screens.setServiceReadiness(ready ? panel.authview.AuthScreens.ServiceReadiness.READY
+                            : panel.authview.AuthScreens.ServiceReadiness.UNAVAILABLE, () -> startAuthService(screens));
+                }
+            });
+        }, "service-launcher");
+        launcher.setDaemon(true);
+        launcher.start();
     }
 
     /** Operações reais por trás das telas de entrada. */
@@ -330,6 +370,7 @@ public class PanelApp extends Application {
         lastView.put(false, "overview");
         mainActive = true;
         ctx.localService.start(); // sondagem do serviço local: só leitura de estado, nunca navega
+        ctx.scientificCapture.start(); // captura científica real: só leitura, fora da FX, depois do login
         ctx.market.start(); // assinatura tipada do mercado público (ETHUSDT) no serviço local
         // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
         lastDisplayed = null;
@@ -745,7 +786,7 @@ public class PanelApp extends Application {
             linked = false;
         }
         return new panel.systemview.SystemStatusModel.Inputs(ctx.research.snapshot.get(), ctx.trading.snapshot.get(), ctx.byx.snapshot(),
-                ctx.sessions.user().isPresent(), ctx.adminAccess.hasValidAdminSession(), linked, views.containsKey("overview"), ctx.localService.snapshot());
+                ctx.sessions.user().isPresent(), ctx.adminAccess.hasValidAdminSession(), linked, views.containsKey("overview"), ctx.localService.snapshot(), ctx.scientificCapture.current());
     }
 
     /** Retry só existe onde há uma nova tentativa REAL: backend (refresh da pesquisa) e nó BYX (leitura da cadeia). */
@@ -848,7 +889,7 @@ public class PanelApp extends Application {
         return new panel.helpview.DiagnosticsReport().set("Application", AppBranding.NAME).set("Version", AppInfo.VERSION).set("Build", AppInfo.build())
                 .set("Environment", AppInfo.ENVIRONMENT).set("Java", AppInfo.java()).set("JavaFX", AppInfo.javafx()).set("Operating system", AppInfo.os())
                 .set("Backend", panel.shell.DockModel.backend(s).name()).set("Market feed", ((panel.design.StatusState) panel.shell.DockModel.feed(t.feed)[0]).name())
-                .set("Capture", ((panel.design.StatusState) panel.shell.DockModel.capture(s.capture.recorder())[0]).name())
+                .set("Capture", ((panel.design.StatusState) panel.shell.DockModel.capture(ctx.scientificCapture.current())[0]).name())
                 .set("Research", views.containsKey("overview") ? "Available to this account" : "Not available to this account")
                 .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Local service", ctx.localService.snapshot().summary()).set("Wallet", panel.shell.WalletStatus.diagnostics(net.identity(), () -> ctx.byxWallets.wallets()))
                 .set("Authentication", !user ? "Signed out" : ctx.adminAccess.hasValidAdminSession() ? "Signed in · admin session active" : "Signed in")
@@ -987,7 +1028,7 @@ public class PanelApp extends Application {
         updateRecovery();
         shell.dock().setModel(panel.shell.DockModel.build(s, ctx.trading.snapshot.get(), ctx.byx.snapshot(),
                 panel.shell.WalletStatus.dock(ctx.byx.snapshot().identity(), () -> ctx.byxWallets.wallets()),
-                ctx.adminAccess.hasValidAdminSession(), views.containsKey("capture")));
+                ctx.adminAccess.hasValidAdminSession(), views.containsKey("capture"), ctx.scientificCapture.current()));
     }
 
     private void chrome(Snapshot s) {

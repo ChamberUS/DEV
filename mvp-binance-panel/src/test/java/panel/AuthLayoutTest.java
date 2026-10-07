@@ -79,6 +79,7 @@ class AuthLayoutTest {
             stage.setScene(s);
             if (show) {
                 stage.show();
+                layout.brand().setFocusOverride(Boolean.TRUE); // o foco real da janela depende do desktop de quem roda o teste
             }
             layout.applyCss();
             layout.layout();

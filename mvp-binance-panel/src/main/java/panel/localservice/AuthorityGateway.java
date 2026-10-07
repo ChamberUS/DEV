@@ -49,6 +49,11 @@ public interface AuthorityGateway {
         return false;
     }
 
+    /** O gateway fala com o serviço do PRÓPRIO bundle (só o cliente real). Dublês de teste/QA: false, e o login não espera por serviço algum. */
+    default boolean launchesBundledService() {
+        return false;
+    }
+
     boolean hasSession();
 
     /** O painel esquece o token (a sessão já não vale no serviço ou o painel saiu). */

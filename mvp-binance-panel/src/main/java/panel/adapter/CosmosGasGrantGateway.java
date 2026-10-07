@@ -11,7 +11,21 @@ import panel.service.GasSponsorshipPolicy;
 /** Native SDK AllowedMsgAllowance(BasicAllowance), limited to MsgSend. Read-only by default. */
 public class CosmosGasGrantGateway implements ByxGasGrantGateway {
     private final Clock clock;
-    private final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
+    /** Criado no primeiro uso: montar o HttpClient (TLS) custa ~100 ms e estes adaptadores não são usados antes do login. */
+    private volatile HttpClient client;
+    private HttpClient client() {
+        HttpClient c = client;
+        if (c == null) {
+            synchronized (this) {
+                c = client;
+                if (c == null) {
+                    c = client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
+                }
+            }
+        }
+        return c;
+    }
+
     private final ObjectMapper json=new ObjectMapper();
     public CosmosGasGrantGateway(Clock clock) { this.clock=clock; }
     private void trust(ByxConfig c, GasSponsorshipPolicy p) throws Exception {
@@ -25,7 +39,7 @@ public class CosmosGasGrantGateway implements ByxGasGrantGateway {
         trust(c,p);
         if (!address.matches("byx1[023456789acdefghjklmnpqrstuvwxyz]{38}")) throw new IllegalArgumentException("Invalid grantee");
         var uri=c.endpoint().resolve("/cosmos/feegrant/v1beta1/allowance/"+p.granter()+"/"+address);
-        var response=client.send(HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(3)).GET().build(),HttpResponse.BodyHandlers.ofString());
+        var response=client().send(HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(3)).GET().build(),HttpResponse.BodyHandlers.ofString());
         if (response.statusCode()==404) return Optional.empty();
         if (response.statusCode()==500 && response.body().length()<1024) {
             var error=json.readTree(response.body());

@@ -145,7 +145,7 @@ class ShellComponentsTest {
                 panel.model.TraderSnapshot trader = new panel.model.TraderSnapshot();
                 trader.feed = "NOT_CONFIGURED";
                 var network = panel.model.ByxSnapshot.unknown("cosmos", "UNKNOWN", "UNKNOWN", "Awaiting identity verification");
-                f.shell.dock().setModel(panel.shell.DockModel.build(snap, trader, network, "Wallet unavailable", true, true));
+                f.shell.dock().setModel(panel.shell.DockModel.build(snap, trader, network, "Wallet unavailable", true, true, panel.model.ScientificCapture.unknown("test")));
                 f.layout();
                 f.layout(); // a compactação reaplica espaçamentos no passe seguinte
                 Bounds dock = inScene(f.shell.dock());
