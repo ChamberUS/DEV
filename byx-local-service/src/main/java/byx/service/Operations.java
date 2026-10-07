@@ -51,7 +51,7 @@ final class Operations {
             case "capabilities" -> {
                 var ops = out.putArray("operations");
                 java.util.stream.Stream.concat(java.util.stream.Stream.concat(Protocol.OPERATIONS.stream(), market == null ? java.util.stream.Stream.<String>empty() : Protocol.MARKET_OPERATIONS.stream()),
-                        Protocol.CHAIN_OPERATIONS.stream()).sorted().forEach(ops::add);
+                        java.util.stream.Stream.concat(Protocol.CHAIN_OPERATIONS.stream(), ChainReadIpc.OPERATIONS.stream())).sorted().forEach(ops::add);
                 if (authentication) {
                     byx.service.auth.AuthIpc.OPERATIONS.stream().sorted().forEach(ops::add);
                 }
@@ -110,6 +110,13 @@ final class Operations {
                 }
                 if (s.blockTimeMs() != null) {
                     out.put("blockTimeMs", s.blockTimeMs());
+                    // saúde pela IDADE do bloco (relógio local só para detectar fresh/stale/future; não basta o RPC responder)
+                    long age = System.currentTimeMillis() - s.blockTimeMs();
+                    out.put("blockAgeMs", Math.max(0, age));
+                    out.put("blockFreshness", age < -2_000 ? "FUTURE" : age > 60_000 ? "STALE" : "FRESH");
+                }
+                if (s.blockHash() != null) {
+                    out.put("blockHash", s.blockHash());
                 }
             }
             case "byx.denomMetadata" -> {

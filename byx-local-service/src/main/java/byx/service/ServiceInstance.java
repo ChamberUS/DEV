@@ -368,7 +368,7 @@ public final class ServiceInstance implements AutoCloseable {
                         throw new com.fasterxml.jackson.databind.JsonMappingException(null, "not a request");
                     }
                     // auth.* tem DTOs tipados por operação (AuthIpc valida o conjunto fechado de campos); o resto segue o Request estrito
-                    req = AuthIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
+                    req = AuthIpc.handles(tree.path("op").asText()) || ChainReadIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
                             : mapper.treeToValue(tree, Protocol.Request.class);
                 } catch (JsonProcessingException e) {
                     send(c, error("bad_request"));
@@ -384,6 +384,9 @@ public final class ServiceInstance implements AutoCloseable {
                 if (AuthIpc.handles(req.op()) && authIpc != null) {
                     AuthIpc.Reply r = authIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree);
                     AuthIpc.write(r, resp);
+                } else if (ChainReadIpc.handles(req.op())) {
+                    resp.put("ok", true);
+                    ChainReadIpc.run(chain, req.op(), tree, resp.putObject("result"));
                 } else if (!operations.supports(req.op())) {
                     resp.put("ok", false);
                     resp.putObject("error").put("code", "unsupported_operation");

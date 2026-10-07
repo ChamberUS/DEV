@@ -50,7 +50,7 @@ public class PanelApp extends Application {
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
-            "t-byx", "t-wallet", "t-benefits", "t-treasury",
+            "t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data",
             "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
             "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts",
             "sys-status", "sys-unavailable");
@@ -277,6 +277,7 @@ public class PanelApp extends Application {
         views.put("t-wallet", new panel.byxview.WalletScreen(ctx.motion, clock, byxData, this::show));
         views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData));
         views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
+        views.put("t-chain-data", new panel.byxview.ChainDataScreen(ctx.motion, clock, new panel.localservice.ModuleReadClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome()))));
         // LEGACY / NO V2 REFERENCE: vincular e revogar a posse (prova externa); o V2 de BYX é somente leitura
         views.put("t-wallet-verify", new panel.ui.ByxWalletView(ctx));
         views.put("t-markets", new panel.tradeview.MarketsPage(ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone(), this::show));
@@ -651,7 +652,7 @@ public class PanelApp extends Application {
         lastDisplayed = id;
         if (id.equals("sys-unavailable")) ((panel.systemview.PageUnavailableScreen) views.get(id)).setRequested(unavailableRequested);
         boolean toTrader = !panel.shell.ShellRoutes.isResearch(id);
-        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-wallet-verify").contains(id);
+        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-wallet-verify").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
         byxWorkspace = toByx;
         trader = toTrader;

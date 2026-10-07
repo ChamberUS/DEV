@@ -27,6 +27,7 @@ public final class CommandPalette {
         result.add(new Command("t-wallet", "Open Wallet", ""));
         result.add(new Command("t-benefits", "Open Benefits", ""));
         result.add(new Command("t-treasury", "Open Treasury", ""));
+        result.add(new Command("t-chain-data", "Open BYX Chain data", ""));
         if (admin) {
             String state = verified ? "" : "Admin verification required";
             result.add(new Command("overview", "Open Research", state));

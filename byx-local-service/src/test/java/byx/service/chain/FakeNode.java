@@ -25,6 +25,10 @@ public final class FakeNode implements AutoCloseable {
     public volatile int displayExponent = 6;
     public volatile String supply = "1500000";
     public volatile Map<String, Reply> override = new ConcurrentHashMap<>();
+    /** Respostas por URI COMPLETA (caminho + consulta), tentadas antes de {@link #override}. */
+    public final Map<String, Reply> byUri = new ConcurrentHashMap<>();
+    public final AtomicInteger concurrent = new AtomicInteger();
+    public final AtomicInteger maxConcurrent = new AtomicInteger();
     public final AtomicInteger requests = new AtomicInteger();
     public final java.util.List<String> paths = new java.util.concurrent.CopyOnWriteArrayList<>();
     private final HttpServer server;
@@ -35,7 +39,12 @@ public final class FakeNode implements AutoCloseable {
             requests.incrementAndGet();
             String key = ex.getRequestURI().getRawPath();
             paths.add(ex.getRequestMethod() + " " + ex.getRequestURI());
-            Reply r = override.get(key);
+            int now = concurrent.incrementAndGet();
+            maxConcurrent.accumulateAndGet(now, Math::max);
+            Reply r = byUri.get(ex.getRequestURI().toString());
+            if (r == null) {
+                r = override.get(key);
+            }
             if (r == null) {
                 r = switch (key) {
                     case "/status" -> Reply.ok(status());
@@ -57,7 +66,9 @@ public final class FakeNode implements AutoCloseable {
                 ex.getResponseBody().write(b);
             }
             ex.close();
+            concurrent.decrementAndGet();
         });
+        server.setExecutor(java.util.concurrent.Executors.newFixedThreadPool(16, r -> { Thread t = new Thread(r, "fake-node"); t.setDaemon(true); return t; }));
         server.start();
     }
 
@@ -66,7 +77,7 @@ public final class FakeNode implements AutoCloseable {
     public String origin() { return "http://127.0.0.1:" + port(); }
 
     public String status() {
-        return "{\"jsonrpc\":\"2.0\",\"id\":-1,\"result\":{\"node_info\":{\"id\":\"abc\",\"network\":\"" + chainId + "\",\"version\":\"0.1\"},\"sync_info\":{\"latest_block_hash\":\"AB\","
+        return "{\"jsonrpc\":\"2.0\",\"id\":-1,\"result\":{\"node_info\":{\"id\":\"abc\",\"network\":\"" + chainId + "\",\"version\":\"0.1\"},\"sync_info\":{\"latest_block_hash\":\"" + "AB".repeat(32) + "\","
                 + "\"latest_block_height\":\"" + height + "\",\"latest_block_time\":\"" + blockTime + "\",\"catching_up\":" + catchingUp + "}}}";
     }
 

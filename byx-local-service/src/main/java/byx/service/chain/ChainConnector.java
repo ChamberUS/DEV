@@ -31,12 +31,15 @@ public final class ChainConnector implements AutoCloseable {
     private final LongSupplier clock;
     private final ExecutorService worker;
     private final AtomicBoolean inflight = new AtomicBoolean();
+    private final ChainReader reader;
 
     private volatile ChainStatus status;
     private volatile ChainOkMetadata metadata; // verificado na geração atual
     private volatile BigInteger supply;
+    private volatile String verifiedChain; // chain id observado == esperado nesta geração (base de validade do cache de módulos)
     private volatile boolean closed;
-    private int generation = 1;
+    private volatile int generation = 1;
+    private volatile int epoch = 1; // muda a cada (re)conexão e nova geração: dado de época anterior nunca é servido como fresco
     private long maxHeight = -1;
     private long lastStartMs;
     private long metadataAtMs;
@@ -45,11 +48,37 @@ public final class ChainConnector implements AutoCloseable {
     record ChainOkMetadata(String base, String display, int exponent) { }
 
     public ChainConnector(Optional<ChainConfig> config, ChainTransport transport, Timing timing, LongSupplier clock) {
+        this(config, transport, timing, clock, ChainReader.Limits.production());
+    }
+
+    ChainConnector(Optional<ChainConfig> config, ChainTransport transport, Timing timing, LongSupplier clock, ChainReader.Limits readLimits) {
         this.config = config;
         this.transport = transport;
         this.timing = timing;
         this.clock = clock;
         this.status = config.isPresent() ? connecting() : ChainStatus.notConfigured(clock.getAsLong());
+        this.reader = config.isPresent() ? new ChainReader(config.get(), transport, new ChainReader.Context() {
+            @Override
+            public ChainStatus status() {
+                return ChainConnector.this.status();
+            }
+
+            @Override
+            public Optional<DenomModel> denom() {
+                ChainOkMetadata m = metadata;
+                return m == null ? Optional.empty() : Optional.of(new DenomModel(m.base(), m.display(), m.exponent()));
+            }
+
+            @Override
+            public int epoch() {
+                return epoch;
+            }
+
+            @Override
+            public Optional<String> verifiedChainId() {
+                return Optional.ofNullable(verifiedChain);
+            }
+        }, clock, readLimits) : null;
         this.worker = config.isPresent() ? Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "byx-chain");
             t.setDaemon(true);
@@ -69,7 +98,7 @@ public final class ChainConnector implements AutoCloseable {
     }
 
     private ChainStatus connecting() {
-        return new ChainStatus(ChainState.CONNECTING, true, false, null, null, null, null, false, ChainReason.NONE, generation, clock.getAsLong());
+        return new ChainStatus(ChainState.CONNECTING, true, false, null, null, null, null, false, ChainReason.NONE, generation, clock.getAsLong(), null);
     }
 
     public boolean configured() {
@@ -118,8 +147,13 @@ public final class ChainConnector implements AutoCloseable {
     /** Nova geração (reinício/mudança de configuração): zera máximo de altura e verificação de denom; o estado volta a CONNECTING. */
     public synchronized void newGeneration() {
         generation++;
+        epoch++;
+        if (reader != null) {
+            reader.invalidate();
+        }
         maxHeight = -1;
         metadata = null;
+        verifiedChain = null;
         supply = null;
         metadataAtMs = 0;
         everReachable = false;
@@ -139,12 +173,15 @@ public final class ChainConnector implements AutoCloseable {
             boolean wasReachable = everReachable;
             everReachable = true;
             if (!wasReachable) {
+                epoch++;
                 Log.event("chain_connect", "gen=" + generation);
             }
             if (!c.expectedChainId().equals(n.chainId())) {
+                verifiedChain = null;
                 mismatch(n.chainId(), ChainReason.NETWORK_MISMATCH, now);
                 return;
             }
+            verifiedChain = n.chainId();
             if (metadata == null || now - metadataAtMs >= timing.metadataRefreshMs()) {
                 ChainParser.Metadata m = ChainParser.denomMetadata(transport.get(c.rest(), ChainRoute.REST_DENOM_METADATA.path(c.denom().base()), ChainRoute.REST_DENOM_METADATA.maxBytes()));
                 if (!m.base().equals(c.denom().base()) || !m.display().equals(c.denom().display()) || m.displayExponent() != c.denom().exponent()) {
@@ -179,14 +216,17 @@ public final class ChainConnector implements AutoCloseable {
     }
 
     private void publish(ChainState state, boolean match, ChainParser.NodeStatus n, ChainReason reason, long now) {
-        status = new ChainStatus(state, true, true, n.chainId(), n.height(), n.catchingUp(), n.blockTimeMs(), match, reason, generation, now);
+        status = new ChainStatus(state, true, true, n.chainId(), n.height(), n.catchingUp(), n.blockTimeMs(), match, reason, generation, now, n.blockHash());
     }
 
     private void mismatch(String observedChain, ChainReason reason, long now) {
         supply = null;
+        if (reader != null) {
+            reader.invalidate(); // nada da rede anterior sobrevive a uma rede errada
+        }
         Log.event("chain_network_mismatch", "gen=" + generation + " reason=" + reason);
         // a altura NÃO é exposta: a rede não é a esperada, então nada dela é apresentado como saudável
-        status = new ChainStatus(ChainState.NETWORK_MISMATCH, true, true, observedChain, null, null, null, false, reason, generation, now);
+        status = new ChainStatus(ChainState.NETWORK_MISMATCH, true, true, observedChain, null, null, null, false, reason, generation, now, null);
     }
 
     private void failed(ChainReason reason, long now) {
@@ -197,17 +237,43 @@ public final class ChainConnector implements AutoCloseable {
             }
             everReachable = false;
             supply = null;
-            status = new ChainStatus(ChainState.OFFLINE, true, false, null, null, null, null, false, reason, generation, now);
+            status = new ChainStatus(ChainState.OFFLINE, true, false, null, null, null, null, false, reason, generation, now, null);
         } else {
             Log.event("chain_parse_rejected", "gen=" + generation + " reason=" + reason);
             supply = null;
-            status = new ChainStatus(ChainState.ERROR, true, true, null, null, null, null, false, reason, generation, now);
+            status = new ChainStatus(ChainState.ERROR, true, true, null, null, null, null, false, reason, generation, now, null);
         }
+    }
+
+    /**
+     * Leitura PÚBLICA de módulo (tipada, somente leitura). Não configurado: NOT_CONFIGURED sem nenhuma rede nem thread. Bloqueia só a thread do IPC chamadora (limitada por prazo), nunca a UI.
+     */
+    public ReadResult read(ReadRequest request) {
+        if (reader == null) {
+            return ReadResult.failure(ReadFailure.NOT_CONFIGURED, 0);
+        }
+        return reader.read(request);
+    }
+
+    public java.util.List<ModuleHealth.Snapshot> moduleHealth() {
+        return reader == null ? java.util.List.of() : reader.health();
+    }
+
+    /** Contadores locais (sem parâmetros): fetches reais, hits de cache, requisições coalescidas e recusadas por limite. */
+    public long[] readCounters() {
+        return reader == null ? new long[4] : new long[] {reader.fetches.get(), reader.cacheHits.get(), reader.coalesced.get(), reader.rateLimited.get()};
+    }
+
+    ChainReader readerForTest() {
+        return reader;
     }
 
     @Override
     public void close() {
         closed = true;
+        if (reader != null) {
+            reader.close();
+        }
         if (worker != null) {
             worker.shutdownNow();
         }

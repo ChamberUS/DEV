@@ -106,7 +106,7 @@ class ChainIpcTest {
             assertEquals("byx", s.path("chainId").asText());
             assertEquals(100, s.path("latestHeight").asLong());
             assertFalse(s.path("catchingUp").asBoolean(true));
-            assertEquals(Set.of("state", "configured", "reachable", "networkMatch", "reason", "generation", "updatedAtMs", "nowMs", "chainId", "latestHeight", "catchingUp", "blockTimeMs"),
+            assertEquals(Set.of("state", "configured", "reachable", "networkMatch", "reason", "generation", "updatedAtMs", "nowMs", "chainId", "latestHeight", "catchingUp", "blockTimeMs", "blockAgeMs", "blockFreshness", "blockHash"),
                     fieldNames(s), "only the minimal typed fields: no raw JSON, no headers, no node internals");
             JsonNode d = c.call("byx.denomMetadata").path("result");
             assertTrue(d.path("available").asBoolean());
@@ -190,7 +190,7 @@ class ChainIpcTest {
                 if (!rel.equals("chain/ChainConfig.java") && !rel.equals("chain/ChainEndpoint.java") && !rel.equals("chain/ChainProfile.java")) {
                     assertFalse(src.contains("ChainConfig.of(") || src.contains("new ChainConfig(") || src.contains("ChainEndpoint.parse(") || src.contains("new ChainEndpoint("), rel + " must not build a node configuration");
                 }
-                if (!rel.startsWith("chain/") && !rel.equals("ServiceMain.java") && !rel.equals("ServiceInstance.java") && !rel.equals("Operations.java")) {
+                if (!rel.startsWith("chain/") && !rel.equals("ServiceMain.java") && !rel.equals("ServiceInstance.java") && !rel.equals("Operations.java") && !rel.equals("ChainReadIpc.java")) {
                     assertFalse(src.contains("ChainConnector") || src.contains("LoopbackHttp"), rel + " must not use the chain connector");
                 }
             }

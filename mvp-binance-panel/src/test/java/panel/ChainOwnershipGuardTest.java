@@ -43,6 +43,28 @@ class ChainOwnershipGuardTest {
     }
 
     @Test
+    void theModuleReadPathIsTypedMinimalAndOwnsNoEndpointRouteOrTransport() throws Exception {
+        String client = read("localservice/LocalServiceClient.java");
+        assertTrue(client.contains("Set.of(\"byx.lojas.getMerchant\", \"byx.lojas.listMerchants\", \"byx.payments.getPayment\", \"byx.payments.listByStore\", \"byx.payments.params\",\n            \"byx.certificados.getCertificate\", \"byx.certificados.listByMerchant\", \"byx.bank.balance\", \"byx.feesplit.params\", \"byx.moduleHealth\")"),
+                "the module operations are a closed list");
+        assertTrue(client.contains("\"{\\\"v\\\":1,\\\"id\\\":\\\"\" + id + \"\\\",\\\"op\\\":\\\"\" + op + \"\\\"\" + (validatedArgsJson == null ? \"\" : \",\\\"args\\\":\" + validatedArgsJson) + \"}\""),
+                "a module request is only {v,id,op,args}");
+        for (String f : new String[] {"localservice/ModuleReadClient.java", "byxview/ChainDataScreen.java", "byxview/ChainDataModel.java", "model/ChainModules.java"}) {
+            String src = read(f).replaceAll("(?s)/\\*.*?\\*/", "").replaceAll("//.*", "");
+            for (String banned : new String[] {"java.net.http", "HttpClient", "URI.create", "http://", "https://", "/byx/", "/cosmos/", "localhost", "127.0.0.1", "ProcessBuilder", "Runtime.getRuntime"}) {
+                assertFalse(src.contains(banned), f + " must not contain " + banned);
+            }
+            assertFalse(src.matches("(?s).*\\\\\"(host|port|url|endpoint|denom|chainId|path|query|route)\\\\\"\\s*:.*"), f + " must not send host/port/url/route");
+        }
+        java.util.Set<String> methods = new java.util.TreeSet<>();
+        for (var m : panel.model.ChainModules.Reader.class.getMethods()) {
+            methods.add(m.getName());
+        }
+        assertEquals(new java.util.TreeSet<>(java.util.List.of("merchant", "merchants", "payment", "paymentsByStore", "paymentParams", "certificate", "certificatesByMerchant", "balance", "feesplit", "health")),
+                methods, "the read interface is exactly these reads: no write seam can hide in it");
+    }
+
+    @Test
     void noPanelClassOpensANetworkConnectionToTheChainOnTheNetworkStatusPath() throws Exception {
         Set<String> httpUsers = new TreeSet<>();
         try (Stream<Path> files = Files.walk(MAIN)) {

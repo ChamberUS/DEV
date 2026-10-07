@@ -5,8 +5,8 @@ package byx.service.chain;
  * em divergência {@code networkMatch=false} e a altura NÃO é exposta como saudável.
  */
 public record ChainStatus(ChainState state, boolean configured, boolean reachable, String chainId, Long latestHeight, Boolean catchingUp, Long blockTimeMs, boolean networkMatch,
-        ChainReason reason, int generation, long updatedAtMs) {
+        ChainReason reason, int generation, long updatedAtMs, String blockHash) {
     static ChainStatus notConfigured(long now) {
-        return new ChainStatus(ChainState.NOT_CONFIGURED, false, false, null, null, null, null, false, ChainReason.NOT_CONFIGURED, 0, now);
+        return new ChainStatus(ChainState.NOT_CONFIGURED, false, false, null, null, null, null, false, ChainReason.NOT_CONFIGURED, 0, now, null);
     }
 }

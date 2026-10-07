@@ -72,6 +72,9 @@ public final class ServiceProbe {
             if (s.connected() && arg.equals("--chain")) {
                 chainOnce(client, out);
             }
+            if (s.connected() && arg.startsWith("--modules")) {
+                modules(client, out, arg.startsWith("--modules=") ? Math.max(1, Math.min(50, Integer.parseInt(arg.substring("--modules=".length())))) : 1);
+            }
             if (s.connected() && arg.startsWith("--chain-watch=")) {
                 chainWatch(client, out, Math.max(2, Math.min(600, Integer.parseInt(arg.substring("--chain-watch=".length())))));
             }
@@ -118,6 +121,63 @@ public final class ServiceProbe {
         out.println("probe.chain.row.displayDenom=" + panel.byxview.NetworkModel.displayDenom(snap));
         out.println("probe.chain.row.exponent=" + panel.byxview.NetworkModel.exponent(snap));
         out.println("probe.chain.row.supply=" + panel.byxview.NetworkModel.supply(snap));
+    }
+
+    /**
+     * Leituras PÚBLICAS de módulo pelo MESMO cliente tipado que a tela usa (IPC verificado → serviço → nó). Só leitura. Endereço de teste: o do merchant 1 lido da própria chain. {@code passes}: repete
+     * o conjunto para observar cache/coalescência/contadores (o serviço decide; o probe só conta).
+     */
+    private static void modules(LocalServiceClient client, PrintStream out, int passes) {
+        ModuleReadClient r = new ModuleReadClient(client);
+        String addr = null;
+        for (int i = 0; i < passes; i++) {
+            boolean first = i == 0;
+            var fee = r.feesplit();
+            line(out, first, "feesplit", fee.ok() ? fee.data().distributionBps() + "/" + fee.data().treasuryBps() + "/" + fee.data().burnBps() + " source=" + fee.data().source() : String.valueOf(fee.failure()));
+            var pp = r.paymentParams();
+            line(out, first, "payments.params", pp.ok() ? pp.data().defaultExpiresInSeconds() + "/" + pp.data().minExpiresInSeconds() + "/" + pp.data().maxExpiresInSeconds() + " " + pp.freshness() : String.valueOf(pp.failure()));
+            var m = r.merchant("1");
+            if (m.ok() && addr == null) {
+                addr = m.data().creator();
+            }
+            line(out, first, "merchant.1", m.ok() ? m.data().name() + "|" + m.data().creator() + "|" + m.data().kycStatus() + " " + m.freshness() : String.valueOf(m.failure()));
+            var ml = r.merchants(5, null);
+            line(out, first, "merchants.list", ml.ok() ? ml.data().items().size() + " items next=" + (ml.nextCursor() != null) + " " + ml.freshness() : String.valueOf(ml.failure()));
+            line(out, first, "merchant.99", String.valueOf(r.merchant("99").failure()));
+            for (String id : new String[] {"1", "2"}) {
+                var p = r.payment(id);
+                line(out, first, "payment." + id, p.ok() ? p.data().amountUbyx() + " ubyx|" + p.data().amountDisplay() + "|" + p.data().status() + "|store=" + p.data().storeId() + " " + p.freshness() : String.valueOf(p.failure()));
+            }
+            var pl = r.paymentsByStore("1", 5, null);
+            line(out, first, "payments.byStore.1", pl.ok() ? pl.data().items().size() + " items " + pl.freshness() : String.valueOf(pl.failure()));
+            var c = r.certificate("1");
+            line(out, first, "certificate.1", c.ok() ? c.data().category() + "|" + c.data().brand() + " " + c.data().model() + "|revoked=" + c.data().revoked() + "|serial=" + c.data().serialHash().substring(0, 8) + " " + c.freshness() : String.valueOf(c.failure()));
+            var cl = r.certificatesByMerchant("1", 5, null);
+            line(out, first, "certificates.byMerchant.1", cl.ok() ? cl.data().items().size() + " items " + cl.freshness() : String.valueOf(cl.failure()));
+            line(out, first, "certificate.77", String.valueOf(r.certificate("77").failure()));
+            if (addr != null) {
+                var b = r.balance(addr);
+                line(out, first, "balance", b.ok() ? b.data().amountUbyx() + " ubyx|" + b.data().amountDisplay() + " " + b.freshness() : String.valueOf(b.failure()));
+            }
+            line(out, first, "balance.invalidAddress", String.valueOf(r.balance("byx1invalid").failure()));
+        }
+        var h = r.health();
+        if (h.ok()) {
+            h.data().modules().forEach(x -> out.println("probe.modules.health." + x.module() + "=" + x.state()));
+            out.println("probe.modules.reads.fetches=" + h.data().fetches());
+            out.println("probe.modules.reads.cacheHits=" + h.data().cacheHits());
+            out.println("probe.modules.reads.coalesced=" + h.data().coalesced());
+            out.println("probe.modules.reads.rateLimited=" + h.data().rateLimited());
+        } else {
+            out.println("probe.modules.health=" + h.failure());
+        }
+        out.println("probe.modules.passes=" + passes);
+    }
+
+    private static void line(PrintStream out, boolean print, String name, String value) {
+        if (print) {
+            out.println("probe.modules." + name + "=" + value);
+        }
     }
 
     /** Amostra a chain por N segundos pelo caminho da tela: altura, estado e geração (altura não deve regredir; a geração deve ficar estável). */

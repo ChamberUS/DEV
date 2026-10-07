@@ -38,7 +38,8 @@ public final class LoopbackHttp implements ChainTransport {
                     throw new ChainException(ChainReason.REDIRECT_REFUSED);
                 }
                 if (status != 200) {
-                    throw new ChainException(ChainReason.HTTP_STATUS);
+                    byte[] err = status >= 400 && status < 500 ? in.readNBytes(1024) : null; // corpo de erro 4xx, limitado, só para o mapeamento interno (não encontrado)
+                    throw new ChainException(ChainReason.HTTP_STATUS, status, err);
                 }
                 long declared = response.headers().firstValueAsLong("content-length").orElse(-1);
                 if (declared > maxBytes) {

@@ -53,6 +53,10 @@ public final class LocalServiceClient {
     private static final Set<String> OPERATIONS = Set.of("health", "version", "capabilities");
     /** Operações PÚBLICAS e somente leitura da chain, sem argumentos: o painel nunca envia host, porta, caminho nem consulta. */
     static final Set<String> CHAIN_OPERATIONS = Set.of("byx.status", "byx.denomMetadata", "byx.supply");
+    /** Leituras PÚBLICAS de módulo (lista fechada; cada uma só aceita os argumentos tipados validados por {@link ModuleReadClient}). */
+    static final Set<String> MODULE_OPERATIONS = Set.of("byx.lojas.getMerchant", "byx.lojas.listMerchants", "byx.payments.getPayment", "byx.payments.listByStore", "byx.payments.params",
+            "byx.certificados.getCertificate", "byx.certificados.listByMerchant", "byx.bank.balance", "byx.feesplit.params", "byx.moduleHealth");
+    private static final java.util.concurrent.atomic.AtomicInteger MODULE_SEQ = new java.util.concurrent.atomic.AtomicInteger();
     private static final JsonMapper JSON = new JsonMapper();
     private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "local-service-timeout");
@@ -285,6 +289,41 @@ public final class LocalServiceClient {
             try {
                 Paired paired = pair(ch, socket, secret);
                 return callWithId(paired.in(), paired.out(), op, "c-" + op.replace('.', '_'));
+            } finally {
+                guard.cancel(false);
+            }
+        } finally {
+            java.util.Arrays.fill(secret, (byte) 0);
+        }
+    }
+
+    /**
+     * Uma leitura PÚBLICA de módulo: canal novo e pareado, prazo total, operação da lista fechada e {@code args} já validados e serializados pelo chamador tipado (só id decimal, endereço, limite e
+     * cursor opaco). O painel nunca monta URL nem escolhe host/porta/rota. Bloqueante: chame fora da thread FX.
+     */
+    JsonNode moduleCall(String op, String validatedArgsJson) throws IOException, Fail {
+        if (!MODULE_OPERATIONS.contains(op) || validatedArgsJson != null && (validatedArgsJson.length() > 256 || !validatedArgsJson.startsWith("{") || !validatedArgsJson.endsWith("}"))) {
+            throw new IllegalArgumentException("not allowlisted");
+        }
+        Path socket = run.resolve("service.sock");
+        byte[] secret = loadSecret(socket);
+        try (SocketChannel ch = SocketChannel.open(StandardProtocolFamily.UNIX)) {
+            ScheduledFuture<?> guard = TIMER.schedule(() -> {
+                try {
+                    ch.close();
+                } catch (IOException ignored) {
+                    // nada
+                }
+            }, TOTAL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            try {
+                Paired paired = pair(ch, socket, secret);
+                String id = "m-" + MODULE_SEQ.incrementAndGet();
+                send(paired.out(), "{\"v\":1,\"id\":\"" + id + "\",\"op\":\"" + op + "\"" + (validatedArgsJson == null ? "" : ",\"args\":" + validatedArgsJson) + "}");
+                JsonNode r = read(paired.in());
+                if (!r.path("ok").isBoolean() || !r.path("ok").asBoolean() || !id.equals(text(r, "id")) || !r.path("result").isObject()) {
+                    throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "contract_violation");
+                }
+                return r.path("result");
             } finally {
                 guard.cancel(false);
             }

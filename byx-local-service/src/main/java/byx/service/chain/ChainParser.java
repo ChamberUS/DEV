@@ -17,12 +17,13 @@ final class ChainParser {
             .build();
     private static final Pattern CHAIN_ID = Pattern.compile("[A-Za-z0-9_.-]{1,64}");
     private static final Pattern HEIGHT = Pattern.compile("[0-9]{1,15}");
+    private static final Pattern HASH = Pattern.compile("[0-9A-Fa-f]{64}");
     private static final Pattern AMOUNT = Pattern.compile("[0-9]{1,40}");
     static final long MAX_HEIGHT = 999_999_999_999_999L;
 
     private ChainParser() { }
 
-    record NodeStatus(String chainId, long height, long blockTimeMs, boolean catchingUp) { }
+    record NodeStatus(String chainId, long height, long blockTimeMs, boolean catchingUp, String blockHash) { }
 
     record Metadata(String base, String display, int displayExponent) { }
 
@@ -95,7 +96,21 @@ final class ChainParser {
         if (!catching.isBoolean()) {
             throw new ChainException(ChainReason.TYPE_MISMATCH);
         }
-        return new NodeStatus(chain, height, timeMs, catching.asBoolean());
+        // hash do último bloco: OPCIONAL (informativo); se presente deve ser hex de 64 dígitos, senão o contrato está quebrado
+        String hash = null;
+        JsonNode h2 = sync.get("latest_block_hash");
+        if (h2 != null) {
+            if (!h2.isTextual()) {
+                throw new ChainException(ChainReason.TYPE_MISMATCH);
+            }
+            if (!h2.asText().isEmpty()) {
+                if (!HASH.matcher(h2.asText()).matches()) {
+                    throw new ChainException(ChainReason.VALUE_OUT_OF_RANGE);
+                }
+                hash = h2.asText();
+            }
+        }
+        return new NodeStatus(chain, height, timeMs, catching.asBoolean(), hash);
     }
 
     /** REST bank denoms_metadata: metadata.{base, display, denom_units[{denom, exponent}]}; devolve o expoente da unidade de exibição. */
