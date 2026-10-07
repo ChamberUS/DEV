@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.PrintStream;
 
 /**
- * Sonda de linha de comando do serviço local, SEM JavaFX: {@code BYX-MVP --probe-service [--market] [--ensure-service]}. Roda no MESMO executável assinado do
+ * Sonda de linha de comando do serviço local, SEM JavaFX: {@code BYX-MVP --probe-service [--market] [--ensure-service] [--chain] [--capture]}. Roda no MESMO executável assinado do
  * app (mesma identidade de código), serve à demonstração automatizada da identidade do peer e imprime só pares chave=valor não sensíveis.
  * Não lê banco, Keychain, sessão nem login e não habilita nada.
  */
@@ -79,7 +79,43 @@ public final class ServiceProbe {
                 chainWatch(client, out, Math.max(2, Math.min(600, Integer.parseInt(arg.substring("--chain-watch=".length())))));
             }
         }
+        if (java.util.Arrays.asList(args).contains("--capture")) {
+            captureStatus(out);
+        }
         return s.connected() ? 0 : 1;
+    }
+
+    /**
+     * Estado da captura científica pelo MESMO modelo que o dock usa (resolvedor de runtime + admissão da última sessão fechada), sem login, sem UI e sem
+     * mercado. Somente leitura: não inicia, para nem altera nada. Duas leituras: a completa (autoritativa) e a rápida verificada.
+     */
+    private static void captureStatus(PrintStream out) {
+        try {
+            panel.model.Settings settings = panel.model.Settings.load();
+            var resolver = panel.adapter.ScientificCaptureResolver.forLocal(java.nio.file.Path.of(System.getProperty("user.home"), ".mvp-binance-capture"),
+                    settings.project().resolve("data/microstructure"), java.nio.file.Path.of(settings.cliPath));
+            for (String pass : new String[] {"full", "fast"}) {
+                long t0 = System.nanoTime();
+                panel.model.ScientificCapture c = resolver.observe(java.time.Instant.now());
+                out.println("probe.capture." + pass + ".ms=" + (System.nanoTime() - t0) / 1_000_000);
+                if (pass.equals("full")) {
+                    out.println("probe.capture.status=" + c.status());
+                    out.println("probe.capture.dock=" + panel.shell.DockModel.capture(c)[0]);
+                    out.println("probe.capture.reason=" + c.reason());
+                    out.println("probe.capture.campaign=" + c.campaign());
+                    out.println("probe.capture.configHash=" + c.configHash());
+                    out.println("probe.capture.session=" + c.session());
+                    out.println("probe.capture.lastWriteAgeSeconds=" + (c.lastWriteAge() == null ? "?" : c.lastWriteAge().toSeconds()));
+                    out.println("probe.capture.supervisorPid=" + c.supervisorPid());
+                    out.println("probe.capture.collectorPid=" + c.collectorPid());
+                    out.println("probe.capture.admission=" + c.admission());
+                } else {
+                    out.println("probe.capture.fast.status=" + c.status());
+                }
+            }
+        } catch (RuntimeException e) {
+            out.println("probe.capture.status=UNKNOWN (" + e.getClass().getSimpleName() + ")");
+        }
     }
 
     /** Leitura PÚBLICA da chain pelo MESMO caminho da tela de rede (cliente IPC → gateway do serviço → modelo da tela). Só leitura; nenhum argumento enviado ao serviço. */

@@ -63,4 +63,26 @@ class StartupGuardTest {
         int afterLogin = app.indexOf("private void afterLogin(");
         assertTrue(app.indexOf("t-mascot-gallery\", new panel.mascot.MascotGallery") > afterLogin, "the gallery is created only after login");
     }
+
+    @Test
+    void productionPanelHasNoMarketBypassAndOnlyTwoKnownEnvironmentReads() throws IOException {
+        java.util.List<String> env = new java.util.ArrayList<>();
+        try (var files = Files.walk(Path.of("src/main/java"))) {
+            for (Path p : files.filter(f -> f.toString().endsWith(".java")).toList()) {
+                String src = Files.readString(p);
+                for (String forbidden : new String[] {"disableMarketForTest", "skipMarket", "offlineTestMode", "offlineMode", "noMarket", "BYX_NO_MARKET", "FakeMarket"}) {
+                    assertFalse(src.contains(forbidden), p + " must not contain " + forbidden);
+                }
+                int i = 0;
+                while ((i = src.indexOf("System.getenv(", i)) >= 0) {
+                    int end = src.indexOf(')', i);
+                    env.add(src.substring(i + 14, end));
+                    i = end;
+                }
+            }
+        }
+        for (String e : env) {
+            assertTrue(e.equals("\"BYX_LOCAL_SERVICE_HOME\"") || e.equals("\"BYX_STARTUP_TRACE\""), "unexpected environment switch " + e);
+        }
+    }
 }
