@@ -123,7 +123,7 @@ class ChainDataScreenTest {
     void everyStateIsDistinctAndStaleOrCachedNeverLooksLive() throws Exception {
         DeskHarness.fx(() -> {
             FakeReader r = new FakeReader();
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, SYNC, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
             s.onShow();
             input(s, "chain-merchant-input").setText("1");
             r.merchant = okMerchant(Freshness.LIVE, 0);
@@ -155,7 +155,7 @@ class ChainDataScreenTest {
     void economicsShowsTheSixtyThirtyTenAllocationAsDocumentedNotQueriedAndModuleStatusIsPerModule() throws Exception {
         DeskHarness.fx(() -> {
             FakeReader r = new FakeReader();
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, SYNC, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
             s.onShow();
             String eco = texts(root(s).lookup("#chain-economics"));
             assertTrue(eco.contains("60%") && eco.contains("30%") && eco.contains("10%"), eco);
@@ -164,7 +164,9 @@ class ChainDataScreenTest {
             assertFalse(eco.toLowerCase().contains("58.8") || eco.contains("net to validator") && !eco.contains("not a net"), "no hardcoded community tax and no 'net validator' claim");
             assertTrue(eco.contains("600 s") && eco.contains("86400 s"), "payment expiry params come from the query");
             String health = texts(root(s).lookup("#chain-health"));
-            assertTrue(health.contains("NODE · OFFLINE") && health.contains("LOJAS · UNAVAILABLE") && health.contains("PAYMENTS · AVAILABLE") && health.contains("FEESPLIT · NOT EXPOSED"), health);
+            assertTrue(health.contains("NODE · OFFLINE") && health.contains("Lojas") && health.contains("UNAVAILABLE") && health.contains("Payments") && health.contains("AVAILABLE") && health.contains("Feesplit") && health.contains("NOT EXPOSED"), health);
+            assertTrue(texts(root(s).lookup("#chain-card-feesplit")).contains("Documented policy · not read from chain"), "feesplit is never mixed with live state");
+            assertTrue(texts(root(s).lookup("#chain-economics")).contains("DOCUMENTED POLICY · NOT READ FROM CHAIN"));
             s.dispose();
         });
     }
@@ -172,7 +174,7 @@ class ChainDataScreenTest {
     @Test
     void thereIsNoControlThatCouldChangeAnythingOnTheChain() throws Exception {
         DeskHarness.fx(() -> {
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, new FakeReader(), SYNC, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, new FakeReader(), null, SYNC, SYNC);
             Set<String> allowed = Set.of("Refresh", "Look up", "Load", "List", "Load more");
             for (Node n : all(s)) {
                 if (n instanceof Button b) {
@@ -195,7 +197,7 @@ class ChainDataScreenTest {
         DeskHarness.fx(() -> {
             FakeReader r = new FakeReader();
             r.balance = new Reply<>(true, null, Freshness.LIVE, 0, new ChainModules.Balance(ADDR, new BigInteger("1234567"), "1.234567 BYX"), null);
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, SYNC, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
             s.onShow();
             input(s, "chain-balance-input").setText("byx1notvalid");
             // o leitor real recusa localmente; o fake ecoa a política: aqui a tela só mostra o estado do Reply
@@ -216,7 +218,7 @@ class ChainDataScreenTest {
     void listsPageIncrementallyAndNeverRenderMoreThanTheCap() throws Exception {
         DeskHarness.fx(() -> {
             FakeReader r = new FakeReader();
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, SYNC, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
             s.onShow();
             r.merchantPages.add(new Reply<>(true, null, Freshness.LIVE, 0, new ChainModules.Page<>(List.of(m("1"), m("2"))), "v1.b.AAAAAAAAAAM"));
             button(s, "chain-merchants-go").fire();
@@ -243,7 +245,7 @@ class ChainDataScreenTest {
         var io = Executors.newSingleThreadExecutor();
         CountDownLatch done = new CountDownLatch(1);
         DeskHarness.fx(() -> {
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, io, cmd -> Platform.runLater(() -> {
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, io, cmd -> Platform.runLater(() -> {
                 cmd.run();
                 done.countDown();
             }));
@@ -264,7 +266,7 @@ class ChainDataScreenTest {
             FakeReader r = new FakeReader();
             r.merchant = okMerchant(Freshness.LIVE, 0);
             List<Runnable> queued = new ArrayList<>();
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, queued::add, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, queued::add, SYNC);
             s.onShow();
             queued.forEach(Runnable::run);
             queued.clear();
@@ -288,7 +290,7 @@ class ChainDataScreenTest {
     void manualRefreshIsDebouncedAndAskedOfTheService() throws Exception {
         DeskHarness.fx(() -> {
             FakeReader r = new FakeReader();
-            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, SYNC, SYNC);
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
             s.onShow();
             long healthCalls = r.calls.stream().filter("health"::equals).count();
             for (int i = 0; i < 10; i++) {
@@ -297,5 +299,32 @@ class ChainDataScreenTest {
             assertEquals(healthCalls, r.calls.stream().filter("health"::equals).count(), "a refresh storm within the debounce window is coalesced");
             s.dispose();
         });
+    }
+
+    @Test
+    void headerReusesTheNetworkSnapshotAndTheRailEntryAddsNoRequests() throws Exception {
+        DeskHarness.fx(() -> {
+            FakeReader r = new FakeReader();
+            ByxScreensTest.Stub data = new ByxScreensTest.Stub();
+            data.network = new panel.model.ByxSnapshot("LIVE_NODE", "LOCALNET", "ONLINE", "VERIFIED", "FRESH", false, "byx", "605", Instant.parse("2026-10-07T11:59:50Z"), null, null, null, 0,
+                    Instant.parse("2026-10-07T11:59:55Z"), "ok", "LIVE", new panel.model.ChainFacts("ubyx", "BYX", 6, java.math.BigInteger.ONE));
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, data, SYNC, SYNC);
+            s.onShow();
+            String h = texts(root(s).lookup("#chain-header"));
+            assertTrue(h.contains("LIVE") && h.contains("byx") && h.contains("605") && h.contains("ubyx / BYX") && h.contains("READ ONLY"), h);
+            assertTrue(h.contains("00:00:10"), "block age from the shared snapshot: " + h);
+            long before = r.calls.size();
+            s.onSnapshot(null);
+            s.onShow();
+            assertEquals(before + 3, r.calls.size(), "re-entering asks for health/feesplit/params once each; the header itself adds no call");
+            s.dispose();
+        });
+    }
+
+    @Test
+    void chainDataIsInTheBYXRailRightAfterNetworkAndOpensTheExistingRoute() {
+        List<String> ids = panel.shell.ShellRoutes.rail(panel.shell.ShellContext.BYX).stream().map(x -> x.id()).toList();
+        assertEquals(List.of("t-byx", "t-chain-data", "t-wallet", "t-benefits", "t-treasury"), ids);
+        assertEquals("Chain data", panel.shell.ShellRoutes.require("t-chain-data").title());
     }
 }

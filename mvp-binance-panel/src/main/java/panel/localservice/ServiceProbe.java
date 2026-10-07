@@ -163,6 +163,7 @@ public final class ServiceProbe {
         }
         var h = r.health();
         if (h.ok()) {
+            out.println("probe.modules.health.node=" + h.data().node());
             h.data().modules().forEach(x -> out.println("probe.modules.health." + x.module() + "=" + x.state()));
             out.println("probe.modules.reads.fetches=" + h.data().fetches());
             out.println("probe.modules.reads.cacheHits=" + h.data().cacheHits());

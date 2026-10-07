@@ -38,6 +38,12 @@ public final class ChainDataScreen implements View {
     private static final long REFRESH_DEBOUNCE_MS = 1_000;
 
     private final ChainModules.Reader reader;
+    private final ByxData network;
+    private final KvRow hNode = new KvRow("Node state");
+    private final KvRow hChain = new KvRow("Chain ID");
+    private final KvRow hHeight = new KvRow("Height");
+    private final KvRow hAge = new KvRow("Block age");
+    private final KvRow hDenom = new KvRow("Denom (base / display)");
     private final MotionService motion;
     private final Clock clock;
     private final Executor io;
@@ -54,12 +60,13 @@ public final class ChainDataScreen implements View {
     private long lastRefreshMs;
     private boolean everShown;
 
-    public ChainDataScreen(MotionService motion, Clock clock, ChainModules.Reader reader) {
-        this(motion, clock, reader, null, Platform::runLater);
+    public ChainDataScreen(MotionService motion, Clock clock, ChainModules.Reader reader, ByxData network) {
+        this(motion, clock, reader, network, null, Platform::runLater);
     }
 
-    /** Testes injetam executores síncronos. */
-    ChainDataScreen(MotionService motion, Clock clock, ChainModules.Reader reader, Executor io, Executor ui) {
+    /** Testes injetam executores síncronos. {@code network}: o MESMO snapshot da tela Network (nenhuma fonte de requisição nova). */
+    ChainDataScreen(MotionService motion, Clock clock, ChainModules.Reader reader, ByxData network, Executor io, Executor ui) {
+        this.network = network;
         this.motion = motion;
         this.clock = clock;
         this.reader = reader;
@@ -80,6 +87,9 @@ public final class ChainDataScreen implements View {
         ByxButton refresh = new ByxButton("Refresh", ByxButton.Variant.SECONDARY, motion).small();
         refresh.setId("chain-refresh");
         refresh.setOnAction(e -> refreshAll(true));
+        VBox nodeHeader = Kit.panel(null, Kit.titled("Network", ByxBadge.of("READ ONLY", ByxBadge.Tone.INFO)), hNode, hChain, hHeight, hAge, hDenom,
+                Kit.dim("Public data from the local BYX node. This page only reads data and cannot change anything."));
+        nodeHeader.setId("chain-header");
         VBox health = Kit.panel(null, Kit.titled("Module status", healthState), moduleBadges, readStats,
                 Kit.muted("The node can be live while one module's query is unavailable; each module is shown on its own. Refresh asks the local service, which applies its cache and rate limits."), refresh);
         health.setId("chain-health");
@@ -101,7 +111,7 @@ public final class ChainDataScreen implements View {
         VBox page = Kit.page(14);
         page.getChildren().addAll(Kit.header("Chain data", "Public, read-only data from the local BYX node, served by the local service."),
                 Kit.environment("LOCALNET", "Development environment", "TEST assets only. Nothing here has real value. This area cannot change anything."),
-                health, economics.box, merchant.box, merchants.box, payment.box, payments.box, cert.box, certs.box, balance.box);
+                nodeHeader, health, economics.box, merchant.box, merchants.box, payment.box, payments.box, cert.box, certs.box, balance.box);
         scroll = Kit.scroll(page);
         sections.addAll(List.of(economics, merchant, merchants, payment, payments, cert, certs, balance));
     }
@@ -126,6 +136,10 @@ public final class ChainDataScreen implements View {
     public void onShow() {
         visible = true;
         epoch++;
+        if (network != null) {
+            network.refreshNetwork(); // o mesmo caminho assíncrono e limitado da tela Network (o serviço coalesce)
+        }
+        renderHeader();
         refreshAll(false); // reaproveita o cache do serviço e atualiza em segundo plano
     }
 
@@ -174,7 +188,22 @@ public final class ChainDataScreen implements View {
         }
     }
 
+    /** Resumo da rede a partir do snapshot que a tela Network já mantém: nenhuma chamada nova. */
+    private void renderHeader() {
+        panel.model.ByxSnapshot s = network == null ? null : network.network();
+        if (s == null) {
+            return;
+        }
+        NetworkModel.State st = NetworkModel.state(s);
+        hNode.set(st.text, false, st == NetworkModel.State.HEALTHY ? "pos" : st == NetworkModel.State.OFFLINE || st == NetworkModel.State.IDENTITY_MISMATCH || st == NetworkModel.State.ERROR ? "neg" : null);
+        hChain.set(NetworkModel.value(s.chainId()), true, null);
+        hHeight.set(NetworkModel.value(s.height()), true, null);
+        hAge.set(NetworkModel.age(s, clock), true, st == NetworkModel.State.STALE ? "warn" : null);
+        hDenom.set(NetworkModel.baseDenom(s) + " / " + NetworkModel.displayDenom(s), true, null);
+    }
+
     private void showHealth(Reply<ChainModules.Health> h) {
+        renderHeader();
         moduleBadges.getChildren().clear();
         if (!h.ok()) {
             ChainDataModel.State st = ChainDataModel.of(h, false);
@@ -192,13 +221,30 @@ public final class ChainDataScreen implements View {
         };
         moduleBadges.getChildren().add(ByxBadge.of("NODE · " + h.data().node().replace('_', ' '), nodeTone));
         for (ChainModules.ModuleStatus m : h.data().modules()) {
+            if (m.module().equals("BANK")) {
+                continue; // o saldo público aparece no inspetor de endereço; os cards são os quatro módulos
+            }
             ByxBadge.Tone tone = switch (m.state()) {
                 case AVAILABLE -> ByxBadge.Tone.POSITIVE;
                 case DEGRADED -> ByxBadge.Tone.WARNING;
                 case UNAVAILABLE -> ByxBadge.Tone.NEGATIVE;
                 case NOT_EXPOSED, UNKNOWN -> ByxBadge.Tone.NEUTRAL;
             };
-            moduleBadges.getChildren().add(ByxBadge.of(m.module() + " · " + m.state().name().replace('_', ' '), tone));
+            String title = switch (m.module()) {
+                case "LOJAS" -> "Lojas";
+                case "PAYMENTS" -> "Payments";
+                case "CERTIFICADOS" -> "Certificates";
+                case "FEESPLIT" -> "Feesplit";
+                default -> m.module();
+            };
+            VBox card = new VBox(4, Fx.label(title, "byx-section-title-sm"), ByxBadge.of(m.state().name().replace('_', ' '), tone));
+            card.getStyleClass().add("byx-panel");
+            card.setId("chain-card-" + m.module().toLowerCase());
+            card.setAccessibleText(title + ": " + m.state().name().replace('_', ' '));
+            if (m.module().equals("FEESPLIT")) {
+                card.getChildren().add(Kit.dim("Documented policy · not read from chain"));
+            }
+            moduleBadges.getChildren().add(card);
         }
         ChainModules.Health d = h.data();
         Fx.text(readStats, "Reads: " + d.fetches() + " from the node · " + d.cacheHits() + " from cache · " + d.coalesced() + " shared · " + d.rateLimited() + " limited");
@@ -208,6 +254,7 @@ public final class ChainDataScreen implements View {
         economics.body.getChildren().remove(1, economics.body.getChildren().size());
         if (f.ok()) {
             ChainModules.Feesplit x = f.data();
+            economics.body.getChildren().add(ByxBadge.of("DOCUMENTED POLICY · NOT READ FROM CHAIN", ByxBadge.Tone.NEUTRAL));
             economics.body.getChildren().addAll(Kit.row("Distribution allocation (staking ecosystem)", ChainDataModel.percent(x.distributionBps()), true), Kit.row("Treasury allocation", ChainDataModel.percent(x.treasuryBps()), true),
                     Kit.row("Burn allocation", ChainDataModel.percent(x.burnBps()), true),
                     Kit.dim("Documented module design, not read from the chain. This is an allocation of collected fees, not a net share paid to validators."));

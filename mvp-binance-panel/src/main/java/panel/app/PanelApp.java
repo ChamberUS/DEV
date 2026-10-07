@@ -277,7 +277,7 @@ public class PanelApp extends Application {
         views.put("t-wallet", new panel.byxview.WalletScreen(ctx.motion, clock, byxData, this::show));
         views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData));
         views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
-        views.put("t-chain-data", new panel.byxview.ChainDataScreen(ctx.motion, clock, new panel.localservice.ModuleReadClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome()))));
+        views.put("t-chain-data", new panel.byxview.ChainDataScreen(ctx.motion, clock, new panel.localservice.ModuleReadClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome())), byxData));
         // LEGACY / NO V2 REFERENCE: vincular e revogar a posse (prova externa); o V2 de BYX é somente leitura
         views.put("t-wallet-verify", new panel.ui.ByxWalletView(ctx));
         views.put("t-markets", new panel.tradeview.MarketsPage(ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone(), this::show));

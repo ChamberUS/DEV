@@ -59,11 +59,11 @@ public final class ShellRoutes {
         add("settings", ShellContext.RESEARCH, "Research Settings", null, null, -1);
         // BYX
         add("t-byx", ShellContext.BYX, "BYX Network", "Network", "network", 0);
-        add("t-wallet", ShellContext.BYX, "Wallet", "Wallet", "wallet", 1);
-        add("t-benefits", ShellContext.BYX, "Benefits", "Benefits", "benefits", 2);
-        add("t-treasury", ShellContext.BYX, "Treasury", "Treasury", "treasury", 3);
-        add("t-chain-data", ShellContext.BYX, "Chain data", null, null, -1); // leitura pública dos módulos (fora do rail; palette)
-        add("t-wallet-verify", ShellContext.BYX, "Verify wallet ownership", null, null, -1);
+        add("t-chain-data", ShellContext.BYX, "Chain data", "Chain data", "orders", 1); // leitura pública dos módulos (somente leitura)
+        add("t-wallet", ShellContext.BYX, "Wallet", "Wallet", "wallet", 2);
+        add("t-benefits", ShellContext.BYX, "Benefits", "Benefits", "benefits", 3);
+        add("t-treasury", ShellContext.BYX, "Treasury", "Treasury", "treasury", 4);
+                add("t-wallet-verify", ShellContext.BYX, "Verify wallet ownership", null, null, -1);
         // Account (não é workspace): Profile existe; Settings fica no pé de todo rail
         add("t-profile", ShellContext.ACCOUNT, "Profile", "Profile", "profile", 0);
         add("t-security", ShellContext.ACCOUNT, "Security", "Security", "security", 1);

@@ -262,7 +262,7 @@ class ShellComponentsTest {
         }
         assertEquals(java.util.Arrays.toString(settled[0]), java.util.Arrays.toString(settled[1]), "FULL vs REDUCED");
         assertEquals(java.util.Arrays.toString(settled[0]), java.util.Arrays.toString(settled[2]), "FULL vs OFF");
-        assertEquals(3 * (58 + 4), settled[0][0], 0.01, "Treasury is the 4th BYX rail item");
+        assertEquals(4 * (58 + 4), settled[0][0], 0.01, "Treasury is the 5th BYX rail item (Chain data sits after Network)");
     }
 
     @Test
