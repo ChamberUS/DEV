@@ -1,0 +1,11 @@
+V2.1I Legacy database isolation foundation (2026-10-06) -- synthetic data only; real panel.db read-only (plan manifest) and never written
+real panel.db sha before/after (every step, incl. 4 full suites and packaged QA): a75769d78cd65a333898831aecc34df1b165a6ab9a0ca9e9627b31ae03c7f7fc ; mtime Oct 6 16:16 ; no wal/shm/journal ; NO runtime.db in the real home (no test or QA touched it)
+inventory (real, ro+immutable): users 1, trusted_devices 1, rate_limits 0, meta 1, audit_log 136, sqlite_sequence 2, verified_wallets 0, byx_payment_intents 0, byx_payment_receipts 0, byx_gas_grants 0 ; user_version 0
+design: runtime.db (new, schema v1, 0700/0600, refuses the panel.db name, no FK to users, user_id = stable legacy id) ; legacy history = LegacyPanelDb (mode=ro&immutable=1 + query_only, closed API, no init/DDL, unavailable if absent/corrupt/symlink) ; migrator panel.runtime.RuntimeMigrator (plan/prepare/verify, allowlist of 4 BYX tables, source ro+immutable, redacted output) ; docs/LEGACY_DB_ISOLATION.md ; manifest docs/qa/runtime-db-migration-plan-2026-10-06.json
+real migration: NOT executed. All BYX tables have 0 rows -> a real prepare would copy 0 rows
+panel suite: 581 tests, 0 failures, 0 errors, 1 skipped (pre-existing capture-live). Runs: 1st had 1 guard failure (debug-System.out allowlist for the new CLI), fixed; 2nd green; packaged QA found a verify bug (absent source table), fixed with test; 3rd green (final)
+panel jar: 0bf5603a981d6ca89a0940312a6728a085fb1e158cda7555c96fafb702c4957a (build/ and build-canary/ identical; previous fb48f5a7...)
+packaged: cutover QA 23/0 ; identity QA 29/0 ; shipped jar: Database public API = openRuntime/inMemory/with/close (no open), LegacyPanelDb present, DenyAll present, no FakeServerAuthorizer ; synthetic migrator plan/prepare/verify run from the bundle: OK, source unchanged
+authority: CUTOVER_VERIFIED freeze=false legacy=ROLLBACK_ONLY verify PASS ; authority.bin 6923eee3a514f84098cd5d5683c31e96d672d3fedbf2a72ee0c9a1dab5a1fa84 (unchanged this round) ; audit.log 42 lines ; PRIVATE_CAPABILITIES_ALLOWED=false EXPLICIT_REVIEW_REQUIRED=true ; profile until 2026-10-13T16:49:55Z
+capture: recorder alive, .part growing (10160328 -> 10826868)
+market issue preserved for V2.1J (6 malformed, 1 resync, 1 connection_lost, auto-recovered LIVE)

@@ -1,0 +1,39 @@
+== assinatura do bundle
+PASS  bundle assinado e íntegro
+PASS  Team ID presente (W5Z65G9UP2)
+PASS  Hardened Runtime ligado (flag runtime)
+PASS  runtime Java EMBUTIDO no bundle (não usa o java global)
+PASS  o executável do serviço tem identificador próprio
+PASS  painel: entitlements = somente allow-jit (sem application-identifier, sem keychain)
+PASS  sem disable-library-validation / debugger / dyld-env / get-task-allow (painel e serviço)
+PASS  serviço: SÓ application-identifier + team-identifier + allow-jit (sem keychain-access-groups/App Groups)
+PASS  perfil embutido só no helper do serviço (o painel não tem perfil)
+      painel  application-identifier: (nenhum)
+      serviço application-identifier: W5Z65G9UP2.com.buynnex.byx.service
+      Team ID: W5Z65G9UP2
+== serviço EMPACOTADO (identidade própria verificada)
+PASS  serviço empacotado: modo packaged_verified (derivado da própria assinatura)
+== peer LEGÍTIMO (BYX-MVP assinado)
+PASS  app assinado conecta (CONNECTED)
+PASS  o app se vê como packaged_verified
+PASS  e verificou o serviço (appIdentity=packaged_verified declarado)
+PASS  conexão continua: market capability true
+PASS  private gate continua false
+PASS  accountData/notifications/adminOperations/secretIntegrations = false
+== ATAQUE do mesmo usuário (todos leem o pairing.token real)
+PASS  mesmo código do painel no java genérico: REJEITADO (selfIdentity=development_unverified)
+PASS  python3 com token e protocolo corretos: REJEITADO (REFUSED(closed_by_service))
+PASS  alegações falsas (bundleId, pid=25682 do app legítimo, teamId): REJEITADO (REFUSED(closed_by_service))
+PASS  app com mesmo identificador, assinatura ad-hoc: REJEITADO
+PASS  app assinado com JAVA_TOOL_OPTIONS (injeção): REJEITADO
+PASS  app assinado com bundle adulterado (selo quebrado): REJEITADO
+PASS  o próprio lançador do painel recusou iniciar com o selo quebrado (exit 71)
+PASS  o serviço registrou as recusas por código fixo, sem segredo
+== CONTROLE: o mesmo cliente Python é perfeito (aceito) num serviço em modo desenvolvimento
+PASS  serviço no java genérico: modo development_unverified
+PASS  o cliente Python é aceito aqui (ACCEPTED): só a identidade o separa do caso acima
+PASS  o app EMPACOTADO recusa falar com um serviço NÃO verificado (impostor com o token)
+== REINÍCIO do serviço empacotado
+PASS  rodada 1: app assinado conecta
+PASS  rodada 2: app assinado conecta
+---- 29 PASS, 0 FAIL
