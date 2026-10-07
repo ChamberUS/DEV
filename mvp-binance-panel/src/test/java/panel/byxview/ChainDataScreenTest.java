@@ -340,4 +340,30 @@ class ChainDataScreenTest {
             s.dispose();
         });
     }
+
+    @Test
+    void oneMascotPerScreenTheEmptyStateTakesItOverAndTheHeaderOneIsInteractiveAndAlive() throws Exception {
+        DeskHarness.fx(() -> {
+            panel.mascot.MascotGuide.session().resetSession();
+            FakeReader r = new FakeReader();
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
+            s.onShow();
+            var header = s.headerMascot();
+            assertTrue(header.isVisible() && !header.isMouseTransparent(), "the header mascot is interactive (click = hint)");
+            r.merchantPages.add(new Reply<>(true, null, Freshness.LIVE, 0, new ChainModules.Page<>(List.of()), null));
+            button(s, "chain-merchants-go").fire();
+            assertEquals("EMPTY", badge(s, "chain-merchants"));
+            assertFalse(header.isVisible() || header.isManaged(), "one presence per screen: the empty state hosts the mascot, the header one steps aside");
+            r.merchantPages.add(new Reply<>(true, null, Freshness.LIVE, 0, new ChainModules.Page<>(List.of(m("1"))), null));
+            button(s, "chain-merchants-go").fire();
+            assertTrue(header.isVisible() && header.isManaged(), "back in the header once the list has items");
+            r.payment = Reply.failed(Failure.NOT_FOUND);
+            input(s, "chain-payment-input").setText("42");
+            button(s, "chain-payment-go").fire();
+            input(s, "chain-payment-input").setText("43");
+            button(s, "chain-payment-go").fire();
+            assertEquals("NOT FOUND", badge(s, "chain-payment"), "repeated not-found lookups stay calm: no exception, normal UI");
+            s.dispose();
+        });
+    }
 }

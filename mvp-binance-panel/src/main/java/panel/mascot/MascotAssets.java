@@ -109,8 +109,15 @@ public final class MascotAssets {
 
     /** Sprite sheet do estado, decodificada para {@code devicePx} (px de dispositivo do canvas de 384). */
     public Lease sheet(MascotManifest.Entry e, int devicePx) {
+        // px de dispositivo por px de canvas, no máximo a escala em que a sheet foi gravada (nunca ampliar)
+        double r = Math.max(0.05, Math.min(e.sheetScale(), devicePx / (double) MascotManifest.CANVAS)) / e.sheetScale();
+        return acquire("S|" + e.state() + "|" + Math.round(r * 1000), e.sheet(), (int) Math.ceil(e.sheetWidth() * r), (int) Math.ceil(e.sheetHeight() * r));
+    }
+
+    /** Camada do rig do IDLE (corpo/olho) decodificada na escala de uso. */
+    public Lease rigPart(MascotManifest.RigPart p, int devicePx) {
         double f = factor(devicePx);
-        return acquire("S|" + e.state() + "|" + Math.round(f * 1000), e.sheet(), (int) Math.ceil(e.sheetWidth() * f), (int) Math.ceil(e.sheetHeight() * f));
+        return acquire("R|" + p.file() + "|" + Math.round(f * 1000), p.file(), Math.max(1, (int) Math.ceil(p.cell().w() * f)), Math.max(1, (int) Math.ceil(p.cell().h() * f)));
     }
 
     /** Poster do estado (canvas inteiro) em {@code devicePx}. */

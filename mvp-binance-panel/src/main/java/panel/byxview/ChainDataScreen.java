@@ -3,6 +3,7 @@ package panel.byxview;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
@@ -21,6 +22,14 @@ import panel.design.ByxBadge;
 import panel.design.ByxButton;
 import panel.design.ByxField;
 import panel.mascot.MascotActivity;
+import panel.mascot.MascotAnchor;
+import panel.mascot.MascotContext;
+import panel.mascot.MascotGuide;
+import panel.mascot.MascotHint;
+import panel.mascot.MascotHintBubble;
+import panel.mascot.MascotPlacement;
+import panel.mascot.MascotPriority;
+import panel.mascot.MascotSize;
 import panel.mascot.MascotState;
 import panel.mascot.MascotUsage;
 import panel.mascot.MascotView;
@@ -50,6 +59,9 @@ public final class ChainDataScreen implements View {
     private final KvRow hAge = new KvRow("Block age");
     private final KvRow hDenom = new KvRow("Denom (base / display)");
     private final MascotView mascot;
+    private final MascotHintBubble bubble;
+    private final MascotGuide guide = MascotGuide.session();
+    private int emptySections;
     private final MascotActivity activity;
     private String lastChainState;
     private MascotUsage.Plan chainPlan;
@@ -97,20 +109,21 @@ public final class ChainDataScreen implements View {
         refresh.setId("chain-refresh");
         refresh.setOnAction(e -> refreshAll(true));
         // UMA presença do mascote nesta tela (identidade, não spinner): estado da chain + espera de consultas > 250 ms. Só começa em onShow (nada no login/startup).
-        mascot = new MascotView(motion, 72);
+        mascot = new MascotView(motion, MascotSize.MEDIUM);
+        bubble = new MascotHintBubble(mascot);
+        mascot.setInteractive(true, this::onMascotClick);
         activity = new MascotActivity(MascotActivity.fx(), shown -> {
             if (shown.isPresent()) {
                 mascot.setState(shown.get());
             } else if (chainPlan != null) {
                 MascotUsage.apply(mascot, chainPlan, false);
             } else {
-                mascot.setStaticState(MascotState.IDLE);
+                mascot.setState(MascotState.IDLE);
             }
         });
         VBox facts = new VBox(0, hNode, hChain, hHeight, hAge, hDenom);
         HBox.setHgrow(facts, javafx.scene.layout.Priority.ALWAYS);
-        HBox factsAndMascot = new HBox(18, facts, mascot);
-        factsAndMascot.setAlignment(Pos.CENTER_LEFT);
+        Node factsAndMascot = MascotPlacement.place(facts, mascot, MascotAnchor.TOP_RIGHT);
         VBox nodeHeader = Kit.panel(null, Kit.titled("Network", ByxBadge.of("READ ONLY", ByxBadge.Tone.INFO)), factsAndMascot,
                 Kit.dim("Public data from the local BYX node. This page only reads data and cannot change anything."));
         nodeHeader.setId("chain-header");
@@ -121,14 +134,14 @@ public final class ChainDataScreen implements View {
         economics = new Section("Economics", "chain-economics");
         economics.body.getChildren().add(Kit.muted("Fee split allocation is shown as the module's documented design. The chain does not expose a query for it, so it is not read from the node."));
 
-        Lookup<ChainModules.Merchant> merchant = new Lookup<>("Merchant", "chain-merchant", "Merchant ID", reader::merchant, ChainDataScreen::merchantRows);
-        Pager<ChainModules.Merchant> merchants = new Pager<>("Merchants", "chain-merchants", null, (id, cursor) -> reader.merchants(5, cursor), m -> m.id(), m -> m.name());
-        Lookup<ChainModules.Payment> payment = new Lookup<>("Payment", "chain-payment", "Payment ID", reader::payment, ChainDataScreen::paymentRows);
+        Lookup<ChainModules.Merchant> merchant = new Lookup<>("Merchant", "chain-merchant", "Merchant ID", reader::merchant, ChainDataScreen::merchantRows).notFound(MascotContext.MERCHANT_NOT_FOUND);
+        Pager<ChainModules.Merchant> merchants = new Pager<>("Merchants", "chain-merchants", null, (id, cursor) -> reader.merchants(5, cursor), m -> m.id(), m -> m.name()).empty(MascotContext.EMPTY_MERCHANTS);
+        Lookup<ChainModules.Payment> payment = new Lookup<>("Payment", "chain-payment", "Payment ID", reader::payment, ChainDataScreen::paymentRows).notFound(MascotContext.PAYMENT_NOT_FOUND);
         Pager<ChainModules.Payment> payments = new Pager<>("Payments by store", "chain-payments", "Store ID", (id, cursor) -> reader.paymentsByStore(id, 5, cursor), p -> p.id(),
-                p -> p.amountDisplay() + " · " + p.status());
-        Lookup<ChainModules.Certificate> cert = new Lookup<>("Certificate", "chain-certificate", "Certificate ID", reader::certificate, ChainDataScreen::certificateRows);
+                p -> p.amountDisplay() + " · " + p.status()).empty(MascotContext.EMPTY_PAYMENTS);
+        Lookup<ChainModules.Certificate> cert = new Lookup<>("Certificate", "chain-certificate", "Certificate ID", reader::certificate, ChainDataScreen::certificateRows).notFound(MascotContext.CERTIFICATE_NOT_FOUND);
         Pager<ChainModules.Certificate> certs = new Pager<>("Certificates by merchant", "chain-certificates", "Merchant ID", (id, cursor) -> reader.certificatesByMerchant(id, 5, cursor), c -> c.id(),
-                c -> (c.revoked() ? "REVOKED · " : "") + c.category() + " " + c.brand());
+                c -> (c.revoked() ? "REVOKED · " : "") + c.category() + " " + c.brand()).empty(MascotContext.EMPTY_CERTIFICATES);
         Lookup<ChainModules.Balance> balance = new Lookup<>("Address inspector", "chain-balance", "BYX address", reader::balance, ChainDataScreen::balanceRows);
         balance.note.setText("Reads a public balance only. Nothing is connected, stored or signed.");
 
@@ -167,6 +180,49 @@ public final class ChainDataScreen implements View {
         }
         renderHeader();
         refreshAll(false); // reaproveita o cache do serviço e atualiza em segundo plano
+        sections.forEach(Section::shown);
+        javafx.animation.PauseTransition firstVisit = new javafx.animation.PauseTransition(javafx.util.Duration.millis(900));
+        firstVisit.setOnFinished(e -> { // primeira visita nesta sessão: uma dica curta, só se nada mais importante estiver acontecendo
+            if (visible && mascot.getScene() != null && mascot.isVisible() && mascot.accepts(MascotPriority.CONTEXT_GUIDE)) {
+                guide.offer(MascotContext.FIRST_VISIT_CHAIN_DATA).ifPresent(this::showHint);
+            }
+        });
+        firstVisit.play();
+    }
+
+    private void onMascotClick() {
+        Optional<MascotContext> c = MascotContext.forChain(lastChainState);
+        if (c.isEmpty()) {
+            return;
+        }
+        guide.ask(c.get()).ifPresent(bubble::toggle); // pedido do usuário: sempre responde (CHAIN_MISMATCH não tem dica: a UI de erro manda)
+    }
+
+    private void showHint(MascotHint h) {
+        if (h.reaction() != null && mascot.accepts(MascotPriority.ATTENTION_NOTIFICATION)) {
+            mascot.play(h.reaction());
+        }
+        bubble.show(h);
+    }
+
+    private void reactNotFound(MascotContext ctx) {
+        if (mascot.isVisible() && mascot.accepts(MascotPriority.CONTEXT_GUIDE)) {
+            guide.offer(ctx).ifPresent(this::showHint);
+        }
+    }
+
+    private void reactInvalidSubmit() {
+        if (mascot.isVisible() && mascot.accepts(MascotPriority.ATTENTION_NOTIFICATION)) {
+            mascot.play(MascotState.ATTENTION); // só no submit, nunca enquanto digita; sem texto
+        }
+    }
+
+    /** Uma presença por tela: com um estado vazio na tela, o mascote ocupa o estado vazio e sai do cabeçalho. */
+    private void suppressHeaderMascot(boolean suppress) {
+        emptySections = Math.max(0, emptySections + (suppress ? 1 : -1));
+        boolean hide = emptySections > 0;
+        mascot.setVisible(!hide);
+        mascot.setManaged(!hide);
     }
 
     @Override
@@ -174,14 +230,22 @@ public final class ChainDataScreen implements View {
         visible = false;
         epoch++; // resultados em voo de uma visita anterior são descartados; nada fica rodando
         mascot.stop();
+        bubble.hide();
+        sections.forEach(Section::hidden);
     }
 
     public void dispose() {
         onHide();
+        sections.forEach(Section::disposeMascot);
         mascot.dispose();
         if (ownedIo != null) {
             ownedIo.shutdownNow();
         }
+    }
+
+    /** Testes: o mascote do cabeçalho. */
+    MascotView headerMascot() {
+        return mascot;
     }
 
     boolean idle() {
@@ -387,6 +451,12 @@ public final class ChainDataScreen implements View {
         }
 
         void rerunIfAny() { }
+
+        void shown() { }
+
+        void hidden() { }
+
+        void disposeMascot() { }
     }
 
     /** Consulta por ID (um registro). */
@@ -396,6 +466,12 @@ public final class ChainDataScreen implements View {
         private final Function<T, List<KvRow>> render;
         private String last;
         private boolean pending;
+        private MascotContext notFoundContext;
+
+        Lookup<T> notFound(MascotContext c) {
+            this.notFoundContext = c;
+            return this;
+        }
 
         Lookup(String title, String id, String label, Function<String, Reply<T>> fetch, Function<T, List<KvRow>> render) {
             super(title, id);
@@ -449,6 +525,11 @@ public final class ChainDataScreen implements View {
             note.setManaged(true);
             note.setVisible(true);
             field.setError(st.view() == ChainDataModel.View.INVALID_INPUT ? st.note() : null);
+            if (st.view() == ChainDataModel.View.NOT_FOUND && notFoundContext != null) {
+                reactNotFound(notFoundContext);
+            } else if (st.view() == ChainDataModel.View.INVALID_INPUT) {
+                reactInvalidSubmit();
+            }
             if (r.ok() && st.view().showsData()) {
                 body.getChildren().addAll(render.apply(r.data()));
             }
@@ -467,6 +548,58 @@ public final class ChainDataScreen implements View {
         private String lastId;
         private boolean pending;
         private int shown;
+        private MascotContext emptyContext;
+        private MascotView emptyMascot;
+        private MascotHintBubble emptyBubble;
+
+        Pager<T> empty(MascotContext c) {
+            this.emptyContext = c;
+            return this;
+        }
+
+        private void enterEmpty() {
+            if (emptyMascot != null || emptyContext == null) {
+                return;
+            }
+            emptyMascot = new MascotView(motion, MascotSize.MEDIUM);
+            emptyBubble = new MascotHintBubble(emptyMascot);
+            MascotContext ctx = emptyContext;
+            emptyMascot.setInteractive(true, () -> guide.ask(ctx).ifPresent(emptyBubble::toggle));
+            rows.getChildren().setAll(MascotPlacement.place(null, emptyMascot, MascotAnchor.CENTER_EMPTY_STATE));
+            emptyMascot.setState(MascotState.IDLE);
+            suppressHeaderMascot(true); // uma presença por tela
+        }
+
+        private void leaveEmpty() {
+            if (emptyMascot == null) {
+                return;
+            }
+            emptyBubble.hide();
+            emptyMascot.dispose();
+            emptyMascot = null;
+            emptyBubble = null;
+            suppressHeaderMascot(false);
+        }
+
+        @Override
+        void hidden() {
+            if (emptyMascot != null) {
+                emptyBubble.hide();
+                emptyMascot.stop();
+            }
+        }
+
+        @Override
+        void shown() {
+            if (emptyMascot != null) {
+                emptyMascot.setState(MascotState.IDLE);
+            }
+        }
+
+        @Override
+        void disposeMascot() {
+            leaveEmpty();
+        }
 
         Pager(String title, String id, String idLabel, BiConsumerFetch<T> fetch, Function<T, String> keyOf, Function<T, String> textOf) {
             super(title, id);
@@ -545,8 +678,12 @@ public final class ChainDataScreen implements View {
                 field.setError(st.view() == ChainDataModel.View.INVALID_INPUT ? st.note() : null);
             }
             if (!append) {
+                leaveEmpty();
                 rows.getChildren().clear();
                 shown = 0;
+            }
+            if (empty) {
+                enterEmpty();
             }
             if (r.ok()) {
                 for (T item : r.data().items()) {

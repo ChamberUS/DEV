@@ -20,10 +20,10 @@ public final class MascotUsage {
             return Optional.empty();
         }
         return switch (chainState) {
-            case "NOT_CONFIGURED", "LIVE" -> Optional.of(new Plan(MascotState.IDLE, null, false)); // sem animação constante
+            case "NOT_CONFIGURED", "LIVE" -> Optional.of(new Plan(MascotState.IDLE, null, true)); // IDLE vivo (procedural, barato): sem animação "de loading" constante
             case "CONNECTING" -> Optional.of(new Plan(MascotState.THINKING, null, true));
             case "SYNCING" -> Optional.of(new Plan(MascotState.SYNCING, null, true));
-            case "OFFLINE", "STALE" -> Optional.of(new Plan(MascotState.IDLE, MascotState.ATTENTION, false)); // uma vez, depois estático
+            case "OFFLINE", "STALE" -> Optional.of(new Plan(MascotState.IDLE, MascotState.ATTENTION, true)); // ATTENTION uma vez, depois volta ao IDLE vivo
             default -> Optional.empty(); // NETWORK_MISMATCH, ERROR, desconhecido: UI de erro normal, nada de mascote
         };
     }
@@ -32,7 +32,7 @@ public final class MascotUsage {
         return switch (r) {
             case LOCAL_PROCESSING -> Optional.of(new Plan(MascotState.PROCESSING, null, true));
             case VALIDATION_CHECK -> Optional.of(new Plan(MascotState.THINKING, null, true));
-            case WAITING_FOR_DATA -> Optional.of(new Plan(MascotState.IDLE, null, false));
+            case WAITING_FOR_DATA -> Optional.of(new Plan(MascotState.IDLE, null, true));
             case SCIENTIFIC_ERROR -> Optional.empty();
         };
     }

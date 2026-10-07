@@ -23,9 +23,12 @@ public final class MascotPerfQa {
         private final MotionService motion = new MotionService();
         private MascotView view;
         private StackPane root;
-        private final String[] scenarios = {"baseline-poster:IDLE:128:static", "IDLE-loop:IDLE:128:loop", "THINKING-loop:THINKING:128:loop", "PROCESSING-loop:PROCESSING:128:loop", "PROCESSING-loop:PROCESSING:192:loop",
-                "SYNCING-loop:SYNCING:128:loop", "TRANSITION-x3:TRANSITION:96:oneshot3", "PROCESSING-second-play:PROCESSING:128:loop"};
+        private final String[] scenarios = {"baseline-poster:IDLE:96:static", "IDLE-alive-calm:IDLE:96:loop", "IDLE-alive-pointer:IDLE:96:pointer", "IDLE-alive-reduced:IDLE:96:reduced", "IDLE-alive-transparent:IDLE:96:loopTransparent", "THINKING-loop:THINKING:96:loop",
+                "PROCESSING-HALO:PROCESSING:128:loop", "PROCESSING-TRANSP:PROCESSING:128:loopTransparent", "PROCESSING-HALO:PROCESSING:160:loop", "PROCESSING-HALO:PROCESSING:192:loop", "SYNCING-loop:SYNCING:128:loop",
+                "TRANSITION-x3:TRANSITION:96:oneshot3"};
+        private javafx.animation.Timeline pointerDemo;
         private int index;
+        private final String only = System.getProperty("mascot.only", "");
         private Duration cpu0;
         private long wall0;
 
@@ -48,18 +51,45 @@ public final class MascotPerfQa {
                 return;
             }
             String[] sc = scenarios[index++].split(":");
+            if (!only.isEmpty() && !sc[0].startsWith(only)) {
+                next();
+                return;
+            }
             if (view != null) {
                 view.dispose();
                 root.getChildren().clear();
             }
             int px = Integer.parseInt(sc[2]);
             view = new MascotView(motion, px);
+            view.setFocusOverride(Boolean.TRUE); // mede o regime COM foco (sem foco o motor para, de propósito)
             root.getChildren().add(view);
             MascotState st = MascotState.valueOf(sc[1]);
             long t0 = System.nanoTime();
+            if (pointerDemo != null) {
+                pointerDemo.stop();
+                pointerDemo = null;
+            }
             switch (sc[3]) {
                 case "static" -> view.setStaticState(st);
                 case "loop" -> view.setState(st);
+                case "loopTransparent" -> {
+                    view.setStageMode(MascotStage.Mode.TRANSPARENT);
+                    view.setState(st);
+                }
+                case "reduced" -> {
+                    view.setMotionMode(panel.motion.MotionPreference.REDUCED);
+                    view.setState(st);
+                }
+                case "pointer" -> {
+                    view.setState(st);
+                    double[] a = {0};
+                    pointerDemo = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.millis(50), ev -> {
+                        a[0] += 0.12;
+                        view.pointerAtScene(180 + Math.cos(a[0]) * 150, 180 + Math.sin(a[0]) * 120);
+                    }));
+                    pointerDemo.setCycleCount(javafx.animation.Animation.INDEFINITE);
+                    pointerDemo.play();
+                }
                 default -> {
                     view.setStaticState(MascotState.IDLE);
                     view.play(st);
@@ -81,8 +111,8 @@ public final class MascotPerfQa {
                 measure.setOnFinished(ev -> {
                     double cpu = (ProcessHandle.current().info().totalCpuDuration().orElse(Duration.ZERO).toNanos() - cpu0.toNanos()) / (double) (System.nanoTime() - wall0) * 100;
                     long rss = rssKb();
-                    System.out.printf(Locale.ROOT, "%-24s size=%3d  CPU=%5.1f%% of one core  RSS=%d MB  threads=%d  firstFrame=%s  loops=%d%n", sc[0], px, cpu, rss / 1024, Thread.getAllStackTraces().size(),
-                            view.firstFrameMicros() < 0 ? "n/a (poster)" : view.firstFrameMicros() / 1000.0 + " ms", motion.runningLoops());
+                    System.out.printf(Locale.ROOT, "%-24s size=%3d  CPU=%5.1f%% of one core  RSS=%d MB  threads=%d  firstFrame=%s  loops=%d life=%s%n", sc[0], px, cpu, rss / 1024, Thread.getAllStackTraces().size(),
+                            view.firstFrameMicros() < 0 ? "n/a (poster)" : view.firstFrameMicros() / 1000.0 + " ms", motion.runningLoops(), view.lifeRunning());
                     next();
                 });
                 measure.play();

@@ -71,13 +71,14 @@ class MascotPolicyTest {
 
     @Test
     void usageMatrixFollowsTheSpecAndNeverUsesTheMascotForErrorsOrSecurity() {
-        assertEquals(new MascotUsage.Plan(MascotState.IDLE, null, false), MascotUsage.forChain("NOT_CONFIGURED").orElseThrow());
+        assertEquals(new MascotUsage.Plan(MascotState.IDLE, null, true), MascotUsage.forChain("NOT_CONFIGURED").orElseThrow());
         assertEquals(MascotState.THINKING, MascotUsage.forChain("CONNECTING").orElseThrow().steady());
         assertEquals(MascotState.SYNCING, MascotUsage.forChain("SYNCING").orElseThrow().steady());
-        assertFalse(MascotUsage.forChain("LIVE").orElseThrow().animate(), "LIVE has no constant animation");
+        assertTrue(MascotUsage.forChain("LIVE").orElseThrow().animate(), "LIVE: IDLE alive (procedural, cheap), never a loading animation");
+        assertEquals(MascotState.IDLE, MascotUsage.forChain("LIVE").orElseThrow().steady());
         var off = MascotUsage.forChain("OFFLINE").orElseThrow();
         assertEquals(MascotState.ATTENTION, off.oneShot());
-        assertFalse(off.animate(), "OFFLINE: ATTENTION once, then static");
+        assertTrue(off.animate() && off.steady() == MascotState.IDLE, "OFFLINE: ATTENTION once, then back to the alive IDLE");
         for (String bad : new String[] {"NETWORK_MISMATCH", "ERROR", "SOMETHING_NEW", null}) {
             assertTrue(MascotUsage.forChain(bad).isEmpty(), "no playful mascot for " + bad);
         }
@@ -123,7 +124,7 @@ class MascotPolicyTest {
             for (Path f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
                 String src = Files.readString(f).replaceAll("(?s)/\\*.*?\\*/", "").replaceAll("//.*", "");
                 assertFalse(src.contains("javafx.scene.media") || src.contains("MediaPlayer") || src.contains("ProcessBuilder"), f.getFileName() + ": no codec/media dependency, no subprocess");
-                assertFalse(src.matches("(?s).*\\.(get\\(\\)|join\\(\\)).*") && !src.contains("Optional") && src.contains("Future"), f.getFileName() + ": no Future.get/join");
+                assertFalse(src.matches("(?s).*(\\.join\\(\\)|[Ff]uture\\w*\\.get\\(|\\.get\\(\\s*\\d+\\s*,).*"), f.getFileName() + ": no Future.get/join (nothing waits on the FX thread)");
                 assertFalse(src.contains("Thread.sleep") || src.contains(".await("), f.getFileName() + ": no blocking wait");
             }
         }

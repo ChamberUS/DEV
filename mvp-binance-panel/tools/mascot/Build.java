@@ -15,17 +15,17 @@ public class Build {
     static final int RING = 7;
     static final int SRC = 1024, CROP = 960, CROP0 = (SRC - CROP) / 2, OUT = 384, PAD = 4;
 
-    record State(String name, int start, int end, boolean loop, int loopStart, int loopEnd, int xfade, int fps, int poster, int durationMs, int holdMs, String use) { }
+    record State(String name, int start, int end, boolean loop, int loopStart, int loopEnd, int xfade, int fps, int poster, int durationMs, int holdMs, String use, double sheetScale) { }
 
     // Frames do vídeo fonte (verificados frame a frame; ver mascot-manifest.json "sourceSegments").
     static final List<State> STATES = List.of(
-            new State("IDLE", 0, 72, true, 21, 71, 4, 15, 36, 0, 0, "estado neutro, vazio/assistente, galeria"),
-            new State("THINKING", 79, 150, true, 95, 140, 0, 20, 100, 0, 0, "consulta deliberada, análise curta, espera local, CONNECTING"),
-            new State("PROCESSING", 1266, 1367, true, 1266, 1368, 8, 24, 1300, 0, 0, "tarefa local longa, preparação de dados, operação assíncrona"),
-            new State("SYNCING", 866, 940, true, 876, 919, 3, 24, 893, 0, 0, "chain catching up, reconexão/resync, sync de dados"),
-            new State("ATTENTION", 253, 300, false, 0, 0, 0, 24, 300, 0, 800, "aviso não fatal; one-shot, depois volta ao estado anterior"),
-            new State("NOTIFICATION", 325, 375, false, 0, 0, 0, 24, 375, 0, 1200, "novo resultado/tarefa concluída; one-shot"),
-            new State("TRANSITION", 1240, 1266, false, 0, 0, 0, 30, 1266, 450, 0, "mudança importante de contexto/workspace; ~450 ms, não bloqueia"));
+            new State("IDLE", 0, 72, true, 21, 71, 4, 15, 36, 0, 0, "estado neutro, vazio/assistente, galeria", 1.0),
+            new State("THINKING", 79, 150, true, 95, 140, 0, 20, 100, 0, 0, "consulta deliberada, análise curta, espera local, CONNECTING", 1.0),
+            new State("PROCESSING", 1266, 1367, true, 1266, 1368, 8, 20, 1300, 0, 0, "tarefa local longa, preparação de dados, operação assíncrona", 0.75),
+            new State("SYNCING", 866, 940, true, 876, 919, 3, 24, 893, 0, 0, "chain catching up, reconexão/resync, sync de dados", 1.0),
+            new State("ATTENTION", 253, 300, false, 0, 0, 0, 24, 300, 0, 800, "aviso não fatal; one-shot, depois volta ao estado anterior", 1.0),
+            new State("NOTIFICATION", 325, 375, false, 0, 0, 0, 24, 375, 0, 1200, "novo resultado/tarefa concluída; one-shot", 1.0),
+            new State("TRANSITION", 1240, 1266, false, 0, 0, 0, 30, 1266, 450, 0, "mudança importante de contexto/workspace; ~450 ms, não bloqueia", 1.0));
 
     public static void main(String[] a) throws Exception {
         String src = a[0]; Path out = Path.of(a[1]); String sha = a[2];
@@ -44,6 +44,7 @@ public class Build {
             int[] rgba = matte(rgb);
             for (String st : need.get(f)) { double[] sh = shift.get(st); frames.put(st + "#" + f, downscale(rgba, CROP0 - sh[0], CROP0 - sh[1])); }
         });
+        String rigJson = buildRig(src, out, shift.get("IDLE"));
         // passo 3: sequências finais, sprite sheets, posters, manifesto
         StringBuilder man = new StringBuilder();
         man.append("{\n  \"schema\": 1,\n  \"canvas\": ").append(OUT).append(",\n  \"cropSourcePx\": ").append(CROP).append(",\n  \"source\": {\"file\": \"bloub-default-cycle.mp4\", \"sha256\": \"").append(sha)
@@ -53,10 +54,15 @@ public class Build {
             List<byte[]> seq = sequence(s, frames);
             int[] bb = unionBounds(seq);
             int cx = Math.max(0, bb[0] - PAD), cy = Math.max(0, bb[1] - PAD), cw = Math.min(OUT, bb[2] + PAD) - cx, ch = Math.min(OUT, bb[3] + PAD) - cy;
-            int cols = Math.max(1, Math.min(seq.size(), 4096 / cw)); int rows = (seq.size() + cols - 1) / cols;
-            if (rows * ch > 4096) throw new IllegalStateException("sheet too tall for " + s.name());
-            BufferedImage sheet = new BufferedImage(cols * cw, rows * ch, BufferedImage.TYPE_INT_ARGB);
-            for (int k = 0; k < seq.size(); k++) blit(sheet, seq.get(k), cx, cy, cw, ch, (k % cols) * cw, (k / cols) * ch);
+            int pcw = (int) Math.round(cw * s.sheetScale), pch = (int) Math.round(ch * s.sheetScale);
+            int cols = Math.max(1, Math.min(seq.size(), 4096 / pcw)); int rows = (seq.size() + cols - 1) / cols;
+            if (rows * pch > 4096) throw new IllegalStateException("sheet too tall for " + s.name());
+            int pw = (int) Math.round(cw * s.sheetScale), ph = (int) Math.round(ch * s.sheetScale); // célula em px da sheet
+            BufferedImage sheet = new BufferedImage(cols * pw, rows * ph, BufferedImage.TYPE_INT_ARGB);
+            for (int k = 0; k < seq.size(); k++) {
+                if (s.sheetScale == 1.0) blit(sheet, seq.get(k), cx, cy, cw, ch, (k % cols) * pw, (k / cols) * ph);
+                else blitScaled(sheet, seq.get(k), cx, cy, cw, ch, pw, ph, (k % cols) * pw, (k / cols) * ph);
+            }
             String sf = "states/" + s.name().toLowerCase() + ".png"; ImageIO.write(sheet, "png", out.resolve(sf).toFile());
             byte[] pf = frames.get(s.name() + "#" + s.poster);
             BufferedImage poster = new BufferedImage(OUT, OUT, BufferedImage.TYPE_INT_ARGB); blit(poster, pf, 0, 0, OUT, OUT, 0, 0);
@@ -65,10 +71,10 @@ public class Build {
             int dur = s.durationMs > 0 ? s.durationMs : (int) Math.round(seq.size() * 1000.0 / s.fps);
             man.append(String.format(Locale.ROOT, "    {\"state\": \"%s\", \"sourceStartFrame\": %d, \"sourceEndFrame\": %d, \"sourceStartTime\": %.3f, \"sourceEndTime\": %.3f, \"loop\": %b, \"loopStart\": %d, \"loopEnd\": %d, \"loopCrossfadeFrames\": %d, "
                             + "\"posterFrame\": %d, \"durationMs\": %d, \"holdMs\": %d, \"fps\": %d, \"frames\": %d, \"sheet\": \"%s\", \"poster\": \"%s\", \"cols\": %d, \"rows\": %d, \"cell\": {\"x\": %d, \"y\": %d, \"w\": %d, \"h\": %d}, "
-                            + "\"opticalShiftSourcePx\": [%.1f, %.1f], \"recommendedUse\": \"%s\"}%s%n",
+                            + "\"sheetScale\": %.4f, \"cellPx\": {\"w\": %d, \"h\": %d}, \"opticalShiftSourcePx\": [%.1f, %.1f], \"recommendedUse\": \"%s\"%s}%s%n",
                     s.name(), s.start, s.end, t0, t1, s.loop, s.loopStart, s.loopEnd, s.xfade, s.poster, dur, s.holdMs, s.durationMs > 0 ? Math.round(seq.size() * 1000.0 / s.durationMs) : s.fps, seq.size(), sf, pn, cols, rows, cx, cy, cw, ch,
-                    shift.get(s.name())[0], shift.get(s.name())[1], s.use, si < STATES.size() - 1 ? "," : ""));
-            System.out.printf(Locale.ROOT, "%-12s frames=%3d cell=%dx%d sheet=%dx%d %s %dKB poster=%dKB%n", s.name(), seq.size(), cw, ch, sheet.getWidth(), sheet.getHeight(), sf, Files.size(out.resolve(sf)) / 1024, Files.size(out.resolve(pn)) / 1024);
+                    s.sheetScale, pw, ph, shift.get(s.name())[0], shift.get(s.name())[1], s.use, s.name().equals("IDLE") ? ", \"rig\": " + rigJson : "", si < STATES.size() - 1 ? "," : ""));
+            System.out.printf(Locale.ROOT, "%-12s frames=%3d cell=%dx%d sheet=%dx%d %s %dKB poster=%dKB%n", s.name(), seq.size(), pcw, pch, sheet.getWidth(), sheet.getHeight(), sf, Files.size(out.resolve(sf)) / 1024, Files.size(out.resolve(pn)) / 1024);
         }
         man.append("  ],\n  \"sourceSegments\": [\n")
            .append("    {\"segment\": \"IDLE\", \"frames\": [0, 72], \"usedAs\": \"IDLE\"},\n")
@@ -132,6 +138,102 @@ public class Build {
         }
     }
 
+
+    /** premult 384 (região cx,cy,cw,ch) -> área média até pw x ph -> ARGB não premultiplicado na sheet. */
+    static void blitScaled(BufferedImage dst, byte[] f, int cx, int cy, int cw, int ch, int pw, int ph, int dx, int dy) {
+        double sx = cw / (double) pw, sy = ch / (double) ph;
+        for (int y = 0; y < ph; y++) for (int x = 0; x < pw; x++) {
+            double x0 = x * sx, x1 = x0 + sx, y0 = y * sy, y1 = y0 + sy, r = 0, g = 0, b = 0, a = 0, wt = 0;
+            for (int yy = (int) Math.floor(y0); yy < Math.ceil(y1); yy++) for (int xx = (int) Math.floor(x0); xx < Math.ceil(x1); xx++) {
+                double w = (Math.min(x1, xx + 1) - Math.max(x0, xx)) * (Math.min(y1, yy + 1) - Math.max(y0, yy)); wt += w;
+                if (xx < 0 || yy < 0 || xx >= cw || yy >= ch) continue;
+                int i = ((cy + yy) * OUT + cx + xx) * 4; r += (f[i] & 255) * w; g += (f[i + 1] & 255) * w; b += (f[i + 2] & 255) * w; a += (f[i + 3] & 255) * w;
+            }
+            int al = (int) Math.round(a / wt); if (al == 0) continue;
+            int rr = (int) Math.min(255, Math.round(r / wt) * 255 / al), gg = (int) Math.min(255, Math.round(g / wt) * 255 / al), bb = (int) Math.min(255, Math.round(b / wt) * 255 / al);
+            dst.setRGB(dx + x, dy + y, al << 24 | rr << 16 | gg << 8 | bb);
+        }
+    }
+
+    // ---------------------------------------------------------------- RIG do IDLE (corpo + dois olhos em camadas)
+    static int[] lastEyeLabel; static int lastEyeCount;
+
+    /** Separa, no frame de poster do IDLE, o CORPO (olhos preenchidos de preto) e cada OLHO (branco com alfa suave), na mesma geometria dos demais assets. Devolve o JSON "rig" do manifesto. */
+    static String buildRig(String src, Path out, double[] shift) throws Exception {
+        Files.createDirectories(out.resolve("rig"));
+        String[] json = new String[1];
+        decode(src, Set.of(36), (f, rgb) -> {
+            try {
+                int[] argb = matte(rgb); int[] lab = lastEyeLabel.clone(); int n = lastEyeCount;
+                if (n != 2) throw new IllegalStateException("expected 2 eye components in the IDLE poster, found " + n);
+                int N = SRC * SRC;
+                for (int pass = 0; pass < 4; pass++) { // dilata os rótulos dos olhos 4 px (a franja cinza pertence ao olho)
+                    int[] nx = lab.clone();
+                    for (int y = 1; y < SRC - 1; y++) for (int x = 1; x < SRC - 1; x++) { int p = y * SRC + x; if (lab[p] == 0) nx[p] = lab[p - 1] != 0 ? lab[p - 1] : lab[p + 1] != 0 ? lab[p + 1] : lab[p - SRC] != 0 ? lab[p - SRC] : lab[p + SRC]; }
+                    lab = nx;
+                }
+                long bs = 0, bc = 0;
+                for (int p = 0; p < N; p++) if (lab[p] == 0 && (argb[p] >>> 24) == 255) { int r = (argb[p] >> 16) & 255; if (r < 40) { bs += r; bc++; } }
+                int black = (int) (bs / Math.max(bc, 1));
+                double[] cx = new double[3]; long[] cn = new long[3];
+                for (int p = 0; p < N; p++) if (lab[p] > 0 && lab[p] <= 2) { cx[lab[p]] += p % SRC; cn[lab[p]]++; }
+                int left = cx[1] / cn[1] < cx[2] / cn[2] ? 1 : 2;
+                int[][] layer = new int[3][N]; // 0 corpo, 1 olho esquerdo, 2 olho direito
+                for (int p = 0; p < N; p++) {
+                    int l = lab[p];
+                    if (l == 0) { layer[0][p] = argb[p]; continue; }
+                    int r = (int) ((rgbAt(rgb, p, 0) * 3 + rgbAt(rgb, p, 1) * 6 + rgbAt(rgb, p, 2)) / 10.0);
+                    double a = Math.max(0, Math.min(1, (r - black) / (double) (255 - black)));
+                    layer[0][p] = 0xFF000000 | black << 16 | black << 8 | black;
+                    layer[l == left ? 1 : 2][p] = (int) Math.round(a * 255) << 24 | 0xFFFFFF;
+                }
+                String[] names = {"idle-body", "idle-eye-l", "idle-eye-r"}; StringBuilder sb = new StringBuilder("{");
+                String haloJson = "";
+                for (int k = 0; k < 3; k++) {
+                    byte[] d = downscale(layer[k], CROP0 - shift[0], CROP0 - shift[1]); int[] bb = unionBounds(List.of(d));
+                    int cx0 = Math.max(0, bb[0] - PAD), cy0 = Math.max(0, bb[1] - PAD), cw = Math.min(OUT, bb[2] + PAD) - cx0, ch = Math.min(OUT, bb[3] + PAD) - cy0;
+                    BufferedImage img = new BufferedImage(cw, ch, BufferedImage.TYPE_INT_ARGB); blit(img, d, cx0, cy0, cw, ch, 0, 0);
+                    ImageIO.write(img, "png", out.resolve("rig/" + names[k] + ".png").toFile());
+                    double px = (bb[0] + bb[2]) / 2.0, py = k == 0 ? bb[3] : (bb[1] + bb[3]) / 2.0; // pivô: corpo = base central; olho = centro
+                    sb.append(k > 0 ? ", " : "").append(String.format(Locale.ROOT, "\"%s\": {\"file\": \"rig/%s.png\", \"cell\": {\"x\": %d, \"y\": %d, \"w\": %d, \"h\": %d}, \"pivot\": [%.1f, %.1f]}", k == 0 ? "body" : k == 1 ? "eyeLeft" : "eyeRight", names[k], cx0, cy0, cw, ch, px, py));
+                    System.out.printf(Locale.ROOT, "rig %-10s cell=%dx%d pivot=(%.1f,%.1f) %dKB%n", names[k], cw, ch, px, py, Files.size(out.resolve("rig/" + names[k] + ".png")) / 1024);
+                    if (k == 0) {
+                        byte[] ring = haloRing(d); int[] hb = unionBounds(List.of(ring));
+                        int hx = Math.max(0, hb[0] - 1), hy = Math.max(0, hb[1] - 1), hw = Math.min(OUT, hb[2] + 1) - hx, hh = Math.min(OUT, hb[3] + 1) - hy;
+                        BufferedImage himg = new BufferedImage(hw, hh, BufferedImage.TYPE_INT_ARGB); blit(himg, ring, hx, hy, hw, hh, 0, 0);
+                        ImageIO.write(himg, "png", out.resolve("rig/idle-halo.png").toFile());
+                        haloJson = String.format(Locale.ROOT, ", \"halo\": {\"file\": \"rig/idle-halo.png\", \"cell\": {\"x\": %d, \"y\": %d, \"w\": %d, \"h\": %d}, \"pivot\": [%.1f, %.1f]}", hx, hy, hw, hh, px, py);
+                        System.out.printf(Locale.ROOT, "rig halo       cell=%dx%d %dKB (baked silhouette outline; no runtime effect)%n", hw, hh, Files.size(out.resolve("rig/idle-halo.png")) / 1024);
+                    }
+                }
+                json[0] = sb.append(haloJson).append("}").toString();
+            } catch (Exception e) { throw new RuntimeException(e); }
+        });
+        return json[0];
+    }
+
+    static final int HALO_R = 6;
+
+    /** Contorno de silhueta sutil e PRÉ-CALCULADO (anel externo ao corpo, cor text.secondary #AAB3C7, ~42% de opacidade no pico, queda quadrática): substitui o DropShadow em tempo de execução no rig. */
+    static byte[] haloRing(byte[] body) {
+        byte[] o = new byte[OUT * OUT * 4];
+        for (int y = 0; y < OUT; y++) for (int x = 0; x < OUT; x++) {
+            int a = body[(y * OUT + x) * 4 + 3] & 255; if (a >= 200) continue;
+            double best = HALO_R + 1;
+            for (int dy = -HALO_R; dy <= HALO_R; dy++) for (int dx = -HALO_R; dx <= HALO_R; dx++) {
+                int xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= OUT || yy >= OUT) continue;
+                if ((body[(yy * OUT + xx) * 4 + 3] & 255) >= 128) best = Math.min(best, Math.hypot(dx, dy));
+            }
+            if (best > HALO_R) continue;
+            double t = 1 - best / HALO_R, al = 0.42 * t * t * (1 - a / 255.0);
+            int i = (y * OUT + x) * 4, A = (int) Math.round(al * 255);
+            o[i] = (byte) Math.round(170 * A / 255.0); o[i + 1] = (byte) Math.round(179 * A / 255.0); o[i + 2] = (byte) Math.round(199 * A / 255.0); o[i + 3] = (byte) A;
+        }
+        return o;
+    }
+
+    static int rgbAt(byte[] rgb, int p, int c) { return rgb[p * 3 + c] & 255; }
+
     // ---------------------------------------------------------------- vídeo / matte
     interface FrameSink { void accept(int frame, byte[] rgb); }
 
@@ -154,7 +256,7 @@ public class Build {
     static int[] matte(byte[] rgb) {
         int N = SRC * SRC; int[] label = new int[N]; boolean[] white = new boolean[N];
         for (int p = 0; p < N; p++) white[p] = Math.min(Math.min(rgb[p * 3] & 255, rgb[p * 3 + 1] & 255), rgb[p * 3 + 2] & 255) >= 240;
-        boolean[] bg = new boolean[N]; int[] queue = new int[N]; int comp = 0;
+        boolean[] bg = new boolean[N]; int[] queue = new int[N]; int comp = 0; lastEyeLabel = new int[N]; lastEyeCount = 0;
         for (int s = 0; s < N; s++) {
             if (!white[s] || label[s] != 0) continue;
             comp++; int qh = 0, qt = 0; queue[qt++] = s; label[s] = comp; boolean border = false; int size = 0;
@@ -181,6 +283,7 @@ public class Build {
                 if (System.getenv("MASCOT_DEBUG") != null) System.err.printf("pocket size=%d dark=%d/%d -> %s%n", size, dark, total, isBg ? "BG" : "EYE");
             }
             if (isBg) for (int k = 0; k < qt; k++) bg[queue[k]] = true;
+            else { lastEyeCount++; for (int k = 0; k < qt; k++) lastEyeLabel[queue[k]] = lastEyeCount; }
         }
         boolean[] near = bg.clone(); // dilatação chebyshev 3 px
         for (int pass = 0; pass < 3; pass++) {
