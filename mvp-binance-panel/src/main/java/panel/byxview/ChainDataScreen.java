@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -19,6 +20,10 @@ import javafx.scene.layout.VBox;
 import panel.design.ByxBadge;
 import panel.design.ByxButton;
 import panel.design.ByxField;
+import panel.mascot.MascotActivity;
+import panel.mascot.MascotState;
+import panel.mascot.MascotUsage;
+import panel.mascot.MascotView;
 import panel.model.ChainModules;
 import panel.model.ChainModules.Reply;
 import panel.motion.MotionService;
@@ -44,6 +49,10 @@ public final class ChainDataScreen implements View {
     private final KvRow hHeight = new KvRow("Height");
     private final KvRow hAge = new KvRow("Block age");
     private final KvRow hDenom = new KvRow("Denom (base / display)");
+    private final MascotView mascot;
+    private final MascotActivity activity;
+    private String lastChainState;
+    private MascotUsage.Plan chainPlan;
     private final MotionService motion;
     private final Clock clock;
     private final Executor io;
@@ -87,7 +96,22 @@ public final class ChainDataScreen implements View {
         ByxButton refresh = new ByxButton("Refresh", ByxButton.Variant.SECONDARY, motion).small();
         refresh.setId("chain-refresh");
         refresh.setOnAction(e -> refreshAll(true));
-        VBox nodeHeader = Kit.panel(null, Kit.titled("Network", ByxBadge.of("READ ONLY", ByxBadge.Tone.INFO)), hNode, hChain, hHeight, hAge, hDenom,
+        // UMA presença do mascote nesta tela (identidade, não spinner): estado da chain + espera de consultas > 250 ms. Só começa em onShow (nada no login/startup).
+        mascot = new MascotView(motion, 72);
+        activity = new MascotActivity(MascotActivity.fx(), shown -> {
+            if (shown.isPresent()) {
+                mascot.setState(shown.get());
+            } else if (chainPlan != null) {
+                MascotUsage.apply(mascot, chainPlan, false);
+            } else {
+                mascot.setStaticState(MascotState.IDLE);
+            }
+        });
+        VBox facts = new VBox(0, hNode, hChain, hHeight, hAge, hDenom);
+        HBox.setHgrow(facts, javafx.scene.layout.Priority.ALWAYS);
+        HBox factsAndMascot = new HBox(18, facts, mascot);
+        factsAndMascot.setAlignment(Pos.CENTER_LEFT);
+        VBox nodeHeader = Kit.panel(null, Kit.titled("Network", ByxBadge.of("READ ONLY", ByxBadge.Tone.INFO)), factsAndMascot,
                 Kit.dim("Public data from the local BYX node. This page only reads data and cannot change anything."));
         nodeHeader.setId("chain-header");
         VBox health = Kit.panel(null, Kit.titled("Module status", healthState), moduleBadges, readStats,
@@ -136,6 +160,8 @@ public final class ChainDataScreen implements View {
     public void onShow() {
         visible = true;
         epoch++;
+        lastChainState = null;
+        chainPlan = null;
         if (network != null) {
             network.refreshNetwork(); // o mesmo caminho assíncrono e limitado da tela Network (o serviço coalesce)
         }
@@ -147,10 +173,12 @@ public final class ChainDataScreen implements View {
     public void onHide() {
         visible = false;
         epoch++; // resultados em voo de uma visita anterior são descartados; nada fica rodando
+        mascot.stop();
     }
 
     public void dispose() {
         onHide();
+        mascot.dispose();
         if (ownedIo != null) {
             ownedIo.shutdownNow();
         }
@@ -200,6 +228,17 @@ public final class ChainDataScreen implements View {
         hHeight.set(NetworkModel.value(s.height()), true, null);
         hAge.set(NetworkModel.age(s, clock), true, st == NetworkModel.State.STALE ? "warn" : null);
         hDenom.set(NetworkModel.baseDenom(s) + " / " + NetworkModel.displayDenom(s), true, null);
+        String cs = s.chainState();
+        if (!java.util.Objects.equals(cs, lastChainState) || chainPlan == null && lastChainState == null) {
+            boolean entering = lastChainState != null;
+            lastChainState = cs;
+            chainPlan = MascotUsage.forChain(cs).orElse(null);
+            if (chainPlan == null) {
+                mascot.setStaticState(MascotState.IDLE); // erro/mismatch: sem brincadeira; só o poster neutro
+            } else if (activity.shown().isEmpty()) {
+                MascotUsage.apply(mascot, chainPlan, entering);
+            }
+        }
     }
 
     private void showHealth(Reply<ChainModules.Health> h) {
@@ -388,9 +427,11 @@ public final class ChainDataScreen implements View {
             pending = true;
             set(new ChainDataModel.State(ChainDataModel.View.LOADING, ""));
             int mine = epoch;
+            MascotActivity.Token token = activity.begin(MascotActivity.Kind.QUERY);
             io.execute(() -> {
                 Reply<T> r = fetch.apply(value);
                 ui.execute(() -> {
+                    activity.end(token); // o resultado nunca espera a animação
                     pending = false;
                     if (mine != epoch && !visible) {
                         return;
@@ -479,9 +520,11 @@ public final class ChainDataScreen implements View {
             pending = true;
             set(new ChainDataModel.State(ChainDataModel.View.LOADING, ""));
             int mine = epoch;
+            MascotActivity.Token token = activity.begin(MascotActivity.Kind.QUERY);
             io.execute(() -> {
                 Reply<ChainModules.Page<T>> r = fetch.get(id, cur);
                 ui.execute(() -> {
+                    activity.end(token);
                     pending = false;
                     if (mine != epoch && !visible) {
                         return;

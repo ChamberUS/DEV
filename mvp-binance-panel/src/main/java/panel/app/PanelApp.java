@@ -50,7 +50,7 @@ public class PanelApp extends Application {
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
     private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
-            "t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data",
+            "t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery",
             "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
             "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts",
             "sys-status", "sys-unavailable");
@@ -277,6 +277,7 @@ public class PanelApp extends Application {
         views.put("t-wallet", new panel.byxview.WalletScreen(ctx.motion, clock, byxData, this::show));
         views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData));
         views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
+        views.put("t-mascot-gallery", new panel.mascot.MascotGallery(ctx.motion, panel.mascot.MascotAssets.shared())); // vazio até ser aberto (lazy); só aparece na palette em LOCAL_QA
         views.put("t-chain-data", new panel.byxview.ChainDataScreen(ctx.motion, clock, new panel.localservice.ModuleReadClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome())), byxData));
         // LEGACY / NO V2 REFERENCE: vincular e revogar a posse (prova externa); o V2 de BYX é somente leitura
         views.put("t-wallet-verify", new panel.ui.ByxWalletView(ctx));
@@ -652,7 +653,7 @@ public class PanelApp extends Application {
         lastDisplayed = id;
         if (id.equals("sys-unavailable")) ((panel.systemview.PageUnavailableScreen) views.get(id)).setRequested(unavailableRequested);
         boolean toTrader = !panel.shell.ShellRoutes.isResearch(id);
-        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-wallet-verify").contains(id);
+        boolean toByx = java.util.Set.of("t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery", "t-wallet-verify").contains(id);
         boolean changedWorkspace = toTrader != trader || toByx != byxWorkspace;
         byxWorkspace = toByx;
         trader = toTrader;
@@ -662,6 +663,7 @@ public class PanelApp extends Application {
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
         if (shell != null) shell.showV2(V2_VIEWS.contains(id));
+        if (changedWorkspace && activeView != null && shell != null) shell.workspaceTransition(); // curta, sem esperar: o conteúdo já está pronto
         if (activeView != next) {
             if (activeView != null) activeView.onHide();
             activeView = next;
@@ -727,6 +729,12 @@ public class PanelApp extends Application {
             case "RESEARCH" -> user.admin() ? "overview" : panel.authview.SessionReturn.DEFAULT_ROUTE;
             default -> panel.authview.SessionReturn.DEFAULT_ROUTE;
         };
+    }
+
+    /** Build LOCAL_QA = o serviço tem a chain pública configurada (o perfil é decidido no build do serviço; o painel só observa). */
+    private boolean qaBuild() {
+        String s = ctx.byx.snapshot().chainState();
+        return s != null && !"NOT_CONFIGURED".equals(s);
     }
 
     private panel.systemview.SystemStatusModel.Inputs statusInputs() {
@@ -949,7 +957,7 @@ public class PanelApp extends Application {
     private java.util.List<panel.shell.ShellPalette.Entry> paletteIndex() {
         boolean admin = ctx.sessions.user().map(u -> u.user().admin()).orElse(false);
         java.util.List<panel.shell.ShellPalette.Entry> out = new java.util.ArrayList<>();
-        for (var c : panel.ui.CommandPalette.commands(admin, ctx.adminAccess.hasValidAdminSession())) {
+        for (var c : panel.ui.CommandPalette.commands(admin, ctx.adminAccess.hasValidAdminSession(), qaBuild())) {
             out.add(c.target() == null
                     ? panel.shell.ShellPalette.Entry.gated(panel.shell.ShellPalette.Group.NAVIGATION, c.title(), c.state())
                     : panel.shell.ShellPalette.Entry.nav(c.title(), c.target(), c.state().isEmpty() ? null : c.state()));

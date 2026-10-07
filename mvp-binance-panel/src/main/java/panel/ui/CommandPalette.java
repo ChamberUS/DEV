@@ -19,6 +19,11 @@ public final class CommandPalette {
     public CommandPalette(Consumer<String> navigate) { this.navigate = navigate; }
 
     public static List<Command> commands(boolean admin, boolean verified) {
+        return commands(admin, verified, false);
+    }
+
+    /** qa: build LOCAL_QA (a chain pública está configurada no serviço); só então aparecem as ferramentas de revisão (galeria do mascote). */
+    public static List<Command> commands(boolean admin, boolean verified, boolean qa) {
         List<Command> result = new ArrayList<>();
         result.add(new Command("t-desk", "Go to Trading Desk", ""));
         result.add(new Command("t-markets", "Open Markets", ""));
@@ -28,6 +33,9 @@ public final class CommandPalette {
         result.add(new Command("t-benefits", "Open Benefits", ""));
         result.add(new Command("t-treasury", "Open Treasury", ""));
         result.add(new Command("t-chain-data", "Open BYX Chain data", ""));
+        if (qa) {
+            result.add(new Command("t-mascot-gallery", "Open Mascot gallery (QA)", ""));
+        }
         if (admin) {
             String state = verified ? "" : "Admin verification required";
             result.add(new Command("overview", "Open Research", state));

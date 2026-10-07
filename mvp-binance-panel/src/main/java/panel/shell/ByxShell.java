@@ -43,6 +43,7 @@ public final class ByxShell extends StackPane {
     /** Conteúdo V2 (Views já portadas): fora do LegacyHost, sem folhas legadas. */
     private final StackPane v2Content = new StackPane();
     private javafx.scene.Node mainOverlay;
+    private panel.mascot.MascotTransitionOverlay workspaceMascot;
     private final VBox center;
     private javafx.scene.Node globalBar;
 
@@ -289,7 +290,22 @@ public final class ByxShell extends StackPane {
     }
 
     /** Fim de sessão: solta o roteador (que vive mais que o shell) e para animações próprias. */
+    /** Mudança de workspace: transição curta do mascote (só FULL; não bloqueia, não captura mouse, criada sob demanda). */
+    public void workspaceTransition() {
+        if (!motion.full()) {
+            return;
+        }
+        if (workspaceMascot == null) {
+            workspaceMascot = new panel.mascot.MascotTransitionOverlay(motion);
+            main.getChildren().add(workspaceMascot);
+        }
+        workspaceMascot.trigger();
+    }
+
     public void dispose() {
+        if (workspaceMascot != null) {
+            workspaceMascot.dispose();
+        }
         router.routeProperty().removeListener(routeListener);
         rail.dispose();
         switcher.dispose();
