@@ -1,0 +1,13 @@
+V2.1G Stage 3B-A: synthetic Research gate reproduction + fix (2026-10-06)
+real profile: NOT used for this round (no login, no OTP, no provider call, no authority write, no finalize, private gate untouched)
+symptom (real, Stage 3B attempt 22:31): Research click opened nothing; 24x ELEVATION_DENIED (user retrying, 150ms-3s apart, one 27s gap); no OTP sent
+reproduction (ResearchGateReproductionTest, PanelApp real + FakeAuthority, before the fix): overlay did NOT open for ANY of the 4 verified-flag combinations (false/false too) -> contact verification is NOT the cause
+root cause: UserSession.id is a random UUID created by every construction; SessionManager.updateUser (called by every status refresh, incl. the one inside tryTrustedDevice) rebuilt the UserSession => new id; PanelApp.requestResearch compared the id captured before the async device check with the current one, found a "different session" and returned silently; each retry repeated it
+24 requests: not a loop; one denied elevation per click (the check completed, the overlay was silently dropped, the user clicked again)
+fix (panel only; service rules unchanged): updateUser keeps the session id (only login/logout change it); tryTrustedDevice asks the service for an elevation only when the service reports mfaRecent=true (contact verified / trusted device never substitute MFA; no denied request noise); the runLater path is try/catch -> researchGateFailed (fixed code BYX_RESEARCH_GATE_ERROR, no message/contact/OTP, cancels the pending request, toast, Research stays locked); User.maskedEmail null-safe
+tests: ResearchGateReproductionTest 11/11 (4 flag combos open the overlay; single/repeated clicks -> 0 elevation requests; refresh inside the check keeps session id + ticket + overlay; navigate-away shows nothing; new login/logout change the session id; redacted fail-closed handler; masking shapes; OTP-only elevation, no trusted device)
+panel suite: 562 tests, 0 failures, 0 errors, 1 skipped (pre-existing capture-live)
+panel jar: fb48f5a79ef379dba3a3b3a1e3781d966422aa7ef385faab18cd30332aa47a0a (build/ and build-canary/ identical); previous 8752dc14...
+packaged cutover QA 23/0, identity QA 29/0
+real state (read-only): verify PASS PREPARED freeze=true legacy=ACTIVE; panel.db a75769d78cd65a333898831aecc34df1b165a6ab9a0ca9e9627b31ae03c7f7fc; legacy resend/twilio/trusted-device PRESENT; PRIVATE_CAPABILITIES_ALLOWED=false EXPLICIT_REVIEW_REQUIRED=true
+authority.bin sha now 4a59d931e1af04c31dbf672de1255a16f84f96e8158d8d92034a83440e1df8c3 (changed ONLY by the owner's LOGIN_OK at 22:31:09; semantic verify PASS; nothing written by this round)
