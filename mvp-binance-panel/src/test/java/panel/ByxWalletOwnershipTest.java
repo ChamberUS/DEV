@@ -24,6 +24,7 @@ import panel.adapter.ByxChainGateway;
 class ByxWalletOwnershipTest {
     final AuthFixture auth = AuthFixture.ready();
     final TestKeyPair keys = new TestKeyPair();
+    final FakeServerAuthorizer authorizer = new FakeServerAuthorizer();
     ByxConfig config;
     ByxWalletIdentityService identity;
     ByxBenefitsService benefits;
@@ -50,7 +51,7 @@ class ByxWalletOwnershipTest {
     @BeforeEach void setup() {
         auth.seedAdmin(); auth.auth.login("boss","correct-horse-1".toCharArray());
         config = new ByxConfig(URI.create("http://127.0.0.1:1417"),URI.create("http://127.0.0.1:27657"),"LOCALNET","test-chain","a".repeat(64),"ubyx","BYX",6,"BANK_METADATA","");
-        identity = new ByxWalletIdentityService(auth.sessions,new ByxWalletRepository(auth.db),()->config,auth.clock);
+        identity = new ByxWalletIdentityService(auth.sessions,new ByxWalletRepository(auth.db),()->config,auth.clock,authorizer);
         benefits = new ByxBenefitsService(identity,new ByxChainGateway() {
             public String source(){return "LIVE_NODE";}
             public ByxSnapshot read(ByxConfig c) throws Exception {
@@ -109,7 +110,7 @@ class ByxWalletOwnershipTest {
     }
     @Test void replayAndRestartRejected() throws Exception {
         var p=valid();identity.verify(p);assertThrows(AccessDeniedException.class,()->identity.verify(p));
-        var restarted=new ByxWalletIdentityService(auth.sessions,new ByxWalletRepository(auth.db),()->config,auth.clock);
+        var restarted=new ByxWalletIdentityService(auth.sessions,new ByxWalletRepository(auth.db),()->config,auth.clock,authorizer);
         assertThrows(AccessDeniedException.class,()->restarted.verify(p));assertEquals(1,restarted.wallets().size());
     }
     @Test void revokedWalletCannotUnlockAndOldPendingProofCannotRelink() throws Exception {
@@ -172,5 +173,14 @@ class ByxWalletOwnershipTest {
             var columns=db.with(c->{var result=new HashSet<String>();try(var s=c.createStatement();var rs=s.executeQuery("PRAGMA table_info(verified_wallets)")){while(rs.next())result.add(rs.getString("name"));}return result;});
             assertEquals(Set.of("user_id","address","public_key","chain_id","genesis_fingerprint","verified_at","last_verified_at","revoked_at"),columns);
         }
+    }
+    /** Contrato C: a lógica de domínio acima só é provada se o autorizador foi realmente exigido; e a negação do serviço vem ANTES da lógica. */
+    @Test void domainTestsConsultTheAuthorizerAndADeniedOperationNeverReachesTheDomainLogic() throws Exception {
+        var proof=valid();identity.verify(proof);
+        assertTrue(authorizer.calls().contains(ServerOperation.WALLET_IDENTITY));
+        authorizer.deny(ServerOperation.WALLET_IDENTITY);
+        var e=assertThrows(AccessDeniedException.class,()->identity.verify(keys.sign(identity.challenge(keys.address()))));
+        assertEquals(ServerAuthorization.REQUIRED+": wallet.identity",e.getMessage());
+        assertEquals(1,new ByxWalletRepository(auth.db).list(auth.sessions.user().orElseThrow().user().id()).size());
     }
 }

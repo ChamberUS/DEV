@@ -15,11 +15,17 @@ public final class TreasuryService {
     private final GasGrantRepository journal;
     private final Supplier<GasSponsorshipPolicy> policy;
     private final Clock clock;
+    private final panel.security.ServerAuthorizer authorizer;
     public TreasuryService(ByxWalletIdentityService identity,ByxChainGateway chain,ByxGasGrantGateway gas,GasGrantRepository journal,Supplier<GasSponsorshipPolicy> policy,Clock clock) {
+        this(identity,chain,gas,journal,policy,clock,panel.security.ServerAuthorization.DENY_ALL);
+    }
+    /** Só para testes de domínio: a composição de produção usa o construtor acima (DENY_ALL). */
+    public TreasuryService(ByxWalletIdentityService identity,ByxChainGateway chain,ByxGasGrantGateway gas,GasGrantRepository journal,Supplier<GasSponsorshipPolicy> policy,Clock clock,panel.security.ServerAuthorizer authorizer) {
+        this.authorizer=java.util.Objects.requireNonNull(authorizer);
         this.identity=identity;this.chain=chain;this.gas=gas;this.journal=journal;this.policy=policy;this.clock=clock;
     }
     public TreasurySnapshot refresh() throws Exception {
-        panel.security.ServerAuthorization.require("wallet.treasury.read");
+        authorizer.require(panel.security.ServerOperation.WALLET_TREASURY_READ);
         var c=identity.network(); var p=policy.get(); p.matches(c);
         var query=new ByxConfig(c.endpoint(),c.rpcEndpoint(),"LOCALNET",c.expectedChainId(),c.genesisFingerprint(),"ubyx","BYX",6,"BANK_METADATA",p.granter());
         var s=chain.read(query); var now=clock.instant();

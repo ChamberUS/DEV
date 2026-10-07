@@ -18,13 +18,20 @@ public final class GasSponsorshipService {
     private final ByxGasGrantGateway gateway;
     private final Supplier<GasSponsorshipPolicy> policy;
     private final Clock clock;
+    private final panel.security.ServerAuthorizer authorizer;
     public GasSponsorshipService(SessionManager sessions, ByxWalletIdentityService identity, ByxBenefitsService benefits,
             GasGrantRepository repository, ByxGasGrantGateway gateway, Supplier<GasSponsorshipPolicy> policy, Clock clock) {
+        this(sessions, identity, benefits, repository, gateway, policy, clock, panel.security.ServerAuthorization.DENY_ALL);
+    }
+    /** Só para testes de domínio: a composição de produção usa o construtor acima (DENY_ALL). */
+    public GasSponsorshipService(SessionManager sessions, ByxWalletIdentityService identity, ByxBenefitsService benefits,
+            GasGrantRepository repository, ByxGasGrantGateway gateway, Supplier<GasSponsorshipPolicy> policy, Clock clock, panel.security.ServerAuthorizer authorizer) {
+        this.authorizer=java.util.Objects.requireNonNull(authorizer);
         this.sessions=sessions; this.identity=identity; this.benefits=benefits; this.repository=repository; this.gateway=gateway; this.policy=policy; this.clock=clock;
     }
     private long user() { return sessions.user().filter(s -> s.user().active() && !s.user().mustChangePassword()).orElseThrow(() -> new AccessDeniedException("Authenticated user required")).user().id(); }
     public synchronized GasGrantSnapshot request(String address) throws Exception {
-        panel.security.ServerAuthorization.require("wallet.gas.request");
+        authorizer.require(panel.security.ServerOperation.WALLET_GAS_REQUEST);
         var session=sessions.user().orElseThrow();
         var wallet=identity.verified(address).orElseThrow(() -> new AccessDeniedException("Verified wallet required"));
         benefits.refresh(address).get();
@@ -66,7 +73,7 @@ public final class GasSponsorshipService {
         return new GasGrantSnapshot(g.granter(),g.grantee(),g.denom(),e.limit(),g.remaining(),g.expiration(),g.state(),e.txHash(),g.updatedAt());
     }
     public synchronized GasGrantSnapshot refresh(String address) throws Exception {
-        panel.security.ServerAuthorization.require("wallet.gas.refresh");
+        authorizer.require(panel.security.ServerOperation.WALLET_GAS_REFRESH);
         if (identity.verified(address).isPresent()) benefits.refresh(address).get();
         synchronized (sessions) {
             long u=user(); var c=identity.network(); var p=policy.get(); p.matches(c);
@@ -84,7 +91,7 @@ public final class GasSponsorshipService {
         }
     }
     public synchronized void revoke(String address) throws Exception {
-        panel.security.ServerAuthorization.require("wallet.gas.revoke");
+        authorizer.require(panel.security.ServerOperation.WALLET_GAS_REVOKE);
         synchronized (sessions) {
             long u=user(); var c=identity.network(); var p=policy.get(); p.matches(c);
             var e=repository.own(u,address,p.chainId(),p.genesis()).orElseThrow(() -> new AccessDeniedException("No own grant"));
@@ -97,5 +104,5 @@ public final class GasSponsorshipService {
             } else repository.update(e,"REVOKED",e.txHash());
         }
     }
-    public List<GasGrantRepository.Entry> journal() { panel.security.ServerAuthorization.require("wallet.gas.journal"); user(); return repository.all(); }
+    public List<GasGrantRepository.Entry> journal() { authorizer.require(panel.security.ServerOperation.WALLET_GAS_JOURNAL); user(); return repository.all(); }
 }

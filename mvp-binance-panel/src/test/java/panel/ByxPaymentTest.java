@@ -15,6 +15,8 @@ import panel.service.*;
 import panel.adapter.*;
 import panel.repository.*;
 import panel.security.AccessDeniedException;
+import panel.security.ServerAuthorization;
+import panel.security.ServerOperation;
 
 class ByxPaymentTest {
     final ByxWalletOwnershipTest f=new ByxWalletOwnershipTest();
@@ -40,7 +42,7 @@ class ByxPaymentTest {
         f.config=new ByxConfig(origin,origin,"LOCALNET",chain,CosmosByxChainGateway.fingerprint(genesis),"ubyx","BYX",6,"BANK_METADATA","");
         f.identity.verify(f.valid());
         policy=new ByxPaymentPolicy(new ByxWalletOwnershipTest.TestKeyPair().address(),chain,f.config.genesisFingerprint(),BigInteger.valueOf(10000),300,10);
-        payments=new ByxPaymentService(f.auth.sessions,f.identity,new ByxPaymentRepository(f.auth.db),new CosmosByxPaymentVerifier(f.auth.clock),f.auth.clock,()->policy);
+        payments=new ByxPaymentService(f.auth.sessions,f.identity,new ByxPaymentRepository(f.auth.db),new CosmosByxPaymentVerifier(f.auth.clock),f.auth.clock,()->policy,f.authorizer);
         entitlements=new EntitlementService(f.benefits,payments);
         responses.put("/cosmos/base/tendermint/v1beta1/node_info",Map.of("default_node_info",Map.of("network",chain,"default_node_id","testnode")));
         responses.put("/status",Map.of("result",Map.of("node_info",Map.of("network",chain,"id","testnode"))));
@@ -99,7 +101,7 @@ class ByxPaymentTest {
     @Test void databasePreventsSameTxForTwoIntentsEvenIfVerifierMisbehaves()throws Exception {
         validTransaction();payments.confirm(intent.id(),hash);var second=payments.create(f.keys.address());
         var faulty=new ByxPaymentService(f.auth.sessions,f.identity,new ByxPaymentRepository(f.auth.db),
-            (c,i,h,d)->new PaymentReceipt(i.id(),i.userId(),i.verifiedWallet(),i.chainId(),i.genesisFingerprint(),h,55,i.amountUbyx(),f.auth.clock.instant(),f.auth.clock.instant(),f.auth.clock.instant().plusSeconds(d)),f.auth.clock,()->policy);
+            (c,i,h,d)->new PaymentReceipt(i.id(),i.userId(),i.verifiedWallet(),i.chainId(),i.genesisFingerprint(),h,55,i.amountUbyx(),f.auth.clock.instant(),f.auth.clock.instant(),f.auth.clock.instant().plusSeconds(d)),f.auth.clock,()->policy,f.authorizer);
         assertThrows(IllegalStateException.class,()->faulty.confirm(second.id(),hash));assertEquals(1,payments.receipts().size());assertEquals(PaymentIntent.Status.REJECTED,payments.get(second.id()).status());
     }
     @Test void revokeDisablesAccessWithoutFalsifyingReceipt()throws Exception{validTransaction();var receipt=payments.confirm(intent.id(),hash);f.identity.revoke(f.keys.address());assertTrue(payments.active(f.keys.address()).isEmpty());assertEquals(receipt,payments.receipts().get(0));}
@@ -144,7 +146,7 @@ class ByxPaymentTest {
     }
     @Test void receiptSurvivesServiceRestartAndReplayStillRejected()throws Exception {
         validTransaction();var receipt=payments.confirm(intent.id(),hash);
-        var restored=new ByxPaymentService(f.auth.sessions,f.identity,new ByxPaymentRepository(f.auth.db),new CosmosByxPaymentVerifier(f.auth.clock),f.auth.clock,()->policy);
+        var restored=new ByxPaymentService(f.auth.sessions,f.identity,new ByxPaymentRepository(f.auth.db),new CosmosByxPaymentVerifier(f.auth.clock),f.auth.clock,()->policy,f.authorizer);
         assertEquals(receipt,restored.active(f.keys.address()).orElseThrow());
         assertThrows(AccessDeniedException.class,()->restored.confirm(intent.id(),hash));
     }
@@ -157,5 +159,13 @@ class ByxPaymentTest {
         assertThrows(AccessDeniedException.class,()->payments.get(intent.id()));
         assertThrows(AccessDeniedException.class,()->payments.confirm(intent.id(),hash));
         assertTrue(payments.receipts().isEmpty());
+    }
+    @Test void paymentDomainTestsConsultTheAuthorizerAndDenialPrecedesAnyEffect()throws Exception {
+        assertTrue(f.authorizer.calls().contains(ServerOperation.WALLET_PAYMENT));
+        validTransaction();f.authorizer.deny(ServerOperation.WALLET_PAYMENT);
+        var e=assertThrows(AccessDeniedException.class,()->payments.confirm(intent.id(),hash));
+        assertEquals(ServerAuthorization.REQUIRED+": wallet.payment",e.getMessage());
+        f.authorizer.deny(ServerOperation.WALLET_IDENTITY);
+        assertThrows(AccessDeniedException.class,()->payments.create(f.keys.address()));
     }
 }

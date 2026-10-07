@@ -16,17 +16,23 @@ public final class ByxWalletIdentityService {
     private final ByxWalletRepository repository;
     private final Supplier<ByxConfig> config;
     private final Clock clock;
+    private final ServerAuthorizer authorizer;
     private final SecureRandom random = new SecureRandom();
     private final Map<String, Pending> pending = new HashMap<>();
     public ByxWalletIdentityService(SessionManager sessions, ByxWalletRepository repository, ByxNetworkService network, Clock clock) {
         this(sessions, repository, network::walletConfig, clock);
     }
     public ByxWalletIdentityService(SessionManager sessions, ByxWalletRepository repository, Supplier<ByxConfig> config, Clock clock) {
+        this(sessions, repository, config, clock, ServerAuthorization.DENY_ALL);
+    }
+    /** Só para testes de domínio: a composição de produção usa os construtores acima (DENY_ALL). */
+    public ByxWalletIdentityService(SessionManager sessions, ByxWalletRepository repository, Supplier<ByxConfig> config, Clock clock, ServerAuthorizer authorizer) {
         this.sessions = sessions; this.repository = repository; this.config = config; this.clock = clock;
+        this.authorizer = java.util.Objects.requireNonNull(authorizer);
         sessions.onLogout(() -> { synchronized (pending) { pending.clear(); } });
     }
     private UserSession user() {
-        ServerAuthorization.require("wallet.identity");
+        authorizer.require(ServerOperation.WALLET_IDENTITY);
         return sessions.user().filter(s -> s.user().active() && !s.user().mustChangePassword())
                 .orElseThrow(() -> new AccessDeniedException("Authenticated user required"));
     }

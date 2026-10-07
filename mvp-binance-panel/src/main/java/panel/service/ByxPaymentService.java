@@ -17,9 +17,12 @@ public final class ByxPaymentService {
     private final ByxPaymentRepository repository;
     private final ByxPaymentVerifier verifier;
     private final Clock clock;
+    private final panel.security.ServerAuthorizer authorizer;
     private final Supplier<ByxPaymentPolicy> policy;
-    public ByxPaymentService(SessionManager sessions,ByxWalletIdentityService identity,ByxPaymentRepository repository,ByxPaymentVerifier verifier,Clock clock,Supplier<ByxPaymentPolicy> policy){this.sessions=sessions;this.identity=identity;this.repository=repository;this.verifier=verifier;this.clock=clock;this.policy=policy;}
-    private long user(){panel.security.ServerAuthorization.require("wallet.payment");return sessions.user().filter(s->s.user().active()&&!s.user().mustChangePassword()).orElseThrow(()->new AccessDeniedException("Authenticated user required")).user().id();}
+    public ByxPaymentService(SessionManager sessions,ByxWalletIdentityService identity,ByxPaymentRepository repository,ByxPaymentVerifier verifier,Clock clock,Supplier<ByxPaymentPolicy> policy){this(sessions,identity,repository,verifier,clock,policy,panel.security.ServerAuthorization.DENY_ALL);}
+    /** Só para testes de domínio: a composição de produção usa o construtor acima (DENY_ALL). */
+    public ByxPaymentService(SessionManager sessions,ByxWalletIdentityService identity,ByxPaymentRepository repository,ByxPaymentVerifier verifier,Clock clock,Supplier<ByxPaymentPolicy> policy,panel.security.ServerAuthorizer authorizer){this.sessions=sessions;this.identity=identity;this.repository=repository;this.verifier=verifier;this.clock=clock;this.policy=policy;this.authorizer=java.util.Objects.requireNonNull(authorizer);}
+    private long user(){authorizer.require(panel.security.ServerOperation.WALLET_PAYMENT);return sessions.user().filter(s->s.user().active()&&!s.user().mustChangePassword()).orElseThrow(()->new AccessDeniedException("Authenticated user required")).user().id();}
     public PaymentIntent create(String address){
         long user=user();var config=identity.network();var p=policy.get();p.check(config);
         var wallet=identity.verified(address).orElseThrow(()->new AccessDeniedException("Verified wallet required"));

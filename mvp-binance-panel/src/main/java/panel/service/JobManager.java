@@ -30,6 +30,7 @@ public class JobManager {
     private final Supplier<Path> workdir;
     private final Runnable onFinished;
     private final Runnable gate;
+    private final panel.security.ServerAuthorizer authorizer;
     private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "job-worker");
         t.setDaemon(true);
@@ -39,6 +40,12 @@ public class JobManager {
     private int seq;
 
     public JobManager(CommandAdapter adapter, Supplier<Path> workdir, Runnable onFinished, Runnable gate) {
+        this(adapter, workdir, onFinished, gate, panel.security.ServerAuthorization.DENY_ALL);
+    }
+
+    /** Só para testes de domínio: a composição de produção usa o construtor acima (DENY_ALL). */
+    public JobManager(CommandAdapter adapter, Supplier<Path> workdir, Runnable onFinished, Runnable gate, panel.security.ServerAuthorizer authorizer) {
+        this.authorizer = java.util.Objects.requireNonNull(authorizer);
         this.gate = gate;
         this.adapter = adapter;
         this.workdir = workdir;
@@ -47,7 +54,7 @@ public class JobManager {
 
     /** Deve ser chamado na thread da UI. Lança IllegalArgumentException/IllegalStateException se o comando for recusado. */
     public JobRecord submit(CommandSpec spec, String sessionId) {
-        panel.security.ServerAuthorization.require("research.job.submit");
+        authorizer.require(panel.security.ServerOperation.RESEARCH_JOB_SUBMIT);
         gate.run();
         if (spec.heavy && !externals.isEmpty()) {
             throw new IllegalStateException("Another label job is already running (pid " + externals.get(0).pid() + "). Wait for it to finish.");
@@ -103,7 +110,7 @@ public class JobManager {
     }
 
     public void cancel(JobRecord job) {
-        panel.security.ServerAuthorization.require("research.job.cancel");
+        authorizer.require(panel.security.ServerOperation.RESEARCH_JOB_CANCEL);
         gate.run();
         if (job.state.get() == JobState.QUEUED) {
             job.state.set(JobState.CANCELLED);

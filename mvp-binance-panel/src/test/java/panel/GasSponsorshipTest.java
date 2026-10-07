@@ -10,6 +10,8 @@ import panel.model.*;
 import panel.repository.*;
 import panel.service.*;
 import panel.security.AccessDeniedException;
+import panel.security.ServerAuthorization;
+import panel.security.ServerOperation;
 
 class GasSponsorshipTest {
     ByxWalletOwnershipTest f; GasSponsorshipService service; GasGrantRepository repo;
@@ -25,10 +27,10 @@ class GasSponsorshipTest {
         f.config=new ByxConfig(f.config.endpoint(),f.config.rpcEndpoint(),"LOCALNET","byx-mvp-localnet-b-fixture",f.config.genesisFingerprint(),"ubyx","BYX",6,"BANK_METADATA","");
         address=f.keys.address();f.identity.verify(f.valid());gateway=new Fake();repo=new GasGrantRepository(f.auth.db);
         policy=new GasSponsorshipPolicy(new ByxWalletOwnershipTest.TestKeyPair().address(),f.config.expectedChainId(),f.config.genesisFingerprint(),Map.of("FREE",BigInteger.ZERO,"HOLDER",BigInteger.ZERO,"PLUS",BigInteger.valueOf(30000),"PRO",BigInteger.valueOf(60000)),300);
-        service=new GasSponsorshipService(f.auth.sessions,f.identity,f.benefits,repo,gateway,()->policy,f.auth.clock);
+        service=new GasSponsorshipService(f.auth.sessions,f.identity,f.benefits,repo,gateway,()->policy,f.auth.clock,f.authorizer);
     }
     @AfterEach void close(){f.close();}
-    @Test void eligibleNativeQuotaAndIdempotentAcrossRestart() throws Exception {var g=service.request(address);assertEquals(BigInteger.valueOf(30000),g.remaining());assertEquals(g,service.request(address));assertEquals(1,gateway.writes);service=new GasSponsorshipService(f.auth.sessions,f.identity,f.benefits,repo,gateway,()->policy,f.auth.clock);service.request(address);assertEquals(1,gateway.writes);}
+    @Test void eligibleNativeQuotaAndIdempotentAcrossRestart() throws Exception {var g=service.request(address);assertEquals(BigInteger.valueOf(30000),g.remaining());assertEquals(g,service.request(address));assertEquals(1,gateway.writes);service=new GasSponsorshipService(f.auth.sessions,f.identity,f.benefits,repo,gateway,()->policy,f.auth.clock,f.authorizer);service.request(address);assertEquals(1,gateway.writes);}
     @Test void freeAndHolderIneligible() {for(String amount:List.of("1","100000000")){f.amount=new BigInteger(amount);assertThrows(AccessDeniedException.class,()->service.request(address));}assertEquals(0,gateway.writes);}
     @Test void watchOnlyCannotGrant(){assertThrows(AccessDeniedException.class,()->service.request(new ByxWalletOwnershipTest.TestKeyPair().address()));}
     @Test void revokedWalletCannotGrant(){f.identity.revoke(address);assertThrows(AccessDeniedException.class,()->service.request(address));}
@@ -70,4 +72,10 @@ class GasSponsorshipTest {
         assertThrows(AccessDeniedException.class,()->service.request(address));
     }
     @Test void productionSignerCannotActivate(){assertThrows(IllegalStateException.class,()->new LocalnetGasTestSigner(f.auth.clock,false,java.nio.file.Path.of("scripts/byx_gas_test.py")));}
+    @Test void gasDomainTestsConsultTheAuthorizerAndDenialPrecedesAnyGatewayWrite() throws Exception {
+        service.request(address);assertTrue(f.authorizer.calls().contains(ServerOperation.WALLET_GAS_REQUEST));
+        f.authorizer.deny(ServerOperation.WALLET_GAS_REVOKE);
+        var e=assertThrows(AccessDeniedException.class,()->service.revoke(address));
+        assertEquals(ServerAuthorization.REQUIRED+": wallet.gas.revoke",e.getMessage());assertEquals(0,gateway.revokes);
+    }
 }

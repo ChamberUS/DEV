@@ -54,7 +54,7 @@ final class AccountDataAdapter implements AccountData {
 
     @Override
     public void savePrefs(Prefs p) {
-        panel.security.ServerAuthorization.require("settings.preferences.persist");
+        panel.security.ServerAuthorization.require(panel.security.ServerOperation.SETTINGS_PREFERENCES_PERSIST);
         var st = ctx.settings;
         String oldMotion = st.motion, oldDensity = st.density;
         boolean oldIcons = st.animatedIcons;
