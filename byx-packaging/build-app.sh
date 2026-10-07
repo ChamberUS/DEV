@@ -1,7 +1,8 @@
 #!/bin/zsh
 # Constrói BYX-MVP.app: painel (com.buynnex.byx) + serviço local como HELPER APP ANINHADO (com.buynnex.byx.service, perfil e identidade
 # próprios), runtime Java embutido, Hardened Runtime e assinatura de desenvolvimento local (Apple Development). Sem root, sem daemon, sem porta.
-#   uso: ./build-app.sh [--out DIR] [--with-canary-harness] [--embedded-profile FILE]
+#   uso: ./build-app.sh [--out DIR] [--with-canary-harness] [--embedded-profile FILE] [--chain-profile production-disabled|local-qa]
+# --chain-profile escolhe o perfil da chain pública do serviço NO BUILD (padrão: production-disabled = NOT_CONFIGURED, sem rede). Perfil desconhecido: FALHA. Não há troca em runtime.
 # Topologia (medida): um helper com application-identifier PRÓPRIO dentro do bundle do painel é encerrado pelo macOS (o perfil do bundle
 # principal não o autoriza); por isso o serviço é um app-like aninhado em Contents/Helpers/ com o seu perfil. O runtime é UM só em
 # disco (clone APFS). Pré-requisito: painel e serviço já empacotados (mvn package); este script NÃO roda a suíte.
@@ -10,18 +11,26 @@ HERE="${0:A:h}"; ROOT="${HERE:h}"
 source "$HERE/identity.env"
 export JAVA_HOME="${JAVA_HOME:-$HOME/dev/tools/jdk-21.0.12.1+1/Contents/Home}"
 export PATH="$JAVA_HOME/bin:$HOME/dev/tools/apache-maven-3.9.9/bin:$PATH"
-OUT="$HERE/build"; ENT="$HERE/entitlements"; CANARY=0; PROFILE=""
+OUT="$HERE/build"; ENT="$HERE/entitlements"; CANARY=0; PROFILE=""; CHAIN="production-disabled"
 while [[ $# -gt 0 ]]; do case "$1" in
   --out) OUT="$2"; shift 2;;
   --entitlements-dir) ENT="$2"; shift 2;;
   --with-canary-harness) CANARY=1; OUT="$HERE/build-canary"; shift;; # variante SÓ DE TESTE, em outro diretório
   --embedded-profile) PROFILE="${2:A}"; shift 2;;                     # perfil de DESENVOLVIMENTO do helper (provisioning/provision.sh)
+  --chain-profile) CHAIN="${2:-}"; shift 2;;
   *) echo "arg inválido: $1" >&2; exit 2;; esac; done
 if [[ -n "$PROFILE" && "$BYX_IDS_FINAL" != "true" ]]; then echo "BLOCKED: FINAL BUNDLE ID REQUIRED"; exit 6; fi
+case "$CHAIN" in
+  production-disabled|"") CHAIN_ENUM=PRODUCTION_DISABLED;;   # vazio => padrão seguro
+  local-qa) CHAIN_ENUM=LOCAL_QA;;
+  *) echo "BLOCKED: perfil de chain desconhecido: '$CHAIN' (production-disabled|local-qa)" >&2; exit 2;; esac
 APP="$OUT/$BYX_APP_NAME.app"; CONTENTS="$APP/Contents"; HELPER="$CONTENTS/Helpers/byx-local-service.app"; HC="$HELPER/Contents"
 IDENT="${BYX_SIGN_IDENTITY:-$(security find-identity -v -p codesigning | awk '/Apple Development/ {print $2; exit}')}"
 [[ -n "$IDENT" ]] || { echo "nenhuma identidade Apple Development encontrada (BYX_SIGN_IDENTITY)"; exit 3; }
 PANEL_JAR="$ROOT/mvp-binance-panel/target/mvp-binance-panel-0.1.0.jar"; SERVICE_JAR="$ROOT/byx-local-service/target/byx-local-service-0.1.0.jar"
+echo "== 0. JAR do serviço com o perfil de chain do build: $CHAIN_ENUM (sem rodar a suíte)"
+( cd "$ROOT/byx-local-service" && mvn -o -q package -DskipTests -Dbyx.chain.profile="$CHAIN_ENUM" )
+[[ "$(unzip -p "$SERVICE_JAR" byx/chain-profile.txt)" == "$CHAIN_ENUM" ]] || { echo "JAR sem o perfil esperado"; exit 4; }
 [[ -f "$PANEL_JAR" && -f "$SERVICE_JAR" ]] || { echo "rode 'mvn package' no painel e no serviço antes"; exit 4; }
 CERT_NAME=$(security find-identity -v -p codesigning | awk -F'"' '/Apple Development/ {print $2; exit}')
 TEAM=$(security find-certificate -c "$CERT_NAME" -p | openssl x509 -noout -subject -nameopt multiline | awk '/organizationalUnitName/ {print $3; exit}')

@@ -199,6 +199,6 @@ class ChainIpcTest {
         assertTrue(main.contains("ChainConnector.production()") && !main.contains("LoopbackHttp") && !main.contains("ChainConfig") && !main.contains("ChainEndpoint"), "production composes only the typed-profile connector");
         String ops = Files.readString(Path.of("src/main/java/byx/service/Operations.java"));
         assertFalse(ops.contains("getenv") || ops.contains("getProperty"), "the answers read no environment or property");
-        assertTrue(ChainConnectorTestAccess.productionProfileIsTheTypedLocalQa());
+        assertTrue(ChainConnectorTestAccess.productionProfileMatchesTheBuildChoice());
     }
 }

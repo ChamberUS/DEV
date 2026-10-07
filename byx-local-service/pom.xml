@@ -9,6 +9,8 @@
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- perfil da chain do ARTEFATO (PRODUCTION_DISABLED | LOCAL_QA); só muda no build: -Dbyx.chain.profile=LOCAL_QA (via build-app.sh, opção chain-profile local-qa) -->
+    <byx.chain.profile>PRODUCTION_DISABLED</byx.chain.profile>
   </properties>
   <dependencies>
     <!-- única dependência de runtime: parser JSON estrito (a mesma versão que o painel já usa) -->
@@ -42,6 +44,12 @@
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -53,6 +61,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
+          <systemPropertyVariables><byx.chain.profile.expected>${byx.chain.profile}</byx.chain.profile.expected></systemPropertyVariables>
           <!-- só os testes de identidade do peer precisam ler o fd do socket; o lançador empacotado define os mesmos flags -->
           <argLine>--add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</argLine>
         </configuration>

@@ -55,17 +55,35 @@ class ChainConnectorTest {
 
     @Test
     void theProfileIsATypedCompileTimeChoiceWithFixedLoopbackEndpointsAndNoRuntimeSwitch() throws Exception {
-        assertEquals(ChainProfile.LOCAL_QA, ChainProfile.ACTIVE);
+        String chosen = System.getProperty("byx.chain.profile.expected", "PRODUCTION_DISABLED");
+        assertEquals(ChainProfile.valueOf(chosen), ChainProfile.ACTIVE, "the default build is PRODUCTION_DISABLED; LOCAL_QA only when built explicitly");
         assertTrue(ChainProfile.PRODUCTION_DISABLED.config().isEmpty(), "the disabled profile has no endpoint");
         ChainConfig qa = ChainProfile.LOCAL_QA.config().orElseThrow();
         assertEquals(new ChainEndpoint("127.0.0.1", 28657), qa.rpc());
         assertEquals(new ChainEndpoint("127.0.0.1", 28317), qa.rest());
         assertEquals("byx", qa.expectedChainId());
         assertEquals(new DenomModel("ubyx", "BYX", 6), qa.denom());
-        assertEquals(Optional.of(qa), ChainConfig.production());
-        assertTrue(ChainConnectorTestAccess.productionProfileIsTheTypedLocalQa());
+        assertEquals(ChainProfile.ACTIVE.config(), ChainConfig.production());
+        assertTrue(ChainConnectorTestAccess.productionProfileMatchesTheBuildChoice());
         String src = java.nio.file.Files.readString(java.nio.file.Path.of("src/main/java/byx/service/chain/ChainProfile.java")).replaceAll("(?s)/\\*.*?\\*/", "");
         assertFalse(src.contains("getenv") || src.contains("getProperty") || src.contains("getBoolean") || src.contains("Files."), "the profile reads no environment, property or file");
+    }
+
+    @Test
+    void buildProfileNamesFailClosedAndNoProfileAllowsAnArbitraryHost() {
+        assertEquals(ChainProfile.LOCAL_QA, ChainProfile.resolve("LOCAL_QA"));
+        assertEquals(ChainProfile.LOCAL_QA, ChainProfile.resolve("LOCAL_QA\n"));
+        assertEquals(ChainProfile.PRODUCTION_DISABLED, ChainProfile.resolve("PRODUCTION_DISABLED"));
+        for (String bad : new String[] {null, "", "  ", "local_qa", "localhost", "evil.example.com:443", "${byx.chain.profile}", "LOCAL_QA,PRODUCTION", "MAINNET"}) {
+            assertEquals(ChainProfile.PRODUCTION_DISABLED, ChainProfile.resolve(bad), "unknown/empty -> safe default: " + bad);
+        }
+        assertTrue(ChainProfile.PRODUCTION_DISABLED.config().isEmpty(), "the default profile carries no endpoint at all");
+        for (ChainProfile p : ChainProfile.values()) {
+            p.config().ifPresent(c -> {
+                assertEquals("127.0.0.1", c.rpc().host());
+                assertEquals("127.0.0.1", c.rest().host());
+            });
+        }
     }
 
     @Test

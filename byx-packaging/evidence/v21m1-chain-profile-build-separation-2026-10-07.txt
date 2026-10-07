@@ -1,0 +1,10 @@
+V2.1M-1 chain profile build separation (2026-10-07). No chain change, no TX, no private capability, no push; soak/full integration not repeated.
+default profile: PRODUCTION_DISABLED (no endpoints). LOCAL_QA preserved (RPC 127.0.0.1:28657, REST 127.0.0.1:28317, chain id byx, ubyx/BYX/6), built only with build-app.sh --chain-profile local-qa.
+mechanism: build-app.sh -> mvn package -DskipTests -Dbyx.chain.profile=<ENUM> -> filtered resource byx/chain-profile.txt inside the (signed) service jar -> ChainProfile.ACTIVE; script verifies the jar content. Runtime override: ABSENT (no env/property/user file/UI/CLI). Unknown build profile: build FAILS (rc 2, build dir untouched); empty -> safe default; runtime unknown/placeholder -> PRODUCTION_DISABLED.
+identity: bundle id com.buynnex.byx / service com.buynnex.byx.service, Team W5Z65G9UP2, same Apple Development identity and embedded service profile; unchanged.
+default bundle (packaged, signed probe): configured=false state=NOT_CONFIGURED screen "NOT CONFIGURED", generation 0, no socket to 28657/28317; Binance market feed LIVE/book LIVE/price (independent); private gate false.
+LOCAL_QA bundle: node off -> configured=true state=OFFLINE reason UNREACHABLE; node on (QA home ~/.byx-qa-v21m, briefly) -> LIVE, chainId byx, ubyx/BYX/6, height 544, only 127.0.0.1<->127.0.0.1 sockets; node stopped afterwards (no byxd, no listener).
+fail-closed tests: ChainConnectorTest (19, incl. resolve: null/empty/blank/lowercase/host:port/placeholder/list -> PRODUCTION_DISABLED; every profile config loopback-only), ChainIpcTest 5; green with default and with -Dbyx.chain.profile=LOCAL_QA.
+packaged QA (default bundle, final artifact): verify-cutover 23/0, verify-identity --market PASS 0 FAIL.
+capture: recorder alive; .part grew during this step (checked just now)
+real state: authority.bin 6923eee3, panel.db a75769d7, runtime.db d0e9363e unchanged; audit.log 42 lines; private gate false; TX blocked GAS_PRICE_POLICY_PENDING
