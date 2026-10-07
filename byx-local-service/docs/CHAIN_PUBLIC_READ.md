@@ -1,4 +1,4 @@
-# V2.1L — Conector PÚBLICO e SOMENTE LEITURA da chain BYX local (fundação; NÃO conectado ao nó real)
+# V2.1L/V2.1M — Conector PÚBLICO e SOMENTE LEITURA da chain BYX local
 
 Estado: **NOT_CONFIGURED em produção**. Nenhum nó real foi contatado; o contrato definitivo da chain ainda está sendo fechado. Tudo foi provado contra um nó FALSO em 127.0.0.1 (porta efêmera), em teste. Nada de transação, assinatura, carteira, mnemônico, chave privada, grant de gás, mutação de pagamento/loja/governança, nem proxy genérico.
 
@@ -34,3 +34,9 @@ Campos: `state, configured, reachable, chainId, latestHeight, catchingUp, blockT
 
 ## Pendências (dependem do contrato da chain)
 `expectedChainId` final; portas/origem empacotada; verificação de identidade do nó além do chain id (id do nó, impressão do genesis) se o contrato exigir; gRPC/WebSocket; leituras de módulos (lojas, payments, feesplit, certificados) e migração dos adaptadores diretos.
+
+## V2.1M — integração com o nó local REAL (QA descartável)
+Contrato da chain: `READ_ONLY APP INTEGRATION = READY` (chain id `byx`, base `ubyx`, display `BYX`, expoente 6, CoinType 118, prefixo `byx`); **TX APP INTEGRATION continua BLOQUEADA** (`GAS_PRICE_POLICY_PENDING`): esta fase é só leitura pública.
+Perfil tipado `ChainProfile` (constante de compilação, sem env/propriedade/arquivo): `PRODUCTION_DISABLED` (sem nó) e `LOCAL_QA` (RPC 127.0.0.1:28657, REST 127.0.0.1:28317, `expectedChainId=byx`, `ubyx/BYX/6`). O artefato desta fase usa `ChainProfile.ACTIVE = LOCAL_QA`; reverter é trocar a constante. Sem nó rodando o estado é OFFLINE (fechado); chain id ou metadata divergente é NETWORK_MISMATCH.
+Nó QA: `~/.byx-qa-v21m` (binário compilado do HEAD aprovado da chain, sem alterar o código-fonte; single-validator `byx`; RPC/REST/P2P só em 127.0.0.1; gRPC e grpc-web desligados; pex off; CORS e unsafe off; sem launchd). Parar: `kill -TERM $(cat ~/.byx-qa-v21m/node.pid)`. Subir: `nice -n 10 ~/.byx-qa-v21m/bin/byxd start --home ~/.byx-qa-v21m/home`.
+Prova no produto (sonda assinada `--chain`/`--chain-watch=N`, mesmo caminho da tela de rede): LIVE com altura crescente e monótona, geração estável, denom e suprimento exatos; parada graciosa → OFFLINE → LIVE com altura preservada; chain id errada e metadata errada (nós descartáveis nos mesmos endpoints) → NETWORK MISMATCH sem altura/denom/suprimento.
