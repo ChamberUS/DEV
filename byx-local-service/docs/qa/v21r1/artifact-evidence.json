@@ -1,0 +1,56 @@
+{
+  "base_commit": "678f508",
+  "production_tx": "DISABLED",
+  "production_signer": "UNAVAILABLE",
+  "production_transport": "ABSENT",
+  "private_gate_allowed": false,
+  "new_runtime_qa_switch": false,
+  "real_key_access": false,
+  "real_signature": false,
+  "real_broadcast": false,
+  "node_started": false,
+  "binance_socket_opened": false,
+  "byx_tcp_socket_opened": false,
+  "ipc_test": "Valid synthetic authority session bound to injected peer11; real Unix IPC; all five typed tx operations denied TX_DISABLED",
+  "synthetic_vector": {
+    "warning": "TEST VECTOR \u2014 NOT A REAL WALLET",
+    "key_type": "secp256k1",
+    "pubkey_type_url": "/cosmos.crypto.secp256k1.PubKey",
+    "address": "byx1w508d6qejxtdg4y5r3zarvary0c5xw7k9hg34e",
+    "hd_path": "m/44'/118'/0'/0/0",
+    "sign_mode": "SIGN_MODE_DIRECT",
+    "tx_hash": "aa0241aad9cd15c6048569cf5499b7509d3fad2fb284ed8ae7a67f7fe34989c3",
+    "cross_implementation": "Go Cosmos SDK vs independent test-only Java wire encoding/BC ECDSA/RFC6979: PASS"
+  },
+  "artifacts": {
+    "panel_default": {
+      "path": "/Users/buynnex-corp/dev/mvp-binance-panel/target/mvp-binance-panel-0.1.0.jar",
+      "sha256": "a8e437161f3b1eb6afe3c01cf30645234cc63bd61069ebf11932a292f419179b",
+      "tx_lab_entries": [],
+      "test_only_entries": []
+    },
+    "panel_local_qa": {
+      "path": "/tmp/byx-r1-artifacts/local-qa/panel.jar",
+      "sha256": "b1a3a628396e5258c002c6382a12c05bf3319a1185469f7810980a558410bf1a",
+      "tx_lab_entries": [
+        "panel/txview/",
+        "panel/txview/TxLabModel$QuoteView.class",
+        "panel/txview/TxLabModel.class",
+        "panel/txview/TxLabService.class",
+        "panel/txview/TransactionLab.class",
+        "panel/txview/TxLabModel$View.class",
+        "panel/txview/TxLabService$1.class",
+        "panel/txview/TxLabService$Reply.class"
+      ],
+      "test_only_entries": []
+    },
+    "service_default": {
+      "path": "/Users/buynnex-corp/dev/byx-local-service/target/byx-local-service-0.1.0.jar",
+      "sha256": "59ec144f3126f835d22af71131443c29c0f9d2537a7cd7c05fb5ab37185ac6d6",
+      "tx_lab_entries": [],
+      "test_only_entries": [],
+      "chain_profile": "PRODUCTION_DISABLED"
+    }
+  },
+  "macos_bundle_repackaged": false
+}

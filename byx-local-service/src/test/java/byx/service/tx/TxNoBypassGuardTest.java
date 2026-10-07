@@ -97,6 +97,22 @@ class TxNoBypassGuardTest {
         assertTrue(ports.contains("SignedTx sign(TxSignRequest request)"));
     }
 
+    @Test
+    void onlyTheTransactionEngineConstructsTheRestrictedSignRequest() throws IOException {
+        int constructions = 0;
+        for (Path path : sources()) {
+            String source = Files.readString(path);
+            int count = count(source, "new TxSignRequest(");
+            if (count != 0) assertEquals("TxService.java", path.getFileName().toString());
+            constructions += count;
+        }
+        assertEquals(1, constructions);
+        String ports = Files.readString(MAIN.resolve("byx/service/tx/TxPorts.java"));
+        assertTrue(ports.contains("public static final class TxSignRequest"));
+        assertTrue(ports.contains("        TxSignRequest(TxKey key, TxQuote quote)"));
+        assertFalse(ports.contains("public TxSignRequest(") || ports.contains("protected TxSignRequest("));
+    }
+
     private static int count(String src, String needle) {
         int n = 0;
         int i = 0;

@@ -59,4 +59,40 @@ class TxSessionsAdapterTest {
             assertTrue(sessions.resolve(PEER, token).isEmpty());
         }
     }
+    @Test
+    void validPeerAndAuthoritySessionCannotBypassDefaultTxOverDirectIpc() throws Exception {
+        java.nio.file.Path home = java.nio.file.Files.createTempDirectory(java.nio.file.Path.of("/tmp"), "r1tx");
+        try (AuthFixture fixture = new AuthFixture()) {
+            String token = AuthFixture.token(fixture.loginUser(PEER));
+            assertTrue(TxProduction.sessions(fixture.auth).resolve(PEER, token).isPresent());
+            var chain = byx.service.chain.ChainConnector.notConfigured();
+            try (var service = byx.service.ServiceInstance.start(home,
+                    byx.service.ServiceInstance.Limits.defaults(),
+                    new byx.service.market.MarketFeed(new byx.service.market.FakeMarket.Ws(), new byx.service.market.FakeMarket.Http(), byx.service.market.FakeMarket.fast()),
+                    byx.service.identity.IdentityPolicy.development(), new AuthIpc(fixture.auth), ignored -> PEER,
+                    chain, TxProduction.disabled(fixture.auth, byx.service.ServiceInstance.txChain(chain)));
+                 var client = new byx.service.TestClient(service.runtimeDir().socket())) {
+                assertEquals("ready", client.handshake(byx.service.TestClient.readToken(home), true).path("type").asText());
+                for (String operation : byx.service.tx.TxIpc.OPERATIONS) {
+                    client.sendJson("{\"v\":1,\"id\":\"denied\",\"op\":\"" + operation
+                            + "\",\"session\":\"" + token + "\",\"operation\":\"" + "0".repeat(32) + "\"}");
+                    var response = client.readJson();
+                    assertFalse(response.path("ok").asBoolean(true));
+                    assertEquals("TX_DISABLED", response.path("error").path("code").asText());
+                }
+                var capabilities = client.call("capabilities").path("result");
+                assertFalse(capabilities.path("features").path("txMutations").asBoolean(true));
+                assertFalse(capabilities.path("tx").path("mutationsAllowed").asBoolean(true));
+                assertEquals("TX_DISABLED", capabilities.path("tx").path("policy").asText());
+                assertEquals("UNAVAILABLE", capabilities.path("tx").path("signer").asText());
+                assertEquals("ABSENT", capabilities.path("tx").path("transport").asText());
+                assertFalse(capabilities.path("privateGate").path("allowed").asBoolean(true));
+            }
+        } finally {
+            try (var paths = java.nio.file.Files.walk(home)) {
+                for (var path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) java.nio.file.Files.delete(path);
+            }
+        }
+    }
+
 }

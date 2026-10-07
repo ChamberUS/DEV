@@ -84,9 +84,18 @@ class TxPanelGuardTest {
         assertTrue(CommandPalette.commands(true, true, true).stream().anyMatch(c -> "t-tx-lab".equals(c.target())), "LOCAL_QA palette has it");
         String app = Files.readString(MAIN.resolve("app/PanelApp.java"));
         int guard = app.indexOf("if (qaBuild()) { // Transaction Lab");
-        int register = app.indexOf("views.put(\"t-tx-lab\"");
+        int register = app.indexOf("TxLabBuild.register(views, ctx)");
         assertTrue(guard > 0 && register > guard && register - guard < 400, "registered only inside the LOCAL_QA guard");
-        assertEquals(1, app.split("new panel.txview.TransactionLab\\(", -1).length - 1);
+        assertFalse(app.contains("panel.txview."));
+        String qa = Files.readString(Path.of("src/build-local-qa/java/panel/app/TxLabBuild.java"));
+        assertTrue(qa.contains("new panel.txview.TransactionLab("));
+        if (panel.app.TxLabBuild.available()) {
+            assertTrue(getClass().getClassLoader().getResource("panel/txview/TransactionLab.class") != null);
+        } else {
+            assertEquals(null, getClass().getClassLoader().getResource("panel/txview/TransactionLab.class"));
+            String stub = Files.readString(Path.of("src/build-default/java/panel/app/TxLabBuild.java"));
+            assertFalse(stub.contains("panel.txview"));
+        }
         // fora do rail: a rota existe só para a navegação por command palette (ordem -1, sem rótulo de rail)
         String routes = Files.readString(MAIN.resolve("shell/ShellRoutes.java"));
         assertTrue(routes.contains("add(\"t-tx-lab\", ShellContext.BYX, \"Transaction Lab\", null, null, -1)"));
