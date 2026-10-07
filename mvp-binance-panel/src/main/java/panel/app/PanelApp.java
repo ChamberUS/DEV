@@ -842,8 +842,7 @@ public class PanelApp extends Application {
                 .set("Backend", panel.shell.DockModel.backend(s).name()).set("Market feed", ((panel.design.StatusState) panel.shell.DockModel.feed(t.feed)[0]).name())
                 .set("Capture", ((panel.design.StatusState) panel.shell.DockModel.capture(s.capture.recorder())[0]).name())
                 .set("Research", views.containsKey("overview") ? "Available to this account" : "Not available to this account")
-                .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Local service", ctx.localService.snapshot().summary()).set("Wallet", !"VERIFIED".equals(net.identity()) ? "Unavailable"
-                        : ctx.byxWallets.wallets().isEmpty() ? "Not linked" : "Linked")
+                .set("BYX node", panel.byxview.NetworkModel.state(net).text).set("Local service", ctx.localService.snapshot().summary()).set("Wallet", panel.shell.WalletStatus.diagnostics(net.identity(), () -> ctx.byxWallets.wallets()))
                 .set("Authentication", !user ? "Signed out" : ctx.adminAccess.hasValidAdminSession() ? "Signed in · admin session active" : "Signed in")
                 .set("Motion mode", ctx.motion.preference.get().name() + (ctx.motionReducedBySystem() ? " (system)" : "")).set("Data source", ctx.settings.dataSource.name()).set("Density", ctx.settings.density);
     }
@@ -979,8 +978,7 @@ public class PanelApp extends Application {
         if (shell == null) return;
         updateRecovery();
         shell.dock().setModel(panel.shell.DockModel.build(s, ctx.trading.snapshot.get(), ctx.byx.snapshot(),
-                !"VERIFIED".equals(ctx.byx.snapshot().identity()) ? "Wallet unavailable"
-                        : ctx.byxWallets.wallets().isEmpty() ? "Wallet not linked" : "Wallet linked",
+                panel.shell.WalletStatus.dock(ctx.byx.snapshot().identity(), () -> ctx.byxWallets.wallets()),
                 ctx.adminAccess.hasValidAdminSession(), views.containsKey("capture")));
     }
 

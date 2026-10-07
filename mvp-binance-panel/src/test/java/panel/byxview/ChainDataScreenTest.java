@@ -327,4 +327,17 @@ class ChainDataScreenTest {
         assertEquals(List.of("t-byx", "t-chain-data", "t-wallet", "t-benefits", "t-treasury"), ids);
         assertEquals("Chain data", panel.shell.ShellRoutes.require("t-chain-data").title());
     }
+
+    @Test
+    void constructingTheScreenIsLazyNoReadsNoTimersNoThreads() throws Exception {
+        DeskHarness.fx(() -> {
+            FakeReader r = new FakeReader();
+            long threadsBefore = Thread.getAllStackTraces().keySet().stream().filter(t -> t.getName().startsWith("chain-data-io")).count();
+            ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null);
+            assertTrue(r.calls.isEmpty(), "building the screen (post-login composition) performs no read: " + r.calls);
+            assertEquals(threadsBefore, Thread.getAllStackTraces().keySet().stream().filter(t -> t.getName().startsWith("chain-data-io")).count(), "no IO thread until the screen is shown");
+            assertTrue(s.idle());
+            s.dispose();
+        });
+    }
 }

@@ -31,6 +31,9 @@ public final class ChainConnector implements AutoCloseable {
     private final LongSupplier clock;
     private final ExecutorService worker;
     private final AtomicBoolean inflight = new AtomicBoolean();
+    /** Teto de leituras de módulo em voo (conexões do IPC presas): 3 de 8, deixando sempre slots para auth, mercado e status. */
+    static final int MAX_CONCURRENT_READS = 3;
+    private final java.util.concurrent.Semaphore readSlots = new java.util.concurrent.Semaphore(MAX_CONCURRENT_READS);
     private final ChainReader reader;
 
     private volatile ChainStatus status;
@@ -252,7 +255,16 @@ public final class ChainConnector implements AutoCloseable {
         if (reader == null) {
             return ReadResult.failure(ReadFailure.NOT_CONFIGURED, 0);
         }
-        return reader.read(request);
+        // no máximo MAX_CONCURRENT_READS conexões do IPC podem estar presas em leituras de módulo: o resto recebe RATE_LIMITED NA HORA (nunca espera). Assim a leitura pública da chain jamais
+        // consome os slots de conexão do serviço de que a autenticação e o mercado precisam (limite total de conexões: 8)
+        if (!readSlots.tryAcquire()) {
+            return ReadResult.failure(ReadFailure.RATE_LIMITED, generation);
+        }
+        try {
+            return reader.read(request);
+        } finally {
+            readSlots.release();
+        }
     }
 
     public java.util.List<ModuleHealth.Snapshot> moduleHealth() {
