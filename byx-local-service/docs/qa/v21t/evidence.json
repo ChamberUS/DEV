@@ -1,0 +1,110 @@
+{
+  "phase": "V2.1T",
+  "architectureStatus": "READY_FOR_SYNTHETIC_KEYCHAIN_IMPLEMENTATION",
+  "realUserKey": "NOT_AUTHORIZED",
+  "realTx": "DISABLED",
+  "baselineCommit": "553737e",
+  "auditUtc": "2026-10-08T00:19:32.794084+00:00",
+  "cleanFullServiceSuite": {
+    "invocations": 1,
+    "removedVariables": [
+      "JAVA_TOOL_OPTIONS",
+      "_JAVA_OPTIONS",
+      "JDK_JAVA_OPTIONS"
+    ],
+    "tests": 405,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "maskedByReruns": false,
+    "log": "/private/tmp/byx-v21t-clean-full.log"
+  },
+  "tests": {
+    "productionHelperDependencyFilesystemGuard": "PASS",
+    "goVet": "PASS",
+    "socketpairKernelMechanism": "PASS_CREATOR_TOKEN_LIMITATION_CONFIRMED",
+    "connectedUnixSocketKernelMechanism": "PASS_BIDIRECTIONAL_PID_INSTANCE_MATCH",
+    "signedCustodyCallerQualification": "NOT_RUN",
+    "custodyKeychainAccessGroupQualification": "NOT_RUN",
+    "lockAndUserPresenceQualification": "NOT_RUN"
+  },
+  "actualPackaging": {
+    "teamId": "W5Z65G9UP2",
+    "panelId": "com.buynnex.byx",
+    "panelEntitlements": [
+      "com.apple.security.cs.allow-jit"
+    ],
+    "panelEmbeddedProfile": false,
+    "serviceId": "com.buynnex.byx.service",
+    "serviceEntitlements": {
+      "com.apple.security.cs.allow-jit": true,
+      "com.apple.application-identifier": "W5Z65G9UP2.com.buynnex.byx.service",
+      "com.apple.developer.team-identifier": "W5Z65G9UP2"
+    },
+    "serviceProfileAllowedGroups": [
+      "W5Z65G9UP2.*"
+    ],
+    "serviceEffectiveDefaultGroup": "W5Z65G9UP2.com.buynnex.byx.service",
+    "profileExpirationUtc": "2026-10-13T16:49:55Z",
+    "profileValidAtAudit": true,
+    "panelAndServiceStrictDeepSignatureChecks": "PASS",
+    "hardenedRuntime": true,
+    "signerBundlePresent": false,
+    "futureSignerId": "com.buynnex.byx.signer",
+    "futureSignerProvisioned": false
+  },
+  "decisions": {
+    "custodyUnit": "derived_account_scalar_32_bytes",
+    "custodyAccess": "helper_only",
+    "panelSees": "WalletId_and_public_projection",
+    "serviceSees": "catalog_and_SigningKeyRef_and_public_metadata",
+    "helperSees": "closed_request_and_private_scalar_briefly",
+    "futureCallerAuth": "connected_AF_UNIX_kernel_audit_token_live_code_and_direct_parent_validation",
+    "futureProcessLifetime": "one_shot",
+    "currentSyntheticStdioChanged": false,
+    "network": "NO_IP_NETWORK_LOCAL_IPC_ONLY",
+    "backup": "device_bound_no_initial_export_requires_product_acceptance_before_real_funds",
+    "import": "BLOCKED_FIRST_VERSION",
+    "presence": "EVERY_TRANSACTION_CANDIDATE_UX_NOT_FINAL"
+  },
+  "captureBegin": {
+    "supervisor": 10657,
+    "collector": 96558,
+    "growth3sBytes": 60317,
+    "lastWriteAgeSeconds": 0.82
+  },
+  "captureFinal": {
+    "supervisorAlive": true,
+    "collectorAlive": true,
+    "sameExpectedCampaignAndCliConfiguration": true,
+    "session": "microstructure-20261008T001300Z-usd_m_futures",
+    "part": "events-00001.jsonl.gz.part",
+    "growth3sBytes": 41148,
+    "lastWriteAgeSeconds": 0.25,
+    "rawEventsRead": false,
+    "intervention": false,
+    "recorderConfigHashReaudited": false
+  },
+  "preservedIncident": {
+    "session": "20261007T220638Z",
+    "status": "REJECT",
+    "reason": "REAL_SEQUENCE_GAP",
+    "causality": "CORRELATED_NOT_CAUSAL",
+    "accessedOrChanged": false
+  },
+  "sideEffects": {
+    "productionCodeChanged": false,
+    "packagingChanged": false,
+    "custodyKeychainQueries": false,
+    "custodyKeychainWrites": false,
+    "realKeyCreated": false,
+    "mnemonicOrSeedGenerated": false,
+    "walletImported": false,
+    "nodeStarted": false,
+    "liveBinanceOrByxTrafficIntroduced": false,
+    "broadcastImplemented": false,
+    "gatesChanged": false,
+    "push": false,
+    "temporaryProbePathsCleaned": true
+  }
+}
