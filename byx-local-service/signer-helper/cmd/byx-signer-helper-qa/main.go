@@ -17,7 +17,7 @@ func main() {
 	// 1. descriptor and environment hygiene BEFORE anything else (the Go runtime has not opened extra files yet)
 	fds, socks := custody.ScrubFDs()
 	envCount := len(os.Environ())
-	time.AfterFunc(15*time.Second, func() { os.Exit(9) }) // hard deadline for the whole one-shot invocation
+	time.AfterFunc(15*time.Second, func() { os.Exit(9) }) // BEST_EFFORT_SELF_TERMINATION; never proof of quiescence
 	// 2. the helper itself must be the genuine, sealed, approved-origin signer QA bundle
 	bundle, ok := custody.SelfCheck()
 	if !ok {

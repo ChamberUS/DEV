@@ -26,7 +26,7 @@ class CustodyGuardTest {
         try (Stream<Path> s = Files.walk(MAIN)) {
             for (Path p : s.filter(f -> f.toString().endsWith(".java")).toList()) {
                 String name = p.getFileName().toString();
-                if (name.equals("CustodyClient.java")) {
+                if (name.equals("CustodyClient.java") || name.equals("CustodyAuthority.java")) {
                     continue;
                 }
                 String src = Files.readString(p);

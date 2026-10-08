@@ -1,0 +1,16 @@
+{
+  "artifact": "/tmp/byx-v21t2r-default-20261008/BYX-MVP.app",
+  "serviceJarSha256": "e53d17c8a29a6fce89a10467d9376ca57a0e4051f9a38eeaae2b0079023e3274",
+  "checks": {
+    "DEFAULT_DEEP_STRICT_SEAL": true,
+    "DEFAULT_NO_QA_HELPER": true,
+    "DEFAULT_NO_QA_TEST_JAR": true,
+    "LATEST_SERVICE_HASH": true,
+    "PRODUCTION_DISABLED_CHAIN": true,
+    "QA_PROBE_MAIN_ABSENT": true,
+    "PANEL_TRANSACTION_LAB_ABSENT": true
+  },
+  "productionKeysAuthorized": false,
+  "broadcasts": 0,
+  "guiStarted": false
+}

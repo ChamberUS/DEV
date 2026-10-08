@@ -1,0 +1,109 @@
+{
+  "cases": [
+    {
+      "case": "signed_helper_Team_identifier_strict_seal",
+      "pass": true
+    },
+    {
+      "case": "signed_helper_exact_executable",
+      "pass": true
+    },
+    {
+      "case": "signed_helper_IP_sockets_zero",
+      "pass": true
+    },
+    {
+      "case": "signed_helper_descendants_zero",
+      "pass": true
+    },
+    {
+      "case": "SIGSTOP_outlives_watchdog_baseline",
+      "pass": true,
+      "elapsedSeconds": 16.015
+    },
+    {
+      "case": "wrong_pidversion_cannot_signal_real_helper",
+      "pass": true,
+      "nativeReturn": 3
+    },
+    {
+      "case": "external_SIGSTOP_termination_verified",
+      "pass": true,
+      "helperExit": -9
+    },
+    {
+      "case": "Service_A_suspended_holds_lock",
+      "pass": true
+    },
+    {
+      "case": "Service_B_denied_no_helper",
+      "pass": true
+    },
+    {
+      "case": "Service_A_actual_death_verified",
+      "pass": true
+    },
+    {
+      "case": "lock_released_on_death_normal_helper_exits",
+      "pass": true,
+      "publicResult": "fencing.result=COUNT"
+    },
+    {
+      "case": "fresh_generation_after_death",
+      "pass": true
+    },
+    {
+      "case": "A_stale_stopped_helper_stopped",
+      "pass": true
+    },
+    {
+      "case": "A_stale_stopped_helper_restart_verified_before_operation",
+      "pass": true
+    },
+    {
+      "case": "A_stale_stopped_helper_UNKNOWN_no_mutation_retry",
+      "pass": true
+    },
+    {
+      "case": "C_authenticated_before_mutation_checkpoint",
+      "pass": true
+    },
+    {
+      "case": "C_authenticated_before_mutation_stopped",
+      "pass": true
+    },
+    {
+      "case": "C_authenticated_before_mutation_restart_verified_before_operation",
+      "pass": true
+    },
+    {
+      "case": "C_authenticated_before_mutation_UNKNOWN_no_mutation_retry",
+      "pass": true
+    },
+    {
+      "case": "D_mutation_before_response_checkpoint",
+      "pass": true
+    },
+    {
+      "case": "D_mutation_before_response_stopped",
+      "pass": true
+    },
+    {
+      "case": "D_mutation_before_response_restart_verified_before_operation",
+      "pass": true
+    },
+    {
+      "case": "D_mutation_before_response_UNKNOWN_no_mutation_retry",
+      "pass": true
+    },
+    {
+      "case": "timeout_UNKNOWN_verified_fence_then_readonly_followup",
+      "pass": true
+    }
+  ],
+  "passed": 24,
+  "failed": 0,
+  "keychainCallsInFaultProbes": 0,
+  "broadcasts": 0,
+  "realKeys": 0
+}

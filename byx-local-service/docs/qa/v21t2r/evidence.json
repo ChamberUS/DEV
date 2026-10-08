@@ -1,0 +1,86 @@
+{
+  "status": "READY_TO_RESUME_V2_1T_3",
+  "baseHead": "687119574096f89518942f8009eff7d5d8e3681e",
+  "branch": "feature/byx-ui-redesign-v1",
+  "createdUtc": "2026-10-08T03:46:17.757327+00:00",
+  "java": {
+    "tests": 429,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "go": {
+    "pass": 41,
+    "fail": 0,
+    "skip": 1
+  },
+  "goSkipReason": "TestProcessHarness: subprocess-only harness (not a standalone test)",
+  "processMatrix": {
+    "pass": 24,
+    "fail": 0
+  },
+  "processModel": {
+    "servicePid": 71995,
+    "helperPid": 71996,
+    "servicePidversion": 779597,
+    "helperPidversion": 779600,
+    "processes": [
+      {
+        "pid": "71995",
+        "ppid": "71979",
+        "pgid": "71979",
+        "state": "S"
+      },
+      {
+        "pid": "71996",
+        "ppid": "71995",
+        "pgid": "71979",
+        "state": "T"
+      }
+    ],
+    "serviceSessionId": 71979,
+    "helperSessionId": 71979,
+    "callerAuthenticated": true,
+    "publicMutationCount": 0,
+    "keychainCalls": 0
+  },
+  "integration": {
+    "scenarios": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "timeout"
+    ],
+    "pass": 5,
+    "fail": 0,
+    "includedInProcessMatrix": true
+  },
+  "security": {
+    "t1Pass": 65,
+    "t1Fail": 0,
+    "PanelAuthorityDenied": true
+  },
+  "default": {
+    "pass": 7,
+    "fail": 0,
+    "evidence": "default-evidence.json"
+  },
+  "quality": {
+    "ruff": "PASS",
+    "phaseDiffCheck": "PASS",
+    "globalDiffCheck": "preexisting iaos-web whitespace only"
+  },
+  "constraints": {
+    "realKeys": 0,
+    "realWallets": 0,
+    "realFunds": 0,
+    "broadcasts": 0,
+    "realTx": "DISABLED",
+    "T3Resumed": false,
+    "productionAuthorityModified": false,
+    "scientificCaptureModified": false,
+    "scientificResearchExecuted": false,
+    "push": false
+  }
+}

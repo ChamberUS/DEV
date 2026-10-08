@@ -78,6 +78,13 @@ public final class CustodyClient {
     private final Path launchApp;
     private final Path trustedOrigin;
     private final CodeIdentity identity;
+    private java.util.function.LongConsumer childObserver = pid -> { };
+    private java.util.function.Consumer<JsonNode> probeObserver;
+
+    void observeChild(java.util.function.LongConsumer observer) { this.childObserver = observer; }
+    void observeProbe(java.util.function.Consumer<JsonNode> observer) { this.probeObserver = observer; }
+
+    CustodyAuthority authority() throws CustodyException { return CustodyAuthority.current(identity, trustedOrigin); }
 
     /** Production-shaped constructor: launches the signer at the fixed sibling origin only. */
     public CustodyClient() throws CustodyException {
@@ -136,34 +143,57 @@ public final class CustodyClient {
 
     private Reply exchange(String op, String keyRef, String namespace, Map<String, Object> extra) throws CustodyException, IOException {
         verifyHelperOnDisk();
+        if (!identity.selfSatisfies(CodeIdentity.requirement("com.buynnex.byx.service", identity.selfTeamId()))) {
+            return new Reply("CALLER_UNTRUSTED", 0, null, null, 0, null);
+        }
+        CustodyAuthority authority = authority();
+        synchronized (authority) {
+            return fencedExchange(authority, op, keyRef, namespace, extra);
+        }
+    }
+
+    private Reply fencedExchange(CustodyAuthority authority, String op, String keyRef, String namespace, Map<String, Object> extra) throws CustodyException, IOException {
+        CustodyAuthority.Binding binding = authority.begin();
         Path exe = launchApp.resolve("Contents").resolve("MacOS").resolve(HELPER_EXE);
-        String invocation = HEX.formatHex(randomBytes(16));
+        String invocation = binding.operationId;
         var builder = new ProcessBuilder(exe.toString());
         builder.environment().clear();
         builder.redirectError(ProcessBuilder.Redirect.DISCARD);
         Process child = builder.start();
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
-        Future<Reply> work = pool.submit(() -> converse(child, invocation, op, keyRef, namespace, extra));
+        Future<Reply> work = null;
+        boolean interrupted = false;
+        boolean resultKnown = false;
+        var dispatched = new java.util.concurrent.atomic.AtomicBoolean();
         try {
-            return work.get(CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            authority.attach(child.pid());
+            childObserver.accept(child.pid());
+            work = pool.submit(() -> converse(child, invocation, op, keyRef, namespace, extra, authority, binding, dispatched));
+            Reply result = work.get(CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            resultKnown = true;
+            return result;
         } catch (java.util.concurrent.ExecutionException e) {
-            if (e.getCause() instanceof CustodyException c) {
+            if (!dispatched.get() && e.getCause() instanceof CustodyException c) {
                 throw c;
             }
-            throw new CustodyException("SIGNING_FAILED", "EXCHANGE:" + e.getCause().getClass().getSimpleName());
+            throw new CustodyException("TIMEOUT_UNKNOWN_RESULT", "EXCHANGE_UNCERTAIN");
         } catch (java.util.concurrent.TimeoutException e) {
-            throw new CustodyException("SIGNING_FAILED", "TIMEOUT");
+            throw new CustodyException("TIMEOUT_UNKNOWN_RESULT", "TIMEOUT_UNKNOWN_RESULT");
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new CustodyException("SIGNING_FAILED", "INTERRUPTED");
+            interrupted = true;
+            throw new CustodyException("TIMEOUT_UNKNOWN_RESULT", "CANCELLED_UNKNOWN_RESULT");
         } finally {
-            work.cancel(true);
-            child.destroyForcibly();
+            if (work != null) { work.cancel(true); }
             pool.shutdownNow();
+            // Cancellation must not skip verification because the caller thread is interrupted.
+            interrupted |= Thread.interrupted();
+            try { authority.finish(!resultKnown); }
+            finally { if (interrupted) { Thread.currentThread().interrupt(); } }
         }
     }
 
-    private Reply converse(Process child, String invocation, String op, String keyRef, String namespace, Map<String, Object> extra) throws Exception {
+    private Reply converse(Process child, String invocation, String op, String keyRef, String namespace, Map<String, Object> extra,
+            CustodyAuthority authority, CustodyAuthority.Binding binding, java.util.concurrent.atomic.AtomicBoolean dispatched) throws Exception {
         // 1. hand over the (public, non-secret) invocation id and read the READY frame
         try (var stdin = child.getOutputStream()) {
             stdin.write((invocation + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -213,18 +243,19 @@ public final class CustodyClient {
                         || !Path.of(peer.codePath()).toRealPath().equals(trustedOrigin.toRealPath())) {
                     throw new CustodyException("SIGNER_UNTRUSTED", "HELPER_PEER_" + peer.verdict());
                 }
+                authority.peer(peer.pid(), peer.pidVersion());
                 var in = new DataInputStream(Channels.newInputStream(ch));
                 var out = new DataOutputStream(Channels.newOutputStream(ch));
                 JsonNode first = readFrame(in);
                 if ("reply".equals(first.path("type").asText()) && "CALLER_UNTRUSTED".equals(first.path("status").asText())) {
                     return parseReply(first); // the helper refused US (before any Keychain access)
                 }
-                if (first.path("protocolVersion").asInt() != 2 || !"challenge".equals(first.path("type").asText()) || !invocation.equals(first.path("invocationId").asText())
+                if (first.path("protocolVersion").asInt() != 3 || !"challenge".equals(first.path("type").asText()) || !invocation.equals(first.path("invocationId").asText())
                         || !first.path("challenge").asText().matches("[0-9a-f]{64}")) {
                     throw new CustodyException("SIGNING_FAILED", "CHALLENGE");
                 }
                 Map<String, Object> req = new LinkedHashMap<>();
-                req.put("protocolVersion", 2);
+                req.put("protocolVersion", 3);
                 req.put("type", "request");
                 req.put("invocationId", invocation);
                 req.put("challenge", first.path("challenge").asText());
@@ -234,14 +265,22 @@ public final class CustodyClient {
                     req.put("namespace", namespace);
                 }
                 req.putAll(extra);
+                req.put("generation", binding.generation);
+                req.put("operationId", binding.operationId);
+                String digest = HEX.formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(JSON.writeValueAsBytes(req)));
+                req.put("requestDigest", digest);
                 byte[] bytes = JSON.writeValueAsBytes(req);
                 if (bytes.length == 0 || bytes.length > MAX_FRAME) {
                     throw new CustodyException("SIGNING_FAILED", "REQUEST_SIZE");
                 }
+                dispatched.set(true);
                 out.writeInt(bytes.length);
                 out.write(bytes);
                 out.flush();
-                Reply reply = parseReply(readFrame(in));
+                if (probeObserver != null) { probeObserver.accept(readFrame(stdout)); }
+                JsonNode response = readFrame(in);
+                binding.accept(response.path("generation").asText(), response.path("operationId").asText(), digest, response.path("requestDigest").asText());
+                Reply reply = parseReply(response);
                 if (!child.waitFor(3, TimeUnit.SECONDS)) {
                     throw new CustodyException("SIGNING_FAILED", "HELPER_DID_NOT_EXIT");
                 }
@@ -251,7 +290,7 @@ public final class CustodyClient {
     }
 
     private static Reply parseReply(JsonNode n) throws CustodyException {
-        if (!n.isObject() || n.path("protocolVersion").asInt() != 2 || !"reply".equals(n.path("type").asText()) || !n.path("status").isTextual()) {
+        if (!n.isObject() || n.path("protocolVersion").asInt() != 3 || !"reply".equals(n.path("type").asText()) || !n.path("status").isTextual()) {
             throw new CustodyException("SIGNING_FAILED", "REPLY");
         }
         return new Reply(n.path("status").asText(), n.path("keychainCalls").asInt(-1), n.path("publicKey").asText(null), n.path("address").asText(null), n.path("count").asInt(0),

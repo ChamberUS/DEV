@@ -36,6 +36,10 @@ public final class CustodyQaMain {
         String cmd = args.length > 0 ? args[0] : new String(System.in.readNBytes(256)).trim().split("\\s+")[0];
         String arg = args.length > 1 ? args[1] : null;
         put("role.selfTeam", String.valueOf(byx.service.identity.PeerIdentity.selfTeamId()));
+        if (cmd.startsWith("fencing-")) {
+            CustodyFencingQaMain.run(cmd);
+            System.exit(0);
+        }
         switch (cmd) {
             case "scenario" -> scenario(arg == null ? null : Path.of(arg));
             case "variants" -> variants(Path.of(arg));

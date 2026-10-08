@@ -96,7 +96,7 @@ func TestQaHelperHasNoNetworkOrExecSurface(t *testing.T) {
 			t.Fatal(err)
 		}
 		s := string(src)
-		for _, forbidden := range []string{"AF_INET", "AF_INET6", "getaddrinfo", "gethostbyname", "SOCK_DGRAM", "net.Dial", "http.", "os/exec", "exec.Command", "syscall.Exec", "getenv(", "os.Getenv", "os.Args[1"} {
+		for _, forbidden := range []string{"AF_INET", "AF_INET6", "getaddrinfo", "gethostbyname", "SOCK_DGRAM", "net.Dial", "http.", "os/exec", "exec.Command", "syscall.Exec", "syscall.ForkExec", "os.StartProcess", "posix_spawn", "fork(", "vfork(", "setsid(", "daemon(", "execve(", "getenv(", "os.Getenv", "os.Args[1"} {
 			if strings.Contains(s, forbidden) {
 				t.Fatal(f, "must not contain", forbidden)
 			}

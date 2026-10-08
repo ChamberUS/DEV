@@ -13,6 +13,17 @@ public final class CodeIdentity {
 
     public record Peer(long pid, long pidVersion, Verdict verdict, String codePath) { }
 
+    public static final class Instance {
+        private final byte[] token;
+
+        private Instance(byte[] token) {
+            this.token = token.clone();
+        }
+
+        public long pid() { return MacSecurity.pidAndVersion(token) >>> 32; }
+        public long pidVersion() { return MacSecurity.pidAndVersion(token) & 0xFFFFFFFFL; }
+    }
+
     private final MacSecurity sec;
 
     private CodeIdentity(MacSecurity sec) {
@@ -35,6 +46,27 @@ public final class CodeIdentity {
     public String selfTeamId() {
         return sec.selfTeamId();
     }
+
+    public boolean selfSatisfies(String requirement) { return sec.selfSatisfies(requirement); }
+
+    public Instance instance(long pid) {
+        byte[] token = sec.processToken(Math.toIntExact(pid));
+        return token == null ? null : new Instance(token);
+    }
+
+    public Verdict checkInstance(Instance instance, String requirement, String expectedBundle) {
+        String[] path = new String[1];
+        Verdict v = map(sec.checkPeer(instance.token, requirement, true, path));
+        return v == Verdict.OK && !expectedBundle.equals(path[0]) ? Verdict.REQUIREMENT_FAILED : v;
+    }
+
+    public String instancePath(Instance instance) { return sec.instancePath(instance.token); }
+    public int signalInstance(Instance instance, int signal) { return sec.signalInstance(instance.token, signal); }
+    public int[] processIds() { return sec.processIds(); }
+    public int processUid(int pid) { return sec.processUid(pid); }
+    public int effectiveUid() { return sec.effectiveUid(); }
+    public String processPath(int pid) { return sec.processPath(pid); }
+    public String custodyTempRoot() { return sec.custodyTempRoot(); }
 
     private static Verdict map(MacSecurity.Check c) {
         return switch (c) {

@@ -29,6 +29,25 @@ final class MacSecurity {
     private static final int MAX_PROCARGS = 512 * 1024;
 
     interface LibC extends Library {
+        int task_name_for_pid(int self, int pid, IntByReference task);
+
+        int task_info(int task, int flavor, byte[] info, IntByReference count);
+
+        int mach_port_deallocate(int self, int port);
+
+        int proc_listallpids(int[] buffer, int size);
+
+        int proc_pidinfo(int pid, int flavor, long arg, byte[] buffer, int size);
+
+        int proc_pidpath(int pid, byte[] buffer, int size);
+
+        int proc_pidpath_audittoken(byte[] token, byte[] buffer, int size);
+
+        int proc_signal_with_audittoken(byte[] token, int signal);
+
+        int geteuid();
+
+        long confstr(int name, byte[] buffer, long size);
         int getsockopt(int fd, int level, int name, byte[] value, IntByReference len);
 
         int sysctl(int[] name, int namelen, byte[] oldp, LongByReference oldlenp, Pointer newp, long newlen);
@@ -100,6 +119,78 @@ final class MacSecurity {
 
     static MacSecurity load() {
         return new MacSecurity();
+    }
+
+    byte[] processToken(int pid) {
+        int self = NativeLibrary.getInstance("c").getGlobalVariableAddress("mach_task_self_").getInt(0);
+        IntByReference port = new IntByReference();
+        if (libc.task_name_for_pid(self, pid, port) != 0) {
+            return null;
+        }
+        try {
+            byte[] token = new byte[32];
+            IntByReference count = new IntByReference(8);
+            return libc.task_info(port.getValue(), 15, token, count) == 0 && count.getValue() == 8 ? token : null;
+        } finally {
+            libc.mach_port_deallocate(self, port.getValue());
+        }
+    }
+
+    int[] processIds() {
+        int[] ids = new int[65536];
+        int count = libc.proc_listallpids(ids, ids.length * 4);
+        if (count <= 0 || count >= ids.length) {
+            throw new IllegalStateException("PROCESS_ENUMERATION_UNPROVEN");
+        }
+        return java.util.Arrays.copyOf(ids, count);
+    }
+
+    // -1: absent/zombie, -2: unreadable; otherwise effective UID. No process name is an identity.
+    int processUid(int pid) {
+        byte[] b = new byte[64];
+        int n = libc.proc_pidinfo(pid, 13, 0, b, b.length);
+        int error = Native.getLastError();
+        if (n != b.length) {
+            return n == 0 && error == 3 ? -1 : -2;
+        }
+        var data = java.nio.ByteBuffer.wrap(b).order(java.nio.ByteOrder.nativeOrder());
+        return data.getInt(12) == 5 ? -1 : data.getInt(36);
+    }
+
+    String processPath(int pid) {
+        byte[] b = new byte[4096];
+        return libc.proc_pidpath(pid, b, b.length) > 0 ? Native.toString(b) : null;
+    }
+
+    // null is proved ESRCH only; every other native error remains an uncertainty.
+    String instancePath(byte[] token) {
+        byte[] b = new byte[4096];
+        int n = libc.proc_pidpath_audittoken(token, b, b.length);
+        int error = Native.getLastError();
+        if (n > 0) {
+            return Native.toString(b);
+        }
+        if (error == 3) {
+            return null;
+        }
+        throw new IllegalStateException("INSTANCE_STATE_UNPROVEN");
+    }
+
+    int signalInstance(byte[] token, int signal) {
+        return libc.proc_signal_with_audittoken(token, signal);
+    }
+
+    String custodyTempRoot() {
+        byte[] b = new byte[4096];
+        long n = libc.confstr(65537, b, b.length); // _CS_DARWIN_USER_TEMP_DIR
+        if (n <= 0 || n >= b.length) {
+            throw new IllegalStateException("PRIVATE_ROOT_UNAVAILABLE");
+        }
+        return Native.toString(b);
+    }
+
+    int effectiveUid() {
+        return libc.geteuid();
     }
 
     // ---- o próprio processo -----------------------------------------------------------------------------------------------------

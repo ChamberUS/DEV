@@ -21,13 +21,14 @@ import (
 
 const (
 	MaxFrame        = 8192
-	ProtocolVersion = 2
+	ProtocolVersion = 3
 )
 
 var (
-	hex32   = regexp.MustCompile(`^[0-9a-f]{32}$`)
-	hex64   = regexp.MustCompile(`^[0-9a-f]{64}$`)
-	opNames = map[string]bool{"provision": true, "sign": true, "lookup": true, "delete": true, "count": true, "cleanup": true}
+	hex32          = regexp.MustCompile(`^[0-9a-f]{32}$`)
+	hex64          = regexp.MustCompile(`^[0-9a-f]{64}$`)
+	opNames        = map[string]bool{"provision": true, "sign": true, "lookup": true, "delete": true, "count": true, "cleanup": true}
+	probeOperation = func(outer) (Reply, bool) { return Reply{}, false }
 )
 
 // Outer custody request (service -> helper). Unknown fields are rejected; `request` is the V2.1S request, decoded by the V2.1S strict decoder.
@@ -40,6 +41,9 @@ type outer struct {
 	KeyRef          string          `json:"keyRef"`
 	Namespace       string          `json:"namespace"`
 	Request         json.RawMessage `json:"request"`
+	Generation      string          `json:"generation"`
+	OperationID     string          `json:"operationId"`
+	RequestDigest   string          `json:"requestDigest"`
 }
 
 type Reply struct {
@@ -51,6 +55,9 @@ type Reply struct {
 	Address         string           `json:"address,omitempty"`
 	Count           int              `json:"count,omitempty"`
 	Response        *signer.Response `json:"response,omitempty"`
+	Generation      string           `json:"generation,omitempty"`
+	OperationID     string           `json:"operationId,omitempty"`
+	RequestDigest   string           `json:"requestDigest,omitempty"`
 }
 
 func WriteFrame(w io.Writer, v any) error {
@@ -165,10 +172,13 @@ func Serve(invocation string, helperBundle string, stdout io.Writer, fds, socks,
 		return 6 // trailing bytes after the single frame
 	}
 	o, err := decodeOuter(frame)
-	if err != nil || o.ProtocolVersion != ProtocolVersion || o.Type != "request" || o.InvocationID != invocation || o.Challenge != challenge || !opNames[o.Op] {
+	if err != nil || o.ProtocolVersion != ProtocolVersion || o.Type != "request" || o.InvocationID != invocation || o.Challenge != challenge || !opNames[o.Op] ||
+		!hex32.MatchString(o.Generation) || o.OperationID != invocation || !hex64.MatchString(o.RequestDigest) {
 		return answer(conn, Reply{Status: StatusFailed})
 	}
-	return answer(conn, handle(o))
+	r := handle(o)
+	r.Generation, r.OperationID, r.RequestDigest = o.Generation, o.OperationID, o.RequestDigest
+	return answer(conn, r)
 }
 
 func reject(conn io.Writer, _ string) int {
@@ -188,6 +198,9 @@ func answer(conn io.Writer, r Reply) int {
 }
 
 func handle(o outer) Reply {
+	if reply, handled := probeOperation(o); handled {
+		return reply
+	}
 	switch o.Op {
 	case "provision":
 		return provision(o.KeyRef)
