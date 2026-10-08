@@ -25,6 +25,16 @@ public final class CustodyQaFixture {
         fx.transport.sequence = "9";
         fx.transport.gasUsed = "120000";
         var captured = new AtomicReference<TxSignRequest>();
+        var broadcasts=new java.util.concurrent.atomic.AtomicInteger();
+        ChainTxTransport transport=new ChainTxTransport() {
+            public RawAccount getAccount(String address) throws TxTransportException { return fx.transport.getAccount(address); }
+            public RawSimulation simulate(SimulationRequest request) throws TxTransportException { return fx.transport.simulate(request); }
+            public RawTxStatus getTxByHash(String hash) throws TxTransportException { return fx.transport.getTxByHash(hash); }
+            public RawBroadcast broadcast(SignedTx signed) {
+                broadcasts.incrementAndGet();
+                throw new AssertionError("QA_BROADCAST_FORBIDDEN");
+            }
+        };
         TxKeys keys = (account, ref) -> Optional.of(new TxKey(keyRef, new BankAddress(senderAddress)));
         TxSigner barrier = new TxSigner() {
             public boolean available() { return true; }
@@ -40,11 +50,12 @@ public final class CustodyQaFixture {
             public MaximumFee maximumFeeBudget() { return new MaximumFee(BigInteger.valueOf(50_000)); }
             public Duration quoteTtl() { return Duration.ofSeconds(60); }
         };
-        var engine = new TxService(() -> true, policy, fx.sessions, fx.chain, keys, fx.transport, barrier, (s, i, st) -> Decision.ALLOW, fx.audit, fx.journal, fx.clock);
+        var engine = new TxService(() -> true, policy, fx.sessions, fx.chain, keys, transport, barrier, (s, i, st) -> Decision.ALLOW, fx.audit, fx.journal, fx.clock);
         var intent = new TxIntent.BankSendIntent(new KeyRef("synthetic"), new BankAddress(recipient), UbyxAmount.parse(amountUbyx), new Memo(memo));
         var q = engine.prepareBankSend(TxFx.PEER, TxFx.TOKEN, TxFx.op(77), intent, FeeMode.STANDARD);
         var status = engine.confirm(TxFx.PEER, TxFx.TOKEN, TxFx.op(77), q.id());
-        return new Captured(captured.get(), status.state(), fx.transport.broadcasts.size());
+        if(broadcasts.get()!=0) throw new AssertionError("QA_BROADCAST_ATTEMPTED");
+        return new Captured(captured.get(), status.state(), broadcasts.get());
     }
 
     /** A valid bech32 byx address that is NOT the sender (the generator is the test helper of the transaction tests). */

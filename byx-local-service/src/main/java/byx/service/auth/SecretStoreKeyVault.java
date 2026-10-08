@@ -16,6 +16,8 @@ public final class SecretStoreKeyVault implements EncryptionKeyVault {
         this.id = id;
     }
 
+    boolean testScoped() { return id.scope()==SecretId.Scope.TEST; }
+
     @Override
     public Optional<byte[]> read() throws VaultException {
         try (SecretBytes v = store.read(id).orElse(null)) {

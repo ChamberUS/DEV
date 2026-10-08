@@ -1,0 +1,350 @@
+{
+  "status": "READY_FOR_PANEL_WALLET_INTEGRATION",
+  "scope": "SYNTHETIC_QA_ONLY",
+  "timestampUtc": "2026-10-08T06:05:33.957519+00:00",
+  "baselineHead": "cee1379c935168a594d3e72e4d0ee4729b916c70",
+  "branch": "feature/byx-ui-redesign-v1",
+  "scientificResearchUntouched": true,
+  "captureUntouched": true,
+  "realUserKeysAuthorized": false,
+  "realTransactionsEnabled": false,
+  "broadcastAttempts": 0,
+  "realFunds": 0,
+  "realUserWallets": 0,
+  "panelIntegrationStarted": false,
+  "push": false,
+  "tests": {
+    "java": {
+      "passed": 458,
+      "failed": 0,
+      "skipped": 0,
+      "newWalletTests": [
+        "rollbackAndSymlinkFailClosed",
+        "formatFourTruncationTamperingUnknownVersionAndBadAnchorFailClosed",
+        "actualWriterHandlesShortWritesAndCommitBoundaryOrder",
+        "formatThreeMigrationRequiresExplicitTestOnlyAuthorization",
+        "actualWriterPersistsFormatFourAndAdvancesAnchorOnlyAfterCommit",
+        "anchorFailureBlocksPublicationAndReloadRepairsOneCommittedRevision",
+        "strictCatalogRejectsUnknownVersionDuplicateAndMissingFields",
+        "framedJsonRejectsDuplicateTrailingOversizeAndTruncation",
+        "responseRejectsCoercedTypesUnknownStatusUnknownFieldsAndOverflow",
+        "concurrentSameCreateAndDeleteAreIdempotentWithoutDeadlock",
+        "revokedReceiptWinsOverActiveMetadata",
+        "protectedSnapshotRollbackAndIndependentlyRetainedRevocationDenyReactivation",
+        "createDeleteRaceRejectsStalePendingVersion",
+        "reservedUnknownSignSurvivesRestartAndNeverRetries",
+        "createPersistRestartDeleteAndFreshIdentity",
+        "foreignOwnerAndChangedIdentityMetadataCannotSelectAnotherKey",
+        "twoSignsCannotOverlapAndDeleteWaitsForDurableUnknown",
+        "liveReceiptWithDifferentValidPublicIdentityIsDurablyQuarantined",
+        "queryDuringDeleteAndSignDuringDeleteNeverReachSigner",
+        "authorizationLossConsentAndRecoverySurfaceFailBeforeHelper",
+        "missingKeyNeverRegeneratesAndQuarantineSurvivesRestart",
+        "queryObservesCommittedPendingStateWhileCreateWaits",
+        "ownerSlotAndIdempotencyRejectConflicts",
+        "serviceCreateCrashBoundariesConvergeThroughExplicitSameOperation",
+        "helperCreateCrashBoundariesNeverRegenerateExistingIdentity",
+        "missingReceiptQuarantineSurvivesRestorationAndRestart",
+        "orphanIsNotAdoptedOrDeletedAndIncompleteInventoryBlocks",
+        "alteredReferenceAndMalformedPublicIdentityOrTombstoneFailClosed",
+        "deleteCrashBoundariesCannotBecomeActiveAfterCommittedIntent"
+      ]
+    },
+    "go": {
+      "passedTestEvents": 59,
+      "failed": 0,
+      "skipped": 1,
+      "passedRootTests": 16,
+      "passedSubtests": 43,
+      "skipReason": "TestProcessHarness is subprocess-only; real process/Java subprocess tests run separately",
+      "skipNames": [
+        "TestProcessHarness"
+      ]
+    },
+    "nativeLifecycle": {
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "syntheticFixtureRoots": 34
+    },
+    "nativeFencing": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "security": {
+      "passed": 66,
+      "failed": 0,
+      "skipped": 0,
+      "t1": 65,
+      "panelAuthorityDenial": 1
+    },
+    "integration": {
+      "passedScenarioGroups": 41,
+      "failed": 0,
+      "skipped": 0,
+      "groups": {
+        "happy": 1,
+        "createCrash": 9,
+        "deleteCrash": 9,
+        "unknownSign": 2,
+        "writerCrash": 12,
+        "wire": 8
+      },
+      "includedInNativeLifecycleAssertions": true
+    },
+    "default": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "resolvedIntermediateFailures": [
+    {
+      "suite": "Java complete initial",
+      "result": "454 tests, 1 failure",
+      "cause": "production domain referenced QA CustodyClient",
+      "resolution": "test-only adapter, existing guard preserved"
+    },
+    {
+      "suite": "signed lifecycle qualified attempt 1",
+      "result": "32 PASS, 2 FAIL (boundary assertion plus execution summary), 0 SKIP",
+      "cause": "probe observer awaited a nonexistent probe during initial inventory",
+      "resolution": "only explicit lifecycle probePoint waits for probe; native rerun required"
+    }
+  ],
+  "intermediateNativeFailureEvidence": {
+    "cases": [
+      {
+        "case": "happy:create",
+        "pass": true
+      },
+      {
+        "case": "happy:restart",
+        "pass": true
+      },
+      {
+        "case": "happy:independent_DIRECT_signature_and_broadcast_barrier",
+        "pass": true
+      },
+      {
+        "case": "happy:delete",
+        "pass": true
+      },
+      {
+        "case": "happy:tombstone_restart_scalar_absent",
+        "pass": true
+      },
+      {
+        "case": "byx-wallet-qa-ypca_wm6:exact_QA_teardown",
+        "pass": true
+      },
+      {
+        "case": "wire:duplicate:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:duplicate:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:missing:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:missing:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:type:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:type:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:unknown:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:unknown:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:trailing_json:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:trailing_json:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:trailing_frame:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:trailing_frame:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:delayed_frame:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "wire:delayed_frame:zero_Keychain_calls",
+        "pass": true
+      },
+      {
+        "case": "wire:stale_reply:fail_closed",
+        "pass": true
+      },
+      {
+        "case": "byx-wallet-qa-x9qgg5uv:exact_QA_teardown",
+        "pass": true
+      },
+      {
+        "case": "wallet-create:beforeCreating:boundary",
+        "pass": true
+      },
+      {
+        "case": "wallet-create:beforeCreating:service_terminated",
+        "pass": true
+      },
+      {
+        "case": "create:beforeCreating:old_helper_absent_after_restart",
+        "pass": true
+      },
+      {
+        "case": "create:beforeCreating:same_operation_one_wallet_one_scalar",
+        "pass": true
+      },
+      {
+        "case": "byx-wallet-qa-rg14rrht:exact_QA_teardown",
+        "pass": true
+      },
+      {
+        "case": "wallet-create:afterCreating:boundary",
+        "pass": true
+      },
+      {
+        "case": "wallet-create:afterCreating:service_terminated",
+        "pass": true
+      },
+      {
+        "case": "create:afterCreating:old_helper_absent_after_restart",
+        "pass": true
+      },
+      {
+        "case": "create:afterCreating:same_operation_one_wallet_one_scalar",
+        "pass": true
+      },
+      {
+        "case": "byx-wallet-qa-nqxbca19:exact_QA_teardown",
+        "pass": true
+      },
+      {
+        "case": "wallet-create:afterPreparing:boundary",
+        "pass": false
+      },
+      {
+        "case": "execution",
+        "pass": false,
+        "reason": "wallet-create:afterPreparing:boundary"
+      }
+    ],
+    "passed": 32,
+    "failed": 2,
+    "skipped": 0,
+    "fixtureRoots": [
+      "/private/tmp/byx-wallet-qa-ypca_wm6",
+      "/private/tmp/byx-wallet-qa-x9qgg5uv",
+      "/private/tmp/byx-wallet-qa-rg14rrht",
+      "/private/tmp/byx-wallet-qa-nqxbca19",
+      "/private/tmp/byx-wallet-qa-gcntze95"
+    ],
+    "broadcasts": 0,
+    "realKeys": 0,
+    "realWallets": 0
+  },
+  "quality": {
+    "ruffSrcTests": "PASS",
+    "scopedDiffCheck": "PASS",
+    "globalDiffCheck": "preexisting whitespace only: iaos-web Layout.jsx 128/129/137/189 and MyStore.jsx 129; preserved"
+  },
+  "artifactSha256": {
+    "qaServiceJar": "d74c4d39fc25c95cddfad9b086615bb978f138fd57bc32ea4cdf2a221b6880d0",
+    "qaTestJar": "abdf37830384e88eb0b18bda88d9aff894babef1cd2385a3495ddb8fe8b63a44",
+    "qaSignerHelper": "ce1ff64ffe08c6b6bb5f2774c7811cc89b5fc72ef4866f285c0ef96187babc2d",
+    "defaultServiceJar": "d74c4d39fc25c95cddfad9b086615bb978f138fd57bc32ea4cdf2a221b6880d0"
+  },
+  "sourceSha256": {
+    "byx-local-service/signer-helper/internal/custody/custody_test.go": "c049569d7538ef37a39231f0bc51a4d1432647121ed568557e3e90506dd4a1a1",
+    "byx-local-service/signer-helper/internal/custody/native.go": "df75635fb7b5e4f70466d98465164705bd6e3d9b3692b4fcb7617513447c27d2",
+    "byx-local-service/signer-helper/internal/custody/server.go": "cfe3e1d8bda8e9b1381a9053aa37989fd0676b6bd5791e40b0b442ad812cde3d",
+    "byx-local-service/signer-helper/internal/custody/lifecycle.go": "081a5f150f030303ba4112c9e3913afd6e2ce20d574138dcc62c17df56531159",
+    "byx-local-service/signer-helper/internal/custody/lifecycle_probe.go": "4649d0ad7cffb56d1aaa86687d86b08e20b024ae1c30f65984882f58f2a8b6ea",
+    "byx-local-service/signer-helper/internal/custody/lifecycle_test.go": "275b02ac427eda4b64a82964d962ce4db20a1fda47c2ae468eb1573697766c3d",
+    "byx-local-service/src/main/java/byx/service/auth/AuthorityAdmin.java": "2e7fe1822d9071fd1625e9fb0fc84ae0e0d1af7fe53871ea3db3a04f2b2794a5",
+    "byx-local-service/src/main/java/byx/service/auth/AuthorityCodec.java": "673f18d8e3858029ca136a62a7850ff7a94f66983f02f19046706fdc3f2864f5",
+    "byx-local-service/src/main/java/byx/service/auth/AuthorityState.java": "8a81d5a749cb49c34420e5001276ba0ffa25237c526f61e55cb4c3aaae3596e2",
+    "byx-local-service/src/main/java/byx/service/auth/AuthorityStore.java": "8d752bf0a4cef49b0e74cb534ac03534edaa3a960e7eba91caa43b54d07ad01b",
+    "byx-local-service/src/main/java/byx/service/auth/SecretStoreAnchor.java": "adbcbb8752905eea876b29263e30ebe16b52eeeb6bf14d37e81423f0b6453da2",
+    "byx-local-service/src/main/java/byx/service/auth/SecretStoreKeyVault.java": "23fdbd6f313c043353cb55939eaf6b9d6a231561d24ce6d6cd436d7df970ffc8",
+    "byx-local-service/src/main/java/byx/service/secrets/SecretId.java": "d1c42fe83b990c53de36f40a3276dde7ba2eeb59a65c87111daa76272258a8b1",
+    "byx-local-service/src/main/java/byx/service/signer/CustodyClient.java": "91b156c511cd080c2a7927959f7dbfaa7c955928075a70cb4a0f43fb47a59445",
+    "byx-local-service/src/main/java/byx/service/signer/WalletCatalog.java": "7a8947ed744cd2eb8224d6360c05a5cf934371d424cf926d1c37524857ad99b2",
+    "byx-local-service/src/main/java/byx/service/signer/WalletLifecycle.java": "732ad07b6e97d43fd1299008743f166a93a1d2c132df054d4c476f60263b4b3c",
+    "byx-local-service/src/test/java/byx/service/auth/WalletAuthorityTest.java": "e86181b3180bca01cd5d88d38a6d8756bd62a4675394ee802f49860e1f73a8c0",
+    "byx-local-service/src/test/java/byx/service/auth/WalletWriterQaFaults.java": "517d7cc52de80c00604abe6684f69a665fde6277de6a437539e342a1fdd7b9aa",
+    "byx-local-service/src/test/java/byx/service/signer/CustodyQaMain.java": "2c302933b3f2b22abc35eaa393ee795afbe079feb6ea31dd14b034c851448ed3",
+    "byx-local-service/src/test/java/byx/service/signer/CustodyReplyParserTest.java": "950630bd54b0cb0925d5783e8f611fd0873eb604489befc5b0b2b41b581d54bb",
+    "byx-local-service/src/test/java/byx/service/signer/WalletLifecycleQaCustody.java": "8629c39b60dae4aec877c1e77fca832ce44484e38d9b140ac4b50c57e2fc5f95",
+    "byx-local-service/src/test/java/byx/service/signer/WalletLifecycleQaMain.java": "0ebf9bc9ad0fbb75821aad6fd22a7674b23471a85cacec7bda07721e8a774c7a",
+    "byx-local-service/src/test/java/byx/service/signer/WalletLifecycleTest.java": "3a152462063d186ec279072a0c40e4ba14ba03d9f96ae8ac2babfdb26e4a5f00",
+    "byx-local-service/src/test/java/byx/service/tx/CustodyQaFixture.java": "ed8ccef5444ebf5a623ccf779bf4111aec0149e4cbddbab38a7432da9c8e2a57",
+    "byx-packaging/verify-custody-fencing-qa.py": "2a80d36a38f4ca8fd76ea264b0ac6329df3cc06338fef6c34389aa8a9c04bda0",
+    "byx-packaging/build-wallet-lifecycle-qa.sh": "5450beaa66f7873e4929ecf11745e1018d5155cf2585df40417c02d5b3852ef7",
+    "byx-packaging/verify-wallet-lifecycle-qa.py": "ca7d961c099297d1bcc2a61346a4a00e75765169cda291431d04a003cfc1833c"
+  },
+  "historicalInterruptedT3Sha256": {
+    "byx-local-service/docs/qa/v21t3/report.md": "1b602cd14371ec9c93ad5d8fd6a79e951bbe15057c200d2f98e682604b5b7fe6",
+    "byx-local-service/docs/qa/v21t3/evidence.json": "73c2d4ff6cabc4c9baf1f4843d7cd5da0e86c0068f09cf77343a3c7562a05bbf"
+  },
+  "logsSha256": {
+    "/tmp/byx-v21t3-service-suite-acceptance.log": "f03b8573759a290d613fe400e82fe5a452fc77e1d84106ff11e54d17c8d49fc7",
+    "/tmp/byx-v21t3-go-qualified.jsonl": "452da152fde4cf3f818c19625af4d65a7de84c2a1a2aed2cc7a8052d5bf8c1e6",
+    "/tmp/byx-v21t3-native-qualified.log": "0aa61e431dbf8f23fcc295671b168d4909a1d46c52c0db061cd159ddad3b75d7",
+    "/tmp/byx-v21t3-security-qualified.log": "91b93fc71116031c6843e2766766af58b6c99a46beaaa1da6b69f61a7f5ecd16",
+    "/tmp/byx-v21t3-process-qualified.log": "4f4baa1b545b845db889737d9746fe17c6b84f5a55fcec28bff43cf797c0f58e",
+    "/tmp/byx-v21t3-default-qualified.log": "9e4473e04c66ffe5e0ba5b278b285feff4b382ef2dd1dab61ec7d33902169130"
+  },
+  "captureObservations": [
+    {
+      "utc": "2026-10-08T05:34:01Z",
+      "bytes": 2633553
+    },
+    {
+      "utc": "2026-10-08T05:34:14Z",
+      "bytes": 2981845
+    }
+  ],
+  "nextAction": "PROCEED TO V2.1T-4 \u2014 PANEL \u2192 SERVICE \u2192 SIGNER END-TO-END QA; review first, not started",
+  "captureFinalObservation": {
+    "supervisorPid": 10657,
+    "collectorPid": 96558,
+    "observations": [
+      {
+        "utc": "2026-10-08T06:04:15Z",
+        "path": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-08/microstructure-20261008T054255Z-usd_m_futures/events-00005.jsonl.gz.part",
+        "bytes": 5204751
+      },
+      {
+        "utc": "2026-10-08T06:06:06Z",
+        "path": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-08/microstructure-20261008T054255Z-usd_m_futures/events-00005.jsonl.gz.part",
+        "bytes": 10994143
+      }
+    ],
+    "checked": "process identity, lsof writer path and file-size metadata only; scientific integrity not checked"
+  }
+}

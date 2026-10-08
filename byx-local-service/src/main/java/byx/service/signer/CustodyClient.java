@@ -50,7 +50,8 @@ public final class CustodyClient {
     private static final int MAX_FRAME = 8192;
     private static final long CALL_TIMEOUT_MS = 12_000;
     private static final List<String> BANNED_ENV = List.of("JAVA_TOOL_OPTIONS=", "_JAVA_OPTIONS=", "JDK_JAVA_OPTIONS=", "CLASSPATH=", "DYLD_", "LD_", "JAVA_OPTIONS=", "HOME=", "PATH=", "TMPDIR=");
-    private static final ObjectMapper JSON = new ObjectMapper().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+    private static final ObjectMapper JSON = new ObjectMapper().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final HexFormat HEX = HexFormat.of();
 
@@ -73,16 +74,43 @@ public final class CustodyClient {
     }
 
     /** Helper reply (statuses are a closed set; unknown is treated as SIGNING_FAILED by callers). */
-    public record Reply(String status, int keychainCalls, String publicKey, String address, int count, JsonNode response) { }
+    public record Reply(String status, int keychainCalls, String publicKey, String address, int count, JsonNode response, JsonNode lifecycle) {
+        public Reply(String status,int keychainCalls,String publicKey,String address,int count,JsonNode response) {
+            this(status,keychainCalls,publicKey,address,count,response,null);
+        }
+    }
+
+    public record LifecycleRequest(WalletCatalog.Binding binding,String operationId,String requestDigest,long expectedVersion,
+            String publicKey,String address,int offset,String snapshotDigest,String probePoint) {
+        public LifecycleRequest(WalletCatalog.Binding binding,String operationId,String requestDigest,long expectedVersion,
+                String publicKey,String address,int offset,String snapshotDigest) {
+            this(binding,operationId,requestDigest,expectedVersion,publicKey,address,offset,snapshotDigest,"");
+        }
+    }
+
+    Reply lifecycle(String op,LifecycleRequest request,TxSignRequest sign) throws CustodyException {
+        var extra=new LinkedHashMap<String,Object>();
+        extra.put("lifecycle",request);
+        if(sign!=null) extra.put("request",CosmosBankSend.material(sign,HEX.parseHex(request.publicKey())).request());
+        try { return exchange(op,request.binding()==null?"":request.binding().signingKeyRef(),null,extra); }
+        catch(IOException e) { throw new CustodyException("TIMEOUT_UNKNOWN_RESULT","EXCHANGE_UNCERTAIN"); }
+    }
+
 
     private final Path launchApp;
     private final Path trustedOrigin;
     private final CodeIdentity identity;
     private java.util.function.LongConsumer childObserver = pid -> { };
     private java.util.function.Consumer<JsonNode> probeObserver;
+    private java.util.function.UnaryOperator<byte[]> requestProbe;
+    private java.util.function.Consumer<DataOutputStream> afterFlushProbe;
+    private java.util.function.Consumer<JsonNode> replyProbe;
 
     void observeChild(java.util.function.LongConsumer observer) { this.childObserver = observer; }
     void observeProbe(java.util.function.Consumer<JsonNode> observer) { this.probeObserver = observer; }
+    void observeWire(java.util.function.UnaryOperator<byte[]> request,java.util.function.Consumer<DataOutputStream> afterFlush,java.util.function.Consumer<JsonNode> reply) {
+        requestProbe=request;afterFlushProbe=afterFlush;replyProbe=reply;
+    }
 
     CustodyAuthority authority() throws CustodyException { return CustodyAuthority.current(identity, trustedOrigin); }
 
@@ -270,6 +298,7 @@ public final class CustodyClient {
                 String digest = HEX.formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(JSON.writeValueAsBytes(req)));
                 req.put("requestDigest", digest);
                 byte[] bytes = JSON.writeValueAsBytes(req);
+                if(requestProbe!=null) bytes=requestProbe.apply(bytes);
                 if (bytes.length == 0 || bytes.length > MAX_FRAME) {
                     throw new CustodyException("SIGNING_FAILED", "REQUEST_SIZE");
                 }
@@ -277,8 +306,18 @@ public final class CustodyClient {
                 out.writeInt(bytes.length);
                 out.write(bytes);
                 out.flush();
-                if (probeObserver != null) { probeObserver.accept(readFrame(stdout)); }
+                if(afterFlushProbe!=null) afterFlushProbe.accept(out);
+                if(extra.containsKey("lifecycle")) ch.shutdownOutput();
+                if (probeObserver != null && (!(extra.get("lifecycle") instanceof LifecycleRequest lifecycle)
+                        || lifecycle.probePoint()!=null && !lifecycle.probePoint().isEmpty())) {
+                    probeObserver.accept(readFrame(stdout));
+                }
                 JsonNode response = readFrame(in);
+                if(replyProbe!=null) replyProbe.accept(response);
+                if(!op.equals(response.path("op").asText()) || !invocation.equals(response.path("invocationId").asText())
+                        || !first.path("challenge").asText().equals(response.path("challenge").asText())) {
+                    throw new CustodyException("TIMEOUT_UNKNOWN_RESULT","REPLY_BINDING");
+                }
                 binding.accept(response.path("generation").asText(), response.path("operationId").asText(), digest, response.path("requestDigest").asText());
                 Reply reply = parseReply(response);
                 if (!child.waitFor(3, TimeUnit.SECONDS)) {
@@ -290,11 +329,37 @@ public final class CustodyClient {
     }
 
     private static Reply parseReply(JsonNode n) throws CustodyException {
-        if (!n.isObject() || n.path("protocolVersion").asInt() != 3 || !"reply".equals(n.path("type").asText()) || !n.path("status").isTextual()) {
+        var fields=java.util.Set.of("protocolVersion","type","status","keychainCalls","publicKey","address","count","response","generation","operationId","requestDigest","op","invocationId","challenge","lifecycle");
+        var statuses=java.util.Set.of("CALLER_UNTRUSTED","SIGNER_SELF_UNTRUSTED","KEY_NOT_FOUND","ALREADY_EXISTS","PROVISIONED","SIGNED","FOUND","DELETED","COUNT","SIGNING_FAILED","NAMESPACE_REFUSED",
+                "PREPARING","LIVE","REVOKED","KEY_MISMATCH","KEY_REVOKED","KEY_CORRUPT","KEYCHAIN_UNAVAILABLE","INVENTORY_INCOMPLETE","INVENTORY");
+        if (!n.isObject() || !n.path("protocolVersion").isIntegralNumber() || !n.path("protocolVersion").canConvertToInt() || n.path("protocolVersion").asInt() != 3 || !n.path("type").isTextual() || !"reply".equals(n.path("type").asText())
+                || !n.path("status").isTextual() || !statuses.contains(n.path("status").asText()) || !n.path("keychainCalls").isIntegralNumber() || !n.path("keychainCalls").canConvertToInt() || n.path("keychainCalls").asLong()<0) {
             throw new CustodyException("SIGNING_FAILED", "REPLY");
         }
+        for(var it=n.fieldNames();it.hasNext();) if(!fields.contains(it.next())) throw new CustodyException("SIGNING_FAILED","REPLY_SCHEMA");
+        for(String f:List.of("publicKey","address","generation","operationId","requestDigest","op","invocationId","challenge")) if(n.has(f) && !n.get(f).isTextual()) throw new CustodyException("SIGNING_FAILED","REPLY_SCHEMA");
+        if(n.has("count") && (!n.get("count").isIntegralNumber() || n.get("count").asLong()<0 || !n.get("count").canConvertToInt())) throw new CustodyException("SIGNING_FAILED","REPLY_SCHEMA");
+        if(n.path("op").isTextual()) {
+            String status=n.get("status").asText();
+            var successes=java.util.Set.of("PROVISIONED","ALREADY_EXISTS","SIGNED","FOUND","DELETED","COUNT","PREPARING","LIVE","REVOKED","INVENTORY");
+            var expected=switch(n.get("op").asText()) {
+                case "provision" -> java.util.Set.of("PROVISIONED","ALREADY_EXISTS");
+                case "sign","signBound" -> java.util.Set.of("SIGNED");
+                case "lookup" -> java.util.Set.of("FOUND");
+                case "delete","cleanup","purgeQaBound" -> java.util.Set.of("DELETED");
+                case "count","probeBeforeMutation","probeAfterMutation" -> java.util.Set.of("COUNT");
+                case "provisionBound" -> java.util.Set.of("LIVE");
+                case "inspectBound" -> java.util.Set.of("PREPARING","LIVE","REVOKED");
+                case "revokeDeleteBound" -> java.util.Set.of("REVOKED");
+                case "inventoryPage" -> java.util.Set.of("INVENTORY");
+                default -> java.util.Set.<String>of();
+            };
+            if(successes.contains(status) && !expected.contains(status)) throw new CustodyException("SIGNING_FAILED","REPLY_OPERATION");
+            if(expected.contains(status) && java.util.Set.of("provisionBound","inspectBound","revokeDeleteBound","signBound","inventoryPage").contains(n.get("op").asText())
+                    && !n.path("lifecycle").isObject()) throw new CustodyException("SIGNING_FAILED","REPLY_SCHEMA");
+        }
         return new Reply(n.path("status").asText(), n.path("keychainCalls").asInt(-1), n.path("publicKey").asText(null), n.path("address").asText(null), n.path("count").asInt(0),
-                n.has("response") ? n.get("response") : null);
+                n.has("response") ? n.get("response") : null,n.has("lifecycle") ? n.get("lifecycle") : null);
     }
 
     private static JsonNode readFrame(DataInputStream in) throws IOException {

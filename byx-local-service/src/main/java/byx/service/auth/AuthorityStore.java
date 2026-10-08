@@ -49,6 +49,15 @@ public final class AuthorityStore {
     private Status status = Status.UNINITIALIZED;
     private String reason = "uninitialized";
     private Object stamp;
+    private boolean walletQa;
+    private boolean walletMigration;
+    private java.util.function.Consumer<String> walletBoundary=point->{ };
+    private int walletWriteChunk=Integer.MAX_VALUE;
+
+    void walletQaFault(java.util.function.Consumer<String> boundary,int writeChunk) {
+        if(!walletQa || writeChunk<1) throw new IllegalArgumentException("wallet_qa_not_enabled");
+        walletBoundary=boundary;walletWriteChunk=writeChunk;
+    }
 
     private AuthorityStore(Path file, Anchor anchor, EncryptionKeyVault vault) {
         this.file = file;
@@ -58,6 +67,17 @@ public final class AuthorityStore {
 
     public static AuthorityStore open(Path file, Anchor anchor, EncryptionKeyVault vault) {
         AuthorityStore s = new AuthorityStore(file, anchor, vault);
+        s.load();
+        return s;
+    }
+
+    public static AuthorityStore openWalletQa(Path file, Anchor anchor, EncryptionKeyVault vault) {
+        if (!(anchor instanceof MemoryAnchor || anchor instanceof SecretStoreAnchor a && a.testScoped())
+                || !(vault instanceof MemoryKeyVault || vault instanceof SecretStoreKeyVault v && v.testScoped())) {
+            throw new IllegalArgumentException("TEST_AUTHORITY_REQUIRED");
+        }
+        AuthorityStore s=new AuthorityStore(file,anchor,vault);
+        s.walletQa=true;
         s.load();
         return s;
     }
@@ -118,6 +138,17 @@ public final class AuthorityStore {
                 untrusted("file_not_regular");
                 return;
             }
+            if(walletQa) {
+                for(Path p=file.toAbsolutePath();p!=null;p=p.getParent()) if(Files.isSymbolicLink(p)) throw new IOException("path_not_regular");
+                if(!Files.getPosixFilePermissions(file,LinkOption.NOFOLLOW_LINKS).equals(PosixFilePermissions.fromString("rw-------"))
+                        || !Files.getPosixFilePermissions(file.getParent(),LinkOption.NOFOLLOW_LINKS).equals(PosixFilePermissions.fromString("rwx------"))
+                        || !Files.getOwner(file,LinkOption.NOFOLLOW_LINKS).getName().equals(ProcessHandle.current().info().user().orElse("?"))) throw new IOException("path_untrusted");
+                try(var files=Files.list(file.getParent())) {
+                    if(files.anyMatch(p->p.getFileName().toString().startsWith(file.getFileName()+".") && p.getFileName().toString().endsWith(".tmp"))) {
+                        untrusted("stale_tmp");return;
+                    }
+                }
+            }
             Object st = stampOf();
             byte[] ek;
             try {
@@ -141,6 +172,7 @@ public final class AuthorityStore {
                 return;
             }
             byte[] computed = p.headMac();
+            if(!walletQa && p.state().walletCatalog()!=null) { java.util.Arrays.fill(ek,(byte)0);untrusted("wallet_qa_not_enabled"); return; }
             long v = p.state().version();
             long av = a.get().version();
             if (v < av) {
@@ -180,6 +212,23 @@ public final class AuthorityStore {
 
     /** Cria o estado inicial (versão 1, sem contas) SOMENTE se não existe arquivo nem âncora. Explícito: nunca implícito em open/current. */
     public synchronized void initialize() throws AuthorityException {
+        initialize(null);
+    }
+
+    public synchronized void initializeWalletQa(byx.service.signer.WalletCatalog catalog) throws AuthorityException {
+        if(!walletQa || catalog==null || !catalog.wallets().isEmpty() || !catalog.operations().isEmpty()) throw new AuthorityException("wallet_qa_not_enabled");
+        initialize(catalog);
+    }
+
+    public synchronized void migrateWalletQa(byx.service.signer.WalletCatalog catalog) throws AuthorityException {
+        if(!walletQa || current().walletCatalog()!=null || catalog==null || !catalog.wallets().isEmpty() || !catalog.operations().isEmpty()
+                || !catalog.auditEvents().isEmpty() || !catalog.quarantines().isEmpty()) throw new AuthorityException("explicit_wallet_migration_required");
+        walletMigration=true;
+        try { mutateRaw(s->s.withWalletCatalog(catalog)); }
+        finally { walletMigration=false; }
+    }
+
+    private void initialize(byx.service.signer.WalletCatalog catalog) throws AuthorityException {
         if (status != Status.UNINITIALIZED || Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
             throw new AuthorityException("already_initialized");
         }
@@ -194,7 +243,7 @@ public final class AuthorityStore {
         random.nextBytes(k);
         byte[] ek = new byte[32]; // chave AEAD independente (nunca derivada da chave MAC)
         random.nextBytes(ek);
-        AuthorityState first = new AuthorityState(1, java.util.List.of());
+        AuthorityState first = new AuthorityState(1, java.util.List.of()).withWalletCatalog(catalog);
         byte[] mac = AuthorityCodec.mac(k, AuthorityCodec.canonical(first));
         try {
             vault.write(ek); // chave antes do arquivo: uma chave órfã (queda) é inofensiva e é substituída aqui
@@ -248,7 +297,11 @@ public final class AuthorityStore {
         } catch (RuntimeException e) {
             throw new AuthorityException("invalid_change"); // a mudança não é aplicada; nada é escrito
         }
-        AuthorityState next = new AuthorityState(cur.version() + 1, proposed.accounts(), proposed.providers(), proposed.devices(), proposed.migrationFreeze());
+        if ((cur.walletCatalog()==null)!=(proposed.walletCatalog()==null) && !(walletMigration && cur.walletCatalog()==null && proposed.walletCatalog()!=null)
+                || cur.walletCatalog()!=null && !cur.walletCatalog().catalogId().equals(proposed.walletCatalog().catalogId())) {
+            throw new AuthorityException("explicit_wallet_migration_required");
+        }
+        AuthorityState next = new AuthorityState(cur.version() + 1, proposed.accounts(), proposed.providers(), proposed.devices(), proposed.migrationFreeze(),proposed.walletCatalog());
         byte[] canon = AuthorityCodec.canonical(next);
         byte[] mac = AuthorityCodec.mac(key, canon);
         try {
@@ -266,11 +319,14 @@ public final class AuthorityStore {
             throw new AuthorityException("io_error");
         }
         try {
+            if(walletQa) walletBoundary.accept("beforeAnchor");
             anchor.write(new AnchorData(key, next.version(), mac));
+            if(walletQa) walletBoundary.accept("afterAnchor");
         } catch (Anchor.AnchorException e) {
             untrusted("anchor_unavailable"); // arquivo na v+1, âncora na v: um novo open() aceita e repara
             throw new AuthorityException("anchor_unavailable");
         }
+        if(walletQa) walletBoundary.accept("beforePublish");
         state = next;
         try {
             stamp = stampOf();
@@ -278,6 +334,7 @@ public final class AuthorityStore {
             untrusted("io_error");
             throw new AuthorityException("io_error");
         }
+        if(walletQa) walletBoundary.accept("afterPublish");
         return next;
     }
 
@@ -288,6 +345,7 @@ public final class AuthorityStore {
     }
 
     private void writeFileAtomic(byte[] bytes) throws IOException {
+        if(walletQa) { writeWalletFileAtomic(bytes); return; }
         Path dir = file.toAbsolutePath().getParent();
         if (!Files.exists(dir)) {
             Files.createDirectories(dir, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
@@ -300,5 +358,44 @@ public final class AuthorityStore {
             ch.force(true);
         }
         Files.move(tmp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private void writeWalletFileAtomic(byte[] bytes) throws IOException {
+        Path dir=file.toAbsolutePath().getParent();
+        for(Path p=file.toAbsolutePath();p!=null;p=p.getParent()) if(Files.isSymbolicLink(p)) throw new IOException("path_not_regular");
+        if(!Files.exists(dir,LinkOption.NOFOLLOW_LINKS)) Files.createDirectory(dir,PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
+        var attrs=Files.readAttributes(dir,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS);
+        if(!attrs.isDirectory() || !Files.getPosixFilePermissions(dir,LinkOption.NOFOLLOW_LINKS).equals(PosixFilePermissions.fromString("rwx------"))
+                || !Files.getOwner(dir,LinkOption.NOFOLLOW_LINKS).getName().equals(ProcessHandle.current().info().user().orElse("?"))) throw new IOException("directory_untrusted");
+        byte[] id=new byte[16]; random.nextBytes(id);
+        Path tmp=file.resolveSibling(file.getFileName()+"."+java.util.HexFormat.of().formatHex(id)+".tmp");
+        Object inode=null;
+        try {
+            try(FileChannel ch=FileChannel.open(tmp,java.util.Set.of(StandardOpenOption.CREATE_NEW,StandardOpenOption.WRITE,LinkOption.NOFOLLOW_LINKS),
+                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")))) {
+                inode=Files.readAttributes(tmp,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS).fileKey();
+                ByteBuffer buffer=ByteBuffer.wrap(bytes);
+                walletBoundary.accept("afterTmpCreate");
+                while(buffer.hasRemaining()) {
+                    int limit=buffer.limit();buffer.limit(buffer.position()+Math.min(buffer.remaining(),walletWriteChunk));
+                    ch.write(buffer);buffer.limit(limit);
+                }
+                walletBoundary.accept("afterWrite");
+                walletBoundary.accept("beforeFileSync");
+                ch.force(true);
+                walletBoundary.accept("afterFileSync");
+                if(!Files.isRegularFile(tmp,LinkOption.NOFOLLOW_LINKS) || !java.util.Objects.equals(inode,Files.readAttributes(tmp,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS).fileKey())) throw new IOException("tmp_changed");
+            }
+            if(!java.util.Objects.equals(attrs.fileKey(),Files.readAttributes(dir,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS).fileKey())) throw new IOException("directory_changed");
+            walletBoundary.accept("beforeRename");
+            Files.move(tmp,file,StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);
+            walletBoundary.accept("afterRename");
+            walletBoundary.accept("beforeDirectorySync");
+            try(FileChannel directory=FileChannel.open(dir,StandardOpenOption.READ,LinkOption.NOFOLLOW_LINKS)) { directory.force(true); }
+            walletBoundary.accept("afterDirectorySync");
+        } finally {
+            if(inode!=null && Files.exists(tmp,LinkOption.NOFOLLOW_LINKS) && !Files.isSymbolicLink(tmp)
+                    && java.util.Objects.equals(inode,Files.readAttributes(tmp,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS).fileKey())) Files.delete(tmp);
+        }
     }
 }

@@ -36,6 +36,10 @@ public final class CustodyQaMain {
         String cmd = args.length > 0 ? args[0] : new String(System.in.readNBytes(256)).trim().split("\\s+")[0];
         String arg = args.length > 1 ? args[1] : null;
         put("role.selfTeam", String.valueOf(byx.service.identity.PeerIdentity.selfTeamId()));
+        if(cmd.startsWith("wallet-")) {
+            WalletLifecycleQaMain.run(args);
+            System.exit(0);
+        }
         if (cmd.startsWith("fencing-")) {
             CustodyFencingQaMain.run(cmd);
             System.exit(0);

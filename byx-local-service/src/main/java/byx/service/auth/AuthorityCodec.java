@@ -31,7 +31,7 @@ final class AuthorityCodec {
     static final int MAX_DEVICES = 10_000;
     private static final byte[] LABEL = "byx-authority-v1\u0000".getBytes(StandardCharsets.UTF_8);
     private static final JsonMapper JSON = JsonMapper.builder(JsonFactory.builder()
-            .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(6).maxStringLength(512).maxNumberLength(20).build()).build())
+            .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(12).maxStringLength(512).maxNumberLength(20).build()).build())
             .enable(com.fasterxml.jackson.core.StreamReadFeature.STRICT_DUPLICATE_DETECTION).enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
             .build();
 
@@ -93,6 +93,7 @@ final class AuthorityCodec {
             n.put("revokedAtMs", d.revokedAtMs());
         }
         o.put("migrationFreeze", s.migrationFreeze());
+        if(s.walletCatalog()!=null) o.set("walletCatalog",s.walletCatalog().json());
         try {
             return JSON.writeValueAsBytes(o);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
@@ -134,8 +135,9 @@ final class AuthorityCodec {
         byte[] plain = canonical(s);
         byte[] header = new byte[HEADER];
         System.arraycopy(MAGIC, 0, header, 0, 4);
-        header[4] = (byte) (FORMAT_VERSION >>> 8);
-        header[5] = (byte) FORMAT_VERSION;
+        int format=s.walletCatalog()==null ? FORMAT_VERSION : 4;
+        header[4] = (byte) (format >>> 8);
+        header[5] = (byte) format;
         for (int i = 0; i < 8; i++) {
             header[6 + i] = (byte) (s.version() >>> (56 - 8 * i));
         }
@@ -172,7 +174,8 @@ final class AuthorityCodec {
                 throw new FormatException("format_invalid");
             }
         }
-        if ((((file[4] & 0xFF) << 8) | (file[5] & 0xFF)) != FORMAT_VERSION) {
+        int format=((file[4] & 0xFF) << 8) | (file[5] & 0xFF);
+        if (format != FORMAT_VERSION && format != 4) {
             throw new FormatException("format_invalid");
         }
         long headerVersion = 0;
@@ -187,7 +190,7 @@ final class AuthorityCodec {
             c.updateAAD(aad(header));
             plain = c.doFinal(file, HEADER + NONCE, file.length - HEADER - NONCE);
             AuthorityState st = parseState(plain);
-            if (st.version() != headerVersion) {
+            if (st.version() != headerVersion || (format==4)!=(st.walletCatalog()!=null)) {
                 throw new FormatException("format_invalid");
             }
             return new Opened(st, mac(macKey, canonical(st)));
@@ -204,7 +207,8 @@ final class AuthorityCodec {
     static AuthorityState parseState(byte[] plain) throws FormatException {
         try {
             JsonNode st = JSON.readTree(plain);
-            if (st == null || !st.isObject() || st.size() != 5 || !st.path("version").isIntegralNumber() || !st.path("accounts").isArray() || !st.path("providers").isObject()
+            integralNumbers(st);
+            if (st == null || !st.isObject() || st.size() != (st.has("walletCatalog")?6:5) || !st.path("version").isIntegralNumber() || !st.path("accounts").isArray() || !st.path("providers").isObject()
                     || !st.path("devices").isArray() || !st.path("migrationFreeze").isBoolean()) {
                 throw new FormatException();
             }
@@ -271,7 +275,13 @@ final class AuthorityCodec {
                 }
                 devices.add(new TrustedDevice(did, acc, n.get("createdAtMs").asLong(), n.get("lastUsedAtMs").asLong(), n.get("expiresAtMs").asLong(), n.get("revokedAtMs").asLong()));
             }
-            return new AuthorityState(version, accounts, providers, devices, st.get("migrationFreeze").asBoolean());
+            byx.service.signer.WalletCatalog catalog=null;
+            if(st.has("walletCatalog")) {
+                if(!st.get("walletCatalog").isObject()) throw new FormatException();
+                catalog=byx.service.signer.WalletCatalog.parse(st.get("walletCatalog"));
+                for(var wallet:catalog.wallets()) if(!ids.contains(wallet.ownerAccountId())) throw new FormatException();
+            }
+            return new AuthorityState(version, accounts, providers, devices, st.get("migrationFreeze").asBoolean(),catalog);
         } catch (java.io.IOException | IllegalArgumentException e) {
             throw new FormatException();
         }
@@ -283,6 +293,12 @@ final class AuthorityCodec {
             throw new FormatException();
         }
         return v.isNull() ? null : v.asText();
+    }
+
+    private static void integralNumbers(JsonNode node) throws FormatException {
+        if(node==null) throw new FormatException();
+        if(node.isNumber() && (!node.isIntegralNumber() || !node.canConvertToLong())) throw new FormatException();
+        if(node.isContainerNode()) for(JsonNode child:node) integralNumbers(child);
     }
 
     private static String text(JsonNode n, String f) throws FormatException {

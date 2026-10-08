@@ -7,7 +7,8 @@ import java.util.Optional;
  * Estado crítico e VERSIONADO da autoridade: contas, papéis, habilitação, versão de credencial, verificadores de senha, configuração não secreta dos
  * provedores, dispositivos confiáveis e a trava de migração (migrationFreeze). Imutável.
  */
-public record AuthorityState(long version, List<Account> accounts, ProviderSettings providers, List<TrustedDevice> devices, boolean migrationFreeze) {
+public record AuthorityState(long version, List<Account> accounts, ProviderSettings providers, List<TrustedDevice> devices, boolean migrationFreeze,
+        byx.service.signer.WalletCatalog walletCatalog) {
     public AuthorityState {
         accounts = List.copyOf(accounts);
         devices = List.copyOf(devices);
@@ -18,8 +19,16 @@ public record AuthorityState(long version, List<Account> accounts, ProviderSetti
         this(version, accounts, ProviderSettings.NONE, List.of(), false);
     }
 
+    public AuthorityState(long version, List<Account> accounts, ProviderSettings providers, List<TrustedDevice> devices, boolean migrationFreeze) {
+        this(version,accounts,providers,devices,migrationFreeze,null);
+    }
+
     public AuthorityState withAccounts(List<Account> a) {
-        return new AuthorityState(version, a, providers, devices, migrationFreeze);
+        return new AuthorityState(version, a, providers, devices, migrationFreeze,walletCatalog);
+    }
+
+    public AuthorityState withWalletCatalog(byx.service.signer.WalletCatalog catalog) {
+        return new AuthorityState(version,accounts,providers,devices,migrationFreeze,catalog);
     }
 
     public Optional<Account> byId(String id) {

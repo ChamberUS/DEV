@@ -183,23 +183,28 @@ def run():
     check("timeout_UNKNOWN_verified_fence_then_readonly_followup", "fencing.result=TIMEOUT_UNKNOWN_RESULT" in output and "fencing.followup=COUNT" in output)
 
 
-try:
-    run()
-except Exception as exc:
-    print("PROBE_FAILURE", str(exc), file=sys.stderr)
-    CASES.append({"case": "probe_execution", "pass": False, "reason": str(exc)[:500]})
-finally:
-    for process, instance in reversed(OWNED):
-        if path(instance) is not None:
-            signal(instance, 9)
-        if process is not None:
-            process.wait(timeout=5)
-    for socket in SOCKETS:
-        socket.unlink(missing_ok=True)
-        socket.parent.rmdir()
-    target = ROOT.parent / "byx-local-service/docs/qa/v21t2r/process-evidence.json"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps({"cases": CASES, "passed": sum(c["pass"] for c in CASES),
-                                  "failed": sum(not c["pass"] for c in CASES),
-                                  "keychainCallsInFaultProbes": 0, "broadcasts": 0, "realKeys": 0}, indent=2) + "\n")
-sys.exit(1 if any(not c["pass"] for c in CASES) else 0)
+def main():
+    try:
+        run()
+    except Exception as exc:
+        print("PROBE_FAILURE", str(exc), file=sys.stderr)
+        CASES.append({"case": "probe_execution", "pass": False, "reason": str(exc)[:500]})
+    finally:
+        for process, instance in reversed(OWNED):
+            if path(instance) is not None:
+                signal(instance, 9)
+            if process is not None:
+                process.wait(timeout=5)
+        for socket in SOCKETS:
+            socket.unlink(missing_ok=True)
+            socket.parent.rmdir()
+        target = Path(sys.argv[1]) if len(sys.argv) == 2 else ROOT.parent / "byx-local-service/docs/qa/v21t2r/process-evidence.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps({"cases": CASES, "passed": sum(c["pass"] for c in CASES),
+                                      "failed": sum(not c["pass"] for c in CASES),
+                                      "keychainCallsInFaultProbes": 0, "broadcasts": 0, "realKeys": 0}, indent=2) + "\n")
+    return 1 if any(not c["pass"] for c in CASES) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

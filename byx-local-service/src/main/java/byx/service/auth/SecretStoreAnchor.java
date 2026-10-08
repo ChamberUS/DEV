@@ -16,6 +16,8 @@ public final class SecretStoreAnchor implements Anchor {
         this.id = id;
     }
 
+    boolean testScoped() { return id.scope()==SecretId.Scope.TEST; }
+
     @Override
     public Optional<AnchorData> read() throws AnchorException {
         try (SecretBytes v = store.read(id).orElse(null)) {

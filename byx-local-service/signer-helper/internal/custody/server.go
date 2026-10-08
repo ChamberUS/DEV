@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -29,21 +30,23 @@ var (
 	hex64          = regexp.MustCompile(`^[0-9a-f]{64}$`)
 	opNames        = map[string]bool{"provision": true, "sign": true, "lookup": true, "delete": true, "count": true, "cleanup": true}
 	probeOperation = func(outer) (Reply, bool) { return Reply{}, false }
+	callerFresh    = func() bool { return false }
 )
 
 // Outer custody request (service -> helper). Unknown fields are rejected; `request` is the V2.1S request, decoded by the V2.1S strict decoder.
 type outer struct {
-	ProtocolVersion int             `json:"protocolVersion"`
-	Type            string          `json:"type"`
-	InvocationID    string          `json:"invocationId"`
-	Challenge       string          `json:"challenge"`
-	Op              string          `json:"op"`
-	KeyRef          string          `json:"keyRef"`
-	Namespace       string          `json:"namespace"`
-	Request         json.RawMessage `json:"request"`
-	Generation      string          `json:"generation"`
-	OperationID     string          `json:"operationId"`
-	RequestDigest   string          `json:"requestDigest"`
+	ProtocolVersion int               `json:"protocolVersion"`
+	Type            string            `json:"type"`
+	InvocationID    string            `json:"invocationId"`
+	Challenge       string            `json:"challenge"`
+	Op              string            `json:"op"`
+	KeyRef          string            `json:"keyRef"`
+	Namespace       string            `json:"namespace"`
+	Request         json.RawMessage   `json:"request"`
+	Generation      string            `json:"generation"`
+	OperationID     string            `json:"operationId"`
+	RequestDigest   string            `json:"requestDigest"`
+	Lifecycle       *lifecycleRequest `json:"lifecycle,omitempty"`
 }
 
 type Reply struct {
@@ -58,6 +61,10 @@ type Reply struct {
 	Generation      string           `json:"generation,omitempty"`
 	OperationID     string           `json:"operationId,omitempty"`
 	RequestDigest   string           `json:"requestDigest,omitempty"`
+	Lifecycle       any              `json:"lifecycle,omitempty"`
+	Op              string           `json:"op,omitempty"`
+	InvocationID    string           `json:"invocationId,omitempty"`
+	Challenge       string           `json:"challenge,omitempty"`
 }
 
 func WriteFrame(w io.Writer, v any) error {
@@ -67,11 +74,24 @@ func WriteFrame(w io.Writer, v any) error {
 	}
 	var h [4]byte
 	binary.BigEndian.PutUint32(h[:], uint32(len(b)))
-	if _, err = w.Write(h[:]); err != nil {
+	if err = writeAll(w, h[:]); err != nil {
 		return err
 	}
-	_, err = w.Write(b)
-	return err
+	return writeAll(w, b)
+}
+
+func writeAll(w io.Writer, b []byte) error {
+	for len(b) > 0 {
+		n, err := w.Write(b)
+		if err != nil {
+			return err
+		}
+		if n < 1 || n > len(b) {
+			return io.ErrShortWrite
+		}
+		b = b[n:]
+	}
+	return nil
 }
 
 func ReadFrame(r io.Reader) ([]byte, error) {
@@ -92,6 +112,19 @@ func ReadFrame(r io.Reader) ([]byte, error) {
 
 func decodeOuter(b []byte) (outer, error) {
 	var o outer
+	if err := strictJSON(b); err != nil {
+		return o, err
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(b, &fields) != nil || fields == nil {
+		return o, errors.New("object")
+	}
+	if raw, ok := fields["lifecycle"]; ok {
+		var tree any
+		if json.Unmarshal(raw, &tree) != nil || requiredFields(tree, reflect.TypeOf(lifecycleRequest{})) != nil {
+			return o, errors.New("lifecycle schema")
+		}
+	}
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&o); err != nil {
@@ -101,6 +134,55 @@ func decodeOuter(b []byte) (outer, error) {
 		return o, errors.New("trailing")
 	}
 	return o, nil
+}
+
+func strictJSON(b []byte) error {
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.UseNumber()
+	var value func(int) error
+	value = func(depth int) error {
+		if depth > 16 {
+			return errors.New("depth")
+		}
+		t, err := d.Token()
+		if err != nil {
+			return err
+		}
+		if delim, ok := t.(json.Delim); ok {
+			switch delim {
+			case '{':
+				seen := map[string]bool{}
+				for d.More() {
+					key, err := d.Token()
+					name, ok := key.(string)
+					if err != nil || !ok || seen[name] {
+						return errors.New("duplicate field")
+					}
+					seen[name] = true
+					if err := value(depth + 1); err != nil {
+						return err
+					}
+				}
+			case '[':
+				for d.More() {
+					if err := value(depth + 1); err != nil {
+						return err
+					}
+				}
+			default:
+				return errors.New("structure")
+			}
+			_, err = d.Token()
+		}
+		return err
+	}
+	if err := value(0); err != nil {
+		return err
+	}
+	if _, err := d.Token(); err != io.EOF {
+		return errors.New("trailing")
+	}
+	return nil
 }
 
 // SelfCheck proves the helper is the genuine, sealed signer QA bundle in its approved origin (…/Contents/Helpers/byx-signer-helper-qa.app).
@@ -154,6 +236,16 @@ func Serve(invocation string, helperBundle string, stdout io.Writer, fds, socks,
 	if !ok || filepath.Dir(callerReal) != filepath.Dir(helperBundle) {
 		return reject(conn, "caller origin") // must live in the same Contents/Helpers directory of the same bundle
 	}
+	callerFresh = func() bool {
+		freshToken, pid, _, err := PeerToken(conn)
+		if err != nil || pid != peerPid || pid != os.Getppid() || token != freshToken || EnvBanned(pid) != 0 {
+			return false
+		}
+		path, rc := CheckToken(freshToken, requirement(ServiceID), true)
+		real, ok := RealPath(path)
+		return rc == 0 && ok && real == callerReal
+	}
+	defer func() { callerFresh = func() bool { return false } }()
 
 	// 2. fresh challenge; one request; nothing else
 	chal := make([]byte, 32)
@@ -176,8 +268,19 @@ func Serve(invocation string, helperBundle string, stdout io.Writer, fds, socks,
 		!hex32.MatchString(o.Generation) || o.OperationID != invocation || !hex64.MatchString(o.RequestDigest) {
 		return answer(conn, Reply{Status: StatusFailed})
 	}
+	if o.Lifecycle != nil {
+		var trailing [1]byte
+		n, err := conn.Read(trailing[:])
+		if n != 0 || err != io.EOF {
+			return answer(conn, Reply{Status: StatusFailed})
+		}
+	}
 	r := handle(o)
+	if !callerFresh() || Pending(conn) {
+		return reject(conn, "caller changed")
+	}
 	r.Generation, r.OperationID, r.RequestDigest = o.Generation, o.OperationID, o.RequestDigest
+	r.Op, r.InvocationID, r.Challenge = o.Op, o.InvocationID, o.Challenge
 	return answer(conn, r)
 }
 
@@ -198,6 +301,9 @@ func answer(conn io.Writer, r Reply) int {
 }
 
 func handle(o outer) Reply {
+	if o.Lifecycle != nil {
+		return lifecycleHandle(o)
+	}
 	if reply, handled := probeOperation(o); handled {
 		return reply
 	}
@@ -213,6 +319,9 @@ func handle(o outer) Reply {
 		}
 		return Reply{Status: StatusFound, PublicKey: hex.EncodeToString(pub), Address: signer.AddressFor(pub)}
 	case "delete":
+		if !legacyAllowed(o.KeyRef) {
+			return Reply{Status: StatusRefused}
+		}
 		switch KCDelete(o.KeyRef) {
 		case 0:
 			return Reply{Status: StatusDeleted}
@@ -237,6 +346,9 @@ func handle(o outer) Reply {
 		}
 		deleted := 0
 		for _, n := range names {
+			if !legacyAllowed(n) {
+				return Reply{Status: StatusRefused}
+			}
 			if KCDelete(n) == 0 {
 				deleted++
 			}
@@ -248,14 +360,17 @@ func handle(o outer) Reply {
 
 // derive reads the scalar, computes the public key and wipes the scalar. Missing item -> KEY_NOT_FOUND.
 func derive(ref string) ([]byte, string) {
+	if !legacyAllowed(ref) {
+		return nil, StatusRefused
+	}
 	b, rc := KCGet(ref)
+	defer Wipe(b)
 	if rc == -25300 {
 		return nil, StatusKeyNotFound
 	}
-	if rc != 0 || len(b) != 32 {
+	if rc != 0 || !validScalar(b) {
 		return nil, StatusFailed
 	}
-	defer Wipe(b)
 	k := secp.PrivKeyFromBytes(b)
 	defer k.Zero()
 	return k.PubKey().SerializeCompressed(), ""
@@ -266,8 +381,16 @@ func provision(ref string) Reply {
 	if !validRef(ref) {
 		return Reply{Status: StatusFailed}
 	}
-	if _, rc := KCGet(ref); rc == 0 {
+	if !legacyAllowed(ref) {
+		return Reply{Status: StatusRefused}
+	}
+	existing, rc := KCGet(ref)
+	Wipe(existing)
+	if rc == 0 {
 		return Reply{Status: StatusAlreadyExists}
+	}
+	if rc != -25300 {
+		return Reply{Status: StatusFailed}
 	}
 	for tries := 0; tries < 8; tries++ {
 		raw := make([]byte, 32)
@@ -298,19 +421,22 @@ func provision(ref string) Reply {
 }
 
 func signOp(o outer) Reply {
+	if !legacyAllowed(o.KeyRef) {
+		return Reply{Status: StatusRefused}
+	}
 	r, err := signer.DecodeRequest(o.Request)
 	if err != nil || r.KeyReference != o.KeyRef {
 		return Reply{Status: StatusFailed}
 	}
 	provider := signer.FuncProvider(func(ref string) (*secp.PrivateKey, error) {
 		b, rc := KCGet(ref)
+		defer Wipe(b)
 		if rc == -25300 {
 			return nil, signer.ErrKeyNotFound
 		}
-		if rc != 0 || len(b) != 32 {
+		if rc != 0 || !validScalar(b) {
 			return nil, errors.New("unavailable")
 		}
-		defer Wipe(b)
 		return secp.PrivKeyFromBytes(b), nil
 	})
 	resp, err := signer.Sign(r, provider)
@@ -321,6 +447,23 @@ func signOp(o outer) Reply {
 		return Reply{Status: StatusFailed}
 	}
 	return Reply{Status: StatusSigned, Response: &resp}
+}
+
+func legacyAllowed(ref string) bool {
+	if !hex32.MatchString(ref) {
+		return true
+	}
+	_, rc := boundNative(ref, LifecycleNamespace, nil, nil, "attributes")
+	return rc == -25300
+}
+
+func validScalar(b []byte) bool {
+	if len(b) != 32 {
+		return false
+	}
+	var s secp.ModNScalar
+	defer s.Zero()
+	return !s.SetByteSlice(b) && !s.IsZero()
 }
 
 // ReadInvocation reads the one-line invocation id from stdin (a public, non-secret value used only to derive the private endpoint name).

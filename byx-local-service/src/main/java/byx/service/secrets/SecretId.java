@@ -14,6 +14,8 @@ public enum SecretId {
     AUTHORITY_TEST_ANCHOR("authority-test-anchor", Scope.TEST),
     /** Chave AEAD (AES-256) do snapshot da autoridade de TESTE; independente da chave MAC. */
     AUTHORITY_TEST_ENCRYPTION_KEY("authority-test-encryption-key", Scope.TEST),
+    WALLET_LIFECYCLE_TEST_ANCHOR("wallet-lifecycle-test-anchor", Scope.TEST),
+    WALLET_LIFECYCLE_TEST_ENCRYPTION_KEY("wallet-lifecycle-test-encryption-key", Scope.TEST),
     /** Destinos de TESTE da migração de segredos de provedor (dados sintéticos). */
     MIGRATION_TEST_RESEND("migration-test-resend", Scope.TEST),
     MIGRATION_TEST_TWILIO("migration-test-twilio", Scope.TEST),

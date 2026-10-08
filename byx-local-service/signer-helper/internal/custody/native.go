@@ -235,6 +235,41 @@ static int qa_kc_add(const char* group, const char* service, const char* account
 	CFRelease(d); CFRelease(q);
 	return rc;
 }
+static int qa_kc_add_bound(const char* group, const char* service, const char* account, const unsigned char* data, int n, const unsigned char* binding, int bn) {
+	CFMutableDictionaryRef q = qa_query(group, service, account);
+	CFDataRef d = CFDataCreate(NULL, data, n), b = CFDataCreate(NULL, binding, bn);
+	CFDictionarySetValue(q, kSecValueData, d);
+	CFDictionarySetValue(q, kSecAttrGeneric, b);
+	CFDictionarySetValue(q, kSecAttrAccessible, kSecAttrAccessibleWhenUnlockedThisDeviceOnly);
+	int rc = (int)SecItemAdd(q, NULL);
+	CFRelease(b); CFRelease(d); CFRelease(q);
+	return rc;
+}
+static int qa_kc_generic(const char* group, const char* service, const char* account, unsigned char* out, int cap, int* len) {
+	CFMutableDictionaryRef q = qa_query(group, service, account);
+	CFDictionarySetValue(q, kSecReturnAttributes, kCFBooleanTrue);
+	CFDictionarySetValue(q, kSecMatchLimit, kSecMatchLimitOne);
+	CFTypeRef res = NULL;
+	int rc = (int)SecItemCopyMatching(q, &res);
+	*len = 0;
+	if (rc == 0) {
+		CFDataRef d = res ? CFDictionaryGetValue((CFDictionaryRef)res, kSecAttrGeneric) : NULL;
+		if (!d || CFGetTypeID(d) != CFDataGetTypeID() || CFDataGetLength(d) < 1 || CFDataGetLength(d) > cap) rc = -2;
+		else { *len = (int)CFDataGetLength(d); memcpy(out, CFDataGetBytePtr(d), *len); }
+	}
+	if (res) CFRelease(res);
+	CFRelease(q);
+	return rc;
+}
+static int qa_kc_receipt_update(const char* group, const char* service, const char* account, const unsigned char* data, int n) {
+	CFMutableDictionaryRef q = qa_query(group, service, account);
+	CFMutableDictionaryRef changes = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+	CFDataRef d = CFDataCreate(NULL, data, n);
+	CFDictionarySetValue(changes, kSecValueData, d);
+	int rc = (int)SecItemUpdate(q, changes);
+	CFRelease(d); CFRelease(changes); CFRelease(q);
+	return rc;
+}
 static int qa_kc_get(const char* group, const char* service, const char* account, unsigned char* out, int cap, int* len) {
 	CFMutableDictionaryRef q = qa_query(group, service, account);
 	CFDictionarySetValue(q, kSecReturnData, kCFBooleanTrue);
@@ -274,7 +309,9 @@ static int qa_kc_list(const char* group, const char* service, char* out, int cap
 			if (a && CFStringGetCString(a, tmp, sizeof(tmp), kCFStringEncodingUTF8)) {
 				int l = (int)strlen(tmp);
 				if (used + l + 2 < cap) { memcpy(out + used, tmp, l); used += l; out[used++] = '\n'; out[used] = 0; }
+				else { rc = -2; break; }
 			}
+			else { rc = -2; break; }
 		}
 		CFRelease(res);
 	}
@@ -294,13 +331,90 @@ import (
 
 // Compiled identity and namespace constants (no configuration, no environment, no arguments).
 const (
-	TeamID        = "W5Z65G9UP2"
-	SignerID      = "com.buynnex.byx.signer.qa"
-	ServiceID     = "com.buynnex.byx.service"
-	AccessGroup   = TeamID + "." + SignerID + ".keys"
-	Namespace     = "byx.signer.qa.synthetic.v1"
-	signerAppName = "byx-signer-helper-qa.app"
+	TeamID             = "W5Z65G9UP2"
+	SignerID           = "com.buynnex.byx.signer.qa"
+	ServiceID          = "com.buynnex.byx.service"
+	AccessGroup        = TeamID + "." + SignerID + ".keys"
+	Namespace          = "byx.signer.qa.synthetic.v1"
+	LifecycleNamespace = Namespace + ".lifecycle"
+	signerAppName      = "byx-signer-helper-qa.app"
 )
+
+var boundNative = nativeBound
+var boundList = nativeBoundList
+
+func nativeBound(ref, service string, data, binding []byte, operation string) ([]byte, int) {
+	if !hex32.MatchString(ref) || (service != Namespace && service != LifecycleNamespace) || !callerFresh() {
+		return nil, -1
+	}
+	KeychainCalls++
+	g, s, a := cstr(AccessGroup), cstr(service), cstr(ref)
+	defer C.free(unsafe.Pointer(g))
+	defer C.free(unsafe.Pointer(s))
+	defer C.free(unsafe.Pointer(a))
+	if operation == "add" {
+		if len(data) == 0 || len(binding) == 0 {
+			return nil, -2
+		}
+		return nil, int(C.qa_kc_add_bound(g, s, a, (*C.uchar)(unsafe.Pointer(&data[0])), C.int(len(data)), (*C.uchar)(unsafe.Pointer(&binding[0])), C.int(len(binding))))
+	}
+	if operation == "update" {
+		if service != LifecycleNamespace || len(data) == 0 {
+			return nil, -2
+		}
+		return nil, int(C.qa_kc_receipt_update(g, s, a, (*C.uchar)(unsafe.Pointer(&data[0])), C.int(len(data))))
+	}
+	if operation == "delete" {
+		return nil, int(C.qa_kc_delete(g, s, a))
+	}
+	buf := (*C.uchar)(C.malloc(4096))
+	defer func() { C.qa_wipe(unsafe.Pointer(buf), 4096); C.free(unsafe.Pointer(buf)) }()
+	var n C.int
+	var rc int
+	if operation == "attributes" {
+		rc = int(C.qa_kc_generic(g, s, a, buf, 4096, &n))
+	} else if operation == "read" {
+		rc = int(C.qa_kc_get(g, s, a, buf, 4096, &n))
+	} else {
+		return nil, -1
+	}
+	if rc != 0 {
+		return nil, rc
+	}
+	if n < 1 || n > 4096 {
+		return nil, -2
+	}
+	return C.GoBytes(unsafe.Pointer(buf), n), 0
+}
+
+func nativeBoundList(service string) ([]string, int) {
+	if (service != Namespace && service != LifecycleNamespace) || !callerFresh() {
+		return nil, -1
+	}
+	KeychainCalls++
+	g, s := cstr(AccessGroup), cstr(service)
+	defer C.free(unsafe.Pointer(g))
+	defer C.free(unsafe.Pointer(s))
+	buf := (*C.char)(C.malloc(8192))
+	defer C.free(unsafe.Pointer(buf))
+	rc := int(C.qa_kc_list(g, s, buf, 8192))
+	if rc == -25300 {
+		return []string{}, 0
+	}
+	if rc != 0 {
+		return nil, rc
+	}
+	refs := strings.Fields(C.GoString(buf))
+	if len(refs) > 64 {
+		return nil, -2
+	}
+	for _, ref := range refs {
+		if !hex32.MatchString(ref) {
+			return nil, -2
+		}
+	}
+	return refs, 0
+}
 
 func requirement(id string) string {
 	return `identifier "` + id + `" and anchor apple generic and certificate leaf[subject.OU] = "` + TeamID + `"`
@@ -451,7 +565,7 @@ func validRef(ref string) bool {
 
 // KCAdd stores a 32-byte scalar. Returns the raw OSStatus.
 func KCAdd(ref string, scalar []byte) int {
-	if !validRef(ref) || len(scalar) != 32 {
+	if !validRef(ref) || len(scalar) != 32 || !callerFresh() {
 		return -1
 	}
 	KeychainCalls++
@@ -464,7 +578,7 @@ func KCAdd(ref string, scalar []byte) int {
 
 // KCGet reads the scalar into a caller-owned slice (the caller zeroes it). OSStatus is returned as is.
 func KCGet(ref string) ([]byte, int) {
-	if !validRef(ref) {
+	if !validRef(ref) || !callerFresh() {
 		return nil, -1
 	}
 	KeychainCalls++
@@ -477,6 +591,9 @@ func KCGet(ref string) ([]byte, int) {
 	var n C.int
 	rc := int(C.qa_kc_get(g, s, a, buf, 64, &n))
 	if rc != 0 || n != 32 {
+		if rc == 0 {
+			rc = -2
+		}
 		return nil, rc
 	}
 	out := make([]byte, int(n))
@@ -485,7 +602,7 @@ func KCGet(ref string) ([]byte, int) {
 }
 
 func KCDelete(ref string) int {
-	if !validRef(ref) {
+	if !validRef(ref) || !callerFresh() {
 		return -1
 	}
 	KeychainCalls++
@@ -498,6 +615,9 @@ func KCDelete(ref string) int {
 
 // KCList returns the account names in exactly (AccessGroup, Namespace).
 func KCList() ([]string, int) {
+	if !callerFresh() {
+		return nil, -1
+	}
 	KeychainCalls++
 	g, s := cstr(AccessGroup), cstr(Namespace)
 	defer C.free(unsafe.Pointer(g))

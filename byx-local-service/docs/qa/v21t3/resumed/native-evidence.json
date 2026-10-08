@@ -1,0 +1,758 @@
+{
+  "cases": [
+    {
+      "case": "happy:create",
+      "pass": true
+    },
+    {
+      "case": "happy:restart",
+      "pass": true
+    },
+    {
+      "case": "happy:independent_DIRECT_signature_and_broadcast_barrier",
+      "pass": true
+    },
+    {
+      "case": "happy:delete",
+      "pass": true
+    },
+    {
+      "case": "happy:tombstone_restart_scalar_absent",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-5mfkoyuw:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wire:duplicate:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:duplicate:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:missing:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:missing:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:type:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:type:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:unknown:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:unknown:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:trailing_json:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:trailing_json:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:trailing_frame:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:trailing_frame:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:delayed_frame:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "wire:delayed_frame:zero_Keychain_calls",
+      "pass": true
+    },
+    {
+      "case": "wire:stale_reply:fail_closed",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-1syb2w0m:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeCreating:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeCreating:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:beforeCreating:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:beforeCreating:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-vx3su_h5:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterCreating:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterCreating:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:afterCreating:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:afterCreating:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-4vwq07y1:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterPreparing:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterPreparing:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:afterPreparing:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:afterPreparing:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-w_5y791l:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeScalar:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeScalar:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:beforeScalar:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:beforeScalar:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-tjad2a22:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterScalar:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterScalar:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:afterScalar:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:afterScalar:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-l1ys867u:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeLive:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeLive:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:beforeLive:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:beforeLive:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-9z9m0omy:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterLive:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterLive:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:afterLive:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:afterLive:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-r7xsc2dp:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeActive:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:beforeActive:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:beforeActive:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:beforeActive:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-71l89v98:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterActive:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:afterActive:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "create:afterActive:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "create:afterActive:same_operation_one_wallet_one_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-p3azfgy_:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeDeleting:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeDeleting:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeDeleting:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeDeleting:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-pxrsf5k1:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterDeleting:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterDeleting:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:afterDeleting:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:afterDeleting:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-rg7jtutl:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeRevoked:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeRevoked:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeRevoked:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeRevoked:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-_om0z_51:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterRevoked:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterRevoked:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:afterRevoked:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:afterRevoked:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-8pfxje0w:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeScalarDelete:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeScalarDelete:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeScalarDelete:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeScalarDelete:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-l0sksnem:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterScalarDelete:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterScalarDelete:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:afterScalarDelete:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:afterScalarDelete:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-l52l4z2u:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeAbsence:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeAbsence:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeAbsence:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeAbsence:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-z1b03h5s:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeDeleted:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:beforeDeleted:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeDeleted:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:beforeDeleted:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-gnkwmdzv:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterDeleted:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-delete:afterDeleted:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "delete:afterDeleted:old_helper_absent_after_restart",
+      "pass": true
+    },
+    {
+      "case": "delete:afterDeleted:same_tombstone_no_scalar",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-vq7gjisi:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-sign:beforeSign:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-sign:beforeSign:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "sign:beforeSign:fenced_UNKNOWN_no_automatic_resign",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-x3330bgt:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-sign:afterSign:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-sign:afterSign:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "sign:afterSign:fenced_UNKNOWN_no_automatic_resign",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-obtfz4na:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterTmpCreate:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterTmpCreate:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterTmpCreate:stale_tmp_fail_closed",
+      "pass": true
+    },
+    {
+      "case": "writer:afterTmpCreate:owned_regular_private_tmp",
+      "pass": true
+    },
+    {
+      "case": "writer:afterTmpCreate:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-du0qkw0s:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterWrite:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterWrite:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterWrite:stale_tmp_fail_closed",
+      "pass": true
+    },
+    {
+      "case": "writer:afterWrite:owned_regular_private_tmp",
+      "pass": true
+    },
+    {
+      "case": "writer:afterWrite:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-j59la_n7:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeFileSync:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeFileSync:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeFileSync:stale_tmp_fail_closed",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeFileSync:owned_regular_private_tmp",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeFileSync:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-mq1zn9tv:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterFileSync:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterFileSync:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterFileSync:stale_tmp_fail_closed",
+      "pass": true
+    },
+    {
+      "case": "writer:afterFileSync:owned_regular_private_tmp",
+      "pass": true
+    },
+    {
+      "case": "writer:afterFileSync:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-sbn1ib3z:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeRename:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeRename:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeRename:stale_tmp_fail_closed",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeRename:owned_regular_private_tmp",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeRename:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-udl2hy2r:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterRename:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterRename:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterRename:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-p8f1ae1y:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeDirectorySync:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeDirectorySync:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeDirectorySync:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-kp4wj_q5:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterDirectorySync:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterDirectorySync:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterDirectorySync:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-0n4tw0wv:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeAnchor:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforeAnchor:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:beforeAnchor:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-97tb2q7r:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterAnchor:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterAnchor:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterAnchor:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-j63ph80y:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforePublish:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:beforePublish:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:beforePublish:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-fm5aefrw:exact_QA_teardown",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterPublish:boundary",
+      "pass": true
+    },
+    {
+      "case": "wallet-create:writer:afterPublish:service_terminated",
+      "pass": true
+    },
+    {
+      "case": "writer:afterPublish:trusted_reload_before_single_create",
+      "pass": true
+    },
+    {
+      "case": "byx-wallet-qa-1l021_5y:exact_QA_teardown",
+      "pass": true
+    }
+  ],
+  "passed": 178,
+  "failed": 0,
+  "skipped": 0,
+  "fixtureRoots": [
+    "/private/tmp/byx-wallet-qa-5mfkoyuw",
+    "/private/tmp/byx-wallet-qa-1syb2w0m",
+    "/private/tmp/byx-wallet-qa-vx3su_h5",
+    "/private/tmp/byx-wallet-qa-4vwq07y1",
+    "/private/tmp/byx-wallet-qa-w_5y791l",
+    "/private/tmp/byx-wallet-qa-tjad2a22",
+    "/private/tmp/byx-wallet-qa-l1ys867u",
+    "/private/tmp/byx-wallet-qa-9z9m0omy",
+    "/private/tmp/byx-wallet-qa-r7xsc2dp",
+    "/private/tmp/byx-wallet-qa-71l89v98",
+    "/private/tmp/byx-wallet-qa-p3azfgy_",
+    "/private/tmp/byx-wallet-qa-pxrsf5k1",
+    "/private/tmp/byx-wallet-qa-rg7jtutl",
+    "/private/tmp/byx-wallet-qa-_om0z_51",
+    "/private/tmp/byx-wallet-qa-8pfxje0w",
+    "/private/tmp/byx-wallet-qa-l0sksnem",
+    "/private/tmp/byx-wallet-qa-l52l4z2u",
+    "/private/tmp/byx-wallet-qa-z1b03h5s",
+    "/private/tmp/byx-wallet-qa-gnkwmdzv",
+    "/private/tmp/byx-wallet-qa-vq7gjisi",
+    "/private/tmp/byx-wallet-qa-x3330bgt",
+    "/private/tmp/byx-wallet-qa-obtfz4na",
+    "/private/tmp/byx-wallet-qa-du0qkw0s",
+    "/private/tmp/byx-wallet-qa-j59la_n7",
+    "/private/tmp/byx-wallet-qa-mq1zn9tv",
+    "/private/tmp/byx-wallet-qa-sbn1ib3z",
+    "/private/tmp/byx-wallet-qa-udl2hy2r",
+    "/private/tmp/byx-wallet-qa-p8f1ae1y",
+    "/private/tmp/byx-wallet-qa-kp4wj_q5",
+    "/private/tmp/byx-wallet-qa-0n4tw0wv",
+    "/private/tmp/byx-wallet-qa-97tb2q7r",
+    "/private/tmp/byx-wallet-qa-j63ph80y",
+    "/private/tmp/byx-wallet-qa-fm5aefrw",
+    "/private/tmp/byx-wallet-qa-1l021_5y"
+  ],
+  "broadcasts": 0,
+  "realKeys": 0,
+  "realWallets": 0
+}

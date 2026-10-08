@@ -93,12 +93,12 @@ public final class AuthorityAdmin {
     }
 
     public void setProviders(ProviderSettings p) throws AuthorityException {
-        store.mutateRaw(s -> new AuthorityState(s.version(), s.accounts(), p, s.devices(), s.migrationFreeze()));
+        store.mutateRaw(s -> new AuthorityState(s.version(), s.accounts(), p, s.devices(), s.migrationFreeze(),s.walletCatalog()));
     }
 
     /** Liga/desliga a trava da janela de segurança do cutover (só o migrador). */
     public void setFreeze(boolean on) throws AuthorityException {
-        store.mutateRaw(s -> new AuthorityState(s.version(), s.accounts(), s.providers(), s.devices(), on));
+        store.mutateRaw(s -> new AuthorityState(s.version(), s.accounts(), s.providers(), s.devices(), on,s.walletCatalog()));
     }
 
     private void update(String id, UnaryOperator<Account> f) throws AuthorityException {
@@ -132,7 +132,7 @@ public final class AuthorityAdmin {
         for (TrustedDevice d : s.devices()) {
             ds.add(d.accountId().equals(accountId) && d.revokedAtMs() == 0 ? new TrustedDevice(d.id(), d.accountId(), d.createdAtMs(), d.lastUsedAtMs(), d.expiresAtMs(), now) : d);
         }
-        return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze());
+        return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze(),s.walletCatalog());
     }
 
     public void setRole(String id, Role role) throws AuthorityException {
@@ -180,7 +180,7 @@ public final class AuthorityAdmin {
             }
             List<TrustedDevice> ds = new ArrayList<>(s.devices());
             ds.removeIf(d -> d.accountId().equals(id));
-            return new AuthorityState(s.version(), next, s.providers(), ds, s.migrationFreeze());
+            return new AuthorityState(s.version(), next, s.providers(), ds, s.migrationFreeze(),s.walletCatalog());
         });
     }
 
@@ -202,7 +202,7 @@ public final class AuthorityAdmin {
                 ds.add(x.accountId().equals(accountId) && x.revokedAtMs() == 0 ? new TrustedDevice(x.id(), x.accountId(), x.createdAtMs(), x.lastUsedAtMs(), x.expiresAtMs(), now) : x);
             }
             ds.add(d);
-            return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze());
+            return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze(),s.walletCatalog());
         });
         return d;
     }
@@ -216,7 +216,7 @@ public final class AuthorityAdmin {
                 ds.add(x.id().equals(deviceId) && x.accountId().equals(accountId) && x.revokedAtMs() == 0
                         ? new TrustedDevice(x.id(), x.accountId(), x.createdAtMs(), x.lastUsedAtMs(), x.expiresAtMs(), now) : x);
             }
-            return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze());
+            return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze(),s.walletCatalog());
         });
     }
 
@@ -227,7 +227,7 @@ public final class AuthorityAdmin {
             for (TrustedDevice x : s.devices()) {
                 ds.add(x.id().equals(deviceId) ? new TrustedDevice(x.id(), x.accountId(), x.createdAtMs(), now, x.expiresAtMs(), x.revokedAtMs()) : x);
             }
-            return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze());
+            return new AuthorityState(s.version(), s.accounts(), s.providers(), ds, s.migrationFreeze(),s.walletCatalog());
         });
     }
 }

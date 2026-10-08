@@ -28,20 +28,26 @@ func TestOuterRequestIsStrict(t *testing.T) {
 		"wrong type":     strings.Replace(good, `"protocolVersion":2`, `"protocolVersion":"2"`, 1),
 		"duplicate keys": strings.Replace(good, `"op":"count"`, `"op":"count","op":"sign"`, 1),
 	} {
-		o, err := decodeOuter([]byte(bad))
-		if name == "duplicate keys" {
-			// encoding/json keeps the last value; the closed operation set and the challenge/invocation binding still apply
-			if err == nil && o.Op == "sign" && (o.Request != nil) {
-				t.Fatal("duplicate key produced a request payload")
-			}
-			continue
-		}
+		_, err := decodeOuter([]byte(bad))
 		if err == nil {
 			t.Fatal("hostile request accepted:", name)
 		}
 	}
 	if opNames["wipe"] || opNames["exec"] || opNames["export"] || opNames["rawSign"] || opNames["listAll"] {
 		t.Fatal("closed operation set violated")
+	}
+}
+
+func TestStoredScalarRejectsInvalidRangeWithoutNormalization(t *testing.T) {
+	for _, b := range [][]byte{nil, make([]byte, 31), make([]byte, 32), bytes.Repeat([]byte{255}, 32)} {
+		if validScalar(b) {
+			t.Fatal("invalid scalar accepted")
+		}
+	}
+	b := make([]byte, 32)
+	b[31] = 1
+	if !validScalar(b) {
+		t.Fatal("valid scalar rejected")
 	}
 }
 
