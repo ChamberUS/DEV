@@ -27,6 +27,7 @@ public final class WalletLifecycle {
     interface Confirmation { boolean current(TxSignRequest request); }
     interface Custody {
         void acquire() throws CustodyFailure;
+        default void verifyAvailability() throws CustodyFailure { }
         Reply call(String op,Request request,TxSignRequest sign) throws CustodyFailure;
     }
     static final class CustodyFailure extends Exception {
@@ -38,7 +39,7 @@ public final class WalletLifecycle {
     record Reply(String status,int keychainCalls,String publicKey,String address,int count,JsonNode response,JsonNode lifecycle) { }
     public static final class Failure extends RuntimeException {
         public final String code;
-        Failure(String code) { super(code,null,false,false);this.code=code; }
+        public Failure(String code) { super(code,null,false,false);this.code=code; }
     }
     record Receipt(int receiptVersion,Binding binding,String state,long revision,String publicKey,String address,
             String lastOperationId,String lastRequestDigest) {
@@ -68,6 +69,7 @@ public final class WalletLifecycle {
     private final Map<String,ReentrantLock> owners=new HashMap<>();
     private volatile Map<String,String> health=Map.of();
     private volatile boolean reconciled;
+    private volatile String lastInventoryFailure = "";
     private java.util.function.Consumer<String> boundary=point->{ };
     private static final SecureRandom RANDOM=new SecureRandom();
     private static final ObjectMapper JSON=new ObjectMapper().enable(com.fasterxml.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
@@ -81,6 +83,41 @@ public final class WalletLifecycle {
         if(catalog()==null) fail("FEATURE_DISABLED");
     }
     void fault(java.util.function.Consumer<String> boundary) { this.boundary=boundary; }
+    record Observation(String availability, Map<String,String> health) { }
+    Observation publicationObservation() {
+        if (!global.tryLock()) return new Observation("OPERATION_PENDING", Map.of());
+        try {
+            try { custody.verifyAvailability(); }
+            catch (CustodyFailure e) { return new Observation("SIGNER_UNAVAILABLE", Map.of()); }
+            if (!reconciled) return new Observation("NEEDS_ATTENTION", Map.of());
+            Map<String,Entry> entries;
+            lastInventoryFailure = "";
+            try { entries = inventory(); }
+            catch (Failure e) {
+                if (lastInventoryFailure.equals("CUSTODY_QUIESCENCE_UNPROVEN")) return new Observation("NEEDS_ATTENTION", Map.of());
+                if (Set.of("SIGNER_UNTRUSTED", "SIGNER_UNAVAILABLE", "SIGNING_FAILED", "TIMEOUT_UNKNOWN_RESULT").contains(lastInventoryFailure)) return new Observation("SIGNER_UNAVAILABLE", Map.of());
+                return new Observation("INVENTORY_INCOMPLETE", Map.of());
+            }
+            Map<String,String> observed = new HashMap<>();
+            Set<String> known = new HashSet<>();
+            for (Wallet w : catalog().wallets()) {
+                known.add(w.signingKeyRef()); Entry entry = entries.get(w.signingKeyRef());
+                if (w.durableState() == State.ACTIVE) {
+                    String state = entry == null || !entry.scalarPresent() ? "ORPHAN_METADATA"
+                            : entry.receipt() == null || !entry.receipt().state().equals("LIVE")
+                              || !entry.scalarBinding().equals(w.binding(catalog().catalogId()))
+                              || !entry.receipt().binding().equals(w.binding(catalog().catalogId()))
+                              || !w.publicKey().equals(entry.receipt().publicKey()) || !w.address().equals(entry.receipt().address())
+                            ? "KEY_MISMATCH" : healthOf(w);
+                    observed.put(w.walletId(), state);
+                }
+            }
+            if (entries.keySet().stream().anyMatch(ref -> !known.contains(ref))) return new Observation("NEEDS_ATTENTION", Map.copyOf(observed));
+            return new Observation("AVAILABLE", Map.copyOf(observed));
+        } finally { global.unlock(); }
+    }
+    WalletCatalog publicationCatalog() { return catalog(); }
+    boolean publicationReconciled() { return reconciled; }
     private WalletCatalog catalog() {
         try { return store.current().walletCatalog(); } catch(AuthorityException e) { throw new Failure("CORRUPT_CATALOG"); }
     }
@@ -100,7 +137,10 @@ public final class WalletLifecycle {
     }
     public String health(String walletId) {
         Wallet w=query().stream().filter(x->x.walletId().equals(walletId)).findFirst().orElseThrow(()->new Failure("WALLET_NOT_FOUND"));
-        return w.quarantineReason()!=null?w.quarantineReason():health.getOrDefault(walletId,"UNRECONCILED");
+        return healthOf(w);
+    }
+    private String healthOf(Wallet w) {
+        return w.quarantineReason() != null ? w.quarantineReason() : health.getOrDefault(w.walletId(), "UNRECONCILED");
     }
     private void ready() { if(!reconciled) fail("RECONCILIATION_REQUIRED"); }
     private Reply call(String op,Wallet w,Operation operation,TxSignRequest sign) {
@@ -118,7 +158,11 @@ public final class WalletLifecycle {
         do {
             Reply reply;
             try { reply=custody.call("inventoryPage",new Request(null,op,requestDigest,1,"","",offset,digest),null); }
-            catch(CustodyFailure e) { throw new Failure("INVENTORY_INCOMPLETE"); }
+            catch(CustodyFailure e) {
+                lastInventoryFailure = e.code();
+                if (e.code().equals("CUSTODY_QUIESCENCE_UNPROVEN")) reconciled = false;
+                throw new Failure("INVENTORY_INCOMPLETE");
+            }
             if(!"INVENTORY".equals(reply.status())) fail("INVENTORY_INCOMPLETE");
             Page page=decode(reply.lifecycle(),Page.class,"INVENTORY_INCOMPLETE");
             if(total<0) { total=page.totalCount();digest=page.snapshotDigest(); }
@@ -239,6 +283,7 @@ public final class WalletLifecycle {
         if(!r.binding().equals(w.binding(catalog().catalogId())) || !r.state().equals("REVOKED") || !r.lastOperationId().equals(op.operationId()) || !r.lastRequestDigest().equals(op.requestDigest())) fail("KEY_MISMATCH");
         Wallet deleted=copy(w,State.DELETED,w.version()+1,op.operationId(),clock.millis(),w.quarantineReason(),w.quarantinedAtMs());
         boundary.accept("beforeDeleted");save(deleted,updated(op,Status.COMPLETE,"DELETED",Attempt.NONE,deleted.walletId()),true);boundary.accept("afterDeleted");
+        var observed = new HashMap<>(health); observed.put(w.walletId(), "DELETED"); health = Map.copyOf(observed);
         return deleted;
     }
     public SignedTx sign(String walletId,long expectedVersion,String idempotencyKey,TxSignRequest request,boolean explicitlyConfirmed) {

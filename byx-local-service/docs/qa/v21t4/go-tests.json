@@ -1,0 +1,9 @@
+{
+  "passed": 59,
+  "failed": 0,
+  "skipped": 1,
+  "counting": "test events, includes subtests",
+  "skippedTest": "TestProcessHarness (subprocess-only; exercised by Java)",
+  "sourceUnchanged": true,
+  "packagesWithoutTests": 3
+}

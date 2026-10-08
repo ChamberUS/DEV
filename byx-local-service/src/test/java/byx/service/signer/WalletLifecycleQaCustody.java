@@ -6,6 +6,10 @@ final class WalletLifecycleQaCustody implements WalletLifecycle.Custody {
     private final CustodyClient client;
     private final String point;
     WalletLifecycleQaCustody(CustodyClient client,String point) { this.client=client;this.point=point; }
+    public void verifyAvailability() throws WalletLifecycle.CustodyFailure {
+        try { client.verifyAvailability(); }
+        catch (CustodyClient.CustodyException e) { throw new WalletLifecycle.CustodyFailure(e.code()); }
+    }
     public void acquire() throws WalletLifecycle.CustodyFailure {
         try { client.authority(); }
         catch(CustodyClient.CustodyException e) { throw new WalletLifecycle.CustodyFailure(e.code()); }

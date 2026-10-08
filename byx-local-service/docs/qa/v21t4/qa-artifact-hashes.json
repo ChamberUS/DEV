@@ -1,0 +1,5 @@
+{
+  "byx-packaging/build-custody-qa/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar": "79fa8cb826f9f53fe7ce12e1a46889cf462075083b5d9552dd3cc7e4c7bf0a94",
+  "byx-packaging/build-custody-qa/BYX-MVP.app/Contents/Helpers/byx-custody-qa-service.app/Contents/app/byx-local-service-0.1.0.jar": "40c1577232e7b17f44fa89e863337f618c2daaba3d24f3c217b54ce19396003e",
+  "byx-packaging/build-custody-qa/BYX-MVP.app/Contents/Helpers/byx-signer-helper-qa.app/Contents/MacOS/byx-signer-helper-qa": "d15ada8f8fe4403a6ed86442be1e2a3c27d3d60a4c42af48d92546c59e94c6cf"
+}

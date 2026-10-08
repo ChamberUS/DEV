@@ -1,0 +1,144 @@
+{
+  "cases": [
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "NO_WALLET",
+      "pass": true
+    },
+    {
+      "case": "user: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "USER cannot mutate",
+      "pass": true
+    },
+    {
+      "case": "createLost: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Lost create response requires reconciliation",
+      "pass": true
+    },
+    {
+      "case": "Service offline distinct from NO_WALLET",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Create committed before lost response survives Service restart",
+      "pass": true
+    },
+    {
+      "case": "create: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Create through real gateway",
+      "pass": true
+    },
+    {
+      "case": "Public identity and no recovery",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Panel process restart reloads Service state",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Service restart reconciles same identity",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Signer offline distinct domain state",
+      "pass": true
+    },
+    {
+      "case": "denySign: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Buggy UI cannot sign with offline signer",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Incomplete inventory disables all mutations",
+      "pass": true
+    },
+    {
+      "case": "barrier: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Adversarial broadcast denied",
+      "pass": true
+    },
+    {
+      "case": "sign: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Synthetic sign independently verified in Java",
+      "pass": true
+    },
+    {
+      "case": "visual: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Real JavaFX 1920x1080 capture",
+      "pass": true
+    },
+    {
+      "case": "execution",
+      "pass": false,
+      "reason": "QA_PROCESS_FAILED Exception in thread \"main\" panel.wallet.WalletGateway$Unavailable: WALLET_NOT_FOUND\nFailed to launch JVM\n"
+    },
+    {
+      "case": "Exact synthetic namespace and TEST anchors teardown",
+      "pass": true
+    }
+  ],
+  "passed": 32,
+  "failed": 1,
+  "skipped": 0,
+  "root": "/private/tmp/byx-wallet-qa-_4flvb1v",
+  "broadcasts": 0,
+  "realKeys": 0,
+  "realWallets": 0
+}

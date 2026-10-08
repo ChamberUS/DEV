@@ -1,0 +1,17 @@
+{
+  "collectorPid": 96558,
+  "supervisorPid": 10657,
+  "observations": [
+    {
+      "utc": "2026-10-08T07:09:33.540517+00:00",
+      "path": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-08/microstructure-20261008T064920Z-usd_m_futures/events-00004.jsonl.gz.part",
+      "bytes": 8678478
+    },
+    {
+      "utc": "2026-10-08T07:09:36.546311+00:00",
+      "path": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-08/microstructure-20261008T064920Z-usd_m_futures/events-00004.jsonl.gz.part",
+      "bytes": 8759423
+    }
+  ],
+  "growthBytes": 80945
+}

@@ -78,6 +78,11 @@ public interface AuthorityGateway {
         return new Reply(false, "TX_DISABLED", null);
     }
 
+    default Reply walletList() { return new Reply(true, "OK", new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(panel.wallet.WalletView.disabled())); }
+    default Reply walletCreate(String key, boolean acknowledged) { return new Reply(false, "FEATURE_DISABLED", null); }
+    default Reply walletDelete(String wallet, long version, String key, boolean acknowledged) { return new Reply(false, "FEATURE_DISABLED", null); }
+    default Reply walletSyntheticSign(String wallet, long version, String key, boolean confirmed) { return new Reply(false, "FEATURE_DISABLED", null); }
+
     boolean hasSession();
 
     /** O painel esquece o token (a sessão já não vale no serviço ou o painel saiu). */

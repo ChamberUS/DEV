@@ -26,6 +26,8 @@ public interface ByxData {
 
     boolean admin();
 
+    default panel.wallet.WalletGateway walletLifecycleGateway() { return null; }
+
     /** Configuração atual (só com sessão de admin); null quando não há. */
     ByxConfig config();
 

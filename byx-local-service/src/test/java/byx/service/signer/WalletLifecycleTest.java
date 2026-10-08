@@ -232,7 +232,7 @@ class WalletLifecycleTest {
     }
     private static final class InjectedCrash extends RuntimeException { }
 
-    private static final class FakeCustody implements WalletLifecycle.Custody {
+    static final class FakeCustody implements WalletLifecycle.Custody {
         final Map<String,WalletLifecycle.Receipt> receipts=new HashMap<>();final Set<String> scalars=new HashSet<>();final Map<String,Binding> scalarBindings=new HashMap<>();int generated,signs;
         String crash;boolean incomplete,orphan;CountDownLatch entered,release,deleteEntered,deleteRelease,signEntered,signRelease;
         public void acquire() { }

@@ -9,6 +9,7 @@
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <byx.wallet.capability>DISABLED</byx.wallet.capability>
   </properties>
   <dependencies>
     <dependency><groupId>com.google.protobuf</groupId><artifactId>protobuf-java</artifactId><version>4.33.5</version></dependency>
@@ -51,6 +52,10 @@
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource><directory>src/main/resources</directory><filtering>false</filtering></resource>
+      <resource><directory>src/wallet-build/resources</directory><filtering>true</filtering></resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -77,4 +82,7 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile><id>wallet-qa</id><properties><byx.wallet.capability>SYNTHETIC_QA</byx.wallet.capability></properties></profile>
+  </profiles>
 </project>

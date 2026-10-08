@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "case": "DEFAULT runtime starts without custody",
+      "pass": true
+    },
+    {
+      "case": "default: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "DEFAULT public capability disabled",
+      "pass": true
+    },
+    {
+      "case": "DEFAULT status unavailable, never NO_WALLET",
+      "pass": true
+    },
+    {
+      "case": "DEFAULT no mutation capability",
+      "pass": true
+    },
+    {
+      "case": "DEFAULT direct create/sign/delete and TX denied",
+      "pass": true
+    }
+  ],
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "root": "/private/tmp/byx-wallet-qa-_k7mx0e1",
+  "custodyComposed": false,
+  "secretsComposed": false,
+  "broadcasts": 0,
+  "realKeys": 0,
+  "realWallets": 0
+}

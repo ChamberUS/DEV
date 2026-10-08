@@ -375,6 +375,12 @@ public final class CustodyClient {
     }
 
     /** Static check before executing anything: real path, no symlinks, exact origin, Apple chain + Team + identifier + strict nested seal. */
+    public void verifyAvailability() throws CustodyException {
+        verifyHelperOnDisk();
+        if (!Files.isExecutable(launchApp.resolve("Contents/MacOS/byx-signer-helper-qa")))
+            throw new CustodyException("SIGNER_UNAVAILABLE", "HELPER_NOT_EXECUTABLE");
+    }
+
     private void verifyHelperOnDisk() throws CustodyException {
         try {
             if (!launchApp.isAbsolute() || !launchApp.getFileName().toString().equals(HELPER_APP)) {

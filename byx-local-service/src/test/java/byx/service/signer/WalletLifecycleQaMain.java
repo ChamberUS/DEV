@@ -49,7 +49,8 @@ final class WalletLifecycleQaMain {
         if(!Files.isRegularFile(fixturePath,LinkOption.NOFOLLOW_LINKS) || Files.size(fixturePath)>1024) throw new IllegalArgumentException("QA_FIXTURE_INVALID");
         fixture=JSON.readValue(Files.readAllBytes(fixturePath),Fixture.class);
         var account=store.current().byId(fixture.ownerAccountId()).orElseThrow();
-        if(!account.username().equals("lifecycle_qa") || store.current().accounts().size()!=1) throw new IllegalArgumentException("QA_ACCOUNT_REQUIRED");
+        if(!account.username().equals("lifecycle_qa") || store.current().accounts().size()>2
+                || store.current().accounts().stream().anyMatch(a -> !java.util.Set.of("lifecycle_qa", "panel_qa_user").contains(a.username()))) throw new IllegalArgumentException("QA_ACCOUNT_REQUIRED");
         String point=args.length>2?args[2]:"";
         if(args[0].equals("wallet-wire")) {
             client.observeWire(bytes->{

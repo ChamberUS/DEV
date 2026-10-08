@@ -1,0 +1,167 @@
+{
+  "status": "READY_FOR_LEGACY_SIGNER_CLEANUP_AND_RUNTIME_HARDENING",
+  "generatedAt": "2026-10-08T08:04:23.390013+00:00",
+  "startingHead": "ee0d6966a2235f8de1c3d54123f78c9bd45b161f",
+  "branch": "feature/byx-ui-redesign-v1",
+  "tests": {
+    "Panel DEFAULT final": {
+      "passed": 723,
+      "failed": 0,
+      "skipped": 1
+    },
+    "Service final": {
+      "passed": 469,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Go (inclui subtests)": {
+      "passed": 59,
+      "failed": 0,
+      "skipped": 1
+    },
+    "Panel \u2192 Service \u2192 signer": {
+      "passed": 42,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Anomalias nativas": {
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Runtime disabled": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "T-2R fencing": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "T-3 lifecycle regressions": {
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Security T-1": {
+      "passed": 65,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Panel custody authority denial": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Packaged DEFAULT": {
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "panelQaEarlierSerial": {
+    "passed": 723,
+    "failed": 0,
+    "skipped": 1
+  },
+  "sourceIndexBlobIds": {
+    "byx-local-service/src/main/java/byx/service/ServiceInstance.java": "471a0d8a166b0f1fd208a939c2eff4b073e2fef3",
+    "byx-local-service/src/main/java/byx/service/signer/CustodyClient.java": "614d51936ee40197adbfa7e547110d755f13ac03",
+    "byx-local-service/src/main/java/byx/service/signer/WalletEndpoint.java": "070571b1801eeb226ded7a2e53040d28a9589cb9",
+    "byx-local-service/src/main/java/byx/service/signer/WalletLifecycle.java": "20fe699ef5f4d36c349a56df8a8816884479f915",
+    "byx-local-service/src/main/java/byx/service/wallet/WalletIpc.java": "16322c579056f4e12c0d9187635f8dd68816c469",
+    "byx-local-service/src/main/java/byx/service/wallet/WalletView.java": "d6125e149d75a97293cf2e757b1f37b99b0d8aef",
+    "byx-local-service/src/test/java/byx/service/signer/CustodyQaMain.java": "b448922e221ff60851bdef20d16892ccf63f85b6",
+    "byx-local-service/src/test/java/byx/service/signer/WalletEndpointTest.java": "c25ae0e196f34dab90eea596262b9f086bc068c0",
+    "byx-local-service/src/test/java/byx/service/signer/WalletLifecycleQaCustody.java": "37f5bc9e055dd25baf33a9595eba0aba667ce686",
+    "byx-local-service/src/test/java/byx/service/signer/WalletLifecycleQaMain.java": "f534274f4fd2a27e2f7b836207de7be484ba31dc",
+    "byx-local-service/src/test/java/byx/service/signer/WalletLifecycleTest.java": "502bff729d0160fccd565abcbc11cb677ae36077",
+    "byx-local-service/src/test/java/byx/service/signer/WalletPanelQaService.java": "3a427155673dbd03e29e9c347644bbb4cc5c7132",
+    "byx-packaging/build-panel-wallet-qa.sh": "9ef322db7f737c054d9362e1e2636e13f2f4fe59",
+    "byx-packaging/verify-panel-wallet-anomalies-qa.py": "f39343f3ac9a31770d89282b26d9e16a5b64b0cf",
+    "byx-packaging/verify-panel-wallet-default-qa.py": "0f8ddf8c26330868a3241843ddffe0cf14fe335d",
+    "byx-packaging/verify-panel-wallet-qa.py": "6f6ae555dacdbd2dcadbbfd57d4a481d0041bb8c",
+    "mvp-binance-panel/pom.xml": "5cdcd8c23abb2f15aa27a65e20e99755a6efa52a",
+    "mvp-binance-panel/src/main/java/panel/app/ByxDataAdapter.java": "f29fe44873822805ad0d8d9d6c4ba3ca900d993e",
+    "mvp-binance-panel/src/main/java/panel/byxview/ByxData.java": "5d6e377799e4c808848a97fad7eb85a63200917a",
+    "mvp-binance-panel/src/main/java/panel/byxview/WalletScreen.java": "4f151e87660fef66b03ead8dce196286066b1344",
+    "mvp-binance-panel/src/main/java/panel/identity/MacSecurity.java": "9be9f47cf3131328fa0a5233b465ec8ca5a64020",
+    "mvp-binance-panel/src/main/java/panel/localservice/AuthorityClient.java": "6e341a5039c2c92a8ccb5a18eda61c2d5550d300",
+    "mvp-binance-panel/src/main/java/panel/localservice/AuthorityGateway.java": "9466de28595dcd99d5573807a90f4e8d01f9377c",
+    "mvp-binance-panel/src/main/java/panel/wallet/WalletController.java": "d25032c53de0e869787e160bed7382fbb2c33b9c",
+    "mvp-binance-panel/src/main/java/panel/wallet/WalletGateway.java": "dc9c6e14229d6dc02958ac737f4b5757a8438bef",
+    "mvp-binance-panel/src/main/java/panel/wallet/WalletPane.java": "3e515d02e843b2b8b373be708f3aea585199db7b",
+    "mvp-binance-panel/src/main/java/panel/wallet/WalletView.java": "b8d488ee582c3181ef282c3a552886105f54eba6",
+    "mvp-binance-panel/src/test/java/panel/wallet/WalletControllerTest.java": "4f670e51bf630f4f9439011016517df48ff377c5",
+    "mvp-binance-panel/src/test/java/panel/wallet/WalletPaneTest.java": "a1459834f9dd10091e63c0b4121330e181e64f55",
+    "mvp-binance-panel/src/test/java/panel/wallet/WalletPanelQaMain.java": "86243bcb56e7ba75350f529bf4985cb5a339c554",
+    "mvp-binance-panel/src/wallet-build/resources/panel/wallet-capability.txt": "a23b3357596b50fcb2e939e95fa6742f00cce089"
+  },
+  "qaArtifactHashes": {
+    "byx-packaging/build-custody-qa/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar": "79fa8cb826f9f53fe7ce12e1a46889cf462075083b5d9552dd3cc7e4c7bf0a94",
+    "byx-packaging/build-custody-qa/BYX-MVP.app/Contents/Helpers/byx-custody-qa-service.app/Contents/app/byx-local-service-0.1.0.jar": "40c1577232e7b17f44fa89e863337f618c2daaba3d24f3c217b54ce19396003e",
+    "byx-packaging/build-custody-qa/BYX-MVP.app/Contents/Helpers/byx-signer-helper-qa.app/Contents/MacOS/byx-signer-helper-qa": "d15ada8f8fe4403a6ed86442be1e2a3c27d3d60a4c42af48d92546c59e94c6cf"
+  },
+  "defaultArtifact": {
+    "artifact": "/tmp/byx-v21t4-default-qualified/BYX-MVP.app",
+    "checks": {
+      "DEFAULT_DEEP_STRICT_SEAL": true,
+      "DEFAULT_NO_QA_HELPER": true,
+      "DEFAULT_NO_QA_LAUNCHER": true,
+      "DEFAULT_NO_QA_TEST_JAR": true,
+      "PANEL_CAPABILITY_DISABLED": true,
+      "PRODUCTION_DISABLED_CHAIN": true,
+      "QA_PROBE_MAIN_ABSENT": true,
+      "PANEL_QA_MAIN_ABSENT": true,
+      "PANEL_TRANSACTION_LAB_ABSENT": true,
+      "LATEST_SERVICE_HASH": true,
+      "LATEST_PANEL_HASH": true
+    },
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "serviceJarSha256": "40c1577232e7b17f44fa89e863337f618c2daaba3d24f3c217b54ce19396003e",
+    "panelJarSha256": "589406ccc39ac5811df6fd7a13404b51ca1e2a33c6a64e0a97fc25ffd1ba74cd",
+    "guiStarted": false,
+    "productionKeysAuthorized": false,
+    "broadcasts": 0
+  },
+  "capture": {
+    "collectorPid": 96558,
+    "supervisorPid": 10657,
+    "activePart": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-08/microstructure-20261008T075443Z-usd_m_futures/events-00002.jsonl.gz.part",
+    "observedAt": "2026-10-08T08:04:19.808060+00:00",
+    "bytesBefore": 10375846,
+    "bytesAfter": 10891195,
+    "growth": 515349,
+    "readOnlyMetadataObservation": true,
+    "captureSignalsSent": 0,
+    "researchProcessed": false
+  },
+  "gates": {
+    "contract": true,
+    "threading": true,
+    "defaultSafety": true,
+    "visual": true,
+    "auth": true,
+    "sensitiveDataBoundary": true,
+    "syntheticCleanup": true,
+    "captureUnchanged": true
+  },
+  "limits": {
+    "syntheticOnly": true,
+    "runtimeDefaultCompositionTested": true,
+    "packagedDefaultMainLaunched": false,
+    "sameUidWritableInstallationRemainsKnownLimit": true,
+    "combinedLocalTreeWithExcludedPreexistingChanges": true
+  },
+  "realUserKeysAuthorized": false,
+  "realTxEnabled": false,
+  "broadcasts": 0,
+  "realFunds": 0,
+  "realUserWallets": 0,
+  "researchProcessed": false,
+  "push": false,
+  "nextStageStarted": false
+}

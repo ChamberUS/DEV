@@ -129,6 +129,7 @@ public final class ServiceInstance implements AutoCloseable {
     private final byx.service.chain.ChainConnector chain;
 
     private final byx.service.tx.TxIpc txIpc;
+    private final byx.service.wallet.WalletIpc walletIpc;
 
     /** Leitura SOMENTE de status da chain para as transações (id + geração + vivo). Fica aqui porque só este arquivo e o ServiceMain podem tocar o conector. */
     public static byx.service.tx.TxPorts.TxChain txChain(byx.service.chain.ChainConnector connector) {
@@ -140,9 +141,10 @@ public final class ServiceInstance implements AutoCloseable {
     }
 
     private ServiceInstance(RuntimeDir dir, byte[] secret, ServerSocketChannel server, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc,
-            PeerKeys.Provider peerKeys, byx.service.chain.ChainConnector chain, byx.service.tx.TxIpc txIpc) {
+            PeerKeys.Provider peerKeys, byx.service.chain.ChainConnector chain, byx.service.tx.TxIpc txIpc, byx.service.wallet.WalletIpc walletIpc) {
         this.chain = chain;
         this.txIpc = txIpc;
+        this.walletIpc = walletIpc;
         this.authIpc = authIpc;
         this.peerKeys = peerKeys;
         this.market = market;
@@ -203,6 +205,12 @@ public final class ServiceInstance implements AutoCloseable {
      */
     public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys,
             byx.service.chain.ChainConnector chain, byx.service.tx.TxIpc txIpc) throws IOException {
+        return start(home, limits, market, identity, authIpc, peerKeys, chain, txIpc, byx.service.wallet.WalletIpc.disabled());
+    }
+
+    /** Explicit injected wallet capability; only the separate synthetic QA composition enables it. */
+    public static ServiceInstance start(Path home, Limits limits, MarketFeed market, IdentityPolicy identity, AuthIpc authIpc, PeerKeys.Provider peerKeys,
+            byx.service.chain.ChainConnector chain, byx.service.tx.TxIpc txIpc, byx.service.wallet.WalletIpc walletIpc) throws IOException {
         RuntimeDir dir = RuntimeDir.prepare(home);
         dir.removeStaleSocket();
         byte[] secret = dir.writeFreshToken();
@@ -215,7 +223,7 @@ public final class ServiceInstance implements AutoCloseable {
             dir.cleanup();
             throw e;
         }
-        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys, chain, txIpc);
+        ServiceInstance s = new ServiceInstance(dir, secret, ch, limits, market, identity, authIpc, peerKeys, chain, txIpc, walletIpc);
         s.acceptor.start();
         s.watchdog.scheduleWithFixedDelay(s::enforceDeadlines, 100, 100, TimeUnit.MILLISECONDS);
         Log.event("started", "protocol=" + Protocol.VERSION + " identity=" + identity.mode().wire);
@@ -389,7 +397,7 @@ public final class ServiceInstance implements AutoCloseable {
                         throw new com.fasterxml.jackson.databind.JsonMappingException(null, "not a request");
                     }
                     // auth.* tem DTOs tipados por operação (AuthIpc valida o conjunto fechado de campos); o resto segue o Request estrito
-                    req = AuthIpc.handles(tree.path("op").asText()) || ChainReadIpc.handles(tree.path("op").asText()) || byx.service.tx.TxIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
+                    req = AuthIpc.handles(tree.path("op").asText()) || ChainReadIpc.handles(tree.path("op").asText()) || byx.service.tx.TxIpc.handles(tree.path("op").asText()) || byx.service.wallet.WalletIpc.handles(tree.path("op").asText()) ? new Protocol.Request(tree.path("v").asInt(-1), tree.path("id").asText(null), tree.path("op").asText())
                             : mapper.treeToValue(tree, Protocol.Request.class);
                 } catch (JsonProcessingException e) {
                     send(c, error("bad_request"));
@@ -399,12 +407,17 @@ public final class ServiceInstance implements AutoCloseable {
                     send(c, error("bad_request"));
                     return;
                 }
+                // Wallet lifecycle may include durable writes plus several verified one-shot helper exchanges.
+                // This bounds application processing only; helper quiescence is never inferred from this deadline.
+                if (byx.service.wallet.WalletIpc.handles(req.op())) c.within(20_000);
                 ObjectNode resp = mapper.createObjectNode();
                 resp.put("v", Protocol.VERSION);
                 resp.put("id", req.id());
                 if (AuthIpc.handles(req.op()) && authIpc != null) {
                     AuthIpc.Reply r = authIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree);
                     AuthIpc.write(r, resp);
+                } else if (byx.service.wallet.WalletIpc.handles(req.op())) {
+                    walletIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree, resp);
                 } else if (byx.service.tx.TxIpc.handles(req.op())) {
                     // transações: superfície tipada e fechada; desligada em produção (TX_DISABLED antes de qualquer validação)
                     txIpc.handle(peerKeys == null ? PeerKeys.NONE : peerKeys.keyOf(c.channel), req.op(), tree, resp);

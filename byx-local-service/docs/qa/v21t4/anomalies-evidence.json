@@ -1,0 +1,192 @@
+{
+  "cases": [
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "create: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "orphan-metadata: Needs attention",
+      "pass": true
+    },
+    {
+      "case": "orphan-metadata: all mutations denied",
+      "pass": true
+    },
+    {
+      "case": "orphan-metadata: identity never repaired by UI",
+      "pass": true
+    },
+    {
+      "case": "denySign: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "orphan-metadata: buggy UI sign denied",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "orphan-metadata: quarantine survives restart",
+      "pass": true
+    },
+    {
+      "case": "orphan-metadata: exact teardown",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "create: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "key-mismatch: Needs attention",
+      "pass": true
+    },
+    {
+      "case": "key-mismatch: all mutations denied",
+      "pass": true
+    },
+    {
+      "case": "key-mismatch: identity never repaired by UI",
+      "pass": true
+    },
+    {
+      "case": "denySign: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "key-mismatch: buggy UI sign denied",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "key-mismatch: quarantine survives restart",
+      "pass": true
+    },
+    {
+      "case": "key-mismatch: exact teardown",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "create: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "orphan-key: Needs attention",
+      "pass": true
+    },
+    {
+      "case": "orphan-key: all mutations denied",
+      "pass": true
+    },
+    {
+      "case": "orphan-key: identity never repaired by UI",
+      "pass": true
+    },
+    {
+      "case": "denySign: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "orphan-key: buggy UI sign denied",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "status: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "orphan-key: quarantine survives restart",
+      "pass": true
+    },
+    {
+      "case": "orphan-key: exact teardown",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "create: public DTO only",
+      "pass": true
+    },
+    {
+      "case": "Service startup reconciles before exposure",
+      "pass": true
+    },
+    {
+      "case": "Corrupt metadata: authenticated gateway is fail closed and UI needs attention",
+      "pass": true
+    },
+    {
+      "case": "corrupt-metadata: exact teardown",
+      "pass": true
+    }
+  ],
+  "passed": 44,
+  "failed": 0,
+  "skipped": 0,
+  "fixtureRoots": [
+    "/private/tmp/byx-wallet-qa-593ecdsd",
+    "/private/tmp/byx-wallet-qa-lv9pr8zn",
+    "/private/tmp/byx-wallet-qa-vvjghtdg",
+    "/private/tmp/byx-wallet-qa-p4k_i6id"
+  ],
+  "broadcasts": 0,
+  "realKeys": 0,
+  "realWallets": 0
+}

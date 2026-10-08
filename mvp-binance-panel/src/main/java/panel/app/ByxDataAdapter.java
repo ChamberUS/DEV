@@ -26,6 +26,8 @@ final class ByxDataAdapter implements ByxData {
 
     @Override public boolean sessionActive() { return ctx.sessions.user().isPresent(); }
 
+    @Override public panel.wallet.WalletGateway walletLifecycleGateway() { return new panel.wallet.WalletGateway(ctx.authority); }
+
     @Override public boolean admin() { return ctx.adminAccess.hasValidAdminSession(); }
 
     @Override

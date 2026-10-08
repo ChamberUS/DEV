@@ -66,16 +66,21 @@ public final class AuthorityClient implements AuthorityGateway, AutoCloseable {
                 } catch (IOException ignored) {
                     // o prazo estourou: a leitura abaixo falha
                 }
-            }, CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }, op.startsWith("wallet.") ? 15_000 : CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             ObjectNode n = JSON.createObjectNode();
             n.put("v", 1);
             n.put("id", "c" + (++seq));
             n.put("op", op);
+            if (op.startsWith("wallet.")) n.put("walletSchema", 1);
             for (int i = 0; i < fields.length; i += 2) {
                 n.put(fields[i], fields[i + 1]);
             }
             LocalServiceClient.send(out, JSON.writeValueAsString(n));
             JsonNode r = LocalServiceClient.read(in, LocalServiceClient.MAX_FRAME);
+            if (op.startsWith("wallet.") && (!r.path("v").isIntegralNumber() || r.path("v").intValue() != 1
+                    || !n.path("id").equals(r.path("id")) || !r.path("ok").isBoolean())) {
+                closeQuietly(); return new Reply(false, "SERVICE_VERSION_INCOMPATIBLE", null);
+            }
             if (r.path("ok").asBoolean(false)) {
                 return new Reply(true, "OK", r.path("result"));
             }
@@ -239,6 +244,30 @@ public final class AuthorityClient implements AuthorityGateway, AutoCloseable {
     @Override
     public Reply txCancel(String operation) {
         return sessionCall("tx.cancel", "operation", operation);
+    }
+
+    /** Wallet I/O has its own paired channel so it never holds the login/logout client's monitor. */
+    private Reply walletCall(String op, String... fields) {
+        String snapshot;
+        synchronized (this) { snapshot = token; }
+        if (snapshot == null) return needToken();
+        try (AuthorityClient isolated = new AuthorityClient(client)) {
+            isolated.token = snapshot;
+            return isolated.sessionCall(op, fields);
+        }
+    }
+
+    @Override public Reply walletList() { return walletCall("wallet.list"); }
+    @Override public Reply walletCreate(String key, boolean acknowledged) {
+        return walletCall("wallet.createSynthetic", "idempotencyKey", key, "lossAcknowledged", Boolean.toString(acknowledged));
+    }
+    @Override public Reply walletDelete(String wallet, long version, String key, boolean acknowledged) {
+        return walletCall("wallet.deleteSynthetic", "walletId", wallet, "expectedVersion", Long.toString(version),
+                "idempotencyKey", key, "lossAcknowledged", Boolean.toString(acknowledged));
+    }
+    @Override public Reply walletSyntheticSign(String wallet, long version, String key, boolean confirmed) {
+        return walletCall("wallet.signSynthetic", "walletId", wallet, "expectedVersion", Long.toString(version),
+                "idempotencyKey", key, "confirmed", Boolean.toString(confirmed));
     }
 
     @Override

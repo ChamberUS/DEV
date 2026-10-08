@@ -1,0 +1,12 @@
+{
+  "collectorPid": 96558,
+  "supervisorPid": 10657,
+  "activePart": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-08/microstructure-20261008T075443Z-usd_m_futures/events-00002.jsonl.gz.part",
+  "observedAt": "2026-10-08T08:04:19.808060+00:00",
+  "bytesBefore": 10375846,
+  "bytesAfter": 10891195,
+  "growth": 515349,
+  "readOnlyMetadataObservation": true,
+  "captureSignalsSent": 0,
+  "researchProcessed": false
+}

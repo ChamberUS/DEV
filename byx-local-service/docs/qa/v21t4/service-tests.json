@@ -1,0 +1,315 @@
+{
+  "passed": 469,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "byx.service.ChainIpcTest",
+      "tests": "5",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.ChainReadIpcTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.PrivateCapabilityDecompositionTest",
+      "tests": "15",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.PrivateCapabilityGateTest",
+      "tests": "6",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.ServiceIdentityTest",
+      "tests": "8",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.ServiceMarketIpcTest",
+      "tests": "11",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.ServiceSecretIsolationTest",
+      "tests": "2",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.ServiceSecurityTest",
+      "tests": "13",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.AuthCutoverTest",
+      "tests": "19",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.AuthIpcTest",
+      "tests": "8",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.AuthIsolationTest",
+      "tests": "10",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.AuthServiceTest",
+      "tests": "23",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.AuthorityStoreTest",
+      "tests": "22",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.ChainAuthIndependenceTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.LoginAuthorityMutationTest",
+      "tests": "2",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.PrivateOperationAuthTest",
+      "tests": "5",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.RealSecondFactorTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.TxSessionsAdapterTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.auth.WalletAuthorityTest",
+      "tests": "7",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.chain.ChainConnectorTest",
+      "tests": "19",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.chain.ChainReaderTest",
+      "tests": "26",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.identity.PeerIdentityTest",
+      "tests": "7",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.market.AllowlistTest",
+      "tests": "10",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.market.DepthBookTest",
+      "tests": "7",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.market.MarketDiagnosticsTest",
+      "tests": "12",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.market.MarketEventsTest",
+      "tests": "9",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.market.MarketFeedTest",
+      "tests": "26",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.market.NoMarketBypassGuardTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.migration.FinalizePreflightTest",
+      "tests": "2",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.migration.LegacyFixtureGuardAndCostTest",
+      "tests": "3",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.migration.LegacyPasswordCompatibilityTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.migration.MigratorTest",
+      "tests": "19",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.secrets.SecretStoreTest",
+      "tests": "14",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.signer.CustodyAuthorityTest",
+      "tests": "20",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.signer.CustodyGuardTest",
+      "tests": "4",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.signer.CustodyReplyParserTest",
+      "tests": "2",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.signer.SignerClientTest",
+      "tests": "24",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.signer.WalletEndpointTest",
+      "tests": "11",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.signer.WalletLifecycleTest",
+      "tests": "20",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.tx.SyntheticSigningVectorTest",
+      "tests": "1",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.tx.TxFeeAndValuesTest",
+      "tests": "9",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.tx.TxIpcTest",
+      "tests": "6",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.tx.TxNoBypassGuardTest",
+      "tests": "6",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "byx.service.tx.TxServiceTest",
+      "tests": "32",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    }
+  ]
+}

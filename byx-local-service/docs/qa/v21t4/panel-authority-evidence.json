@@ -1,0 +1,7 @@
+{
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0,
+  "expected": "CALLER_UNTRUSTED; no authority lease acquired",
+  "output": "qa.role.selfTeam=W5Z65G9UP2\nfencing.result=CALLER_UNTRUSTED\n"
+}
