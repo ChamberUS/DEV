@@ -20,6 +20,7 @@ final class MacSecurity {
     static final int SOL_LOCAL = 0;
     static final int LOCAL_PEERTOKEN = 0x006;
     static final int CF_UTF8 = 0x08000100;
+    static final int ERR_SEC_CS_UNSIGNED = -67062;
     static final int SEC_CS_SIGNING_INFORMATION = 1 << 1;
     static final int SEC_CS_CHECK_NESTED_CODE = 1 << 3;
     static final int SEC_CS_STRICT_VALIDATE = 1 << 4;
@@ -42,6 +43,10 @@ final class MacSecurity {
 
         Pointer CFDictionaryGetValue(Pointer dict, Pointer key);
 
+        Pointer CFURLCreateWithFileSystemPath(Pointer alloc, Pointer path, long pathStyle, byte isDirectory);
+
+        byte CFURLGetFileSystemRepresentation(Pointer url, byte resolveAgainstBase, byte[] buffer, long maxBufLen);
+
         byte CFStringGetCString(Pointer s, byte[] buffer, long size, int encoding);
 
         void CFRelease(Pointer p);
@@ -61,6 +66,10 @@ final class MacSecurity {
         int SecStaticCodeCheckValidityWithErrors(Pointer staticCode, int flags, Pointer requirement, PointerByReference errors);
 
         int SecCodeCopySigningInformation(Pointer code, int flags, PointerByReference information);
+
+        int SecStaticCodeCreateWithPath(Pointer url, int flags, PointerByReference staticCode);
+
+        int SecCodeCopyPath(Pointer staticCode, int flags, PointerByReference url);
     }
 
     private static final String SEC_PATH = "/System/Library/Frameworks/Security.framework/Security";
@@ -152,6 +161,11 @@ final class MacSecurity {
     enum Check { OK, NO_GUEST, BAD_REQUIREMENT, REQUIREMENT_FAILED, BUNDLE_MODIFIED }
 
     Check checkPeer(byte[] token, String requirement, boolean sealedBundle) {
+        return checkPeer(token, requirement, sealedBundle, null);
+    }
+
+    /** Igual a {@link #checkPeer(byte[], String, boolean)}; se {@code pathOut} != null recebe o caminho do código do guest (bundle) quando a checagem passa. */
+    Check checkPeer(byte[] token, String requirement, boolean sealedBundle, String[] pathOut) {
         Pointer data = cf.CFDataCreate(null, token, token.length);
         Pointer attrs = cf.CFDictionaryCreate(null, new Pointer[] {auditKey}, new Pointer[] {data}, 1, keyCallbacks, valueCallbacks);
         PointerByReference guest = new PointerByReference();
@@ -175,6 +189,15 @@ final class MacSecurity {
                     return Check.BUNDLE_MODIFIED;
                 }
             }
+            if (pathOut != null) {
+                if (staticCode.getValue() == null && sec.SecCodeCopyStaticCode(guest.getValue(), 0, staticCode) != 0) {
+                    return Check.BUNDLE_MODIFIED;
+                }
+                pathOut[0] = pathOf(staticCode.getValue());
+                if (pathOut[0] == null) {
+                    return Check.NO_GUEST;
+                }
+            }
             return Check.OK;
         } finally {
             release(staticCode.getValue());
@@ -182,6 +205,58 @@ final class MacSecurity {
             release(guest.getValue());
             release(attrs);
             release(data);
+        }
+    }
+
+    /** Caminho (no disco) do código identificado por um SecStaticCode; null se indisponível. */
+    private String pathOf(Pointer staticCode) {
+        PointerByReference url = new PointerByReference();
+        if (sec.SecCodeCopyPath(staticCode, 0, url) != 0 || url.getValue() == null) {
+            return null;
+        }
+        try {
+            byte[] buf = new byte[4096];
+            if (cf.CFURLGetFileSystemRepresentation(url.getValue(), (byte) 1, buf, buf.length) == 0) {
+                return null;
+            }
+            int n = 0;
+            while (n < buf.length && buf[n] != 0) {
+                n++;
+            }
+            return new String(buf, 0, n, StandardCharsets.UTF_8);
+        } finally {
+            release(url.getValue());
+        }
+    }
+
+    /** Valida o código ESTÁTICO em um caminho (bundle) contra um requisito, com selo estrito e código aninhado. Antes de executar qualquer coisa. */
+    Check checkStaticPath(String path, String requirement) {
+        Pointer ps = cf.CFStringCreateWithCString(null, path, CF_UTF8);
+        Pointer url = ps == null ? null : cf.CFURLCreateWithFileSystemPath(null, ps, 0, (byte) 1);
+        PointerByReference sc = new PointerByReference();
+        Pointer req = null;
+        try {
+            if (url == null || sec.SecStaticCodeCreateWithPath(url, 0, sc) != 0 || sc.getValue() == null) {
+                return Check.NO_GUEST;
+            }
+            req = requirement(requirement);
+            if (req == null) {
+                return Check.BAD_REQUIREMENT;
+            }
+            // two steps, so each defect has its own verdict: (1) is there a valid, sealed signature at all (strict, nested)? (2) does it satisfy the requirement?
+            int seal = sec.SecStaticCodeCheckValidityWithErrors(sc.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, null, null);
+            if (seal == ERR_SEC_CS_UNSIGNED) {
+                return Check.NO_GUEST; // unsigned
+            }
+            if (seal != 0) {
+                return Check.BUNDLE_MODIFIED; // broken seal / modified resources / invalid signature
+            }
+            return sec.SecStaticCodeCheckValidityWithErrors(sc.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, req, null) == 0 ? Check.OK : Check.REQUIREMENT_FAILED;
+        } finally {
+            release(sc.getValue());
+            release(req);
+            release(url);
+            release(ps);
         }
     }
 

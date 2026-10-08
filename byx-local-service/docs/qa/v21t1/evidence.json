@@ -1,0 +1,45 @@
+{
+  "phase": "V2.1T-1",
+  "status": "READY_FOR_WALLET_LIFECYCLE_DESIGN",
+  "realUserKey": "NOT_AUTHORIZED",
+  "realTx": "DISABLED",
+  "provisioning": {
+    "result": "SUCCESS",
+    "team": "W5Z65G9UP2",
+    "appId": "com.buynnex.byx.signer.qa",
+    "applicationIdentifier": "W5Z65G9UP2.com.buynnex.byx.signer.qa",
+    "profileUuid": "695b211c-9dad-4cce-b30f-68b27f99deeb",
+    "expires": "2026-10-15T01:03:43Z",
+    "serviceProfileExpires": "2026-10-13T16:49:55Z",
+    "signedKeychainGroup": "W5Z65G9UP2.com.buynnex.byx.signer.qa.keys",
+    "profileGroupShape": "W5Z65G9UP2.* (Xcode managed wildcard)"
+  },
+  "matrix": {
+    "pass": 65,
+    "fail": 0
+  },
+  "suite": {
+    "service": "409/0/0/0 in one clean run",
+    "goQa": "custody + signer tests PASS"
+  },
+  "default": {
+    "signerHelper": "ABSENT",
+    "chainProfile": "PRODUCTION_DISABLED",
+    "tx": "TX_DISABLED",
+    "signer": "UNAVAILABLE",
+    "transport": "ABSENT",
+    "privateGate": false,
+    "sockets": 0,
+    "verifyCutoverFinal": "30 PASS 0 FAIL",
+    "verifyIdentity": "29 PASS 0 FAIL"
+  },
+  "secretAccess": {
+    "panel": "DENIED -34018",
+    "service": "DENIED -34018",
+    "foreignUnsigned": "DENIED -34018",
+    "sameTeamWrongRole": "DENIED -34018",
+    "signer": "ALLOWED"
+  },
+  "noBroadcast": true,
+  "namespaceItemsRemaining": 0
+}

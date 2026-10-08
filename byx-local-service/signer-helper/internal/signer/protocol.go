@@ -64,6 +64,23 @@ type Response struct {
 type KeyProvider interface {
 	resolve(string) (*secp.PrivateKey, error)
 }
+// ErrKeyNotFound lets a custody provider report a missing item distinctly; every other provider failure stays the generic SIGNING_FAILED.
+var ErrKeyNotFound = errors.New("KEY_NOT_FOUND")
+
+// FuncProvider adapts a function (e.g. a Data Protection Keychain lookup) to KeyProvider without exposing the interface method.
+type FuncProvider func(string) (*secp.PrivateKey, error)
+
+func (f FuncProvider) resolve(ref string) (*secp.PrivateKey, error) { return f(ref) }
+
+// DecodeRequest strictly decodes a V2.1S request (duplicate/unknown/missing/null fields rejected).
+func DecodeRequest(b []byte) (Request, error) { return decode(b) }
+
+// Sign validates the binding, resolves the key through the provider and signs SIGN_MODE_DIRECT; the caller still verifies everything independently.
+func Sign(r Request, p KeyProvider) (Response, error) { return sign(r, p) }
+
+// AddressFor returns the bech32 byx address of a compressed secp256k1 public key.
+func AddressFor(pub []byte) string { return address(pub) }
+
 type UnavailableProvider struct{}
 
 func (UnavailableProvider) resolve(string) (*secp.PrivateKey, error) { return nil, denied }
@@ -157,6 +174,9 @@ func sign(r Request, p KeyProvider) (Response, error) {
 		return Response{}, denied
 	}
 	key, err := p.resolve(r.KeyReference)
+	if errors.Is(err, ErrKeyNotFound) {
+		return Response{}, ErrKeyNotFound
+	}
 	if err != nil || key == nil {
 		return Response{}, denied
 	}

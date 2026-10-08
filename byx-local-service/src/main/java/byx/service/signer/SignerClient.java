@@ -90,6 +90,11 @@ public final class SignerClient {
         try (var parser = json.getFactory().createParser(response)) {
             root = json.readTree(parser); if (parser.nextToken() != null) throw new IOException("SIGNING_FAILED");
         }
+        return verifySigned(root, request, material, publicKey);
+    }
+
+    /** Independent verification of a V2.1S response (shared by the stdio client and the custody client): every binding, low-S signature, TxRaw and tx hash. */
+    static SignedTx verifySigned(JsonNode root, TxSignRequest request, CosmosBankSend.Material material, byte[] publicKey) throws IOException {
         if (root == null || !root.isObject() || root.size() != RESPONSE.size()) throw new IOException("SIGNING_FAILED");
         var names = root.fieldNames(); while (names.hasNext()) if (!RESPONSE.contains(names.next())) throw new IOException("SIGNING_FAILED");
         if (!root.get("protocolVersion").isIntegralNumber() || !root.get("protocolVersion").canConvertToInt() || root.get("protocolVersion").intValue() != 1) throw new IOException("SIGNING_FAILED");
