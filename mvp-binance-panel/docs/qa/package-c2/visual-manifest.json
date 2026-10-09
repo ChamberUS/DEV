@@ -1,0 +1,2940 @@
+{
+  "source": "actual JavaFX native Scene snapshots, no HTML",
+  "count": 418,
+  "fileCount": 419,
+  "images": [
+    {
+      "path": "native-visual-release/dark-en-account-menu-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ca1c0b4ab4c8305a76a93910db1825b687570e4d223d47dfaab61eac79942f85",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-account-menu-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "3aed52f7353171e9f1cd82e05339837f0f81f028b417410a68083a025cafd4a5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-account-menu-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "be70561c86721c6e6e4cff096763e3026527a7ab5a2a70d666b9c623c8f09197",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-appearance-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "1029f0e7546dc454a1fe1f206aaeeb7888d99250aa0b588556cef336a8f4098a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-appearance-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "0ead87e2bbc9818a49f9c5cba5751c97461f6ed2bdcf79e4b53c0072528f0639",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-appearance-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c6214c102a944955077f4215060527a9a8db7acf95a43c997f8ffd2fb5e3fd06",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-login-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "51f8d4b761b1afdd436407afaa00849381d6632cca0bd1dae989add402d81101",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-login-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "0fe7b6f06115322407245ebc63e85765886bed4e82fb5d9eb74b48d49b337e01",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-login-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "f6d8ec70ee874f8549aeca06b09218a9bab7645c4152aad7a6c0721fda6336ed",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-modal-switched-from-PT_BR-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "cf6a61f53db39baa6539613e7b54908fc341670c0edd1e697d2277552419fd28",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-modal-switched-from-PT_BR-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7d94eff709cf12a5b573b5784afc41e476ac6cc062f8a210e8251aa94218a49f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-modal-switched-from-PT_BR-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "55718f7ce6f466f8f3ee9a7c5abb8d812b1763531ce4cb90640e51a16de354ed",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-notifications-popover-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "cf8a16200ad1a3640efa649d152574a93bff9774fdd9ca923d2be7eedac277af",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-notifications-popover-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ba3ccb70d33f53d035387bf90dd3f9bd5cc5038993ba6c98329a0f0eefdb21b3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-notifications-popover-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "a901f7ad19a2b495e125eea8a50ef154a8670025e76c7dd53723a5cc5186713d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-onboarding-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "24abc3e4e77ba747478b8a4a942e4f8fff8bbeae7f8156e928b7b132b4741864",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-onboarding-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "71bbd0451ad555a0d8a8819f330b954d53b71fa4d32dfd895622bde7eba04ba0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-onboarding-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "d924d6d12770b1dd6d509b1a7554edd18d7569f1398f125d2755eebfd0252f34",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-palette-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "77dfcb059ec6ecc65c0d4cf824165f4de4853a4fe7714dce9ca3007edde51e17",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-palette-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "be336c92173445c9da2c2d540a0fa7866c6ca008ba65bbca241a961ef604e0e5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-palette-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "6dc605add658d9a2317961b5de0435bdeea0fd0adfa5da9200f244bd4ce9e5d1",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-capture-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "a9c30d72cf24478acd4a94103ff5fd85796785b34df0a3e28c98aab8e626a551",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-capture-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "5c3d6e33181948fa3a2bca44af4a1458b7bcfcd0c91eebebe0608653eead4bc3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-capture-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "8d898efe11a665fe5bbfd1b022f2bd3e267a942c38772854ca1fc1f1fc2a39e3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-logs-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "87b04d8b062e12ef68644499f9cc769abfca38cd23819cdf20f24863c67eacfd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-logs-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b79a15a3469f31ea51cdea87d77146e3d4d66c0fbeb65f76bcc4e1ee69562591",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-logs-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "cec6dcf254185427d5ad3a8abdf49fc82c9468663e6549e946e00cc3cd88eff2",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-overview-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "1c10b402063eae6c1493d54d097b6e30bcb4cc8fe12946c27689695f987f9fb4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-overview-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "0f680223768bf4ff920bdf6a4d915fea9399751eb3660770cb52a35aa7bf2e04",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-overview-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "ade58ee32fe708057bc7b2bbbe8f7e3bd99fcd131ed71366fe3b1445bfedd11e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ae7a1088a6a9f682b0f74b1a07872c12f964b3df914cbe209501bea44208abda",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "3ac1d775f05a503f7e413ac45f9f39e448e11da9957a6ea594ffd3af5073dbd5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-research-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "6add3713f1f06fa4c9eb3a11c23f551caad94ca18f39999136cad1d87d31c876",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-byx-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d5f4f9322a34cafe7f5aee18f63f0273b65839350d7ca40695089ec08b6e8525",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-byx-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "18896a94f8ea41824f32019219514d6e2c69953905de1ec084183269e6ff03b8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-byx-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "fce5522958c75c4035f114ec6d586ed8df4a27830bacbfd0db30c34231276077",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-chain-data-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c3ebf35f3100ee610312d22581bdb5d7ba590da3c1ca625ca5442e2c5d0333f8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-chain-data-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "5beb2df147ac4fef142d053395aa88b20d33fcd0be9231a69c5de0b2287267af",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-chain-data-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "37e58513a61ed85a44e06530f919cc30ba4f79876de0ddaefed5415b3bdd45a8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-desk-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "f1e46e1e5fd1acacc28d7705a61c80b7f6d09b83e016e9b615691cbc04463810",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-desk-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "53d595bd59c17c529c9d126d8bc67aecad6d517b6af896696ceefbdf2199414f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-desk-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "41f4267bae358643f4718c81f8063058367319d34e763258f5e24d3db1b1c7ac",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-home-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "88356828881bebad7521c7db543bf87eb270e5681972a011a2c5e6db601f6c0a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-home-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ee9c387e5327ace647ba98e4dc63cf6a16c1e484a58916fb65b552f8d37abe4f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-home-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "032594b84f45a9367e5bfca91aee8287186f523ebe1d3dfb3806820709e75875",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-markets-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4a47ed6e1186c5d5687029675894adba7c74def39e16218d2fb3baff7776d620",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-markets-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ec55112b2ce91f01ae8e36dec085cf38bc9273f53da9fd0eee2c7b0be91c3c1f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-markets-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b4358ed083130a1c7ea281dd8c588d6f5a8b434b642c89a7e14a04e18eb918ae",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-profile-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "f872181fd403c5dc41b68969157c1a6632fa8e67905695da4526b148715cb994",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-profile-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "f18fbd0cd2b4717755e3af44371c2e2078cd12322c4a73b257317ed925a3dabe",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-profile-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "2d5888922471d16b8d899d6a871ac38d8d6903fa985cc6fb979533fe45ce6a93",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "30bdbbbc6d66780bf934e06b713299d4810579370f98a79861a5c49de7b37fe7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "e86b4bc2810674607f9ea4684a39b3d9b3c0c23e353ecfdbd10ce9b3098576c5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "8bb8810b22db78a304ad21616254dbc39bdd58d6cfa8bac92dd37b486593d84e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-wallet-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "0fee78925c096efa7fd23f8b4940645e8f7566a11d892b65bded766a346ff8fa",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-wallet-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "31df1d9db39d83d4764493225168f85d645179203907e43ff3b649ab66b164d4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-en-t-wallet-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "bb467372bce32aef5a66a40cb42c53f18da7fe601be34d460de867c85a62abc0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-account-menu-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "9a64303deb8e77070c5c5e6247d623ec0a95acbb9fff85829297d0906bc430f3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-account-menu-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "802f694c8561c52ae437f964bcd95ffe903e4994884053fbb8046b50a3bb7f23",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-account-menu-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "0c131005261e8b87b17daf51f8c0fb03ad27b276189fb28cc8649924a1799d2d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-appearance-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "408272e905a7be2f3f5874e37d3ac780c8f27ac97644a93412a735fd0b2311b7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-appearance-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7cd237e428ce14ccdf8908ba541b34940d20e9754a16e9f92785a3a7023224a6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-appearance-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "987f164fab220bb8c25717cf3dbc3ccdd156e685514c0fdf4e99d7f43b71b22b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-login-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d812c4f541ccbc83943be8c05c4cc8dce3ec81f389d7a53aca359569b5b43442",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-login-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "9334c29812f52b99ee1e9de52b3537b265f125d916ecbf789608cf242fcbcec7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-login-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "a22e92328157d5c5114fe406e26ca20adb5730f070233dd39356176a0497cb3e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-modal-switched-from-EN-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "f8c5c5c9df1c9294dc91a1d71e554493fc21501262b089b6f489a231a933157d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-modal-switched-from-EN-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "00c8c557a9036b32980d6ae69a778da0001a33c1a304a143d3fa91888567af16",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-modal-switched-from-EN-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "2262c15c9ac8e77e6bede385f712cb322963c87c10eccb86990582d11833e593",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-notifications-popover-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "b2ca9561e94f0359810d4866518475f6c344f6b6d60283bc95626d7236c8053d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-notifications-popover-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "09c6988ad629297cb5ef57fea845375e42e262ad90d7aafa74f25ea3732d6e1b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-notifications-popover-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "4199126d8ae8f6dc683504f478cc98e92a60f430132eb40a56487270c6c203f4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-onboarding-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "8bfe46f4446bb32e4d9c24aa0b7419ce10c955dc40a64c76d87368026e9174cc",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-onboarding-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "a01f2a773553805d4f2acfe5e1cc1af086f0c00316e42b4b9ddb3375e194affc",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-onboarding-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "11d9bbf86dc676391856829b7665192730a0411eafc0aec85213ee5997c7de0d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-palette-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "de98c2676cefeae606b1f5eb6f98a935e6ffaec1616d0367176cf7cc2f4ff0de",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-palette-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "2c6e914e54b57207bc3754777a224e25f721af503c90488583fbc49c8eaec4b3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-palette-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "f91cd76cc89f9ca5489854294233d547551e94871d2768ac1682bbca1c34b58c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-capture-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "cbdbfc390f1e57ccb666dd8da6e675a839113b7797d851edb1d0a7aedf6decc4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-capture-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "0cebab3967756ca79a87c854bd88c1ad63fa9db7fd07f3a9c6614718b6eac13a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-capture-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "35b47878e7804b5d4282ac0fc5230cad9103f4830442c357ef547efefb289816",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-gate-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "9fd3543a6abb2c6ab445d4fb6186802c97843d4e0ffafa7914a47f04f7eb2f1b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-gate-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "032bd191b9fa74becb28b8a626b9aceb0a1fb6d961106964af4db4f857aae0ce",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-gate-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "961ee11e5f7137e8c2a5611f19d0d7156a0df694ff8b7935d5454375c818d71f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-logs-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "e79101903ac6340e384f442582d9bc88a7d222bf9dc325e54a4b590af74adfd6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-logs-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "272bb78789f2ad6e8edc4a20a442bfb1a27d4ddef0df814981d3a85891fdd672",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-logs-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "08e5fa027166caf1d09e6fb85ce3e30f1f4005c881165d46e4c928a3510dc39b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-overview-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "096b9e2dbbc72a5bdb69f9338f8f1b3bccbc50ddbb5b6da138fc133fb04b552d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-overview-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "467b8f3d6de7293a43e60ce0549e4a43058ec3b933f17a03dcb761004b9611cb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-overview-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "ba0fc0187a944dcd6303d65f67a64a20ea035fc263cd1049f3692c689a83a1f4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4880ea58bca23fde225d20d75864b7c9204306247df00dd196d86ab91d6d4284",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b65fb33100ec51f1f3e83b5f7763f4337b89993dbdf2ed03b81418bd62bbb097",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-research-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "de5dcd76ea34a464010d902ce5519c932707dc34c763a0830f44e35cbe02a5b4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-byx-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "747760e33e6b05489c1947b2abe9f6eff4e2b3e47d3aafc72ed85c85d485c460",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-byx-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "8b0d14ac3a3d2563b34aaaa76ef0cc3db28b7c66cd6cc12353d3105d094f9ad0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-byx-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "bdbe52e859c7048835b3ad201f2381db624ccc3d7b0fa6e67cb68f2180dae407",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-chain-data-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "b31dd8129c68da8edd1594e6d150d0dcaeca1bb2c3acb6ea8953152fc5e15371",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-chain-data-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b2bebd828287be2af9114b627acca42e82cf1f15cc762431547f20fc3136723f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-chain-data-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "6e41189c0ad9848048c4ce27d10804cd92d584db6a1f5f52dac2caf3024f7ae0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-desk-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "5deea0feea92c2d8c514f0240e2d1482310beb427aa2ee41d666040767c26615",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-desk-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b0af9a1741ec188be6d3759357ab09f787324f0437a1bbae7f4722aa7d8d6e79",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-desk-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "39861b402c72d7192abee93539a4aba699df309341aa04a3c9a46d297a2f921d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-home-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "9e123f6443142438013c302c6ba33f9f50f09425c2a4dc62d22c765d3a3e827f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-home-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "6182faa2a8c13f757a4c1adbf034444e19c5efbbf40a6320eca32c0a4966c1e8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-home-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b5106bb01d8743cf578e368cdc73a4df7714d165a5555fe169a78c629e2a9f04",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-markets-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "e1659141943ba3fc0385a6286b44a3f9167f7e1fa1c55262df8cc6cc91f83bbf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-markets-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "e6c3651ce49c44bad61b80c40bbd9610655c7e881894186387b4f3cd63c1eec5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-markets-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "ffdd9e9768edfd587ce2e27d18e82e376aaeb1e1fcc40957440bdc94200beaf4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-profile-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ebb42f5ab52d59ae742fb7d96bc739d44bc2ef0c3dbf0218bd3a12dbf573e74d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-profile-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "6d857aa15771e53ac5a3a98563ec38ce175840ba9f2d1da28e3c33a36b30c27a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-profile-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b5267f77dabbc3a070eaa7746e6dd9126f25196715582dbfd213b5821e8cfac0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "849eb559b8ed41056264cbfdebd2f7681f25e6e49b5bced76c67dd561c670a64",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "6be4970e31fc8e1f4c29d1b97eee46589070138f2ae5739fe8b490e2e55fd551",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "e999b4962ab9ea125bf965e7304a501a4c2614dc75b822e404d30980c4e5d825",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-wallet-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "72efd08ed7ebfe38dcf823acd7648ecf5f288455201244eb612d8707dea4c41f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-wallet-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "31864e4d3136a52cd27837528c5db9d50b4361c33227fa91b93f7c5ab84016a7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/dark-pt-BR-t-wallet-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "2ca4d791fbde1ebb5d904157df36066b63384fa11cba706f75c7cd66480dcef4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-account-menu-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d45363f53b9fd697934421ac7055b959898070c018bf09f3049444e5d48d4dc5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-account-menu-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "05bd7bad9845ba9134ec54449e3cdc1d93bac91032cd0fd873d599c20497cd51",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-account-menu-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "9398aacb89aded799663eb0943dc7ace171d76351a6ad19fc4856052c76c4a7e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-appearance-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "53e052720ea2da46879e8458e264000517275058cc4a262705afcba7f4a4fe1f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-appearance-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "2d481a5dbf20b9d39279f729b396bec05feae743befed2327704864cc78dc56f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-appearance-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "563da2efc089c0b04b90670ca083c5e6e4a9cb87ac62ebf93b9e0e6f25cc23f2",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-login-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "52fd8166d8114249afbaa2a37b651e8848f4e87318f059111e58637f72d857d4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-login-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "1b0bb0596a925b75f310afa8e09809c69606935d9184599dde067c03e4b5ebda",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-login-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "64267caa70ed937c1cec83552ba8848ed6292e729d9ddd595c982ef640f14615",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-modal-switched-from-PT_BR-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "3cfffcca93c349d391bead02c6e3d22e8c07290406dcc0169c54a364f4ac9738",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-modal-switched-from-PT_BR-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7bea1e2ed02147d0fadcf1faf8558e70b0f9afa4a23ac7b53c96f0f11d79b615",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-modal-switched-from-PT_BR-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b25dea70bc41a6cd6105215e21b12f8a41fb5d99981d81d75eeadb08682f78cd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-notifications-popover-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "dffc1fa41b6bb5d90fe6d17feb57110b226fad590482c53a16d3465cced96caf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-notifications-popover-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ddaf892927c4221b4c4ee13b469ee56826e59d0848f5df72fcd90c430f968dbf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-notifications-popover-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "17cd7ff03386beb9b9217127f0aefed0a3e862dda2705689894a9fb5d27e32bb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-onboarding-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "e60a604fe44b0bba2c3d28e19c06fae267f3fa9c976741328b989d2f7736cdfe",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-onboarding-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "a25bcc70f3160a72a7e41205122266b2b571801946d5edbc9f58cf94630bec09",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-onboarding-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "9c3e3e17d9c5e4b3952d7852a16c712ed4ac540c457af2b04c85df624cf69b1d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-palette-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ed8f79a59f3428e41cbaaba88de08762c5ea8e13021666338df539437b2caff4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-palette-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "41f105777ab74a7bfdeb7e0ab37c7ab4bad183ab9022a1b30d5c3d73e63bee4f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-palette-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "6b6e96c0bf5fb9316e2f4faa5bbf2c8da1392ff913dd6c1816ecf5b76882459f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-capture-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "a7135d236897619d346eb4614dae989e70026484f35582ddf9e0e275420730fa",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-capture-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b5a17f66634463c99778ac5d22d0deeae21b3c62f82210e3ad045f3943eb7d1e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-capture-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "07f8397e54de24edc7802bf6ea4eb01ef090924793f55689b867156ffc08af24",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-logs-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "e06198fd12c195db7a79f05303b8b534138881969038deb2df1ddaee857a91cd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-logs-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c806ab553ef2ba50acc9562198bdd5a6bc1c1b254a59e58d09f6ed9009199ba6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-logs-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "61b60ca1ecd97d08d2b34029cd4e3c89c0eae3129f0a0613cbd4419b8d071a59",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-overview-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "1f4f9f483aca93957270e1d25517e3db9c3b1c4feb2a40f49d7c856450628b3d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-overview-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "e709eec52f0e6e565c928f4fd1ce4da997987074fb214eaaa26fcdc5011767da",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-overview-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b491ba6a148e75ef49a5fb2246c95964da18ffc18f7e7059a6b448a2ef9f4c12",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d0cde89bdf57d2edb7a8111ceb079005a8589381b70078b819d121189cdb36c4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "de77706e2edf9ff3c92547f7a65d150eee441bc8706caa97f496df1fa1c2c2e9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-research-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "f044afc9874955b685cb95ae80f0d0906b75d0d0bb0d46563fe56dfb0557c2e0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-byx-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c8417f9d7932f13249e1fa19324390e00d1dcb1438f2da087db5451c643212e8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-byx-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "e624808eba9a26a7dcbca56ddc2f3942bea3606847799129257b4cb7e86d6719",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-byx-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b33ad92d83e46e2e80d465b3ccc80f9f6a1b9fa3cab00fa0a7ac20a8e4ba5adf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-chain-data-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "89fc627cf88c2530e140a6e38f071922f889e8b3e9a75385ed5d5f4d47f72c96",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-chain-data-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c45f1decf10c731ed428fa8778c44216718ee14200640893434fd82ce496a0ca",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-chain-data-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "305a0a8951b204975707ceaff62a88c1a46cbca4d6cbcd8ee0e7849fbdb5e4b5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-desk-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "0c3596a6135b6dde153a523ef635f08210723bbe5c92f2646c502a2b44b4390c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-desk-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d43b3820d72e754b2c38932b47c4811ecf8f8f69ccdc883dded90a78e2a43520",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-desk-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "21c940e567af6b4bac428aa5a26c8dd569eb6c69ac31dc76e8ddcca6c3ce66c9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-home-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "1e56329c000f36985c84e634832c8163909e8036c151d55805a2723f3aa89dfa",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-home-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ca7520050efa54b713dec4a623cdc5fb5e2c604248ac12220ab0d3fa0acc6bf9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-home-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "585ef17f0353303d1863391e50087a14e85cb73c676a350a17e7d441512e077f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-markets-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c5ef9e45581677e14e31fb0596749e2d658fbd5183087f3b9d7e20e8b723c65d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-markets-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "03fbe933dfe40d07a0c6cc2f96853d02d37b68dabaab5ea0b0f6f5307bd61378",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-markets-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "cb34b629b6133678e6ceb73197e86b0c078f518c6039873a3c63da918fe7a5c4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-profile-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7d7ef36a37fb13d6836bc2cd5a277b6e87b303a3872c0abf51c84c213c9d1395",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-profile-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "5c06dcb1d57460d8123f62f8c32f7ab4e7c775575f9470c9ff0cc47bfae09178",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-profile-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "2505aae8e2ec6e57ab826c57b11e2581adb91f663e60e152aa33b9c732567f72",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7e4c23211713910766e66bad44901435e110680cd11867786c45347bf566f200",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "baee635481bd4fd26054418d5c1f9c026bbed98af49c8acee4364c902d32074b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "9ac4de44181739a9ca0603c7196ecb8c8c4c347653a11b14035976ac889ec23f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-wallet-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "6c54e3d0bc3fcea268f9dcf9a7c1938f29350528523691d300a8949431882e74",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-wallet-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "39f50e868615fc53274efb1f45cc22aa13159a7b731902183988c8baef256160",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-en-t-wallet-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "710220a5eeaeee8dfb9a66c11f774ecfabd057d600105bc9807b31c4435a3074",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-account-menu-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "05ce53494cd3165ab9d2ff6d64dfa0e3467b4f69a94209892576d76c703619d9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-account-menu-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ef73047213bbabea88ae9a9a91fbc741d7c3b1b0c626a05e38a8dcd7364adb9d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-account-menu-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "ff67a0964ccb1d768fe6d9e0be31f3a15c7e6f265df6179894644f64da2f51f0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-appearance-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "f734f2929f8179e2a7f74f082715e4fc8be3166f69e8098c85101b800283d0ff",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-appearance-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "23971f6ea06cb397d80c42e26b16ebcdcea25b8f91300fd2ac6b070dd4066918",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-appearance-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "791f534a43588a4b6deeb0a7ec10c101f34295d3cd3a461bfd0487a9130df2ba",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-login-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "6a1ad9dd5112b6c89e28fc2d9ecd314e55689807f3e9b9354b9e44ac84add86d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-login-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "fb9f9903a6c3c841e5bcaa51b16c2af136aab8a22ced8a7d18fa772a2ca6a3fb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-login-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "3f2ff3682d5e3e369bab84dfae98d237ec415430f21ec18ac39f99d279aaec43",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-modal-switched-from-EN-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ea4fff49f6350d6ae6beb598eed4e444be3a30b39470880ca84e4848ac768b5c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-modal-switched-from-EN-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d18f693c7467cb60749a5801b86587d9285d00034ea92145fc71b4f4125d7316",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-modal-switched-from-EN-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "de04fd237d24104ac8b93b98ee4dc3208a07930a42ff8484bb3858b0b73f6f0e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-notifications-popover-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d9e7ba1bc4ba4b28191fdc5d9d6fe07f9d83d5155057d29a1f1c60f71dafebfa",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-notifications-popover-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7d3b05eea4dcb8c848c311af7e1238b7af7a429a45b6f52e3abc4bdc7f548057",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-notifications-popover-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "087fd1110b42a69730f4182c8657ba9eea2bed4a16459aa738688a529493ff0a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-onboarding-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4254de14a5ba1166f556905ceb0ba780ed2503f07c0943ca0bdbbb9075b5f4c1",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-onboarding-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "8c462d8d7276a67141cd45bd18dda894ee1231f7199ff0f473940eaa2cc88ae7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-onboarding-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "7bf396151fc951aed94013542e2c1ded03e119ea826e0474d83f87852d3dff17",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-palette-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "dfb8b6e7243ae2befa6386190722a4b74174199f50cf86eec6d7cea0625a8af2",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-palette-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "a9814c24e6437b4ecab083c175463d3cf457ae2d6dd9a9dfc1527c73a20ebe68",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-palette-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "009649d9f4762ab0ea26374b31e59ed3df6eb02071d11102e99fac34a62797a0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-capture-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7545f7f976599d5a6969543f4e5b66cc28078cfa6bb4d1b32fdf175577b760d7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-capture-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c434ccf89c0d3d44269b5f2df6beb14e3ae0b4cd56756c12086f1e7b09e75406",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-capture-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "e53d31e96df542030857ad64cc2d676886afbf03a329a322da4d6d77ff3db501",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-gate-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4aee93834864c76656ac9ce4a3a7375b507acd9a1a9fa26966f04c51823434ed",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-gate-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "09e9acb94985c154b65b49b103369892dbfc29dbd80608db0d5d51d5083ab6ea",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-gate-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "2daf6dc0655f0928e9d650737b5ed947b8f5c815ccf68ea083d4f828437bbd95",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-logs-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "06a02ef17c60c607f03419b539e742e116eb382fe362ef6f75c3857a676df694",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-logs-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "69e2dee672b3c5d7fd4d93ce1a6eecc6c19e3fc3fd02600530382f261c3271a8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-logs-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "a0cd30e631d0eb37b9c47fc69f0a583a654163885d8fe43370cf90011c59630d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-overview-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "6cbc97b98d75eb30be9ec81a4b7ba16de1771d5c152628eec7d0e3b2db718c21",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-overview-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "e1605faee01017a60bc403936de8cef132fc901349660c3a5417354396a265a0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-overview-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "fe18168c0bea1e5727406f09c6413c0906fb5c3380bd750fc8666ee249943cfd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4af027e72bf0ce04d2c4235ed05f4dd19e287d0ba0a832539a2bfd12677456c4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "f0b7f821a21f968a89712492ce4a9ef9b79183cd0beffbb496a80414651335c7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-research-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "8edffaec50640b79f1a58e3a5c47430420c9da4caad46c36c2943435019af86c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-byx-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c794b12d6ca38143702e55afaad55165d29c8288722349aaf2f35e2eec98e7ed",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-byx-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "45c121c66c822726b3ae514600cb0229114aede61f89c06908a01db22c426c09",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-byx-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "0c88c064a2fd860ace253ab4b46372f1e6025d3182b843fcf1297ba19698954a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-chain-data-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "66ca9c6a5472479790695a28dd8996f14411779d6dd2ce6b6ecd98db07e70912",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-chain-data-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "fa5c6ee2a2dc02713a658076de886665c75f4fe4872b272acce19da98c7d2765",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-chain-data-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "1a31bade00d1671d42c1adb022b74e54d09f266e081d3de5ae880cc13ae980ee",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-desk-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "a43cc99049d638d7def38a7f3b1baeba142e3cea2470f6f9f1f786a273abb5c3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-desk-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "2a0611f61b5eb63025b8e2f1f9cfac4acde9fe008a630173d09b1b28cd597449",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-desk-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "50fcfb6dad3358b8d575d60a81562a6be4f4a67d24f6079e77f33513b5c5334c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-home-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "508994ecb03ce6f5b2a36a60f7dd89d924b95d0992e2513d52ac4e5a6309bdef",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-home-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "5090af8adc26dc163a619e408afe481008e98045c6b6c490881e43e04365697a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-home-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c888de94323d9cfa7a8d564445d3a56980a4285d45f0261655f11205a92a0bc6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-markets-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "5db47041399e86108e95f43e5e4b762648d359f158c996d3f3619a86cafcb0cb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-markets-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "403373758b48085f4163fc2609f588571607655c0b159a7bf0220e62d8c39e21",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-markets-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "feb9bc18ab025bb791981445d14feb77a321ca1d08de9d5f3e80762c2b1f7b58",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-profile-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ca52c7fc38db85eae0cef0d5c287d8b1bb127e709beadf018e051973fb99bd91",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-profile-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c637369809a65d0f1221be40afba44144c4e994a6b990f505f3591d3b8a5cbd8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-profile-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "103c9e8118db9847fa08e8eacf6b1b70f157ad22bce19b4910f0f55e41c89332",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-settings-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7dba27150b03806917c66e2de4ae18c1527a06c7d631516002d27a8ddd28cbce",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-settings-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "de364bc951a2a3b096efeaa304fe0c7d53d39981f91ef12e684556127bc4bc1d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-settings-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "77ff4fc6aa4e6e6263edbe42b7b62a4f999417fdce8425ba7c42e10102f6710a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-wallet-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "a0d3abd6096bf9830edbe9859c4a7fa13ee1db240baadc8436b44bcf39a64b8a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-wallet-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "35b5788e833298bd9e221e830c889f28db9fcba777ac518c8f3290ed66969a29",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "native-visual-release/light-pt-BR-t-wallet-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "7d8db17b58a68634ab43c9a22cf94c4c13bbad4dba93fec3a28e33118b18a650",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-degraded-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "525254da538674e859b870fd1409b4ceaa222cfe23d51a678ee75062cbbf9eb8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-degraded-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "165570e451e8c7eb9c7595cd8e78d539da3b374102cd28c05da9f2b1d376ea44",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-degraded-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "bc5d80d58af0f38f42f66f696f9f484aaf7e1fc6138bfb17c402b7e148d59bb2",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-disconnected-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7602ef5caf2983a67499c53c87e1e167bfed28444d6cb520f4c1c96039ea18a4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-disconnected-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "aad0d6791347844f91a60649d57572ce074a03d23f21c1f73ed8c407edf72365",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-disconnected-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "454e5c2662fcf1f2d11faedeec416eb3b4394dd2a622bdc0b4c0eb7dd1ca28b7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-error-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4d56ba23913f49cd38ba0848b6891011060d3e0be086ff1af69b850f21d0b3ee",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-error-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "9ebf48ada5230dc655971e135b4d406d37350b767289dc25b78c98a356a7bb15",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-error-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "3011a5cb8830bb0a8d020c01bbe2075e8e5e539e79666dd9554ce5c8499b4595",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-live-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d2cf61fdbd478d2dca178de5f85b08f0f361e28f5923b433fe41929d8287c7c4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-live-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "bd124ecca597f871a30edc04127f40347ee88670a0d0c171f7c57da589e75be3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-live-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "7757045baf8091318d128e672d765b319cd2549f1efc8bdea2bc959b7df6c55e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-stale-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "149542206f7e52755ea0b17422d06252b8c2dc685c7997b11b61feb7397506ec",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-stale-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "faa94354b7a97cca569649a1c74abf9c8c472abc76fe2c0725664c1d3cfc4257",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-stale-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b19b930bbe86e8b1199d1eded080d10603769a83c620eefe101a6b5a41c95c05",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-waiting-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "f9fb6907eaddbbb810039bdc7e1424b8623102635314015c8477d1e4982e763b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-waiting-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ab8965c64773dcbb67ea69bcbd66fa3a72f2c99266c6f3a1050fd890c6630a49",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-en-waiting-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "aa4c7115ba609ee20601066bc8b3ddf6177b921fb1a1377c78522d4fa673a56b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-degraded-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "fc9e71fdb274127dd940793f48f1ca3275137ccd0d60771cee15a0c55947b2e0",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-degraded-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "964eb96347212266aa0f1d78776b2313cf1513d0b584d084986a683d39001218",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-degraded-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "f6a97f81db6c7b3f7de31c25b73e5cab9dee16a7e82cd8e8dcbb35431ac114ea",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-disconnected-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "2e5e831c65f9721bca75cb6dae58beb476654012e23ae16d80da94437679949e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-disconnected-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "48ed2542cb0f22b2826da992d40b6054fae24fa38d7ea6934d03deef616321db",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-disconnected-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "6b079d61d765bde1e48b46f2a9c1982ad4111906db7f0734eb1232c5abf02d29",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-error-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "bcf27eca52c7b584cad203e0ba0a76faff4d5d73833209690d920090be03ca4e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-error-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "fae855842973b60c1089d612bc210f06758eed58b9974b64af3ec9f6725e765e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-error-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "1720640e50653db020d3569160632b5820d6794535d8fcd19c5426edac4f0a42",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-live-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "bdd378c4245736da4f5d00462e09fa2c627ef131289ca78b858aba79f71fd1c5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-live-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "45a5648b9f2bbc75110b8b8576ffbc01808c97a14caa163cfc64b76440027da9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-live-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "160fdcdc4ebef040e5e26326ca1455c5d8a12aeb2fd70f8b17e9f2c6a26cb6cd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-stale-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "e4665df01f9e781e35f79134d39bb8bad3a402d3c613008b659c5562a19f1600",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-stale-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "a53152ed36c7708c5f4834321e42548607065463b9a08a442df1ca4598043a97",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-stale-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "fcfdf9104395f140130afd5833b8bc13e4a8ac74b13722fe58e3177e24b0508d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-waiting-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "cc313e0b1a13b8bf82916a8405e66ea9d41ef292c9a381f86aabb2e324ce8e9c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-waiting-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "f1c1ae4ccfbd1129e14701aa70a5c5006ef187ccbcc5794b10ac0ed7b35f9e00",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/dark-pt-BR-waiting-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c6be7d185fbff241ccf4a8818deb9c8d457270a43486dce0757e8276422c69cf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-degraded-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "6bbfb796b126ac7f8e152141d0ce9c6fef88b709163e69c902ab105581ef3e12",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-degraded-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "f44ee251fb131ede70a848be038d54075c336f9f4d6c514eec2a06e567835790",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-degraded-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "eb55fd41c4419c3af667c3c4a23efcda96962dd175caf50f4565747fab53de0b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-disconnected-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "4b37e12678e46acb4db09377f91482b17fb907a1fda94118a744e86b3566ea27",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-disconnected-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "5b6ed8d8c35783bddf553da91da7ed0d75ee85cca68bc2ef7637f76c37a806dc",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-disconnected-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "65fba35b69ffc9f30604330aef203e6aa07434421812e5f4353fd186294b20ea",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-error-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "48c329aec761f8591f4a02099970cef0b9a6ae3772fc78185c0aa5f60adedef6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-error-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "4726d6b91640cda9703adbbc6ae3252dd06c798ba512db42a97925134b26255b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-error-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "f1009d14b2a57b16dc4a8d076d075ab356718516b60c554d2fd46c577d2c4acd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-live-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "05d3c67b73dc34a1be5798d9b74ad4ea2a367a86896c3d8228887355f59cf38d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-live-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "da0394ea76602c8823d246067f67de698cd92c52250bf729b6c4a7d5098aef03",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-live-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "d8dff861eeb944383eda4cbb9dbd4605c6b19f04ac9d80a8454f68f14cd2ef67",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-stale-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "3bab03d672d09cf8420b801d10dc54a56b3892ac8cd5e0075861d5dc29879c8b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-stale-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "54a6fdd21fef3a8debe98c8ecb432689a4b066d1c2f84f012f4ec29e67cb6dfd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-stale-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "d047d9ffb7993b5cf507c3f32f80fb091fc754f3b9354a9204e1c04b5d2b2235",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-waiting-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "3c27aa071d8308728a10e067026a6d5b7f3c4909fcf2335b3bb60a623442c7c8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-waiting-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "3844b1ba7d3d869c75748bdc8485aa0cfe0e21139f368a5b3d94a95dbe795e87",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-en-waiting-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "05ab77bbbaca822f6fdc3efbd558eb6652fc933f69839ce4fbe4ec04276be0b6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-degraded-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "514dc48d91f6859f16a013a1700cbbf473fc9b07c483a729576b070b287cc0f5",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-degraded-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "6640525ebf9e4fc039fc4c74016bb56f3930189fb7497f8fe3bc3c84020b90d2",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-degraded-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "9363476c0b09e09367c0fda17f4c411af3b4905d3cca9ef5322cd93d6eb73b27",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-disconnected-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "d9d7133edd6eaaa1940ab08aae51b015d52ae16807681b6895a4ad6d4f4c08f4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-disconnected-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "dc612c08d773e8f042c1d9b1dfca7d58257f9deb2e255287e3e423ed38d964c1",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-disconnected-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "e19062f5d129e6c804bcd642d2327d4dc462df7b427603f5d6a983561cf80763",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-error-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "b087b96a8a6efb1db3b6eabdc51f3d499ddfca1be59aed35854e0784d625cb96",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-error-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7c4dd1174ecec91e5fbeff3fe7c0626a52b41c16ef1bc839e7d84b93383d9500",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-error-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "4b19eb6c6c237f3f3271635a358cc85ad6d0eff6c00267b10c020de64649d8d4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-live-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "31d23d2bc45ace509d88715da36f2c6cbf6a3130bcdf295086621833d5984410",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-live-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "3991b3187071a05f11a8fd8a0e939447c4de49d504f452ee0f0c20cde6f03c21",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-live-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "d82d6f3c770a25a4563844d9a769944493b1dd0c16acc4fca346cbe5a4321c45",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-stale-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "781cf887c940e36239b09bcfe8956d5a845b2d8c98a9ee46fcd4b1d08e0c3432",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-stale-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "915afd148fd53032b64c8c5549ef442fc4fceb3a2af33614f3ce2ccc5d110f36",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-stale-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "5bcd55e2e95024820cd49f507068fdf6671d94fa02fca59cde218c8855279524",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-waiting-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "1aa20df2a80fa5fdf64c1bbdd7e4d59c0caf1b158c67837354f62287879de684",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-waiting-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "20db6ea48b6562885415e69844c5736058dd0d71876c1e8fb9fdf328320e702c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "graphics-release/light-pt-BR-waiting-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "545d331fe44550b14df52fe250593c9175621e87408b8ff5102bb751ef72b2cc",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/01-dark-idle.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "7cede3abe61cc63ab9dd9ef8f0d96f14219522c10a82aef97ac7d81de457cf24",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/02-light-idle.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "f3ace571c1845a5b2f0b5f98116f9ba73a855fca35166d0c96a8b78deb3a2605",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/03-dark-gaze-bottom-right.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "089030ec2b7fe8da6cd10e1e9c03e423fc3e7fe552df588b7b006df159938e25",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/04-light-gaze-bottom-right.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "3a549801c0c512386654235fa2f97e2e27e256403af27c0381d9e44597e6c6eb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/05-dark-gaze-top-left.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "092ecda1f8d646bfcbddad886bc13842178db9e95a0630da64823eb974bc62f6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/06-light-gaze-top-left.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "282914e4059b9db82618125e5c058218cb97eaac1ea5b41b16c7a3fa9a465a69",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/07-dark-gaze-top-right.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "3b851238079286d18b12cb94232edd8a394a44ee7313ae36109103799039a12b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/08-light-gaze-top-right.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "3993c934bb35f3ab7240a4485a08138cd4dc4b66ff21b2bb96c7ae35bc09e486",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/09-dark-gaze-bottom-left.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "aa2244466b3dae82d2ea3f14dec2b86e6e5dc02f349c60f86b0c26dc681b254b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/10-light-gaze-bottom-left.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "39b6f0c8e03717da9fb9408fd4f4f3f7c1f20f1f84cf01666e1f1abc6a2e73ef",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/11-dark-hover.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "59133367ad370c1d1d926519c3e4b431fba7501db2aa4e171a9f7d332dcd9d82",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/12-light-hover.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "bf798ab68fc2bd5680041ca5b84b31934e2316473446d66de48432499b0dc24f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/13-dark-pressed.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "a8151c215d0ef859ec89f349c582ef7c68920b6cd05e1a5471ee85026ff7a6ed",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/14-light-pressed.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "0207544e6a30ade927019af774de1a18e28bbe7b5f1693525f86bb54ee8c9642",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/15-dark-reaction-60ms.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "e0b6399fd11849d911df2821097f823eb609028e108cc95d3b8262cf36a48958",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/16-light-reaction-60ms.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "5b5c0d9a0e2f33d52ab0816a1fdcca5ad7953e25ca2ad69f9d2897ccbb253b83",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/17-dark-reaction-180ms-hold.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "33cc2a4a15675c7dd1f548b0bc588ede08164ba1db5b0451ff34845b59d12e11",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/18-light-reaction-180ms-hold.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "68fbcfedd339a1db71bd9b8fcc8fb2de3447b543a2dae4dab02d2d85778ad51a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/19-dark-reaction-420ms-return.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "b3669bb250f2b75af29c92962e070b7f1ee3c228bee2dca6afc66b64d2d35ac6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/20-light-reaction-420ms-return.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "2298a1fb9b2834fe5497e49b1b0a9ae0bd2b63a74c35c3de7457f1e17596e961",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/21-dark-menu-open-looks-at-menu.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "0da0aa2b51449be1ec54a4d1d1cca9990d0d1e4e735c39a1772ea19d67a02a3d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/22-light-menu-open-looks-at-menu.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "e5cecabbd1ed7a575b8d42ffe769f247506663709325d1ed3c0178f3419325bf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/23-dark-loading-enter.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "0372fb3512341504a2579f2455bed44048ff8c364c35af2a112d497a8ee50d0c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/24-light-loading-enter.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "f517ccc2ee5728ed6c0407ec3da05b1e203b0bc0817546d40baa34603a3cd94a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/25-dark-loading-t+0.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "b8b78a6313f4e465ea9c118f5d50b456e85f12f88c1b11ab30a8afc613081fe3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/26-light-loading-t+0.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "879100753d4908793bab1aba3c384facecba95da50ecd1b23c1b2550e00e7ce6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/27-dark-loading-t+150.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "b55fa273060014ba699d4257b3b884bdb48ac8952d9111e7e68c5b37941df0b7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/28-light-loading-t+150.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "888a3a34040faabb76e1f1e8629f79551dd1a5ebdca75f60442ad078b3da8679",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/29-dark-loading-t+300.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "b4f43f57bcc3798a7811f6de6fc01e900d0b02c7dde2556201aed6c625d2ecad",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/30-light-loading-t+300.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "931c2c0af3b35759b36f59525cf640340d337fea2baf2fe90ace68ff01ae526e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/31-dark-loading-click-press-only.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "7263b11fad2177e37ed2d1c130d6c6d599e1b16c14dfad9b155ef9cb46efd5b9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/32-light-loading-click-press-only.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "b314e48dd0dd1e56f0086570ad0f81ef4acdcaed8aa318e4e9e17129ba12fb86",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/33-dark-error.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "84aaee59457a773b7397f4681853a8bf0cb13d0577c64aed326b91a29762af0f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/34-light-error.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "35212d120af5339deb5bbb25dae40b5b32c2f4add779c59c3b034cf405c4982f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/35-dark-reduced-loading-static.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "566f5073e65778f449fee84c4d2e3acb97404cd87b8cd613a3affd5c384070e4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/36-light-reduced-loading-static.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "84a0b6008d5ab610e706502b9809434ce1eaf4d67a904543b07b2d7b00e35d0a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/37-dark-off-loading-static.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "c96e1c7d295e2150e386dbb92d1473354829d847865727a4a3cc331939c80a4b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/38-light-off-loading-static.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "354b7e1d6e4918191f698de133b82e52028c810e7a7248397ac8f995d31669bf",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/39-dark-off-idle.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "76c53427b28c2cd2070d5768302f6963b7f53386e8ab7690f30283db14981467",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/40-light-off-idle.png",
+      "width": 288,
+      "height": 288,
+      "sha256": "7c20f6b25792fed6f2e3b4795a5891514fe0feb4254136283a69761c9efb88a8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "mascot-release/contact-sheet.png",
+      "width": 1810,
+      "height": 2241,
+      "sha256": "140310714faf8bb0f6271bf1dba38ddf54be5fa91081430af6686ad41c67f4db",
+      "kind": "review composite"
+    },
+    {
+      "path": "auth-release/dark-en-auth-change-password-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "3e310fc575c02f28603e1beb7a1498299d478c5d0bb97f5fda8c8be644ab7766",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-change-password-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7e278f3300ed9c0f7c16ce5c3c6e2be86a0273f4656964b1534fb4f22a83ea61",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-change-password-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "da6c6833de3909c3b5c3eadf9ba1992b38aac879af37a10301e92d31bc9ad77f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-forgot-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "19d4e1ccc2c026f061a0ba08181b9f934c2b96f1bba68051b2c01faf4a6afdd3",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-forgot-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "16c63f9848114b0b2e32c46ca3007b227d9013c6a0137a01cd3a40daddf7499f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-forgot-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b0eab5aab168b36236875f60193c65813e1f7953f28c5670475e1072466ca227",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-default-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "06f1de9ad08dd23c26aa795ef538d493c748aa8894f183dbafc19fa2f1a857f9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-default-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "39df5d2f7d8b654b9b076799de8e3e9560a5acc1b860b7398048a16945932434",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-default-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "77b3fe9da5e6e4c002b8dec1e88ffc71192efe4475eea43140e7b04c86c994de",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-invalid-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7252c46bc2c3c2a97023790cf0ebd398006495c3361f21c3d3ee2ad017853740",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-invalid-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ee4c730beef279004e35c227533439a614ed6dfdc7ba2770ad8867ae0736157d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-invalid-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "abc693608f867a855e2a15dc464a69c0297421cc8624ea8ef7cac2ee8328122a",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-rate-limited-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "7f4e02c9d40c54965a73a55d44179c6f1291d34da91fa1cb87593fbdd5f48fd9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-rate-limited-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b48ecad773964750b450d2db00b1939b9cf424f6a00ffb79a68e33838acde8cb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-login-rate-limited-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "cae5d69257992faf28dd618c0ab301210ea70baf856a9eaa3708744d701c3351",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-session-expired-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c54cd2f3dffdebf7cc52d5545841084a9307e70fce8083b639050d0bdf6aba6f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-session-expired-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "1b7515d80bb674e5fec6164ff230e45fadf9d75bac9e98b5a9e396c1bc8987a4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-en-auth-session-expired-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "eccd3f632e606e27ca46b7c25351720051f8b7af99f2cebf7f20b0ab74a276e2",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-change-password-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c22de480aef410bc3387c147d399148b63cdbeb6dd24326f35e530b163b63ad9",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-change-password-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "3cef56c692aa1739a61397700a093bddc7ff7915c2c4d1d495843b34f4b952b6",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-change-password-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c5bb063541324c8a1beda153f6bb7331de5bfd48f063d8324dc5fc2c0e483b34",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-forgot-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "c8824b927f2ddeffe0ff05d2804c5e9dd7c51a1c424479998330835a959cfd4b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-forgot-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "23aeaa29dc88585933cab82fda1f595ff9879efd10f3f548fab04ec82b5bb617",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-forgot-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "5972705ba9c81f2bee52a78289ca175926df1accd71dca706d3eb4c1fd3baa8c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-default-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "3f9b12e488e29b34a15ec87e424b30a9c8422efc1f508f83ed44964f8df7bd7f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-default-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c3ddff6996d036ea1e47f136e53dadc6a6b07398120d6bb696a5d42db05d43b8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-default-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "fc7f43563239c906ab70e003c5e4f36ec585312894666b0bfc516a1e8926e0b4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-invalid-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "b15238cb81764487b0d7fe96a9a72b9202e23912a9e24b227006d373c7a72f92",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-invalid-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b217b1e858e0157b6e15a00c8c8b81ff3b3ab38595b9e000fd4c3be16bb6a6aa",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-invalid-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c6dd029327fc04ba71e1f9e7a28372c6e94db37fc72f46edfa159d5678c92f74",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-rate-limited-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "f17bcda4c7468b9e60f94e8e2a6b4922c8e84168c1923c4fe44b09a141e17640",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-rate-limited-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d6ad92ae71e57479776ee158005d682d936622a3ba07e83c6957ea561086f5b1",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-login-rate-limited-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "f889543474ca2ef24466b2723fd22c33f46cff0de4d2a766454ac6dfc3c7e951",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-session-expired-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "98c1ef648f888a60555067a31429ad1f765e9cf22edbe51054eafee8fa5b2a51",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-session-expired-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "4e6c2a7c2b11e6cd6d10f84375576d2af30c0f74ba70ec6783a413f40a1ce786",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/dark-pt-BR-auth-session-expired-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "5b7d3e8332ebd57dddad95d6f18981e5bb7e20ec459961ce7c57641e7acbb9de",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-change-password-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "614ccb5c93c7965ed84a37773692ccb682aa5ab77e8071eec0b8433383ee00f4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-change-password-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "e15900c466e0ea077b72821255889b3c2519fc87ad2f6e8ac722f5c90909818d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-change-password-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "07db365a96182e08c82fba284722eb7fd77e4c3479a8d860e072397ea15d068c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-forgot-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ad2a146db99ebebeb241d255698451f49a0c23888f3ffa0a7437f8e59080a7f7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-forgot-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "1af293d6a297d0bf17775ab2be4d20fe16f6a37cce80265f54cf27300a755335",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-forgot-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "3450864ac87342a35f98bdd29f1b319e44d32da2abc06202e45de6dcee294bc7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-default-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "ed8e77690f9347fd8e2b67692df373a98390883062f5896eeeb66de597ae477f",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-default-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "4eb534756ab70b7269db2858e244ffda4403a8fde0f1ef7c56c5753a195a5f0d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-default-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "bfe6ab6a7fc68c67135272ee8b0bb22eebcf3f54a70c058843b22250f3f4e56e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-invalid-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "cf2342b46619909fb1ac377f8e96fbad2f5e4ed1d14f7e9b8260d09f4386b078",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-invalid-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "02d17d5388063b03198e08d7cffa2e683ab184557ca596924bd0db3fdf4d8f06",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-invalid-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "71fb6762c8ef4bb5a60c42a46910257fd1c2b8768fc45d655d94f51cbded2d2d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-rate-limited-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "462a5fbf947f31505f9f77406f416e19d3a14d54a551b47bbeaaae0df599a28e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-rate-limited-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "56e1ab8c25f7c5488cbf62bf1fbd3e27d1645973901a483893e19b046817dabd",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-login-rate-limited-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b64162be283b934208e0d0fd96020ed1b58c7d17e60201348b92ec5813eba3a7",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-session-expired-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "076de02404fd3998e8b80627bab3048a0d108e8274facfa9e71403f03803bd7c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-session-expired-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c5f269738484224dd4a2346ec39e6f98b33a5cc2d0c4f19d1af754e95e5ab06b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-en-auth-session-expired-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "048368a781f2c0f803d22a0ef96972ec8525d196c621aed907c8a7bbc80d55b4",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-change-password-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "9a61700a7fe2577b72b00d0d0eb3cd8cdb0114b362b96961f5441a69d988004e",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-change-password-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "93bd8b70712811bb5fa59714025b4cf9daa3a3831098b335e8643e6b5570f3a8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-change-password-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "55c3d66cdc8b11f44af648f5fadd97684c3affe53fbb172bf9343e5254552f8b",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-forgot-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "0a64e7d2905e50882d4777d124678d961dba1a975ccbe0ce3bad552aa181f612",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-forgot-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "fa2e1e41fca8b549818b6a67d01f5c4bb2fd31a71b02d225ba6d9004b33da8ba",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-forgot-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "b9d4a86295ce0c4364378a9e5aef638b16eee144853ef7040250378cb01d9cbb",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-default-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "90462e4272aebfb291e499b3a599183d3162d077cbc92e89df58ce5ae221eb7c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-default-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ed3a963d45371e1e0aca90aab4bb0ea1bc4f10ba2b1fde035599862c7df45944",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-default-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "66680709e9d27ea36988b55f5cd7c4fd44ec13d59b285567011d0f83d0032e5c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-invalid-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "578feb64b92e3357d33d2fb49593ed428c1873ad92806204d8474a9a6b6e887c",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-invalid-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "c76620fca7f1854814647e7a1e3b0d2a0757ed7857a75112cfe2bd69609b1692",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-invalid-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "5768bdc0bb1ad3a4ffa05219839c359402955b3a5c78370bfe0d1dba54b57b0d",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-rate-limited-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "641059678e7fb16fe1d54e2f8cbbd69ae070664eb052c2b63850975bc4e5b783",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-rate-limited-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ad4d2d08e96e641b2df7106affe24e78d1cd6bcd55f331fc70348c1abbe61938",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-login-rate-limited-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "148300ea1a8e4c0b4737fcb0c70c198bcf0581fc321fc3d62ab60e947897c8b8",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-session-expired-1100x700.png",
+      "width": 1100,
+      "height": 700,
+      "sha256": "b9789d09d5d596499075e51c4e8437a3b37b0ed5f31c628fdb55e2aa58953702",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-session-expired-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "23d0749bc0f2a2ca7657f36dc98c0a36b984f3d5abd140552ff521d8ac21f4db",
+      "kind": "native Scene snapshot"
+    },
+    {
+      "path": "auth-release/light-pt-BR-auth-session-expired-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "06f6f8c0a937089e733f827a61a410131ba5b02c491bcef3d36832ed2248dce8",
+      "kind": "native Scene snapshot"
+    }
+  ]
+}

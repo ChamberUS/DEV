@@ -1,0 +1,527 @@
+[
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".nav-group",
+    "lightOverride": "-fx-text-fill: -byx-disabled; -fx-font-size: 10.5px; -fx-font-family: \"Inter SemiBold\"; -fx-padding: 14 16 4 16;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".nav-item.selected",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-font-family: \"Inter SemiBold\";"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".scroll-bar .thumb",
+    "lightOverride": "-fx-background-color: -byx-line; -fx-background-radius: 6;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".stage:hover",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".stage-border-ok",
+    "lightOverride": "-fx-border-color: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".stage-border-warn",
+    "lightOverride": "-fx-border-color: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".stage-border-bad",
+    "lightOverride": "-fx-border-color: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".btn-primary",
+    "lightOverride": "-fx-background-color: -byx-trading; -fx-text-fill: white;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".btn-primary:hover",
+    "lightOverride": "-fx-background-color: -byx-trading;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".btn-ghost:hover",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".chip:selected",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-border-color: -info;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".text-field, .combo-box-base, .spinner, .spinner .text-field",
+    "lightOverride": "-fx-background-color: -panel2; -fx-border-color: -border; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: -text; -fx-prompt-text-fill: -byx-disabled;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".combo-box-popup .list-cell:hover",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".table-row-cell",
+    "lightOverride": "-fx-background-color: -panel; -fx-border-color: transparent transparent -byx-bg2 transparent; -fx-cell-size: 34;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".table-row-cell:odd",
+    "lightOverride": "-fx-background-color: -byx-bg0;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".table-row-cell:hover",
+    "lightOverride": "-fx-background-color: -byx-bg1;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".table-row-cell:selected",
+    "lightOverride": "-fx-background-color: -byx-bg3;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".log-view",
+    "lightOverride": "-fx-background-color: -byx-bg0; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".log-view .list-cell",
+    "lightOverride": "-fx-background-color: transparent; -fx-text-fill: -byx-text-secondary; -fx-padding: 1 10;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".chart-vertical-grid-lines, .chart-horizontal-grid-lines",
+    "lightOverride": "-fx-stroke: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".chart-horizontal-zero-line",
+    "lightOverride": "-fx-stroke: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".chart-line-symbol",
+    "lightOverride": "-fx-background-color: -purple, -byx-bg0;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".dialog.dialog-pane .button:default",
+    "lightOverride": "-fx-background-color: -byx-trading; -fx-text-fill: white;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".tooltip",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-font-size: 11.5px;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".ws-tab:selected",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-border-color: -info;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".root.trader",
+    "lightOverride": "-bg: -byx-bg0; -panel: -byx-bg1; -panel2: -byx-bg1; -border: -byx-line;\n    -text: -byx-text-primary; -muted: -byx-text-secondary; -text2: -byx-text-secondary; -disabled: -byx-disabled;\n    -ok: -byx-positive; -bad: -byx-negative; -warn: -byx-warning; -info: -byx-warning;\n    -fx-base: -byx-bg1;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .sidebar",
+    "lightOverride": "-fx-background-color: -byx-bg0;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .nav-item.selected",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-text-fill: -byx-warning;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .nav-item:hover",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .ws-tab:selected",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-text-fill: -byx-warning; -fx-border-color: -byx-warning;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .btn-primary",
+    "lightOverride": "-fx-background-color: -byx-warning; -fx-text-fill: -byx-bg1;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .table-row-cell:selected",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .table-row-cell:odd",
+    "lightOverride": "-fx-background-color: -byx-bg0;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .table-row-cell:hover",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .chip:selected, .trader .tab-pane > .tab-header-area .tab:selected",
+    "lightOverride": "-fx-border-color: transparent transparent -byx-warning transparent;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".pos",
+    "lightOverride": "-fx-text-fill: -byx-positive; -fx-font-family: \"JetBrains Mono Medium\", \"Menlo\"; -fx-font-size: 12px;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".neg",
+    "lightOverride": "-fx-text-fill: -byx-negative; -fx-font-family: \"JetBrains Mono Medium\", \"Menlo\"; -fx-font-size: 12px;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".th-market-row",
+    "lightOverride": "-fx-padding: 8; -fx-background-color: -byx-bg2; -fx-background-radius: 3; -fx-cursor: hand;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".auth-left",
+    "lightOverride": "-fx-background-color: linear-gradient(to bottom right, -byx-bg0, -byx-bg1);"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".auth-tagline",
+    "lightOverride": "-fx-font-size: 20px; -fx-text-fill: -byx-warning; -fx-padding: 28 0 0 0;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".auth-input:focused",
+    "lightOverride": "-fx-border-color: -byx-warning;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".menu-item:focused",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".btn-primary:pressed",
+    "lightOverride": "-fx-background-color: -byx-disabled;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".trader .btn-primary:pressed",
+    "lightOverride": "-fx-background-color: -byx-warning;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".btn-ghost:hover",
+    "lightOverride": "-fx-border-color: -byx-hover; -fx-text-fill: -text;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".card.clickable:hover",
+    "lightOverride": "-fx-background-color: -byx-bg1; -fx-border-color: -byx-hover; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 8, 0, 0, 2);"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".stage:hover",
+    "lightOverride": "-fx-border-color: -byx-hover;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".seg-thumb",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-background-radius: 5; -fx-border-color: -info; -fx-border-radius: 5;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".menu-pop",
+    "lightOverride": "-fx-background-color: -byx-bg1; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 14, 0, 0, 4); -fx-min-width: 200;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".toast",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 14, 0, 0, 4);"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".skeleton",
+    "lightOverride": "-fx-background-color: -byx-bg2; -fx-background-radius: 4;"
+  },
+  {
+    "source": "src/main/resources/panel/panel.css",
+    "selector": ".chart-watermark",
+    "lightOverride": "-fx-text-fill: -byx-hover; -fx-font-family: \"Inter Bold\", \"Inter\"; -fx-font-weight: bold; -fx-font-size: 18px;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".root, .root.trader, .root.research, .root.byx",
+    "lightOverride": "-bg: -byx-bg-canvas; -panel: -byx-bg0; -panel2: -byx-bg1; -surface3: -byx-bg2;\n    -border: -byx-bg3; -text: -byx-text-primary; -text2: -byx-text-secondary; -muted: -byx-text-tertiary;\n    -disabled: -byx-disabled; -ok: -byx-positive; -bad: -byx-negative; -warn: -byx-warning;\n    -info: -byx-info; -purple: -byx-research; -aqua: -byx-byx; -accent: -byx-trading;\n    -fx-background-color: -bg; -fx-base: -panel2; -fx-control-inner-background: -panel;\n    -fx-font-family: \"Inter\"; -fx-font-size: 14px;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".pipeline-hatch",
+    "lightOverride": "-fx-background-color: linear-gradient(from 0px 0px to 8px 8px, repeat, -byx-disabled 0%, -byx-disabled 50%, transparent 50%, transparent 100%); -fx-opacity: .5;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".holdout-hatch",
+    "lightOverride": "-fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, -byx-bg2 0%, -byx-bg2 50%, -byx-bg1 50%, -byx-bg1 100%);"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".text-field:focused, .password-field:focused, .auth-input:focused",
+    "lightOverride": "-fx-border-color: -byx-trading, -byx-trading;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".treasury-lane-0",
+    "lightOverride": "-fx-border-color: -byx-feedback-success-surface; -fx-border-style: dashed;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".treasury-lane-1",
+    "lightOverride": "-fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, -byx-bg1 0%, -byx-bg1 50%, -byx-bg0 50%, -byx-bg0 100%);"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".treasury-lane-2",
+    "lightOverride": "-fx-border-color: -byx-feedback-info-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".treasury-lane-3",
+    "lightOverride": "-fx-border-color: -byx-feedback-error-surface; -fx-border-style: dotted;"
+  },
+  {
+    "source": "src/main/resources/panel/byx.css",
+    "selector": ".skeleton",
+    "lightOverride": "-fx-background-color: linear-gradient(from 0% 0% to 200% 0%, repeat, -byx-bg2 25%, -byx-line 50%, -byx-bg2 75%); -fx-background-radius: 5;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/auth.css",
+    "selector": ".byx-auth-okc",
+    "lightOverride": "-fx-min-width: 64; -fx-min-height: 64; -fx-max-width: 64; -fx-max-height: 64; -fx-background-color: -byx-feedback-success-surface; -fx-background-radius: 32;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/auth.css",
+    "selector": ".byx-verify-message.error",
+    "lightOverride": "-fx-text-fill: -byx-negative;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-btn.danger-outline",
+    "lightOverride": "-fx-background-color: transparent; -fx-border-color: -byx-feedback-error-surface; -fx-border-width: 1; -fx-border-radius: 9; -fx-text-fill: -byx-negative;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-btn.danger-outline:hover",
+    "lightOverride": "-fx-background-color: -byx-feedback-error-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-btn.danger-outline:focus-visible, .root.focusall .byx-btn.danger-outline:focused",
+    "lightOverride": "-fx-border-color: -byx-text-primary, -byx-feedback-error-surface;\n    -fx-border-width: 2, 1;\n    -fx-border-insets: -4, 0;\n    -fx-border-radius: 13, 9;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-spinner-track",
+    "lightOverride": "-fx-stroke: -byx-line; -fx-fill: transparent; -fx-stroke-width: 2;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-input:hover",
+    "lightOverride": "-fx-background-color: -byx-hover, -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-badge.tone-accent",
+    "lightOverride": "-fx-text-fill: -byx-accent; -fx-background-color: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-operational",
+    "lightOverride": "-fx-background-color: -byx-feedback-success-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-operational .byx-chip-text",
+    "lightOverride": "-fx-text-fill: -byx-byx;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-connecting",
+    "lightOverride": "-fx-background-color: -byx-feedback-info-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-connecting .byx-chip-text",
+    "lightOverride": "-fx-text-fill: -byx-info;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-reconnecting, .byx-chip.state-degraded",
+    "lightOverride": "-fx-background-color: -byx-feedback-warning-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-reconnecting .byx-chip-text, .byx-chip.state-degraded .byx-chip-text",
+    "lightOverride": "-fx-text-fill: -byx-warning;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-unavailable",
+    "lightOverride": "-fx-background-color: -byx-feedback-error-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-unavailable .byx-chip-text",
+    "lightOverride": "-fx-text-fill: -byx-negative;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-unavailable-expected",
+    "lightOverride": "-fx-background-color: -byx-bg3;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-unavailable-expected .byx-chip-text",
+    "lightOverride": "-fx-text-fill: -byx-text-secondary;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-unknown",
+    "lightOverride": "-fx-background-color: transparent; -fx-border-color: -byx-line; -fx-border-width: 1;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-chip.state-unknown .byx-chip-text",
+    "lightOverride": "-fx-text-fill: -byx-text-secondary;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/controls.css",
+    "selector": ".byx-backdrop",
+    "lightOverride": "-fx-background-color: -byx-bg-canvas;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-gate.open",
+    "lightOverride": "-fx-background-color: -byx-feedback-success-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-gate.locked",
+    "lightOverride": "-fx-background-color: -byx-feedback-error-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-gate.sealed",
+    "lightOverride": "-fx-background-color: -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-gate-icon",
+    "lightOverride": "-fx-background-radius: 16; -fx-background-color: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-gate.open .byx-res-gate-icon",
+    "lightOverride": "-fx-background-color: -byx-feedback-success-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-gate.locked .byx-res-gate-icon",
+    "lightOverride": "-fx-background-color: -byx-feedback-error-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-seg.complete",
+    "lightOverride": "-fx-background-color: -byx-feedback-success-surface;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/research.css",
+    "selector": ".byx-res-now",
+    "lightOverride": "-fx-background-color: -byx-bg0; -fx-background-radius: 5;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/screens.css",
+    "selector": ".byx-env-banner",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-bg1; -fx-padding: 14 18 14 18;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/screens.css",
+    "selector": ".byx-home-card-stack:hover .byx-home-card-body",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-bg2;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-avatar",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-avatar-bg; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;\n    -fx-text-fill: -byx-text-primary; -fx-font-family: \"Schibsted Grotesk SemiBold\"; -fx-font-size: 13px;\n    -fx-padding: 0; -fx-cursor: hand;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-avatar:hover",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-avatar-bg;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-mascot-body",
+    "lightOverride": "-fx-fill: -byx-bg-canvas; -fx-stroke: -byx-line; -fx-stroke-width: 1.6;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-avatar-static",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-bg2; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;\n    -fx-text-fill: -byx-text-primary; -fx-font-family: \"Schibsted Grotesk SemiBold\"; -fx-font-size: 13px;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-menu-item.current",
+    "lightOverride": "-fx-background-color: -byx-trading;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-menu-item.danger .byx-menu-label",
+    "lightOverride": "-fx-text-fill: -byx-negative;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/shell.css",
+    "selector": ".byx-menu-item.danger .byx-icon",
+    "lightOverride": "-fx-stroke: -byx-negative;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/trading.css",
+    "selector": ".byx-panel",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-bg1;\n    -fx-background-insets: 0, 1 0 0 0;\n    -fx-background-radius: 14, 14;\n    -fx-padding: 16;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/trading.css",
+    "selector": ".chart-grid-ink",
+    "lightOverride": "-fx-background-color: -byx-line;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/trading.css",
+    "selector": ".chart-text-ink",
+    "lightOverride": "-fx-background-color: -byx-text-tertiary;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/trading.css",
+    "selector": ".byx-desk-depth.ask",
+    "lightOverride": "-fx-background-color: -byx-feedback-error-surface; -fx-background-radius: 4;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/trading.css",
+    "selector": ".byx-desk-depth.bid",
+    "lightOverride": "-fx-background-color: -byx-feedback-success-surface; -fx-background-radius: 4;"
+  },
+  {
+    "source": "src/main/resources/panel/v2/trading.css",
+    "selector": ".byx-desk-scroll.byx-panel",
+    "lightOverride": "-fx-background-color: -byx-line, -byx-bg1; -fx-background-insets: 0, 1 0 0 0; -fx-background-radius: 14, 14; -fx-padding: 14;"
+  }
+]

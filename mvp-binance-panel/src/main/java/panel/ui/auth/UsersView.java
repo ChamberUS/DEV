@@ -55,6 +55,7 @@ public class UsersView implements View {
             d.setHeaderText("Role for " + u.username());
             d.getDialogPane().getStylesheets().add(getClass().getResource("/panel/panel.css").toExternalForm());
             d.getDialogPane().getStyleClass().add("dialog");
+            panel.design.ByxTheme.apply(d.getDialogPane());
             d.showAndWait().ifPresent(r -> ctx.userService.changeRole(u.id(), r));
         }, "Role updated."));
         Button reset = Ui.button("Reset password", "ghost");
@@ -123,6 +124,7 @@ public class UsersView implements View {
         d.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         d.getDialogPane().getStylesheets().add(getClass().getResource("/panel/panel.css").toExternalForm());
         d.getDialogPane().getStyleClass().add("dialog");
+        panel.design.ByxTheme.apply(d.getDialogPane());
         return d;
     }
 

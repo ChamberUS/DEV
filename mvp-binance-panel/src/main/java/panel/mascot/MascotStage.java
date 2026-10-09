@@ -36,6 +36,7 @@ public final class MascotStage extends Region {
     public static final Color ACCENT_BYX = Color.web("#5ED6C4");
 
     private final double size;
+    private Mode selectedMode;
 
     public MascotStage(double size, Mode mode) {
         this.size = size;
@@ -45,6 +46,7 @@ public final class MascotStage extends Region {
         setMouseTransparent(true);
         getStyleClass().add("byx-mascot-stage");
         apply(mode);
+        panel.design.ByxTheme.observe(this, () -> apply(selectedMode));
     }
 
     public MascotStage(double size, Color ignoredAccent) {
@@ -52,12 +54,13 @@ public final class MascotStage extends Region {
     }
 
     public void apply(Mode mode) {
+        selectedMode = mode;
         setBackground(Background.EMPTY);
         setBorder(Border.EMPTY);
         if (mode == Mode.SURFACE) {
             double r = size / 2;
-            setBackground(new Background(new BackgroundFill(new RadialGradient(0, 0, 0.42, 0.38, 0.75, true, CycleMethod.NO_CYCLE, new Stop(0, CENTER), new Stop(1, EDGE)), new CornerRadii(r), Insets.EMPTY)));
-            setBorder(new Border(new BorderStroke(RING, BorderStrokeStyle.SOLID, new CornerRadii(r), new BorderWidths(Math.max(1, size / 96)))));
+            setBackground(new Background(new BackgroundFill(new RadialGradient(0, 0, 0.42, 0.38, 0.75, true, CycleMethod.NO_CYCLE, new Stop(0, panel.design.ByxTheme.paint("#C3CADB", panel.design.ThemeToken.SURFACE_HOVER)), new Stop(1, panel.design.ByxTheme.paint("#AAB3C7", panel.design.ThemeToken.AVATAR_CONTAINER))), new CornerRadii(r), Insets.EMPTY)));
+            setBorder(new Border(new BorderStroke(panel.design.ByxTheme.paint("#2A3144", panel.design.ThemeToken.AVATAR_BOUNDARY), BorderStrokeStyle.SOLID, new CornerRadii(r), new BorderWidths(Math.max(1, size / 96)))));
         }
     }
 

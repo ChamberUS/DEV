@@ -1,0 +1,40 @@
+{
+  "runs": [
+    {
+      "run": "native-visual-release",
+      "log": "native-visual-release/native-flow.txt",
+      "passes": 1487,
+      "failures": [],
+      "pngCount": 234
+    },
+    {
+      "run": "motion-full-comfortable",
+      "log": "motion-full-comfortable/native-flow.txt",
+      "passes": 1487,
+      "failures": [],
+      "pngCount": 0
+    },
+    {
+      "run": "motion-reduced-comfortable",
+      "log": "motion-reduced-comfortable/native-flow.txt",
+      "passes": 1487,
+      "failures": [],
+      "pngCount": 0
+    },
+    {
+      "run": "graphics-release",
+      "log": "graphics-release/graphics-checks.txt",
+      "passes": 72,
+      "failures": [],
+      "pngCount": 72
+    },
+    {
+      "run": "auth-release",
+      "log": "auth-release/auth-full.txt",
+      "passes": 35,
+      "failures": [],
+      "pngCount": 72
+    }
+  ],
+  "mascotNativeFrames": 40
+}

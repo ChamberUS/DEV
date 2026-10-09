@@ -58,8 +58,14 @@ class MascotPresenceViewTest {
     }
 
     private static Mounted mount(MotionService m, double size, MascotAssets assets) throws Exception {
+        return mount(m, size, assets, false);
+    }
+
+    private static Mounted mount(MotionService m, double size, MascotAssets assets, boolean controlledClock) throws Exception {
         return fx(() -> {
             MascotView v = new MascotView(m, size, assets, Platform::runLater, () -> 1.0, null);
+            // Establish the manual clock before Scene/window attachment can schedule a real-time tick.
+            if (controlledClock) v.tickAt(0);
             StackPane root = new StackPane(v);
             Stage st = new Stage();
             st.setScene(new Scene(root, 420, 320));
@@ -177,7 +183,7 @@ class MascotPresenceViewTest {
 
     @Test
     void reducedBlinksOnlyAndOffIsCompletelyStatic() throws Exception {
-        Mounted m = mount(motion(MotionPreference.REDUCED), 96, MascotAssets.shared());
+        Mounted m = mount(motion(MotionPreference.REDUCED), 96, MascotAssets.shared(), true);
         fx(() -> { m.view.setState(MascotState.IDLE); return null; });
         until("rig in REDUCED", () -> m.view.showing() == MascotView.Showing.RIG);
         assertFalse(fx(m.view::pointerTracking), "REDUCED never follows the cursor");

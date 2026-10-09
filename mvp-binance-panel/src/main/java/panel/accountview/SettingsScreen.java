@@ -15,6 +15,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import panel.app.AppInfo;
+import panel.i18n.Strings;
+import panel.design.ThemeSelector;
 import panel.design.ByxBadge;
 import panel.design.ByxButton;
 import panel.design.ByxOverlayHost;
@@ -149,10 +151,7 @@ public final class SettingsScreen implements View {
                 panel.getChildren().add(setting("Time zone display", "Times are shown in your local time zone.", ByxBadge.of("LOCAL TIME", ByxBadge.Tone.NEUTRAL)));
             }
             case "Appearance" -> {
-                Kit.Segmented theme = new Kit.Segmented(List.of("Dark", "Light"), "Dark", t -> { });
-                theme.disable("Light", true);
-                panel.getChildren().add(setting("Theme", "Dark is the only theme in this version.", new HBox(8, theme,
-                        ByxBadge.availability(ByxBadge.Availability.COMING_SOON))));
+                panel.getChildren().add(setting("Theme", Strings.table(Strings.Lang.EN).getProperty("appearance.intro"), new ThemeSelector()));
                 panel.getChildren().add(setting("Density", "Compact fits more rows. Trading always stays dense.", row("Density", new Kit.Segmented(
                         List.of("Comfortable", "Compact"), pretty(draft.density()), v -> edit(new AccountData.Prefs(draft.motion(), v.toUpperCase(), draft.animatedIcons(), draft.primaryWorkspace(), draft.followSystemMotion()))),
                         !draft.density().equals(saved.density()))));
@@ -231,7 +230,8 @@ public final class SettingsScreen implements View {
         VBox copy = new VBox(2, heading, detail);
         copy.setMinWidth(0);
         HBox.setHgrow(copy, Priority.ALWAYS);
-        if (control instanceof Region r) r.setMinWidth(Region.USE_PREF_SIZE);
+        // Appearance is a wrapping native form; segmented controls keep their intrinsic width.
+        if (control instanceof Region r && !(control instanceof ThemeSelector)) r.setMinWidth(Region.USE_PREF_SIZE);
         HBox wide = new HBox(16);
         wide.setAlignment(Pos.CENTER_LEFT);
         VBox row = new VBox(12);

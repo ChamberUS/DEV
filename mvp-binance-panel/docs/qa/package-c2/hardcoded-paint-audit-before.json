@@ -1,0 +1,930 @@
+[
+  {
+    "path": "src/main/java/panel/tradeview/ChartPanel.java",
+    "matches": [
+      {
+        "line": 227,
+        "text": "g.setStroke(Color.web(\"#ffffff08\"));"
+      },
+      {
+        "line": 231,
+        "text": "g.setStroke(Color.web(\"#ffffff06\"));"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/design/ByxRegion.java",
+    "matches": [
+      {
+        "line": 297,
+        "text": "Color hi = Color.web(\"#303958\"); // destaque da refer\u00eancia (.sk)"
+      },
+      {
+        "line": 300,
+        "text": "return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, base), new Stop(1, base));"
+      },
+      {
+        "line": 303,
+        "text": "return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, base),"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/design/DesignTokens.java",
+    "matches": [
+      {
+        "line": 73,
+        "text": "return Color.web(node(path).asText());"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/motion/MotionService.java",
+    "matches": [
+      {
+        "line": 258,
+        "text": "new KeyFrame(scale(Duration.millis(380)), new KeyValue(glow.radiusProperty(), 0, MotionTokens.EASE_OUT), new KeyValue(glow.colorProperty(), Color.TRANSPARENT)));"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/motion/ReferenceMotion.java",
+    "matches": [
+      {
+        "line": 162,
+        "text": "fills.add(new BackgroundFill(blend(a == null ? Color.TRANSPARENT : a.getFill(),"
+      },
+      {
+        "line": 163,
+        "text": "b == null ? Color.TRANSPARENT : b.getFill(), f), geometry.getRadii(), geometry.getInsets()));"
+      },
+      {
+        "line": 283,
+        "text": "return new Background(new BackgroundFill(new LinearGradient(x, 0, x + 2, 0, true,"
+      },
+      {
+        "line": 284,
+        "text": "CycleMethod.REPEAT, new Stop(.25, Color.web(\"#1C2131\")), new Stop(.5, Color.web(\"#283049\")),"
+      },
+      {
+        "line": 285,
+        "text": "new Stop(.75, Color.web(\"#1C2131\"))), new javafx.scene.layout.CornerRadii(5), Insets.EMPTY));"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/mascot/MascotStage.java",
+    "matches": [
+      {
+        "line": 23,
+        "text": "* <li>{@link Mode#HALO} (PADR\u00c3O): fundo TOTALMENTE transparente + contorno de silhueta sutil (glow da m\u00e1scara alfa, 1\u20132 px, {@code text.secondary} #AAB3C7 a baixa opacidade). Sem c\u00edrculo, sem card.</li>"
+      },
+      {
+        "line": 32,
+        "text": "static final Color CENTER = Color.web(\"#C3CADB\");"
+      },
+      {
+        "line": 33,
+        "text": "static final Color EDGE = Color.web(\"#AAB3C7\");"
+      },
+      {
+        "line": 34,
+        "text": "static final Color RING = Color.web(\"#2A3144\");"
+      },
+      {
+        "line": 35,
+        "text": "static final Color HALO_COLOR = Color.web(\"#AAB3C7\");"
+      },
+      {
+        "line": 36,
+        "text": "public static final Color ACCENT_BYX = Color.web(\"#5ED6C4\");"
+      },
+      {
+        "line": 59,
+        "text": "setBackground(new Background(new BackgroundFill(new RadialGradient(0, 0, 0.42, 0.38, 0.75, true, CycleMethod.NO_CYCLE, new Stop(0, CENTER), new Stop(1, EDGE)), new CornerRadii(r), Insets.EMPTY)));"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/mascot/MascotGallery.java",
+    "matches": [
+      {
+        "line": 41,
+        "text": "private static final String[] BACKGROUNDS = {\"bg0 #0B0E16\", \"bg1 #121723\", \"bg2 #1A2030\", \"bg3 #232A3D\", \"hover #2C3550\", \"light #EEF1F8\"};"
+      },
+      {
+        "line": 52,
+        "text": "private final Circle marker = new Circle(5, Color.web(\"#5ED6C4\"));"
+      },
+      {
+        "line": 90,
+        "text": "previewHost.setStyle(\"-fx-background-color: #121723; -fx-background-radius: 12;\");"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/mascot/MascotHintBubble.java",
+    "matches": [
+      {
+        "line": 61,
+        "text": "l.setTextFill(Color.web(\"#EEF1F8\"));"
+      },
+      {
+        "line": 65,
+        "text": "box.setStyle(\"-fx-background-color: #1A2030; -fx-background-radius: 10; -fx-border-color: #2A3144; -fx-border-radius: 10; -fx-border-width: 1;\""
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/researchview/ResearchOverview.java",
+    "matches": [
+      {
+        "line": 496,
+        "text": "getChildren().add(new Hatch(8, Color.web(\"#ffffff0a\"), 10));"
+      },
+      {
+        "line": 571,
+        "text": "hatch = new Hatch(4, Color.web(\"#566079\"), 4);"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/authview/BrandPanel.java",
+    "matches": [
+      {
+        "line": 367,
+        "text": "line1.setFill(sweep(c, Color.web(\"#CBD3E8\"), Color.WHITE));"
+      },
+      {
+        "line": 368,
+        "text": "line2.setFill(sweep(c, Color.web(\"#AAB3C7\"), Color.web(\"#D8DFF2\")));"
+      },
+      {
+        "line": 370,
+        "text": "line1.setFill(Color.web(\"#CBD3E8\"));"
+      },
+      {
+        "line": 371,
+        "text": "line2.setFill(Color.web(\"#AAB3C7\"));"
+      },
+      {
+        "line": 379,
+        "text": "return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, base), new Stop(a, base),"
+      },
+      {
+        "line": 398,
+        "text": "band.setFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(124, 150, 255, 0)),"
+      },
+      {
+        "line": 399,
+        "text": "new Stop(0.5, Color.rgb(124, 150, 255, 0.07)), new Stop(1, Color.rgb(124, 150, 255, 0))));"
+      },
+      {
+        "line": 418,
+        "text": "glow.setFill(new RadialGradient(0, 0, w * 0.78, h * 0.38, w * 0.38, false, CycleMethod.NO_CYCLE,"
+      },
+      {
+        "line": 419,
+        "text": "new Stop(0, Color.rgb(124, 150, 255, 1)), new Stop(1, Color.rgb(124, 150, 255, 0))));"
+      },
+      {
+        "line": 445,
+        "text": "// fundo da regi\u00e3o: bg1 + brilho inferior esquerdo (radial-gradient 20% 110% #7C96FF1A)"
+      },
+      {
+        "line": 446,
+        "text": "g.setFill(Color.web(\"#121723\"));"
+      },
+      {
+        "line": 448,
+        "text": "g.setFill(new RadialGradient(0, 0, w * 0.2, h * 1.1, 900, false, CycleMethod.NO_CYCLE,"
+      },
+      {
+        "line": 449,
+        "text": "new Stop(0, Color.web(\"#7C96FF1A\")), new Stop(1, Color.web(\"#7C96FF00\"))));"
+      },
+      {
+        "line": 451,
+        "text": "g.setFill(new RadialGradient(0, 0, w * 0.62, h * 0.55, w * 0.55, false, CycleMethod.NO_CYCLE,"
+      },
+      {
+        "line": 452,
+        "text": "new Stop(0, Color.rgb(170, 176, 200, 0.05)), new Stop(1, Color.rgb(170, 176, 200, 0))));"
+      },
+      {
+        "line": 459,
+        "text": "g.setFill(Color.rgb(120, 140, 190, clamp(a)));"
+      },
+      {
+        "line": 468,
+        "text": "L.setFill(Color.rgb(220, 228, 255, a));"
+      },
+      {
+        "line": 475,
+        "text": "L.setStroke(Color.rgb(150, 170, 230, BrandFieldModel.EDGE_ALPHA));"
+      },
+      {
+        "line": 479,
+        "text": "L.setFill(Color.rgb(190, 205, 255, 0.3));"
+      }
+    ]
+  },
+  {
+    "path": "src/main/java/panel/ui/trader/CandleChart.java",
+    "matches": [
+      {
+        "line": 25,
+        "text": "return ink.getBackground() == null ? Color.TRANSPARENT : ink.getBackground().getFills().getFirst().getFill();"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/byx.css",
+    "matches": [
+      {
+        "line": 3,
+        "text": "-bg: #080A0F; -panel: #0E1119; -panel2: #141824; -surface3: #1C2131;"
+      },
+      {
+        "line": 4,
+        "text": "-border: #232A3C; -text: #ECEFF6; -text2: #A0A9BE; -muted: #7A839A;"
+      },
+      {
+        "line": 5,
+        "text": "-disabled: #4A5266; -ok: #42D79B; -bad: #FF7A7A; -warn: #E9B44C;"
+      },
+      {
+        "line": 6,
+        "text": "-info: #5CC8FF; -purple: #B896FF; -aqua: #5ED6C4; -accent: #7C96FF;"
+      },
+      {
+        "line": 168,
+        "text": ".pipeline-hatch { -fx-background-color: linear-gradient(from 0px 0px to 8px 8px, repeat, #4A5266 0%, #4A5266 50%, transparent 50%, transparent 100%); -fx-opacity: .5; }"
+      },
+      {
+        "line": 169,
+        "text": ".holdout-hatch { -fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, #1C2131 0%, #1C2131 50%, #141824 50%, #141824 100%); }"
+      },
+      {
+        "line": 179,
+        "text": ".text-field:focused, .password-field:focused, .auth-input:focused { -fx-border-color: #7C96FF, #7C96FF22; }"
+      },
+      {
+        "line": 198,
+        "text": ".treasury-lane-0 { -fx-border-color: #42D79B66; -fx-border-style: dashed; }"
+      },
+      {
+        "line": 199,
+        "text": ".treasury-lane-1 { -fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, #1C1B1C 0%, #1C1B1C 50%, #0E1119 50%, #0E1119 100%); }"
+      },
+      {
+        "line": 200,
+        "text": ".treasury-lane-2 { -fx-border-color: #5CC8FF44; }"
+      },
+      {
+        "line": 201,
+        "text": ".treasury-lane-3 { -fx-border-color: #FF7A7A66; -fx-border-style: dotted; }"
+      },
+      {
+        "line": 207,
+        "text": ".skeleton { -fx-background-color: linear-gradient(from 0% 0% to 200% 0%, repeat, #1C2131 25%, #283049 50%, #1C2131 75%); -fx-background-radius: 5; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/panel.css",
+    "matches": [
+      {
+        "line": 2,
+        "text": "-bg: #0B0E14; -panel: #11151D; -panel2: #151A23; -border: #232A36;"
+      },
+      {
+        "line": 3,
+        "text": "-text: #E6EDF3; -muted: #A4AEBA; -text2: #C5CCD6; -disabled: #6B7480;"
+      },
+      {
+        "line": 4,
+        "text": "-ok: #3FB950; -warn: #D29922; -bad: #F85149; -info: #58A6FF; -purple: #A371F7;"
+      },
+      {
+        "line": 8,
+        "text": "-fx-base: #151A23;"
+      },
+      {
+        "line": 9,
+        "text": "-fx-control-inner-background: #11151D;"
+      },
+      {
+        "line": 34,
+        "text": ".nav-group { -fx-text-fill: #6E7681; -fx-font-size: 10.5px; -fx-font-family: \"Inter SemiBold\"; -fx-padding: 14 16 4 16; }"
+      },
+      {
+        "line": 37,
+        "text": ".nav-item.selected { -fx-background-color: #1C2433; -fx-text-fill: -text; -fx-font-family: \"Inter SemiBold\"; }"
+      },
+      {
+        "line": 43,
+        "text": ".scroll-bar .thumb { -fx-background-color: #30363D; -fx-background-radius: 6; }"
+      },
+      {
+        "line": 59,
+        "text": ".stage:hover { -fx-background-color: #1C2433; }"
+      },
+      {
+        "line": 60,
+        "text": ".stage-border-ok { -fx-border-color: #1F4D2B; } .stage-border-warn { -fx-border-color: #5C4A12; } .stage-border-bad { -fx-border-color: #5A1F1C; }"
+      },
+      {
+        "line": 76,
+        "text": ".btn-primary { -fx-background-color: #1F6FEB; -fx-text-fill: white; }"
+      },
+      {
+        "line": 77,
+        "text": ".btn-primary:hover { -fx-background-color: #388BFD; }"
+      },
+      {
+        "line": 79,
+        "text": ".btn-ghost:hover { -fx-background-color: #1C2433; }"
+      },
+      {
+        "line": 83,
+        "text": ".chip:selected { -fx-background-color: #1C2433; -fx-text-fill: -text; -fx-border-color: -info; }"
+      },
+      {
+        "line": 86,
+        "text": ".text-field, .combo-box-base, .spinner, .spinner .text-field { -fx-background-color: -panel2; -fx-border-color: -border; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: -text; -fx-prompt-text-fill: #6E7681; }"
+      },
+      {
+        "line": 91,
+        "text": ".combo-box-popup .list-cell:hover { -fx-background-color: #1C2433; }"
+      },
+      {
+        "line": 100,
+        "text": ".table-row-cell { -fx-background-color: -panel; -fx-border-color: transparent transparent #1A202B transparent; -fx-cell-size: 34; }"
+      },
+      {
+        "line": 101,
+        "text": ".table-row-cell:odd { -fx-background-color: #0F131A; }"
+      },
+      {
+        "line": 102,
+        "text": ".table-row-cell:hover { -fx-background-color: #161C27; }"
+      },
+      {
+        "line": 103,
+        "text": ".table-row-cell:selected { -fx-background-color: #1C2A44; }"
+      },
+      {
+        "line": 118,
+        "text": ".log-view { -fx-background-color: #0A0D12; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; }"
+      },
+      {
+        "line": 119,
+        "text": ".log-view .list-cell { -fx-background-color: transparent; -fx-text-fill: #C9D1D9; -fx-padding: 1 10; }"
+      },
+      {
+        "line": 128,
+        "text": ".chart-vertical-grid-lines, .chart-horizontal-grid-lines { -fx-stroke: #1C2230; }"
+      },
+      {
+        "line": 129,
+        "text": ".chart-horizontal-zero-line { -fx-stroke: #30363D; }"
+      },
+      {
+        "line": 134,
+        "text": ".chart-line-symbol { -fx-background-color: -purple, #0B0E14; }"
+      },
+      {
+        "line": 142,
+        "text": ".dialog.dialog-pane .button:default { -fx-background-color: #1F6FEB; -fx-text-fill: white; }"
+      },
+      {
+        "line": 143,
+        "text": ".tooltip { -fx-background-color: #1C2433; -fx-text-fill: -text; -fx-font-size: 11.5px; }"
+      },
+      {
+        "line": 148,
+        "text": ".ws-tab:selected { -fx-background-color: #1C2433; -fx-text-fill: -text; -fx-border-color: -info; }"
+      },
+      {
+        "line": 152,
+        "text": "-bg: #0B0E11; -panel: #12161C; -panel2: #181C23; -border: #2B3139;"
+      },
+      {
+        "line": 153,
+        "text": "-text: #EAECEF; -muted: #A7B0BC; -text2: #C9D0D9; -disabled: #6F7885;"
+      },
+      {
+        "line": 154,
+        "text": "-ok: #0ECB81; -bad: #F6465D; -warn: #F0B90B; -info: #F0B90B;"
+      },
+      {
+        "line": 155,
+        "text": "-fx-base: #181C23;"
+      },
+      {
+        "line": 157,
+        "text": ".trader .sidebar { -fx-background-color: #0F1318; }"
+      },
+      {
+        "line": 158,
+        "text": ".trader .nav-item.selected { -fx-background-color: #1E2329; -fx-text-fill: #F0B90B; }"
+      },
+      {
+        "line": 159,
+        "text": ".trader .nav-item:hover { -fx-background-color: #1A1F26; }"
+      },
+      {
+        "line": 160,
+        "text": ".trader .ws-tab:selected { -fx-background-color: #1E2329; -fx-text-fill: #F0B90B; -fx-border-color: #F0B90B; }"
+      },
+      {
+        "line": 161,
+        "text": ".trader .btn-primary { -fx-background-color: #F0B90B; -fx-text-fill: #181A20; }"
+      },
+      {
+        "line": 162,
+        "text": ".trader .table-row-cell:selected { -fx-background-color: #20262E; }"
+      },
+      {
+        "line": 163,
+        "text": ".trader .table-row-cell:odd { -fx-background-color: #0F1318; }"
+      },
+      {
+        "line": 164,
+        "text": ".trader .table-row-cell:hover { -fx-background-color: #1A1F26; }"
+      },
+      {
+        "line": 165,
+        "text": ".trader .chip:selected, .trader .tab-pane > .tab-header-area .tab:selected { -fx-border-color: transparent transparent #F0B90B transparent; }"
+      },
+      {
+        "line": 171,
+        "text": ".pos { -fx-text-fill: #0ECB81; -fx-font-family: \"JetBrains Mono Medium\", \"Menlo\"; -fx-font-size: 12px; }"
+      },
+      {
+        "line": 172,
+        "text": ".neg { -fx-text-fill: #F6465D; -fx-font-family: \"JetBrains Mono Medium\", \"Menlo\"; -fx-font-size: 12px; }"
+      },
+      {
+        "line": 175,
+        "text": ".th-market-row { -fx-padding: 8; -fx-background-color: #1E2329; -fx-background-radius: 3; -fx-cursor: hand; }"
+      },
+      {
+        "line": 181,
+        "text": ".auth-left { -fx-background-color: linear-gradient(to bottom right, #0B0E11, #10151B); }"
+      },
+      {
+        "line": 184,
+        "text": ".auth-tagline { -fx-font-size: 20px; -fx-text-fill: #F0B90B; -fx-padding: 28 0 0 0; }"
+      },
+      {
+        "line": 187,
+        "text": ".auth-input:focused { -fx-border-color: #F0B90B; }"
+      },
+      {
+        "line": 196,
+        "text": ".menu-item:focused { -fx-background-color: #20262E; }"
+      },
+      {
+        "line": 227,
+        "text": ".btn-primary:pressed { -fx-background-color: #1858C4; }"
+      },
+      {
+        "line": 228,
+        "text": ".trader .btn-primary:pressed { -fx-background-color: #C99B05; }"
+      },
+      {
+        "line": 229,
+        "text": ".btn-ghost:hover { -fx-border-color: #3A4352; -fx-text-fill: -text; }"
+      },
+      {
+        "line": 233,
+        "text": ".card.clickable:hover { -fx-background-color: #151B25; -fx-border-color: #3A4352; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 8, 0, 0, 2); }"
+      },
+      {
+        "line": 235,
+        "text": ".stage:hover { -fx-border-color: #3A4352; }"
+      },
+      {
+        "line": 241,
+        "text": ".seg-thumb { -fx-background-color: #1E2329; -fx-background-radius: 5; -fx-border-color: -info; -fx-border-radius: 5; }"
+      },
+      {
+        "line": 249,
+        "text": ".menu-pop { -fx-background-color: #181C23; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 14, 0, 0, 4); -fx-min-width: 200; }"
+      },
+      {
+        "line": 256,
+        "text": ".toast { -fx-background-color: #1B212B; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 14, 0, 0, 4); }"
+      },
+      {
+        "line": 263,
+        "text": ".skeleton { -fx-background-color: #1B212B; -fx-background-radius: 4; }"
+      },
+      {
+        "line": 272,
+        "text": ".chart-watermark { -fx-text-fill: #3A4352; -fx-font-family: \"Inter Bold\", \"Inter\"; -fx-font-weight: bold; -fx-font-size: 18px; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/research.css",
+    "matches": [
+      {
+        "line": 7,
+        "text": ".byx-res-gate.open { -fx-background-color: #42D79B14; }"
+      },
+      {
+        "line": 8,
+        "text": ".byx-res-gate.locked { -fx-background-color: #FF7A7A10; }"
+      },
+      {
+        "line": 9,
+        "text": ".byx-res-gate.sealed { -fx-background-color: #1A2030; }"
+      },
+      {
+        "line": 10,
+        "text": ".byx-res-gate-icon { -fx-background-radius: 16; -fx-background-color: #AAB3C722; }"
+      },
+      {
+        "line": 11,
+        "text": ".byx-res-gate.open .byx-res-gate-icon { -fx-background-color: #42D79B22; }"
+      },
+      {
+        "line": 12,
+        "text": ".byx-res-gate.locked .byx-res-gate-icon { -fx-background-color: #FF7A7A22; }"
+      },
+      {
+        "line": 40,
+        "text": ".byx-res-seg.complete { -fx-background-color: #42D79BBF; }"
+      },
+      {
+        "line": 59,
+        "text": ".byx-res-now { -fx-background-color: #0A0C14; -fx-background-radius: 5; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/trading.css",
+    "matches": [
+      {
+        "line": 10,
+        "text": "-fx-background-color: #FFFFFF0A, -byx-bg1;"
+      },
+      {
+        "line": 81,
+        "text": ".chart-grid-ink { -fx-background-color: #FFFFFF10; }"
+      },
+      {
+        "line": 82,
+        "text": ".chart-text-ink { -fx-background-color: #8791A8; }"
+      },
+      {
+        "line": 96,
+        "text": ".byx-desk-depth.ask { -fx-background-color: #FF7A7A18; -fx-background-radius: 4; }"
+      },
+      {
+        "line": 97,
+        "text": ".byx-desk-depth.bid { -fx-background-color: #42D79B18; -fx-background-radius: 4; }"
+      },
+      {
+        "line": 160,
+        "text": ".byx-desk-scroll.byx-panel { -fx-background-color: #FFFFFF0A, -byx-bg1; -fx-background-insets: 0, 1 0 0 0; -fx-background-radius: 14, 14; -fx-padding: 14; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/auth.css",
+    "matches": [
+      {
+        "line": 50,
+        "text": ".byx-auth-okc { -fx-min-width: 64; -fx-min-height: 64; -fx-max-width: 64; -fx-max-height: 64; -fx-background-color: #42D79B22; -fx-background-radius: 32; }"
+      },
+      {
+        "line": 59,
+        "text": ".byx-verify-message.error { -fx-text-fill: #FF9B9B; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/tokens.css",
+    "matches": [
+      {
+        "line": 8,
+        "text": "-byx-bg0: #0B0E16;"
+      },
+      {
+        "line": 9,
+        "text": "-byx-bg1: #121723;"
+      },
+      {
+        "line": 10,
+        "text": "-byx-bg2: #1A2030;"
+      },
+      {
+        "line": 11,
+        "text": "-byx-bg3: #232A3D;"
+      },
+      {
+        "line": 12,
+        "text": "-byx-hover: #2C3550;"
+      },
+      {
+        "line": 13,
+        "text": "-byx-line: #2A3144;"
+      },
+      {
+        "line": 14,
+        "text": "-byx-scrim: #05070BD1; /* scrim #05070B at scrimOpacity 0.82 */"
+      },
+      {
+        "line": 17,
+        "text": "-byx-text-primary: #EEF1F8;"
+      },
+      {
+        "line": 18,
+        "text": "-byx-text-secondary: #AAB3C7;"
+      },
+      {
+        "line": 19,
+        "text": "-byx-text-tertiary: #8791A8;"
+      },
+      {
+        "line": 20,
+        "text": "-byx-text-on-accent: #0A0C14;"
+      },
+      {
+        "line": 23,
+        "text": "-byx-trading: #7C96FF;"
+      },
+      {
+        "line": 24,
+        "text": "-byx-research: #B896FF;"
+      },
+      {
+        "line": 25,
+        "text": "-byx-byx: #5ED6C4;"
+      },
+      {
+        "line": 29,
+        "text": "-byx-positive: #42D79B;"
+      },
+      {
+        "line": 30,
+        "text": "-byx-negative: #FF7A7A;"
+      },
+      {
+        "line": 31,
+        "text": "-byx-warning: #E9B44C;"
+      },
+      {
+        "line": 32,
+        "text": "-byx-info: #5CC8FF;"
+      },
+      {
+        "line": 33,
+        "text": "-byx-disabled: #566079;"
+      },
+      {
+        "line": 36,
+        "text": "-byx-positive-tint: #42D79B1F;"
+      },
+      {
+        "line": 37,
+        "text": "-byx-negative-tint: #FF7A7A1F;"
+      },
+      {
+        "line": 38,
+        "text": "-byx-warning-tint: #E9B44C1F;"
+      },
+      {
+        "line": 39,
+        "text": "-byx-info-tint: #5CC8FF1F;"
+      },
+      {
+        "line": 40,
+        "text": "-byx-accent-tint: #7C96FF1F;"
+      },
+      {
+        "line": 41,
+        "text": "-byx-positive-banner: #42D79B18;"
+      },
+      {
+        "line": 42,
+        "text": "-byx-negative-banner: #FF7A7A18;"
+      },
+      {
+        "line": 43,
+        "text": "-byx-warning-banner: #E9B44C18;"
+      },
+      {
+        "line": 44,
+        "text": "-byx-info-banner: #5CC8FF18;"
+      },
+      {
+        "line": 47,
+        "text": "-byx-banner-error: #FFB0B0;"
+      },
+      {
+        "line": 48,
+        "text": "-byx-banner-warning: #F2CB7A;"
+      },
+      {
+        "line": 49,
+        "text": "-byx-banner-success: #7FE6B8;"
+      },
+      {
+        "line": 50,
+        "text": "-byx-banner-info: #8ED8FF;"
+      },
+      {
+        "line": 53,
+        "text": "-byx-bg-canvas: #05070B;"
+      },
+      {
+        "line": 54,
+        "text": "-byx-avatar-bg: #1c253c;"
+      },
+      {
+        "line": 55,
+        "text": "-byx-ring-1: #B369D1;"
+      },
+      {
+        "line": 56,
+        "text": "-byx-ring-2: #69B6D3;"
+      },
+      {
+        "line": 57,
+        "text": "-byx-ring-3: #69D3A6;"
+      },
+      {
+        "line": 58,
+        "text": "-byx-ring-4: #D3C869;"
+      },
+      {
+        "line": 59,
+        "text": "-byx-ring-5: #D36990;"
+      },
+      {
+        "line": 62,
+        "text": "-byx-focus-ring: #7C96FF21;"
+      },
+      {
+        "line": 63,
+        "text": "-byx-error-ring: #FF7A7A1A;"
+      },
+      {
+        "line": 67,
+        "text": ".root.trader, .byx-ctx-trader { -byx-accent: -byx-trading; -byx-accent-tint: #7C96FF1F; }"
+      },
+      {
+        "line": 68,
+        "text": ".root.research, .byx-ctx-research { -byx-accent: -byx-research; -byx-accent-tint: #B896FF1F; }"
+      },
+      {
+        "line": 69,
+        "text": ".root.byx, .byx-ctx-byx { -byx-accent: -byx-byx; -byx-accent-tint: #5ED6C41F; }"
+      },
+      {
+        "line": 73,
+        "text": "-byx-text-secondary: #C3CADB;"
+      },
+      {
+        "line": 74,
+        "text": "-byx-text-tertiary: #A3ACC2;"
+      },
+      {
+        "line": 75,
+        "text": "-byx-line: #3A4460;"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/screens.css",
+    "matches": [
+      {
+        "line": 6,
+        "text": ".byx-env-banner { -fx-background-color: #FFFFFF0A, -byx-bg1; -fx-padding: 14 18 14 18; }"
+      },
+      {
+        "line": 82,
+        "text": ".byx-home-card-stack:hover .byx-home-card-body { -fx-background-color: #FFFFFF14, -byx-bg2; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/shell.css",
+    "matches": [
+      {
+        "line": 88,
+        "text": "-fx-background-color: #FFFFFF1A, -byx-avatar-bg; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;"
+      },
+      {
+        "line": 92,
+        "text": ".byx-avatar:hover { -fx-background-color: #FFFFFF40, -byx-avatar-bg; }"
+      },
+      {
+        "line": 96,
+        "text": ".byx-mascot-body { -fx-fill: -byx-bg-canvas; -fx-stroke: #FFFFFF2E; -fx-stroke-width: 1.6; }"
+      },
+      {
+        "line": 146,
+        "text": "-fx-background-color: #FFFFFF1A, -byx-bg2; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;"
+      },
+      {
+        "line": 160,
+        "text": ".byx-menu-item.current { -fx-background-color: #7C96FF14; }"
+      },
+      {
+        "line": 162,
+        "text": ".byx-menu-item.danger .byx-menu-label { -fx-text-fill: #FF9B9B; }"
+      },
+      {
+        "line": 163,
+        "text": ".byx-menu-item.danger .byx-icon { -fx-stroke: #FF9B9B; }"
+      }
+    ]
+  },
+  {
+    "path": "src/main/resources/panel/v2/controls.css",
+    "matches": [
+      {
+        "line": 40,
+        "text": ".byx-btn.danger-outline { -fx-background-color: transparent; -fx-border-color: #FF7A7A55; -fx-border-width: 1; -fx-border-radius: 9; -fx-text-fill: #FF9B9B; }"
+      },
+      {
+        "line": 41,
+        "text": ".byx-btn.danger-outline:hover { -fx-background-color: #FF7A7A14; }"
+      },
+      {
+        "line": 65,
+        "text": "-fx-border-color: -byx-text-primary, #FF7A7A55;"
+      },
+      {
+        "line": 72,
+        "text": ".byx-spinner-track { -fx-stroke: #FFFFFF33; -fx-fill: transparent; -fx-stroke-width: 2; }"
+      },
+      {
+        "line": 93,
+        "text": ".byx-input:hover { -fx-background-color: #3A4460, -byx-bg2; }"
+      },
+      {
+        "line": 178,
+        "text": ".byx-badge.tone-accent { -fx-text-fill: -byx-accent; -fx-background-color: #FFFFFF12; }"
+      },
+      {
+        "line": 188,
+        "text": ".byx-chip.state-operational { -fx-background-color: #42D79B1A; }"
+      },
+      {
+        "line": 189,
+        "text": ".byx-chip.state-operational .byx-chip-text { -fx-text-fill: #7FE6B8; }"
+      },
+      {
+        "line": 190,
+        "text": ".byx-chip.state-connecting { -fx-background-color: #5CC8FF1A; }"
+      },
+      {
+        "line": 191,
+        "text": ".byx-chip.state-connecting .byx-chip-text { -fx-text-fill: #8ED8FF; }"
+      },
+      {
+        "line": 192,
+        "text": ".byx-chip.state-reconnecting, .byx-chip.state-degraded { -fx-background-color: #E9B44C1F; }"
+      },
+      {
+        "line": 193,
+        "text": ".byx-chip.state-reconnecting .byx-chip-text, .byx-chip.state-degraded .byx-chip-text { -fx-text-fill: #F2CB7A; }"
+      },
+      {
+        "line": 194,
+        "text": ".byx-chip.state-unavailable { -fx-background-color: #FF7A7A1A; }"
+      },
+      {
+        "line": 195,
+        "text": ".byx-chip.state-unavailable .byx-chip-text { -fx-text-fill: #FF9B9B; }"
+      },
+      {
+        "line": 196,
+        "text": ".byx-chip.state-unavailable-expected { -fx-background-color: #232A3D; }"
+      },
+      {
+        "line": 197,
+        "text": ".byx-chip.state-unavailable-expected .byx-chip-text { -fx-text-fill: #AAB3C7; }"
+      },
+      {
+        "line": 198,
+        "text": ".byx-chip.state-unknown { -fx-background-color: transparent; -fx-border-color: #2A3144; -fx-border-width: 1; }"
+      },
+      {
+        "line": 199,
+        "text": ".byx-chip.state-unknown .byx-chip-text { -fx-text-fill: #AAB3C7; }"
+      },
+      {
+        "line": 226,
+        "text": ".byx-backdrop { -fx-background-color: #05070B; }"
+      }
+    ]
+  }
+]

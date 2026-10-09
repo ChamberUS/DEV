@@ -281,14 +281,15 @@ public final class ReferenceMotion {
 
     private static Background shimmerPaint(double x) {
         return new Background(new BackgroundFill(new LinearGradient(x, 0, x + 2, 0, true,
-                CycleMethod.REPEAT, new Stop(.25, Color.web("#1C2131")), new Stop(.5, Color.web("#283049")),
-                new Stop(.75, Color.web("#1C2131"))), new javafx.scene.layout.CornerRadii(5), Insets.EMPTY));
+                CycleMethod.REPEAT, new Stop(.25, panel.design.ByxTheme.paint("#1C2131", panel.design.ThemeToken.SURFACE_INPUT)), new Stop(.5, panel.design.ByxTheme.paint("#283049", panel.design.ThemeToken.SURFACE_HOVER)),
+                new Stop(.75, panel.design.ByxTheme.paint("#1C2131", panel.design.ThemeToken.SURFACE_INPUT))), new javafx.scene.layout.CornerRadii(5), Insets.EMPTY));
     }
 
     private void shimmer(Region node) {
+        panel.design.ByxTheme.observe(node, () -> { if (!node.backgroundProperty().isBound()) node.setBackground(shimmerPaint(0)); });
         visibleLoop(node, () -> {
             var offset = new SimpleDoubleProperty();
-            node.backgroundProperty().bind(javafx.beans.binding.Bindings.createObjectBinding(() -> shimmerPaint(offset.get()), offset));
+            node.backgroundProperty().bind(javafx.beans.binding.Bindings.createObjectBinding(() -> shimmerPaint(offset.get()), offset, panel.design.ByxTheme.modeProperty()));
             return new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(offset, 0)),
                     new KeyFrame(MotionTokens.SHIMMER, new KeyValue(offset, 2, MotionTokens.CSS_EASE)));
         }, () -> { node.backgroundProperty().unbind(); node.setBackground(shimmerPaint(0)); });

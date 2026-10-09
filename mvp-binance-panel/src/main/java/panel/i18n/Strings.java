@@ -60,7 +60,7 @@ public final class Strings {
 
     private static Properties load(Lang lang) {
         Properties p = new Properties();
-        for (String base : new String[] {"package-b_", "package-b-extra_", "ui_"}) {
+        for (String base : new String[] {"package-b_", "package-b-extra_", "ui_", "appearance_"}) {
             String path = "/panel/i18n/" + base + lang.tag + ".properties";
             try (InputStream in = Strings.class.getResourceAsStream(path)) {
                 if (in != null) {

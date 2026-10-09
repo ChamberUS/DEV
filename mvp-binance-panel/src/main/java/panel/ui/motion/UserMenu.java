@@ -34,6 +34,7 @@ public class UserMenu extends Button {
         popup.setAutoHide(true);
         popup.setHideOnEscape(true);
         content.getStyleClass().add("menu-pop");
+        panel.design.ByxTheme.apply(content);
         content.setPadding(new Insets(6));
         popup.getContent().add(content);
         content.addEventFilter(KeyEvent.KEY_PRESSED, e -> {

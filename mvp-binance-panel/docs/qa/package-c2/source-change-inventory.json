@@ -1,0 +1,210 @@
+{
+  "comparison": "entry C1 source archive vs final tested C2 source",
+  "changes": [
+    {
+      "path": "src/main/java/panel/tradeview/ChartPanel.java",
+      "status": "modified",
+      "entrySha": "c7f176cfee82646200ef06fe6c8643407e58951bc9981d9cad33015d8df98d6c",
+      "currentSha": "d15ed92a4763f9936d5f5a5d1fd145a93a36410ea14c5553e6ec13364ada3ace"
+    },
+    {
+      "path": "src/main/java/panel/ui/Dialogs.java",
+      "status": "modified",
+      "entrySha": "c60d94089a8459ac1067571fc8cdf4e04d464614ddd77f4ecb10609c658dfe72",
+      "currentSha": "4205ab4207e2229bc98d4a84d72b2e7cab79811efe8cf123a71c8147f35cc86a"
+    },
+    {
+      "path": "src/main/java/panel/design/ThemePalette.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "beb566b6bb7a7fe960418e3a4eb8d4bf324891e541592a1c2929c7c3d4f19ae4"
+    },
+    {
+      "path": "src/main/java/panel/design/ThemeMode.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "3f6ad40885ad89e4e0e1cc591380d489e890d0c9cc24309cb72bbae0b264292b"
+    },
+    {
+      "path": "src/main/java/panel/design/ThemeToken.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "74d24a7105690d495c10f5f057b68cd7f9f6b4bd170bc4d8aa94e1d5c406a890"
+    },
+    {
+      "path": "src/main/java/panel/design/ByxRegion.java",
+      "status": "modified",
+      "entrySha": "089ac3247e0219f9da088e8aefa267417eae2b57d7302f9870ae877909bf182d",
+      "currentSha": "852cdc5290c957c1ee93924d6692611b26c8ba96ea1ff8e6b5d86e7498102a99"
+    },
+    {
+      "path": "src/main/java/panel/design/ThemeSelector.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "8e47e4cb8f801b2ac5ae5746c227b881ed667d2fea9dfb1d89f3c61ef67f0c02"
+    },
+    {
+      "path": "src/main/java/panel/design/ByxTheme.java",
+      "status": "modified",
+      "entrySha": "91fa5e959555b74d960dcf66ce757d53fe1665501d32465b6dfc5cd7f288c95e",
+      "currentSha": "d044fb63810406cdc6ce6b4e40bdbd2696d9aa79e88052423e6aa39094dd0992"
+    },
+    {
+      "path": "src/main/java/panel/app/PanelApp.java",
+      "status": "modified",
+      "entrySha": "6510f53fd6230b80740a13f25aecfac768ede103bef13491a2f31e5e2de7f7b4",
+      "currentSha": "ea05f04e17633c4dc47e2d89b698b9d6497c8005e010909e3ec7fa85fc62794e"
+    },
+    {
+      "path": "src/main/java/panel/shell/LegacyHost.java",
+      "status": "modified",
+      "entrySha": "ef98b5ba0743de05494f1caea909d22c60fec35a6af7522298e865a28f3c0db1",
+      "currentSha": "f0354973b4227df33c09db18916b0570d8c044ca999187e2c378a23d53b9e455"
+    },
+    {
+      "path": "src/main/java/panel/motion/ReferenceMotion.java",
+      "status": "modified",
+      "entrySha": "8596bee1c2315ae7c0647a39e04118ee7c9ae25d7b9ca33514af3087ced79866",
+      "currentSha": "0fa7998431d7088d3f4461b4b602f3d8af950658504c0b71ca501f1beb5d11a0"
+    },
+    {
+      "path": "src/main/java/panel/mascot/MascotStage.java",
+      "status": "modified",
+      "entrySha": "6bd1ad7573ecd88c71021089923bb558cb8b93995bf6f12f429eb7c493a3181c",
+      "currentSha": "4d08dce1edf6e0323a19f3baf7dcba0d2e718ef8fa0fbcdcd0789cfc7f112ead"
+    },
+    {
+      "path": "src/main/java/panel/mascot/MascotHintBubble.java",
+      "status": "modified",
+      "entrySha": "47159a67b8bd6e354cdff249e30661173a5151a1e4dd8b7897cb2eb73f6efd67",
+      "currentSha": "4e3d007be81ae2f0e3e45101a236ca0fa49e225acdf37aee1ec20c4ce7cd0982"
+    },
+    {
+      "path": "src/main/java/panel/accountview/SettingsScreen.java",
+      "status": "modified",
+      "entrySha": "bb09500bbca121c6fe414289f2363691f271d9c6926b7da41e2114b024e94326",
+      "currentSha": "aa4aa11b55a8ef56a935b952be995bf5e1078336a33e3d95882d211f83b27840"
+    },
+    {
+      "path": "src/main/java/panel/researchview/Hatch.java",
+      "status": "modified",
+      "entrySha": "3039f03c939c663f395cd6a70c830675ce565b4861757afbcd7aef6b6f5021c8",
+      "currentSha": "27ace1d4f1e2e2b643b624437aef2f87de844e60be638501e6d2c54ec30c1739"
+    },
+    {
+      "path": "src/main/java/panel/authview/BrandPanel.java",
+      "status": "modified",
+      "entrySha": "d377b1a1a34da5742d632a6e58d02f5ce2edba41216c6d05bc05c0637768c38e",
+      "currentSha": "6ac53e54090ab90e167622dc7014315d49c0493394ff1b56d9a13b4339b0204d"
+    },
+    {
+      "path": "src/main/java/panel/i18n/Strings.java",
+      "status": "modified",
+      "entrySha": "cd7552572a77c44a5733f24ca71649aa7b4db0e1a6e090f6cab6aa07102e1e33",
+      "currentSha": "a176a0aa0fc54a713c6b437710169502cf545824d1b98d64dd862e8ff7d79dad"
+    },
+    {
+      "path": "src/main/java/panel/ui/auth/UsersView.java",
+      "status": "modified",
+      "entrySha": "63eff0793db60b0ab998a6379ae83db48e4b652e8af8a482e2146c937e1d656b",
+      "currentSha": "42dc09566ee3a6a74fd761e93128ce1ca15b07b6e6aca358a3022bd35d88790c"
+    },
+    {
+      "path": "src/main/java/panel/ui/trader/CandleChart.java",
+      "status": "modified",
+      "entrySha": "11a86f1094e547c0056e3cd1107ee449a4ead674b66be521f261fc08f1200a98",
+      "currentSha": "6bf640f6ff9bbe71ea46849608dda6712e4f561ba5131c8da18e1b874e16c157"
+    },
+    {
+      "path": "src/main/java/panel/ui/motion/UserMenu.java",
+      "status": "modified",
+      "entrySha": "7b7dd96651e25a2eaf69b5e11c641410f397c9eabdefc863e6b0c560e44b747a",
+      "currentSha": "23380367ca08f673240e7483438fffde9be076ee4550686168ea096f5aa32eb2"
+    },
+    {
+      "path": "src/main/resources/design/BYX_PACKAGE_C2_TOKENS.json",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "44c4ff82d156806020425f5e23382aaeb7a8da5cdca96cdd919c1615339dec0c"
+    },
+    {
+      "path": "src/main/resources/panel/v2/theme-controls.css",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "9b91b55254afd5003027e66bb48ac567ff5a9ae0d16267d676c229d1c3a62257"
+    },
+    {
+      "path": "src/main/resources/panel/v2/theme-palette.css",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "9c0049da679152b810cc8e7694c0d2dae6594ab3b10d116c50f9f8aa6e39c112"
+    },
+    {
+      "path": "src/main/resources/panel/i18n/appearance_pt-BR.properties",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "324c29dbbde99efd7eb0c6e8d469d0345c45af7c23541a4ca579a29e9aae7dd5"
+    },
+    {
+      "path": "src/main/resources/panel/i18n/appearance_en.properties",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "a4bf54269ec5aae5904ebba7f206230b3bd3a3dd45ce8560a11220f191691799"
+    },
+    {
+      "path": "src/test/java/panel/PackageC2FlowQa.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "cc31d044e7cb4c175435af055353d88b0e94c63fb247e821e04482bcea65f323"
+    },
+    {
+      "path": "src/test/java/panel/PackageC2ThemeTest.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "77cde2f460521270b3cfef9ca2ec394b3dddde84d6763e3ab0618cc3e97ee9fb"
+    },
+    {
+      "path": "src/test/java/panel/PackageC2AuthFlowQa.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "db32c6c7ed84998ec44b115906afddd6bbb4a3997e13ea1a2dd49d8b51117ad8"
+    },
+    {
+      "path": "src/test/java/panel/tradeview/PackageC2GraphicsQa.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "21df95b6f380ee2c999d5841631cfa4dd6a05ce146c1b4b730bcec99160e89c0"
+    },
+    {
+      "path": "src/test/java/panel/tradeview/PackageC2ResolvedControlsTest.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "f6c9d678fd0b216d71c3eb8f77e570bddd368620da08b6538223a98444e8b843"
+    },
+    {
+      "path": "src/test/java/panel/design/PackageC2ContrastQa.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "b23ebffef5002a6b2fbf0d3447fbd9d22d74915f7d2f54240d5fb3356861c1c1"
+    },
+    {
+      "path": "src/test/java/panel/mascot/MascotPresenceViewTest.java",
+      "status": "modified",
+      "entrySha": "2673247c57f8d10616d8be8a3d4029939662070dd0443eb449981809c053299e",
+      "currentSha": "749a8a6c58b87f961bcdb338b89ca368c40d488abccd4b4f39fd09fd7f05536a"
+    },
+    {
+      "path": "src/test/java/panel/accountview/PackageC2SettingsTest.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "d2d58b268e9338b666331a0fc0a6bd2b13f0f4f9ef953fb0faf11bfd743bbf21"
+    },
+    {
+      "path": "src/test/java/panel/shell/avatar/PackageC2AvatarVisualQa.java",
+      "status": "added",
+      "entrySha": null,
+      "currentSha": "be2ad2c29c621686004ddf21dddc550e2186848c264f184efa0cc15da8090dd6"
+    }
+  ],
+  "deleted": []
+}

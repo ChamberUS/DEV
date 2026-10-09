@@ -1,0 +1,42 @@
+[
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgb-uat/1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z/BYX-MVP-1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z.zip",
+    "sha256": "88122d266440b98430949aa1b28ec9c9aaeb05b61d69026bc3bd9ac09b91fb88",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-rc1/1.0.0-local-rc1-9d3eb1e50ea4-20261009T002639Z/BYX-MVP-1.0.0-local-rc1-9d3eb1e50ea4-20261009T002639Z.zip",
+    "sha256": "cd382408cf2ef256413273d0778d23f74f508dabe3d79d05150f7e9ffa04a2d7",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkga-uat/1.0.0-local-pkga-uat-20261009T055159Z/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar",
+    "sha256": "d5ff209a1e561b0d3b37392f834db69e177d244903c4dced073bd0d9e2a073c7",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkga-uat/1.0.0-local-pkga-uat-20261009T055159Z/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar",
+    "sha256": "9520ddc0566645fe8bbd48f0f23d8b7bb79ec10f4d8406dbe445fbc916852225",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgb-uat/1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar",
+    "sha256": "fd0af17b8f117443d409bb6fe7bd4a72c23d7ff3e5bb133b4d238ca1a9b68b7c",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgb-uat/1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar",
+    "sha256": "9520ddc0566645fe8bbd48f0f23d8b7bb79ec10f4d8406dbe445fbc916852225",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc1-uat/1.0.0-local-pkgc1-uat-20261009T082713Z/BYX-MVP.app/Contents/app/mvp-binance-panel-0.1.0.jar",
+    "sha256": "4f2f6e004e52c1f62bad83a1714f41fb22e87288ec27998209d537bbfb02122c",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc1-uat/1.0.0-local-pkgc1-uat-20261009T082713Z/BYX-MVP.app/Contents/Helpers/byx-local-service.app/Contents/app/byx-local-service-0.1.0.jar",
+    "sha256": "9520ddc0566645fe8bbd48f0f23d8b7bb79ec10f4d8406dbe445fbc916852225",
+    "unchanged": true
+  }
+]

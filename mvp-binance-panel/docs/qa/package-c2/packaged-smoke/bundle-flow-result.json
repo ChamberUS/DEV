@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0-local-pkgc2-uat-20261009T172945Z",
+  "passes": 1487,
+  "failures": 0,
+  "productionClasspath": "current packaged Contents/app/*.jar only",
+  "externalTestClasspath": "/tmp/byx-c2-final-compiled/test-classes",
+  "authority": "existing isolated synthetic QaContext; normal email/SMS MFA",
+  "signedLauncherClaim": false
+}

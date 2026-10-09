@@ -192,7 +192,7 @@ public class PanelApp extends Application {
     // ---- fluxo de autenticação -------------------------------------------------
 
     private void showEntry(String message) {
-        if (localeOwner != null) { panel.i18n.Strings.resetSession(); localeOwner = null; }
+        if (localeOwner != null) { panel.i18n.Strings.resetSession(); panel.design.ByxTheme.resetSession(); localeOwner = null; }
         signingOut = false;
         rootStack.setDisable(false);
         researchCheckGeneration++;
@@ -374,7 +374,7 @@ public class PanelApp extends Application {
     // ---- aplicação principal ---------------------------------------------------
 
     private void enterApp(User user) {
-        if (localeOwner != null && localeOwner.longValue() != user.id()) panel.i18n.Strings.resetSession();
+        if (localeOwner != null && localeOwner.longValue() != user.id()) { panel.i18n.Strings.resetSession(); panel.design.ByxTheme.resetSession(); }
         localeOwner = user.id();
         signingOut = false;
         rootStack.setDisable(false);

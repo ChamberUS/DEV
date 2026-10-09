@@ -58,12 +58,13 @@ public final class MascotHintBubble {
         Label l = new Label(hint.text());
         l.setWrapText(true);
         l.setMaxWidth(WIDTH - 28);
-        l.setTextFill(Color.web("#EEF1F8"));
+        l.getStyleClass().add("byx-body");
         l.setStyle("-fx-font-size: 12.5px;");
         StackPane box = new StackPane(l);
         box.setPadding(new Insets(10, 14, 10, 14));
-        box.setStyle("-fx-background-color: #1A2030; -fx-background-radius: 10; -fx-border-color: #2A3144; -fx-border-radius: 10; -fx-border-width: 1;"
+        box.setStyle("-fx-background-color: -byx-bg2; -fx-background-radius: 10; -fx-border-color: -byx-line; -fx-border-radius: 10; -fx-border-width: 1;"
                 + "-fx-effect: dropshadow(gaussian, rgba(5,7,11,0.55), 14, 0.1, 0, 4);");
+        panel.design.ByxTheme.apply(box);
         box.setPrefWidth(WIDTH);
         box.setMaxWidth(WIDTH);
         box.setFocusTraversable(false);

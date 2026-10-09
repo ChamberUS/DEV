@@ -1,0 +1,1487 @@
+PASS login labels EN
+PASS login same view/shell DARK EN
+PASS login route and session preserved DARK EN
+PASS login focus preserved DARK EN
+PASS login locale independent DARK
+PASS login theme root marker DARK
+PASS login same view/shell LIGHT EN
+PASS login route and session preserved LIGHT EN
+PASS login focus preserved LIGHT EN
+PASS login locale independent LIGHT
+PASS login theme root marker LIGHT
+PASS login labels PT_BR
+PASS login same view/shell DARK PT_BR
+PASS login route and session preserved DARK PT_BR
+PASS login focus preserved DARK PT_BR
+PASS login locale independent DARK
+PASS login theme root marker DARK
+PASS login same view/shell LIGHT PT_BR
+PASS login route and session preserved LIGHT PT_BR
+PASS login focus preserved LIGHT PT_BR
+PASS login locale independent LIGHT
+PASS login theme root marker LIGHT
+PASS locale does not authenticate
+PASS t-home stable route EN
+PASS t-home stable authority EN
+PASS t-home same view EN
+PASS t-home same mascot and handlers EN
+PASS t-home same view/shell DARK EN
+PASS t-home route and session preserved DARK EN
+PASS t-home focus preserved DARK EN
+PASS t-home locale independent DARK
+PASS t-home theme root marker DARK
+PASS t-home same view/shell LIGHT EN
+PASS t-home route and session preserved LIGHT EN
+PASS t-home focus preserved LIGHT EN
+PASS t-home locale independent LIGHT
+PASS t-home theme root marker LIGHT
+PASS t-home stable route PT_BR
+PASS t-home stable authority PT_BR
+PASS t-home same view PT_BR
+PASS t-home same mascot and handlers PT_BR
+PASS t-home same view/shell DARK PT_BR
+PASS t-home route and session preserved DARK PT_BR
+PASS t-home focus preserved DARK PT_BR
+PASS t-home locale independent DARK
+PASS t-home theme root marker DARK
+PASS t-home same view/shell LIGHT PT_BR
+PASS t-home route and session preserved LIGHT PT_BR
+PASS t-home focus preserved LIGHT PT_BR
+PASS t-home locale independent LIGHT
+PASS t-home theme root marker LIGHT
+PASS t-desk stable route EN
+PASS t-desk stable authority EN
+PASS t-desk same view EN
+PASS t-desk same mascot and handlers EN
+PASS t-desk same view/shell DARK EN
+PASS t-desk route and session preserved DARK EN
+PASS t-desk focus preserved DARK EN
+PASS t-desk locale independent DARK
+PASS t-desk theme root marker DARK
+PASS t-desk same view/shell LIGHT EN
+PASS t-desk route and session preserved LIGHT EN
+PASS t-desk focus preserved LIGHT EN
+PASS t-desk locale independent LIGHT
+PASS t-desk theme root marker LIGHT
+PASS t-desk stable route PT_BR
+PASS t-desk stable authority PT_BR
+PASS t-desk same view PT_BR
+PASS t-desk same mascot and handlers PT_BR
+PASS t-desk same view/shell DARK PT_BR
+PASS t-desk route and session preserved DARK PT_BR
+PASS t-desk focus preserved DARK PT_BR
+PASS t-desk locale independent DARK
+PASS t-desk theme root marker DARK
+PASS t-desk same view/shell LIGHT PT_BR
+PASS t-desk route and session preserved LIGHT PT_BR
+PASS t-desk focus preserved LIGHT PT_BR
+PASS t-desk locale independent LIGHT
+PASS t-desk theme root marker LIGHT
+PASS t-markets stable route EN
+PASS t-markets stable authority EN
+PASS t-markets same view EN
+PASS t-markets same mascot and handlers EN
+PASS t-markets same view/shell DARK EN
+PASS t-markets route and session preserved DARK EN
+PASS t-markets focus preserved DARK EN
+PASS t-markets locale independent DARK
+PASS t-markets theme root marker DARK
+PASS t-markets same view/shell LIGHT EN
+PASS t-markets route and session preserved LIGHT EN
+PASS t-markets focus preserved LIGHT EN
+PASS t-markets locale independent LIGHT
+PASS t-markets theme root marker LIGHT
+PASS t-markets stable route PT_BR
+PASS t-markets stable authority PT_BR
+PASS t-markets same view PT_BR
+PASS t-markets same mascot and handlers PT_BR
+PASS t-markets same view/shell DARK PT_BR
+PASS t-markets route and session preserved DARK PT_BR
+PASS t-markets focus preserved DARK PT_BR
+PASS t-markets locale independent DARK
+PASS t-markets theme root marker DARK
+PASS t-markets same view/shell LIGHT PT_BR
+PASS t-markets route and session preserved LIGHT PT_BR
+PASS t-markets focus preserved LIGHT PT_BR
+PASS t-markets locale independent LIGHT
+PASS t-markets theme root marker LIGHT
+PASS t-bot stable route EN
+PASS t-bot stable authority EN
+PASS t-bot same view EN
+PASS t-bot same mascot and handlers EN
+PASS t-bot same view/shell DARK EN
+PASS t-bot route and session preserved DARK EN
+PASS t-bot focus preserved DARK EN
+PASS t-bot locale independent DARK
+PASS t-bot theme root marker DARK
+PASS t-bot same view/shell LIGHT EN
+PASS t-bot route and session preserved LIGHT EN
+PASS t-bot focus preserved LIGHT EN
+PASS t-bot locale independent LIGHT
+PASS t-bot theme root marker LIGHT
+PASS t-bot stable route PT_BR
+PASS t-bot stable authority PT_BR
+PASS t-bot same view PT_BR
+PASS t-bot same mascot and handlers PT_BR
+PASS t-bot same view/shell DARK PT_BR
+PASS t-bot route and session preserved DARK PT_BR
+PASS t-bot focus preserved DARK PT_BR
+PASS t-bot locale independent DARK
+PASS t-bot theme root marker DARK
+PASS t-bot same view/shell LIGHT PT_BR
+PASS t-bot route and session preserved LIGHT PT_BR
+PASS t-bot focus preserved LIGHT PT_BR
+PASS t-bot locale independent LIGHT
+PASS t-bot theme root marker LIGHT
+PASS t-strategies stable route EN
+PASS t-strategies stable authority EN
+PASS t-strategies same view EN
+PASS t-strategies same mascot and handlers EN
+PASS t-strategies same view/shell DARK EN
+PASS t-strategies route and session preserved DARK EN
+PASS t-strategies focus preserved DARK EN
+PASS t-strategies locale independent DARK
+PASS t-strategies theme root marker DARK
+PASS t-strategies same view/shell LIGHT EN
+PASS t-strategies route and session preserved LIGHT EN
+PASS t-strategies focus preserved LIGHT EN
+PASS t-strategies locale independent LIGHT
+PASS t-strategies theme root marker LIGHT
+PASS t-strategies stable route PT_BR
+PASS t-strategies stable authority PT_BR
+PASS t-strategies same view PT_BR
+PASS t-strategies same mascot and handlers PT_BR
+PASS t-strategies same view/shell DARK PT_BR
+PASS t-strategies route and session preserved DARK PT_BR
+PASS t-strategies focus preserved DARK PT_BR
+PASS t-strategies locale independent DARK
+PASS t-strategies theme root marker DARK
+PASS t-strategies same view/shell LIGHT PT_BR
+PASS t-strategies route and session preserved LIGHT PT_BR
+PASS t-strategies focus preserved LIGHT PT_BR
+PASS t-strategies locale independent LIGHT
+PASS t-strategies theme root marker LIGHT
+PASS t-signals stable route EN
+PASS t-signals stable authority EN
+PASS t-signals same view EN
+PASS t-signals same mascot and handlers EN
+PASS t-signals same view/shell DARK EN
+PASS t-signals route and session preserved DARK EN
+PASS t-signals focus preserved DARK EN
+PASS t-signals locale independent DARK
+PASS t-signals theme root marker DARK
+PASS t-signals same view/shell LIGHT EN
+PASS t-signals route and session preserved LIGHT EN
+PASS t-signals focus preserved LIGHT EN
+PASS t-signals locale independent LIGHT
+PASS t-signals theme root marker LIGHT
+PASS t-signals stable route PT_BR
+PASS t-signals stable authority PT_BR
+PASS t-signals same view PT_BR
+PASS t-signals same mascot and handlers PT_BR
+PASS t-signals same view/shell DARK PT_BR
+PASS t-signals route and session preserved DARK PT_BR
+PASS t-signals focus preserved DARK PT_BR
+PASS t-signals locale independent DARK
+PASS t-signals theme root marker DARK
+PASS t-signals same view/shell LIGHT PT_BR
+PASS t-signals route and session preserved LIGHT PT_BR
+PASS t-signals focus preserved LIGHT PT_BR
+PASS t-signals locale independent LIGHT
+PASS t-signals theme root marker LIGHT
+PASS t-portfolio stable route EN
+PASS t-portfolio stable authority EN
+PASS t-portfolio same view EN
+PASS t-portfolio same mascot and handlers EN
+PASS t-portfolio same view/shell DARK EN
+PASS t-portfolio route and session preserved DARK EN
+PASS t-portfolio focus preserved DARK EN
+PASS t-portfolio locale independent DARK
+PASS t-portfolio theme root marker DARK
+PASS t-portfolio same view/shell LIGHT EN
+PASS t-portfolio route and session preserved LIGHT EN
+PASS t-portfolio focus preserved LIGHT EN
+PASS t-portfolio locale independent LIGHT
+PASS t-portfolio theme root marker LIGHT
+PASS t-portfolio stable route PT_BR
+PASS t-portfolio stable authority PT_BR
+PASS t-portfolio same view PT_BR
+PASS t-portfolio same mascot and handlers PT_BR
+PASS t-portfolio same view/shell DARK PT_BR
+PASS t-portfolio route and session preserved DARK PT_BR
+PASS t-portfolio focus preserved DARK PT_BR
+PASS t-portfolio locale independent DARK
+PASS t-portfolio theme root marker DARK
+PASS t-portfolio same view/shell LIGHT PT_BR
+PASS t-portfolio route and session preserved LIGHT PT_BR
+PASS t-portfolio focus preserved LIGHT PT_BR
+PASS t-portfolio locale independent LIGHT
+PASS t-portfolio theme root marker LIGHT
+PASS t-positions stable route EN
+PASS t-positions stable authority EN
+PASS t-positions same view EN
+PASS t-positions same mascot and handlers EN
+PASS t-positions same view/shell DARK EN
+PASS t-positions route and session preserved DARK EN
+PASS t-positions focus preserved DARK EN
+PASS t-positions locale independent DARK
+PASS t-positions theme root marker DARK
+PASS t-positions same view/shell LIGHT EN
+PASS t-positions route and session preserved LIGHT EN
+PASS t-positions focus preserved LIGHT EN
+PASS t-positions locale independent LIGHT
+PASS t-positions theme root marker LIGHT
+PASS t-positions stable route PT_BR
+PASS t-positions stable authority PT_BR
+PASS t-positions same view PT_BR
+PASS t-positions same mascot and handlers PT_BR
+PASS t-positions same view/shell DARK PT_BR
+PASS t-positions route and session preserved DARK PT_BR
+PASS t-positions focus preserved DARK PT_BR
+PASS t-positions locale independent DARK
+PASS t-positions theme root marker DARK
+PASS t-positions same view/shell LIGHT PT_BR
+PASS t-positions route and session preserved LIGHT PT_BR
+PASS t-positions focus preserved LIGHT PT_BR
+PASS t-positions locale independent LIGHT
+PASS t-positions theme root marker LIGHT
+PASS t-orders stable route EN
+PASS t-orders stable authority EN
+PASS t-orders same view EN
+PASS t-orders same mascot and handlers EN
+PASS t-orders same view/shell DARK EN
+PASS t-orders route and session preserved DARK EN
+PASS t-orders focus preserved DARK EN
+PASS t-orders locale independent DARK
+PASS t-orders theme root marker DARK
+PASS t-orders same view/shell LIGHT EN
+PASS t-orders route and session preserved LIGHT EN
+PASS t-orders focus preserved LIGHT EN
+PASS t-orders locale independent LIGHT
+PASS t-orders theme root marker LIGHT
+PASS t-orders stable route PT_BR
+PASS t-orders stable authority PT_BR
+PASS t-orders same view PT_BR
+PASS t-orders same mascot and handlers PT_BR
+PASS t-orders same view/shell DARK PT_BR
+PASS t-orders route and session preserved DARK PT_BR
+PASS t-orders focus preserved DARK PT_BR
+PASS t-orders locale independent DARK
+PASS t-orders theme root marker DARK
+PASS t-orders same view/shell LIGHT PT_BR
+PASS t-orders route and session preserved LIGHT PT_BR
+PASS t-orders focus preserved LIGHT PT_BR
+PASS t-orders locale independent LIGHT
+PASS t-orders theme root marker LIGHT
+PASS t-performance stable route EN
+PASS t-performance stable authority EN
+PASS t-performance same view EN
+PASS t-performance same mascot and handlers EN
+PASS t-performance same view/shell DARK EN
+PASS t-performance route and session preserved DARK EN
+PASS t-performance focus preserved DARK EN
+PASS t-performance locale independent DARK
+PASS t-performance theme root marker DARK
+PASS t-performance same view/shell LIGHT EN
+PASS t-performance route and session preserved LIGHT EN
+PASS t-performance focus preserved LIGHT EN
+PASS t-performance locale independent LIGHT
+PASS t-performance theme root marker LIGHT
+PASS t-performance stable route PT_BR
+PASS t-performance stable authority PT_BR
+PASS t-performance same view PT_BR
+PASS t-performance same mascot and handlers PT_BR
+PASS t-performance same view/shell DARK PT_BR
+PASS t-performance route and session preserved DARK PT_BR
+PASS t-performance focus preserved DARK PT_BR
+PASS t-performance locale independent DARK
+PASS t-performance theme root marker DARK
+PASS t-performance same view/shell LIGHT PT_BR
+PASS t-performance route and session preserved LIGHT PT_BR
+PASS t-performance focus preserved LIGHT PT_BR
+PASS t-performance locale independent LIGHT
+PASS t-performance theme root marker LIGHT
+PASS t-activity stable route EN
+PASS t-activity stable authority EN
+PASS t-activity same view EN
+PASS t-activity same mascot and handlers EN
+PASS t-activity same view/shell DARK EN
+PASS t-activity route and session preserved DARK EN
+PASS t-activity focus preserved DARK EN
+PASS t-activity locale independent DARK
+PASS t-activity theme root marker DARK
+PASS t-activity same view/shell LIGHT EN
+PASS t-activity route and session preserved LIGHT EN
+PASS t-activity focus preserved LIGHT EN
+PASS t-activity locale independent LIGHT
+PASS t-activity theme root marker LIGHT
+PASS t-activity stable route PT_BR
+PASS t-activity stable authority PT_BR
+PASS t-activity same view PT_BR
+PASS t-activity same mascot and handlers PT_BR
+PASS t-activity same view/shell DARK PT_BR
+PASS t-activity route and session preserved DARK PT_BR
+PASS t-activity focus preserved DARK PT_BR
+PASS t-activity locale independent DARK
+PASS t-activity theme root marker DARK
+PASS t-activity same view/shell LIGHT PT_BR
+PASS t-activity route and session preserved LIGHT PT_BR
+PASS t-activity focus preserved LIGHT PT_BR
+PASS t-activity locale independent LIGHT
+PASS t-activity theme root marker LIGHT
+PASS t-wallet stable route EN
+PASS t-wallet stable authority EN
+PASS t-wallet same view EN
+PASS t-wallet same mascot and handlers EN
+PASS t-wallet same view/shell DARK EN
+PASS t-wallet route and session preserved DARK EN
+PASS t-wallet focus preserved DARK EN
+PASS t-wallet locale independent DARK
+PASS t-wallet theme root marker DARK
+PASS t-wallet same view/shell LIGHT EN
+PASS t-wallet route and session preserved LIGHT EN
+PASS t-wallet focus preserved LIGHT EN
+PASS t-wallet locale independent LIGHT
+PASS t-wallet theme root marker LIGHT
+PASS t-wallet stable route PT_BR
+PASS t-wallet stable authority PT_BR
+PASS t-wallet same view PT_BR
+PASS t-wallet same mascot and handlers PT_BR
+PASS t-wallet same view/shell DARK PT_BR
+PASS t-wallet route and session preserved DARK PT_BR
+PASS t-wallet focus preserved DARK PT_BR
+PASS t-wallet locale independent DARK
+PASS t-wallet theme root marker DARK
+PASS t-wallet same view/shell LIGHT PT_BR
+PASS t-wallet route and session preserved LIGHT PT_BR
+PASS t-wallet focus preserved LIGHT PT_BR
+PASS t-wallet locale independent LIGHT
+PASS t-wallet theme root marker LIGHT
+PASS t-byx stable route EN
+PASS t-byx stable authority EN
+PASS t-byx same view EN
+PASS t-byx same mascot and handlers EN
+PASS t-byx same view/shell DARK EN
+PASS t-byx route and session preserved DARK EN
+PASS t-byx focus preserved DARK EN
+PASS t-byx locale independent DARK
+PASS t-byx theme root marker DARK
+PASS t-byx same view/shell LIGHT EN
+PASS t-byx route and session preserved LIGHT EN
+PASS t-byx focus preserved LIGHT EN
+PASS t-byx locale independent LIGHT
+PASS t-byx theme root marker LIGHT
+PASS t-byx stable route PT_BR
+PASS t-byx stable authority PT_BR
+PASS t-byx same view PT_BR
+PASS t-byx same mascot and handlers PT_BR
+PASS t-byx same view/shell DARK PT_BR
+PASS t-byx route and session preserved DARK PT_BR
+PASS t-byx focus preserved DARK PT_BR
+PASS t-byx locale independent DARK
+PASS t-byx theme root marker DARK
+PASS t-byx same view/shell LIGHT PT_BR
+PASS t-byx route and session preserved LIGHT PT_BR
+PASS t-byx focus preserved LIGHT PT_BR
+PASS t-byx locale independent LIGHT
+PASS t-byx theme root marker LIGHT
+PASS t-chain-data stable route EN
+PASS t-chain-data stable authority EN
+PASS t-chain-data same view EN
+PASS t-chain-data same mascot and handlers EN
+PASS t-chain-data same view/shell DARK EN
+PASS t-chain-data route and session preserved DARK EN
+PASS t-chain-data focus preserved DARK EN
+PASS t-chain-data locale independent DARK
+PASS t-chain-data theme root marker DARK
+PASS t-chain-data same view/shell LIGHT EN
+PASS t-chain-data route and session preserved LIGHT EN
+PASS t-chain-data focus preserved LIGHT EN
+PASS t-chain-data locale independent LIGHT
+PASS t-chain-data theme root marker LIGHT
+PASS t-chain-data stable route PT_BR
+PASS t-chain-data stable authority PT_BR
+PASS t-chain-data same view PT_BR
+PASS t-chain-data same mascot and handlers PT_BR
+PASS t-chain-data same view/shell DARK PT_BR
+PASS t-chain-data route and session preserved DARK PT_BR
+PASS t-chain-data focus preserved DARK PT_BR
+PASS t-chain-data locale independent DARK
+PASS t-chain-data theme root marker DARK
+PASS t-chain-data same view/shell LIGHT PT_BR
+PASS t-chain-data route and session preserved LIGHT PT_BR
+PASS t-chain-data focus preserved LIGHT PT_BR
+PASS t-chain-data locale independent LIGHT
+PASS t-chain-data theme root marker LIGHT
+PASS t-benefits stable route EN
+PASS t-benefits stable authority EN
+PASS t-benefits same view EN
+PASS t-benefits same mascot and handlers EN
+PASS t-benefits same view/shell DARK EN
+PASS t-benefits route and session preserved DARK EN
+PASS t-benefits focus preserved DARK EN
+PASS t-benefits locale independent DARK
+PASS t-benefits theme root marker DARK
+PASS t-benefits same view/shell LIGHT EN
+PASS t-benefits route and session preserved LIGHT EN
+PASS t-benefits focus preserved LIGHT EN
+PASS t-benefits locale independent LIGHT
+PASS t-benefits theme root marker LIGHT
+PASS t-benefits stable route PT_BR
+PASS t-benefits stable authority PT_BR
+PASS t-benefits same view PT_BR
+PASS t-benefits same mascot and handlers PT_BR
+PASS t-benefits same view/shell DARK PT_BR
+PASS t-benefits route and session preserved DARK PT_BR
+PASS t-benefits focus preserved DARK PT_BR
+PASS t-benefits locale independent DARK
+PASS t-benefits theme root marker DARK
+PASS t-benefits same view/shell LIGHT PT_BR
+PASS t-benefits route and session preserved LIGHT PT_BR
+PASS t-benefits focus preserved LIGHT PT_BR
+PASS t-benefits locale independent LIGHT
+PASS t-benefits theme root marker LIGHT
+PASS t-treasury stable route EN
+PASS t-treasury stable authority EN
+PASS t-treasury same view EN
+PASS t-treasury same mascot and handlers EN
+PASS t-treasury same view/shell DARK EN
+PASS t-treasury route and session preserved DARK EN
+PASS t-treasury focus preserved DARK EN
+PASS t-treasury locale independent DARK
+PASS t-treasury theme root marker DARK
+PASS t-treasury same view/shell LIGHT EN
+PASS t-treasury route and session preserved LIGHT EN
+PASS t-treasury focus preserved LIGHT EN
+PASS t-treasury locale independent LIGHT
+PASS t-treasury theme root marker LIGHT
+PASS t-treasury stable route PT_BR
+PASS t-treasury stable authority PT_BR
+PASS t-treasury same view PT_BR
+PASS t-treasury same mascot and handlers PT_BR
+PASS t-treasury same view/shell DARK PT_BR
+PASS t-treasury route and session preserved DARK PT_BR
+PASS t-treasury focus preserved DARK PT_BR
+PASS t-treasury locale independent DARK
+PASS t-treasury theme root marker DARK
+PASS t-treasury same view/shell LIGHT PT_BR
+PASS t-treasury route and session preserved LIGHT PT_BR
+PASS t-treasury focus preserved LIGHT PT_BR
+PASS t-treasury locale independent LIGHT
+PASS t-treasury theme root marker LIGHT
+PASS t-profile stable route EN
+PASS t-profile stable authority EN
+PASS t-profile same view EN
+PASS t-profile same mascot and handlers EN
+PASS t-profile same view/shell DARK EN
+PASS t-profile route and session preserved DARK EN
+PASS t-profile focus preserved DARK EN
+PASS t-profile locale independent DARK
+PASS t-profile theme root marker DARK
+PASS t-profile same view/shell LIGHT EN
+PASS t-profile route and session preserved LIGHT EN
+PASS t-profile focus preserved LIGHT EN
+PASS t-profile locale independent LIGHT
+PASS t-profile theme root marker LIGHT
+PASS t-profile stable route PT_BR
+PASS t-profile stable authority PT_BR
+PASS t-profile same view PT_BR
+PASS t-profile same mascot and handlers PT_BR
+PASS t-profile same view/shell DARK PT_BR
+PASS t-profile route and session preserved DARK PT_BR
+PASS t-profile focus preserved DARK PT_BR
+PASS t-profile locale independent DARK
+PASS t-profile theme root marker DARK
+PASS t-profile same view/shell LIGHT PT_BR
+PASS t-profile route and session preserved LIGHT PT_BR
+PASS t-profile focus preserved LIGHT PT_BR
+PASS t-profile locale independent LIGHT
+PASS t-profile theme root marker LIGHT
+PASS t-security stable route EN
+PASS t-security stable authority EN
+PASS t-security same view EN
+PASS t-security same mascot and handlers EN
+PASS t-security same view/shell DARK EN
+PASS t-security route and session preserved DARK EN
+PASS t-security focus preserved DARK EN
+PASS t-security locale independent DARK
+PASS t-security theme root marker DARK
+PASS t-security same view/shell LIGHT EN
+PASS t-security route and session preserved LIGHT EN
+PASS t-security focus preserved LIGHT EN
+PASS t-security locale independent LIGHT
+PASS t-security theme root marker LIGHT
+PASS t-security stable route PT_BR
+PASS t-security stable authority PT_BR
+PASS t-security same view PT_BR
+PASS t-security same mascot and handlers PT_BR
+PASS t-security same view/shell DARK PT_BR
+PASS t-security route and session preserved DARK PT_BR
+PASS t-security focus preserved DARK PT_BR
+PASS t-security locale independent DARK
+PASS t-security theme root marker DARK
+PASS t-security same view/shell LIGHT PT_BR
+PASS t-security route and session preserved LIGHT PT_BR
+PASS t-security focus preserved LIGHT PT_BR
+PASS t-security locale independent LIGHT
+PASS t-security theme root marker LIGHT
+PASS t-sessions stable route EN
+PASS t-sessions stable authority EN
+PASS t-sessions same view EN
+PASS t-sessions same mascot and handlers EN
+PASS t-sessions same view/shell DARK EN
+PASS t-sessions route and session preserved DARK EN
+PASS t-sessions focus preserved DARK EN
+PASS t-sessions locale independent DARK
+PASS t-sessions theme root marker DARK
+PASS t-sessions same view/shell LIGHT EN
+PASS t-sessions route and session preserved LIGHT EN
+PASS t-sessions focus preserved LIGHT EN
+PASS t-sessions locale independent LIGHT
+PASS t-sessions theme root marker LIGHT
+PASS t-sessions stable route PT_BR
+PASS t-sessions stable authority PT_BR
+PASS t-sessions same view PT_BR
+PASS t-sessions same mascot and handlers PT_BR
+PASS t-sessions same view/shell DARK PT_BR
+PASS t-sessions route and session preserved DARK PT_BR
+PASS t-sessions focus preserved DARK PT_BR
+PASS t-sessions locale independent DARK
+PASS t-sessions theme root marker DARK
+PASS t-sessions same view/shell LIGHT PT_BR
+PASS t-sessions route and session preserved LIGHT PT_BR
+PASS t-sessions focus preserved LIGHT PT_BR
+PASS t-sessions locale independent LIGHT
+PASS t-sessions theme root marker LIGHT
+PASS t-settings stable route EN
+PASS t-settings stable authority EN
+PASS t-settings same view EN
+PASS t-settings same mascot and handlers EN
+PASS t-settings same view/shell DARK EN
+PASS t-settings route and session preserved DARK EN
+PASS t-settings focus preserved DARK EN
+PASS t-settings locale independent DARK
+PASS t-settings theme root marker DARK
+PASS t-settings same view/shell LIGHT EN
+PASS t-settings route and session preserved LIGHT EN
+PASS t-settings focus preserved LIGHT EN
+PASS t-settings locale independent LIGHT
+PASS t-settings theme root marker LIGHT
+PASS t-settings stable route PT_BR
+PASS t-settings stable authority PT_BR
+PASS t-settings same view PT_BR
+PASS t-settings same mascot and handlers PT_BR
+PASS t-settings same view/shell DARK PT_BR
+PASS t-settings route and session preserved DARK PT_BR
+PASS t-settings focus preserved DARK PT_BR
+PASS t-settings locale independent DARK
+PASS t-settings theme root marker DARK
+PASS t-settings same view/shell LIGHT PT_BR
+PASS t-settings route and session preserved LIGHT PT_BR
+PASS t-settings focus preserved LIGHT PT_BR
+PASS t-settings locale independent LIGHT
+PASS t-settings theme root marker LIGHT
+PASS t-notifications stable route EN
+PASS t-notifications stable authority EN
+PASS t-notifications same view EN
+PASS t-notifications same mascot and handlers EN
+PASS t-notifications same view/shell DARK EN
+PASS t-notifications route and session preserved DARK EN
+PASS t-notifications focus preserved DARK EN
+PASS t-notifications locale independent DARK
+PASS t-notifications theme root marker DARK
+PASS t-notifications same view/shell LIGHT EN
+PASS t-notifications route and session preserved LIGHT EN
+PASS t-notifications focus preserved LIGHT EN
+PASS t-notifications locale independent LIGHT
+PASS t-notifications theme root marker LIGHT
+PASS t-notifications stable route PT_BR
+PASS t-notifications stable authority PT_BR
+PASS t-notifications same view PT_BR
+PASS t-notifications same mascot and handlers PT_BR
+PASS t-notifications same view/shell DARK PT_BR
+PASS t-notifications route and session preserved DARK PT_BR
+PASS t-notifications focus preserved DARK PT_BR
+PASS t-notifications locale independent DARK
+PASS t-notifications theme root marker DARK
+PASS t-notifications same view/shell LIGHT PT_BR
+PASS t-notifications route and session preserved LIGHT PT_BR
+PASS t-notifications focus preserved LIGHT PT_BR
+PASS t-notifications locale independent LIGHT
+PASS t-notifications theme root marker LIGHT
+PASS t-account-activity stable route EN
+PASS t-account-activity stable authority EN
+PASS t-account-activity same view EN
+PASS t-account-activity same mascot and handlers EN
+PASS t-account-activity same view/shell DARK EN
+PASS t-account-activity route and session preserved DARK EN
+PASS t-account-activity focus preserved DARK EN
+PASS t-account-activity locale independent DARK
+PASS t-account-activity theme root marker DARK
+PASS t-account-activity same view/shell LIGHT EN
+PASS t-account-activity route and session preserved LIGHT EN
+PASS t-account-activity focus preserved LIGHT EN
+PASS t-account-activity locale independent LIGHT
+PASS t-account-activity theme root marker LIGHT
+PASS t-account-activity stable route PT_BR
+PASS t-account-activity stable authority PT_BR
+PASS t-account-activity same view PT_BR
+PASS t-account-activity same mascot and handlers PT_BR
+PASS t-account-activity same view/shell DARK PT_BR
+PASS t-account-activity route and session preserved DARK PT_BR
+PASS t-account-activity focus preserved DARK PT_BR
+PASS t-account-activity locale independent DARK
+PASS t-account-activity theme root marker DARK
+PASS t-account-activity same view/shell LIGHT PT_BR
+PASS t-account-activity route and session preserved LIGHT PT_BR
+PASS t-account-activity focus preserved LIGHT PT_BR
+PASS t-account-activity locale independent LIGHT
+PASS t-account-activity theme root marker LIGHT
+PASS h-faq stable route EN
+PASS h-faq stable authority EN
+PASS h-faq same view EN
+PASS h-faq same mascot and handlers EN
+PASS h-faq same view/shell DARK EN
+PASS h-faq route and session preserved DARK EN
+PASS h-faq focus preserved DARK EN
+PASS h-faq locale independent DARK
+PASS h-faq theme root marker DARK
+PASS h-faq same view/shell LIGHT EN
+PASS h-faq route and session preserved LIGHT EN
+PASS h-faq focus preserved LIGHT EN
+PASS h-faq locale independent LIGHT
+PASS h-faq theme root marker LIGHT
+PASS h-faq stable route PT_BR
+PASS h-faq stable authority PT_BR
+PASS h-faq same view PT_BR
+PASS h-faq same mascot and handlers PT_BR
+PASS h-faq same view/shell DARK PT_BR
+PASS h-faq route and session preserved DARK PT_BR
+PASS h-faq focus preserved DARK PT_BR
+PASS h-faq locale independent DARK
+PASS h-faq theme root marker DARK
+PASS h-faq same view/shell LIGHT PT_BR
+PASS h-faq route and session preserved LIGHT PT_BR
+PASS h-faq focus preserved LIGHT PT_BR
+PASS h-faq locale independent LIGHT
+PASS h-faq theme root marker LIGHT
+PASS h-help stable route EN
+PASS h-help stable authority EN
+PASS h-help same view EN
+PASS h-help same mascot and handlers EN
+PASS h-help same view/shell DARK EN
+PASS h-help route and session preserved DARK EN
+PASS h-help focus preserved DARK EN
+PASS h-help locale independent DARK
+PASS h-help theme root marker DARK
+PASS h-help same view/shell LIGHT EN
+PASS h-help route and session preserved LIGHT EN
+PASS h-help focus preserved LIGHT EN
+PASS h-help locale independent LIGHT
+PASS h-help theme root marker LIGHT
+PASS h-help stable route PT_BR
+PASS h-help stable authority PT_BR
+PASS h-help same view PT_BR
+PASS h-help same mascot and handlers PT_BR
+PASS h-help same view/shell DARK PT_BR
+PASS h-help route and session preserved DARK PT_BR
+PASS h-help focus preserved DARK PT_BR
+PASS h-help locale independent DARK
+PASS h-help theme root marker DARK
+PASS h-help same view/shell LIGHT PT_BR
+PASS h-help route and session preserved LIGHT PT_BR
+PASS h-help focus preserved LIGHT PT_BR
+PASS h-help locale independent LIGHT
+PASS h-help theme root marker LIGHT
+PASS h-about stable route EN
+PASS h-about stable authority EN
+PASS h-about same view EN
+PASS h-about same mascot and handlers EN
+PASS h-about same view/shell DARK EN
+PASS h-about route and session preserved DARK EN
+PASS h-about focus preserved DARK EN
+PASS h-about locale independent DARK
+PASS h-about theme root marker DARK
+PASS h-about same view/shell LIGHT EN
+PASS h-about route and session preserved LIGHT EN
+PASS h-about focus preserved LIGHT EN
+PASS h-about locale independent LIGHT
+PASS h-about theme root marker LIGHT
+PASS h-about stable route PT_BR
+PASS h-about stable authority PT_BR
+PASS h-about same view PT_BR
+PASS h-about same mascot and handlers PT_BR
+PASS h-about same view/shell DARK PT_BR
+PASS h-about route and session preserved DARK PT_BR
+PASS h-about focus preserved DARK PT_BR
+PASS h-about locale independent DARK
+PASS h-about theme root marker DARK
+PASS h-about same view/shell LIGHT PT_BR
+PASS h-about route and session preserved LIGHT PT_BR
+PASS h-about focus preserved LIGHT PT_BR
+PASS h-about locale independent LIGHT
+PASS h-about theme root marker LIGHT
+PASS h-overview stable route EN
+PASS h-overview stable authority EN
+PASS h-overview same view EN
+PASS h-overview same mascot and handlers EN
+PASS h-overview same view/shell DARK EN
+PASS h-overview route and session preserved DARK EN
+PASS h-overview focus preserved DARK EN
+PASS h-overview locale independent DARK
+PASS h-overview theme root marker DARK
+PASS h-overview same view/shell LIGHT EN
+PASS h-overview route and session preserved LIGHT EN
+PASS h-overview focus preserved LIGHT EN
+PASS h-overview locale independent LIGHT
+PASS h-overview theme root marker LIGHT
+PASS h-overview stable route PT_BR
+PASS h-overview stable authority PT_BR
+PASS h-overview same view PT_BR
+PASS h-overview same mascot and handlers PT_BR
+PASS h-overview same view/shell DARK PT_BR
+PASS h-overview route and session preserved DARK PT_BR
+PASS h-overview focus preserved DARK PT_BR
+PASS h-overview locale independent DARK
+PASS h-overview theme root marker DARK
+PASS h-overview same view/shell LIGHT PT_BR
+PASS h-overview route and session preserved LIGHT PT_BR
+PASS h-overview focus preserved LIGHT PT_BR
+PASS h-overview locale independent LIGHT
+PASS h-overview theme root marker LIGHT
+PASS h-diagnostics stable route EN
+PASS h-diagnostics stable authority EN
+PASS h-diagnostics same view EN
+PASS h-diagnostics same mascot and handlers EN
+PASS h-diagnostics same view/shell DARK EN
+PASS h-diagnostics route and session preserved DARK EN
+PASS h-diagnostics focus preserved DARK EN
+PASS h-diagnostics locale independent DARK
+PASS h-diagnostics theme root marker DARK
+PASS h-diagnostics same view/shell LIGHT EN
+PASS h-diagnostics route and session preserved LIGHT EN
+PASS h-diagnostics focus preserved LIGHT EN
+PASS h-diagnostics locale independent LIGHT
+PASS h-diagnostics theme root marker LIGHT
+PASS h-diagnostics stable route PT_BR
+PASS h-diagnostics stable authority PT_BR
+PASS h-diagnostics same view PT_BR
+PASS h-diagnostics same mascot and handlers PT_BR
+PASS h-diagnostics same view/shell DARK PT_BR
+PASS h-diagnostics route and session preserved DARK PT_BR
+PASS h-diagnostics focus preserved DARK PT_BR
+PASS h-diagnostics locale independent DARK
+PASS h-diagnostics theme root marker DARK
+PASS h-diagnostics same view/shell LIGHT PT_BR
+PASS h-diagnostics route and session preserved LIGHT PT_BR
+PASS h-diagnostics focus preserved LIGHT PT_BR
+PASS h-diagnostics locale independent LIGHT
+PASS h-diagnostics theme root marker LIGHT
+PASS h-whats-new stable route EN
+PASS h-whats-new stable authority EN
+PASS h-whats-new same view EN
+PASS h-whats-new same mascot and handlers EN
+PASS h-whats-new same view/shell DARK EN
+PASS h-whats-new route and session preserved DARK EN
+PASS h-whats-new focus preserved DARK EN
+PASS h-whats-new locale independent DARK
+PASS h-whats-new theme root marker DARK
+PASS h-whats-new same view/shell LIGHT EN
+PASS h-whats-new route and session preserved LIGHT EN
+PASS h-whats-new focus preserved LIGHT EN
+PASS h-whats-new locale independent LIGHT
+PASS h-whats-new theme root marker LIGHT
+PASS h-whats-new stable route PT_BR
+PASS h-whats-new stable authority PT_BR
+PASS h-whats-new same view PT_BR
+PASS h-whats-new same mascot and handlers PT_BR
+PASS h-whats-new same view/shell DARK PT_BR
+PASS h-whats-new route and session preserved DARK PT_BR
+PASS h-whats-new focus preserved DARK PT_BR
+PASS h-whats-new locale independent DARK
+PASS h-whats-new theme root marker DARK
+PASS h-whats-new same view/shell LIGHT PT_BR
+PASS h-whats-new route and session preserved LIGHT PT_BR
+PASS h-whats-new focus preserved LIGHT PT_BR
+PASS h-whats-new locale independent LIGHT
+PASS h-whats-new theme root marker LIGHT
+PASS h-terms stable route EN
+PASS h-terms stable authority EN
+PASS h-terms same view EN
+PASS h-terms same mascot and handlers EN
+PASS h-terms same view/shell DARK EN
+PASS h-terms route and session preserved DARK EN
+PASS h-terms focus preserved DARK EN
+PASS h-terms locale independent DARK
+PASS h-terms theme root marker DARK
+PASS h-terms same view/shell LIGHT EN
+PASS h-terms route and session preserved LIGHT EN
+PASS h-terms focus preserved LIGHT EN
+PASS h-terms locale independent LIGHT
+PASS h-terms theme root marker LIGHT
+PASS h-terms stable route PT_BR
+PASS h-terms stable authority PT_BR
+PASS h-terms same view PT_BR
+PASS h-terms same mascot and handlers PT_BR
+PASS h-terms same view/shell DARK PT_BR
+PASS h-terms route and session preserved DARK PT_BR
+PASS h-terms focus preserved DARK PT_BR
+PASS h-terms locale independent DARK
+PASS h-terms theme root marker DARK
+PASS h-terms same view/shell LIGHT PT_BR
+PASS h-terms route and session preserved LIGHT PT_BR
+PASS h-terms focus preserved LIGHT PT_BR
+PASS h-terms locale independent LIGHT
+PASS h-terms theme root marker LIGHT
+PASS h-privacy stable route EN
+PASS h-privacy stable authority EN
+PASS h-privacy same view EN
+PASS h-privacy same mascot and handlers EN
+PASS h-privacy same view/shell DARK EN
+PASS h-privacy route and session preserved DARK EN
+PASS h-privacy focus preserved DARK EN
+PASS h-privacy locale independent DARK
+PASS h-privacy theme root marker DARK
+PASS h-privacy same view/shell LIGHT EN
+PASS h-privacy route and session preserved LIGHT EN
+PASS h-privacy focus preserved LIGHT EN
+PASS h-privacy locale independent LIGHT
+PASS h-privacy theme root marker LIGHT
+PASS h-privacy stable route PT_BR
+PASS h-privacy stable authority PT_BR
+PASS h-privacy same view PT_BR
+PASS h-privacy same mascot and handlers PT_BR
+PASS h-privacy same view/shell DARK PT_BR
+PASS h-privacy route and session preserved DARK PT_BR
+PASS h-privacy focus preserved DARK PT_BR
+PASS h-privacy locale independent DARK
+PASS h-privacy theme root marker DARK
+PASS h-privacy same view/shell LIGHT PT_BR
+PASS h-privacy route and session preserved LIGHT PT_BR
+PASS h-privacy focus preserved LIGHT PT_BR
+PASS h-privacy locale independent LIGHT
+PASS h-privacy theme root marker LIGHT
+PASS h-shortcuts stable route EN
+PASS h-shortcuts stable authority EN
+PASS h-shortcuts same view EN
+PASS h-shortcuts same mascot and handlers EN
+PASS h-shortcuts same view/shell DARK EN
+PASS h-shortcuts route and session preserved DARK EN
+PASS h-shortcuts focus preserved DARK EN
+PASS h-shortcuts locale independent DARK
+PASS h-shortcuts theme root marker DARK
+PASS h-shortcuts same view/shell LIGHT EN
+PASS h-shortcuts route and session preserved LIGHT EN
+PASS h-shortcuts focus preserved LIGHT EN
+PASS h-shortcuts locale independent LIGHT
+PASS h-shortcuts theme root marker LIGHT
+PASS h-shortcuts stable route PT_BR
+PASS h-shortcuts stable authority PT_BR
+PASS h-shortcuts same view PT_BR
+PASS h-shortcuts same mascot and handlers PT_BR
+PASS h-shortcuts same view/shell DARK PT_BR
+PASS h-shortcuts route and session preserved DARK PT_BR
+PASS h-shortcuts focus preserved DARK PT_BR
+PASS h-shortcuts locale independent DARK
+PASS h-shortcuts theme root marker DARK
+PASS h-shortcuts same view/shell LIGHT PT_BR
+PASS h-shortcuts route and session preserved LIGHT PT_BR
+PASS h-shortcuts focus preserved LIGHT PT_BR
+PASS h-shortcuts locale independent LIGHT
+PASS h-shortcuts theme root marker LIGHT
+PASS sys-status stable route EN
+PASS sys-status stable authority EN
+PASS sys-status same view EN
+PASS sys-status same mascot and handlers EN
+PASS sys-status same view/shell DARK EN
+PASS sys-status route and session preserved DARK EN
+PASS sys-status focus preserved DARK EN
+PASS sys-status locale independent DARK
+PASS sys-status theme root marker DARK
+PASS sys-status same view/shell LIGHT EN
+PASS sys-status route and session preserved LIGHT EN
+PASS sys-status focus preserved LIGHT EN
+PASS sys-status locale independent LIGHT
+PASS sys-status theme root marker LIGHT
+PASS sys-status stable route PT_BR
+PASS sys-status stable authority PT_BR
+PASS sys-status same view PT_BR
+PASS sys-status same mascot and handlers PT_BR
+PASS sys-status same view/shell DARK PT_BR
+PASS sys-status route and session preserved DARK PT_BR
+PASS sys-status focus preserved DARK PT_BR
+PASS sys-status locale independent DARK
+PASS sys-status theme root marker DARK
+PASS sys-status same view/shell LIGHT PT_BR
+PASS sys-status route and session preserved LIGHT PT_BR
+PASS sys-status focus preserved LIGHT PT_BR
+PASS sys-status locale independent LIGHT
+PASS sys-status theme root marker LIGHT
+PASS sys-unavailable stable route EN
+PASS sys-unavailable stable authority EN
+PASS sys-unavailable same view EN
+PASS sys-unavailable same mascot and handlers EN
+PASS sys-unavailable same view/shell DARK EN
+PASS sys-unavailable route and session preserved DARK EN
+PASS sys-unavailable focus preserved DARK EN
+PASS sys-unavailable locale independent DARK
+PASS sys-unavailable theme root marker DARK
+PASS sys-unavailable same view/shell LIGHT EN
+PASS sys-unavailable route and session preserved LIGHT EN
+PASS sys-unavailable focus preserved LIGHT EN
+PASS sys-unavailable locale independent LIGHT
+PASS sys-unavailable theme root marker LIGHT
+PASS sys-unavailable stable route PT_BR
+PASS sys-unavailable stable authority PT_BR
+PASS sys-unavailable same view PT_BR
+PASS sys-unavailable same mascot and handlers PT_BR
+PASS sys-unavailable same view/shell DARK PT_BR
+PASS sys-unavailable route and session preserved DARK PT_BR
+PASS sys-unavailable focus preserved DARK PT_BR
+PASS sys-unavailable locale independent DARK
+PASS sys-unavailable theme root marker DARK
+PASS sys-unavailable same view/shell LIGHT PT_BR
+PASS sys-unavailable route and session preserved LIGHT PT_BR
+PASS sys-unavailable focus preserved LIGHT PT_BR
+PASS sys-unavailable locale independent LIGHT
+PASS sys-unavailable theme root marker LIGHT
+PASS t-wallet-verify stable route EN
+PASS t-wallet-verify stable authority EN
+PASS t-wallet-verify same view EN
+PASS t-wallet-verify same mascot and handlers EN
+PASS t-wallet-verify same view/shell DARK EN
+PASS t-wallet-verify route and session preserved DARK EN
+PASS t-wallet-verify focus preserved DARK EN
+PASS t-wallet-verify locale independent DARK
+PASS t-wallet-verify theme root marker DARK
+PASS t-wallet-verify same view/shell LIGHT EN
+PASS t-wallet-verify route and session preserved LIGHT EN
+PASS t-wallet-verify focus preserved LIGHT EN
+PASS t-wallet-verify locale independent LIGHT
+PASS t-wallet-verify theme root marker LIGHT
+PASS t-wallet-verify stable route PT_BR
+PASS t-wallet-verify stable authority PT_BR
+PASS t-wallet-verify same view PT_BR
+PASS t-wallet-verify same mascot and handlers PT_BR
+PASS t-wallet-verify same view/shell DARK PT_BR
+PASS t-wallet-verify route and session preserved DARK PT_BR
+PASS t-wallet-verify focus preserved DARK PT_BR
+PASS t-wallet-verify locale independent DARK
+PASS t-wallet-verify theme root marker DARK
+PASS t-wallet-verify same view/shell LIGHT PT_BR
+PASS t-wallet-verify route and session preserved LIGHT PT_BR
+PASS t-wallet-verify focus preserved LIGHT PT_BR
+PASS t-wallet-verify locale independent LIGHT
+PASS t-wallet-verify theme root marker LIGHT
+PASS appearance same view/shell DARK EN
+PASS appearance route and session preserved DARK EN
+PASS appearance focus preserved DARK EN
+PASS appearance locale independent DARK
+PASS appearance theme root marker DARK
+PASS appearance same view/shell LIGHT EN
+PASS appearance route and session preserved LIGHT EN
+PASS appearance focus preserved LIGHT EN
+PASS appearance locale independent LIGHT
+PASS appearance theme root marker LIGHT
+PASS appearance same view/shell DARK PT_BR
+PASS appearance route and session preserved DARK PT_BR
+PASS appearance focus preserved DARK PT_BR
+PASS appearance locale independent DARK
+PASS appearance theme root marker DARK
+PASS appearance same view/shell LIGHT PT_BR
+PASS appearance route and session preserved LIGHT PT_BR
+PASS appearance focus preserved LIGHT PT_BR
+PASS appearance locale independent LIGHT
+PASS appearance theme root marker LIGHT
+PASS account menu EN
+PASS account-menu same view/shell DARK EN
+PASS account-menu route and session preserved DARK EN
+PASS account-menu focus preserved DARK EN
+PASS account-menu locale independent DARK
+PASS account-menu theme root marker DARK
+PASS account-menu same view/shell LIGHT EN
+PASS account-menu route and session preserved LIGHT EN
+PASS account-menu focus preserved LIGHT EN
+PASS account-menu locale independent LIGHT
+PASS account-menu theme root marker LIGHT
+PASS notifications-popover same view/shell DARK EN
+PASS notifications-popover route and session preserved DARK EN
+PASS notifications-popover focus preserved DARK EN
+PASS notifications-popover locale independent DARK
+PASS notifications-popover theme root marker DARK
+PASS notifications-popover same view/shell LIGHT EN
+PASS notifications-popover route and session preserved LIGHT EN
+PASS notifications-popover focus preserved LIGHT EN
+PASS notifications-popover locale independent LIGHT
+PASS notifications-popover theme root marker LIGHT
+PASS palette EN
+PASS palette same view/shell DARK EN
+PASS palette route and session preserved DARK EN
+PASS palette focus preserved DARK EN
+PASS palette locale independent DARK
+PASS palette theme root marker DARK
+PASS palette same view/shell LIGHT EN
+PASS palette route and session preserved LIGHT EN
+PASS palette focus preserved LIGHT EN
+PASS palette locale independent LIGHT
+PASS palette theme root marker LIGHT
+PASS modal retained across switch EN
+PASS modal-switched-from-EN same view/shell DARK PT_BR
+PASS modal-switched-from-EN route and session preserved DARK PT_BR
+PASS modal-switched-from-EN focus preserved DARK PT_BR
+PASS modal-switched-from-EN locale independent DARK
+PASS modal-switched-from-EN theme root marker DARK
+PASS modal-switched-from-EN same view/shell LIGHT PT_BR
+PASS modal-switched-from-EN route and session preserved LIGHT PT_BR
+PASS modal-switched-from-EN focus preserved LIGHT PT_BR
+PASS modal-switched-from-EN locale independent LIGHT
+PASS modal-switched-from-EN theme root marker LIGHT
+PASS account menu PT_BR
+PASS account-menu same view/shell DARK PT_BR
+PASS account-menu route and session preserved DARK PT_BR
+PASS account-menu focus preserved DARK PT_BR
+PASS account-menu locale independent DARK
+PASS account-menu theme root marker DARK
+PASS account-menu same view/shell LIGHT PT_BR
+PASS account-menu route and session preserved LIGHT PT_BR
+PASS account-menu focus preserved LIGHT PT_BR
+PASS account-menu locale independent LIGHT
+PASS account-menu theme root marker LIGHT
+PASS notifications-popover same view/shell DARK PT_BR
+PASS notifications-popover route and session preserved DARK PT_BR
+PASS notifications-popover focus preserved DARK PT_BR
+PASS notifications-popover locale independent DARK
+PASS notifications-popover theme root marker DARK
+PASS notifications-popover same view/shell LIGHT PT_BR
+PASS notifications-popover route and session preserved LIGHT PT_BR
+PASS notifications-popover focus preserved LIGHT PT_BR
+PASS notifications-popover locale independent LIGHT
+PASS notifications-popover theme root marker LIGHT
+PASS palette PT_BR
+PASS palette same view/shell DARK PT_BR
+PASS palette route and session preserved DARK PT_BR
+PASS palette focus preserved DARK PT_BR
+PASS palette locale independent DARK
+PASS palette theme root marker DARK
+PASS palette same view/shell LIGHT PT_BR
+PASS palette route and session preserved LIGHT PT_BR
+PASS palette focus preserved LIGHT PT_BR
+PASS palette locale independent LIGHT
+PASS palette theme root marker LIGHT
+PASS modal retained across switch PT_BR
+PASS modal-switched-from-PT_BR same view/shell DARK EN
+PASS modal-switched-from-PT_BR route and session preserved DARK EN
+PASS modal-switched-from-PT_BR focus preserved DARK EN
+PASS modal-switched-from-PT_BR locale independent DARK
+PASS modal-switched-from-PT_BR theme root marker DARK
+PASS modal-switched-from-PT_BR same view/shell LIGHT EN
+PASS modal-switched-from-PT_BR route and session preserved LIGHT EN
+PASS modal-switched-from-PT_BR focus preserved LIGHT EN
+PASS modal-switched-from-PT_BR locale independent LIGHT
+PASS modal-switched-from-PT_BR theme root marker LIGHT
+PASS USER cannot open Research in PT
+PASS USER locale cannot elevate authority
+PASS logout resets session UI locale
+PASS logout resets appearance
+PASS old shell disposed
+PASS ADMIN still needs MFA after locale switch
+PASS research-gate same view/shell DARK PT_BR
+PASS research-gate route and session preserved DARK PT_BR
+PASS research-gate focus preserved DARK PT_BR
+PASS research-gate locale independent DARK
+PASS research-gate theme root marker DARK
+PASS research-gate same view/shell LIGHT PT_BR
+PASS research-gate route and session preserved LIGHT PT_BR
+PASS research-gate focus preserved LIGHT PT_BR
+PASS research-gate locale independent LIGHT
+PASS research-gate theme root marker LIGHT
+PASS synthetic email verification
+PASS synthetic SMS verification
+PASS normal synthetic MFA gate completed
+PASS authorized Research overview EN
+PASS MFA authority preserved overview EN
+PASS research-overview same view/shell DARK EN
+PASS research-overview route and session preserved DARK EN
+PASS research-overview focus preserved DARK EN
+PASS research-overview locale independent DARK
+PASS research-overview theme root marker DARK
+PASS research-overview same view/shell LIGHT EN
+PASS research-overview route and session preserved LIGHT EN
+PASS research-overview focus preserved LIGHT EN
+PASS research-overview locale independent LIGHT
+PASS research-overview theme root marker LIGHT
+PASS authorized Research overview PT_BR
+PASS MFA authority preserved overview PT_BR
+PASS research-overview same view/shell DARK PT_BR
+PASS research-overview route and session preserved DARK PT_BR
+PASS research-overview focus preserved DARK PT_BR
+PASS research-overview locale independent DARK
+PASS research-overview theme root marker DARK
+PASS research-overview same view/shell LIGHT PT_BR
+PASS research-overview route and session preserved LIGHT PT_BR
+PASS research-overview focus preserved LIGHT PT_BR
+PASS research-overview locale independent LIGHT
+PASS research-overview theme root marker LIGHT
+PASS authorized Research capture EN
+PASS MFA authority preserved capture EN
+PASS research-capture same view/shell DARK EN
+PASS research-capture route and session preserved DARK EN
+PASS research-capture focus preserved DARK EN
+PASS research-capture locale independent DARK
+PASS research-capture theme root marker DARK
+PASS research-capture same view/shell LIGHT EN
+PASS research-capture route and session preserved LIGHT EN
+PASS research-capture focus preserved LIGHT EN
+PASS research-capture locale independent LIGHT
+PASS research-capture theme root marker LIGHT
+PASS authorized Research capture PT_BR
+PASS MFA authority preserved capture PT_BR
+PASS research-capture same view/shell DARK PT_BR
+PASS research-capture route and session preserved DARK PT_BR
+PASS research-capture focus preserved DARK PT_BR
+PASS research-capture locale independent DARK
+PASS research-capture theme root marker DARK
+PASS research-capture same view/shell LIGHT PT_BR
+PASS research-capture route and session preserved LIGHT PT_BR
+PASS research-capture focus preserved LIGHT PT_BR
+PASS research-capture locale independent LIGHT
+PASS research-capture theme root marker LIGHT
+PASS authorized Research sessions EN
+PASS MFA authority preserved sessions EN
+PASS research-sessions same view/shell DARK EN
+PASS research-sessions route and session preserved DARK EN
+PASS research-sessions focus preserved DARK EN
+PASS research-sessions locale independent DARK
+PASS research-sessions theme root marker DARK
+PASS research-sessions same view/shell LIGHT EN
+PASS research-sessions route and session preserved LIGHT EN
+PASS research-sessions focus preserved LIGHT EN
+PASS research-sessions locale independent LIGHT
+PASS research-sessions theme root marker LIGHT
+PASS authorized Research sessions PT_BR
+PASS MFA authority preserved sessions PT_BR
+PASS research-sessions same view/shell DARK PT_BR
+PASS research-sessions route and session preserved DARK PT_BR
+PASS research-sessions focus preserved DARK PT_BR
+PASS research-sessions locale independent DARK
+PASS research-sessions theme root marker DARK
+PASS research-sessions same view/shell LIGHT PT_BR
+PASS research-sessions route and session preserved LIGHT PT_BR
+PASS research-sessions focus preserved LIGHT PT_BR
+PASS research-sessions locale independent LIGHT
+PASS research-sessions theme root marker LIGHT
+PASS authorized Research dataset EN
+PASS MFA authority preserved dataset EN
+PASS research-dataset same view/shell DARK EN
+PASS research-dataset route and session preserved DARK EN
+PASS research-dataset focus preserved DARK EN
+PASS research-dataset locale independent DARK
+PASS research-dataset theme root marker DARK
+PASS research-dataset same view/shell LIGHT EN
+PASS research-dataset route and session preserved LIGHT EN
+PASS research-dataset focus preserved LIGHT EN
+PASS research-dataset locale independent LIGHT
+PASS research-dataset theme root marker LIGHT
+PASS authorized Research dataset PT_BR
+PASS MFA authority preserved dataset PT_BR
+PASS research-dataset same view/shell DARK PT_BR
+PASS research-dataset route and session preserved DARK PT_BR
+PASS research-dataset focus preserved DARK PT_BR
+PASS research-dataset locale independent DARK
+PASS research-dataset theme root marker DARK
+PASS research-dataset same view/shell LIGHT PT_BR
+PASS research-dataset route and session preserved LIGHT PT_BR
+PASS research-dataset focus preserved LIGHT PT_BR
+PASS research-dataset locale independent LIGHT
+PASS research-dataset theme root marker LIGHT
+PASS authorized Research labels EN
+PASS MFA authority preserved labels EN
+PASS research-labels same view/shell DARK EN
+PASS research-labels route and session preserved DARK EN
+PASS research-labels focus preserved DARK EN
+PASS research-labels locale independent DARK
+PASS research-labels theme root marker DARK
+PASS research-labels same view/shell LIGHT EN
+PASS research-labels route and session preserved LIGHT EN
+PASS research-labels focus preserved LIGHT EN
+PASS research-labels locale independent LIGHT
+PASS research-labels theme root marker LIGHT
+PASS authorized Research labels PT_BR
+PASS MFA authority preserved labels PT_BR
+PASS research-labels same view/shell DARK PT_BR
+PASS research-labels route and session preserved DARK PT_BR
+PASS research-labels focus preserved DARK PT_BR
+PASS research-labels locale independent DARK
+PASS research-labels theme root marker DARK
+PASS research-labels same view/shell LIGHT PT_BR
+PASS research-labels route and session preserved LIGHT PT_BR
+PASS research-labels focus preserved LIGHT PT_BR
+PASS research-labels locale independent LIGHT
+PASS research-labels theme root marker LIGHT
+PASS authorized Research features EN
+PASS MFA authority preserved features EN
+PASS research-features same view/shell DARK EN
+PASS research-features route and session preserved DARK EN
+PASS research-features focus preserved DARK EN
+PASS research-features locale independent DARK
+PASS research-features theme root marker DARK
+PASS research-features same view/shell LIGHT EN
+PASS research-features route and session preserved LIGHT EN
+PASS research-features focus preserved LIGHT EN
+PASS research-features locale independent LIGHT
+PASS research-features theme root marker LIGHT
+PASS authorized Research features PT_BR
+PASS MFA authority preserved features PT_BR
+PASS research-features same view/shell DARK PT_BR
+PASS research-features route and session preserved DARK PT_BR
+PASS research-features focus preserved DARK PT_BR
+PASS research-features locale independent DARK
+PASS research-features theme root marker DARK
+PASS research-features same view/shell LIGHT PT_BR
+PASS research-features route and session preserved LIGHT PT_BR
+PASS research-features focus preserved LIGHT PT_BR
+PASS research-features locale independent LIGHT
+PASS research-features theme root marker LIGHT
+PASS authorized Research hypotheses EN
+PASS MFA authority preserved hypotheses EN
+PASS research-hypotheses same view/shell DARK EN
+PASS research-hypotheses route and session preserved DARK EN
+PASS research-hypotheses focus preserved DARK EN
+PASS research-hypotheses locale independent DARK
+PASS research-hypotheses theme root marker DARK
+PASS research-hypotheses same view/shell LIGHT EN
+PASS research-hypotheses route and session preserved LIGHT EN
+PASS research-hypotheses focus preserved LIGHT EN
+PASS research-hypotheses locale independent LIGHT
+PASS research-hypotheses theme root marker LIGHT
+PASS authorized Research hypotheses PT_BR
+PASS MFA authority preserved hypotheses PT_BR
+PASS research-hypotheses same view/shell DARK PT_BR
+PASS research-hypotheses route and session preserved DARK PT_BR
+PASS research-hypotheses focus preserved DARK PT_BR
+PASS research-hypotheses locale independent DARK
+PASS research-hypotheses theme root marker DARK
+PASS research-hypotheses same view/shell LIGHT PT_BR
+PASS research-hypotheses route and session preserved LIGHT PT_BR
+PASS research-hypotheses focus preserved LIGHT PT_BR
+PASS research-hypotheses locale independent LIGHT
+PASS research-hypotheses theme root marker LIGHT
+PASS authorized Research validation EN
+PASS MFA authority preserved validation EN
+PASS research-validation same view/shell DARK EN
+PASS research-validation route and session preserved DARK EN
+PASS research-validation focus preserved DARK EN
+PASS research-validation locale independent DARK
+PASS research-validation theme root marker DARK
+PASS research-validation same view/shell LIGHT EN
+PASS research-validation route and session preserved LIGHT EN
+PASS research-validation focus preserved LIGHT EN
+PASS research-validation locale independent LIGHT
+PASS research-validation theme root marker LIGHT
+PASS authorized Research validation PT_BR
+PASS MFA authority preserved validation PT_BR
+PASS research-validation same view/shell DARK PT_BR
+PASS research-validation route and session preserved DARK PT_BR
+PASS research-validation focus preserved DARK PT_BR
+PASS research-validation locale independent DARK
+PASS research-validation theme root marker DARK
+PASS research-validation same view/shell LIGHT PT_BR
+PASS research-validation route and session preserved LIGHT PT_BR
+PASS research-validation focus preserved LIGHT PT_BR
+PASS research-validation locale independent LIGHT
+PASS research-validation theme root marker LIGHT
+PASS authorized Research execution EN
+PASS MFA authority preserved execution EN
+PASS research-execution same view/shell DARK EN
+PASS research-execution route and session preserved DARK EN
+PASS research-execution focus preserved DARK EN
+PASS research-execution locale independent DARK
+PASS research-execution theme root marker DARK
+PASS research-execution same view/shell LIGHT EN
+PASS research-execution route and session preserved LIGHT EN
+PASS research-execution focus preserved LIGHT EN
+PASS research-execution locale independent LIGHT
+PASS research-execution theme root marker LIGHT
+PASS authorized Research execution PT_BR
+PASS MFA authority preserved execution PT_BR
+PASS research-execution same view/shell DARK PT_BR
+PASS research-execution route and session preserved DARK PT_BR
+PASS research-execution focus preserved DARK PT_BR
+PASS research-execution locale independent DARK
+PASS research-execution theme root marker DARK
+PASS research-execution same view/shell LIGHT PT_BR
+PASS research-execution route and session preserved LIGHT PT_BR
+PASS research-execution focus preserved LIGHT PT_BR
+PASS research-execution locale independent LIGHT
+PASS research-execution theme root marker LIGHT
+PASS authorized Research paper EN
+PASS MFA authority preserved paper EN
+PASS research-paper same view/shell DARK EN
+PASS research-paper route and session preserved DARK EN
+PASS research-paper focus preserved DARK EN
+PASS research-paper locale independent DARK
+PASS research-paper theme root marker DARK
+PASS research-paper same view/shell LIGHT EN
+PASS research-paper route and session preserved LIGHT EN
+PASS research-paper focus preserved LIGHT EN
+PASS research-paper locale independent LIGHT
+PASS research-paper theme root marker LIGHT
+PASS authorized Research paper PT_BR
+PASS MFA authority preserved paper PT_BR
+PASS research-paper same view/shell DARK PT_BR
+PASS research-paper route and session preserved DARK PT_BR
+PASS research-paper focus preserved DARK PT_BR
+PASS research-paper locale independent DARK
+PASS research-paper theme root marker DARK
+PASS research-paper same view/shell LIGHT PT_BR
+PASS research-paper route and session preserved LIGHT PT_BR
+PASS research-paper focus preserved LIGHT PT_BR
+PASS research-paper locale independent LIGHT
+PASS research-paper theme root marker LIGHT
+PASS authorized Research live EN
+PASS MFA authority preserved live EN
+PASS research-live same view/shell DARK EN
+PASS research-live route and session preserved DARK EN
+PASS research-live focus preserved DARK EN
+PASS research-live locale independent DARK
+PASS research-live theme root marker DARK
+PASS research-live same view/shell LIGHT EN
+PASS research-live route and session preserved LIGHT EN
+PASS research-live focus preserved LIGHT EN
+PASS research-live locale independent LIGHT
+PASS research-live theme root marker LIGHT
+PASS authorized Research live PT_BR
+PASS MFA authority preserved live PT_BR
+PASS research-live same view/shell DARK PT_BR
+PASS research-live route and session preserved DARK PT_BR
+PASS research-live focus preserved DARK PT_BR
+PASS research-live locale independent DARK
+PASS research-live theme root marker DARK
+PASS research-live same view/shell LIGHT PT_BR
+PASS research-live route and session preserved LIGHT PT_BR
+PASS research-live focus preserved LIGHT PT_BR
+PASS research-live locale independent LIGHT
+PASS research-live theme root marker LIGHT
+PASS authorized Research jobs EN
+PASS MFA authority preserved jobs EN
+PASS research-jobs same view/shell DARK EN
+PASS research-jobs route and session preserved DARK EN
+PASS research-jobs focus preserved DARK EN
+PASS research-jobs locale independent DARK
+PASS research-jobs theme root marker DARK
+PASS research-jobs same view/shell LIGHT EN
+PASS research-jobs route and session preserved LIGHT EN
+PASS research-jobs focus preserved LIGHT EN
+PASS research-jobs locale independent LIGHT
+PASS research-jobs theme root marker LIGHT
+PASS authorized Research jobs PT_BR
+PASS MFA authority preserved jobs PT_BR
+PASS research-jobs same view/shell DARK PT_BR
+PASS research-jobs route and session preserved DARK PT_BR
+PASS research-jobs focus preserved DARK PT_BR
+PASS research-jobs locale independent DARK
+PASS research-jobs theme root marker DARK
+PASS research-jobs same view/shell LIGHT PT_BR
+PASS research-jobs route and session preserved LIGHT PT_BR
+PASS research-jobs focus preserved LIGHT PT_BR
+PASS research-jobs locale independent LIGHT
+PASS research-jobs theme root marker LIGHT
+PASS authorized Research logs EN
+PASS MFA authority preserved logs EN
+PASS research-logs same view/shell DARK EN
+PASS research-logs route and session preserved DARK EN
+PASS research-logs focus preserved DARK EN
+PASS research-logs locale independent DARK
+PASS research-logs theme root marker DARK
+PASS research-logs same view/shell LIGHT EN
+PASS research-logs route and session preserved LIGHT EN
+PASS research-logs focus preserved LIGHT EN
+PASS research-logs locale independent LIGHT
+PASS research-logs theme root marker LIGHT
+PASS authorized Research logs PT_BR
+PASS MFA authority preserved logs PT_BR
+PASS research-logs same view/shell DARK PT_BR
+PASS research-logs route and session preserved DARK PT_BR
+PASS research-logs focus preserved DARK PT_BR
+PASS research-logs locale independent DARK
+PASS research-logs theme root marker DARK
+PASS research-logs same view/shell LIGHT PT_BR
+PASS research-logs route and session preserved LIGHT PT_BR
+PASS research-logs focus preserved LIGHT PT_BR
+PASS research-logs locale independent LIGHT
+PASS research-logs theme root marker LIGHT
+PASS authorized Research settings EN
+PASS MFA authority preserved settings EN
+PASS research-settings same view/shell DARK EN
+PASS research-settings route and session preserved DARK EN
+PASS research-settings focus preserved DARK EN
+PASS research-settings locale independent DARK
+PASS research-settings theme root marker DARK
+PASS research-settings same view/shell LIGHT EN
+PASS research-settings route and session preserved LIGHT EN
+PASS research-settings focus preserved LIGHT EN
+PASS research-settings locale independent LIGHT
+PASS research-settings theme root marker LIGHT
+PASS authorized Research settings PT_BR
+PASS MFA authority preserved settings PT_BR
+PASS research-settings same view/shell DARK PT_BR
+PASS research-settings route and session preserved DARK PT_BR
+PASS research-settings focus preserved DARK PT_BR
+PASS research-settings locale independent DARK
+PASS research-settings theme root marker DARK
+PASS research-settings same view/shell LIGHT PT_BR
+PASS research-settings route and session preserved LIGHT PT_BR
+PASS research-settings focus preserved LIGHT PT_BR
+PASS research-settings locale independent LIGHT
+PASS research-settings theme root marker LIGHT
+PASS authorized Research users EN
+PASS MFA authority preserved users EN
+PASS research-users same view/shell DARK EN
+PASS research-users route and session preserved DARK EN
+PASS research-users focus preserved DARK EN
+PASS research-users locale independent DARK
+PASS research-users theme root marker DARK
+PASS research-users same view/shell LIGHT EN
+PASS research-users route and session preserved LIGHT EN
+PASS research-users focus preserved LIGHT EN
+PASS research-users locale independent LIGHT
+PASS research-users theme root marker LIGHT
+PASS authorized Research users PT_BR
+PASS MFA authority preserved users PT_BR
+PASS research-users same view/shell DARK PT_BR
+PASS research-users route and session preserved DARK PT_BR
+PASS research-users focus preserved DARK PT_BR
+PASS research-users locale independent DARK
+PASS research-users theme root marker DARK
+PASS research-users same view/shell LIGHT PT_BR
+PASS research-users route and session preserved LIGHT PT_BR
+PASS research-users focus preserved LIGHT PT_BR
+PASS research-users locale independent LIGHT
+PASS research-users theme root marker LIGHT
+PASS onboarding shown in PT
+PASS onboarding same view/shell DARK PT_BR
+PASS onboarding route and session preserved DARK PT_BR
+PASS onboarding focus preserved DARK PT_BR
+PASS onboarding locale independent DARK
+PASS onboarding theme root marker DARK
+PASS onboarding same view/shell LIGHT PT_BR
+PASS onboarding route and session preserved LIGHT PT_BR
+PASS onboarding focus preserved LIGHT PT_BR
+PASS onboarding locale independent LIGHT
+PASS onboarding theme root marker LIGHT
+PASS onboarding remains during switch
+PASS onboarding same view/shell DARK EN
+PASS onboarding route and session preserved DARK EN
+PASS onboarding focus preserved DARK EN
+PASS onboarding locale independent DARK
+PASS onboarding theme root marker DARK
+PASS onboarding same view/shell LIGHT EN
+PASS onboarding route and session preserved LIGHT EN
+PASS onboarding focus preserved LIGHT EN
+PASS onboarding locale independent LIGHT
+PASS onboarding theme root marker LIGHT
+PASS no missing key during native flow: []
+PASS no English fallback during native flow
+PASS account replacement resets theme
+PASS account replacement resets language
+PASS account replacement cannot retain MFA

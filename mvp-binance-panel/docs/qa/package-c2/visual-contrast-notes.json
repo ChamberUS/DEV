@@ -1,0 +1,69 @@
+{
+  "measurements": "Token native CSS measurements in native-contrast.json; actual real Desk paints asserted in PackageC2ResolvedControlsTest. Compositing below from unchanged native DARK avatar CSS #FFFFFF1A over #1C253C.",
+  "actualDarkDecorativeAvatarOuterLayer": {
+    "foreground": "#FFFFFF1A",
+    "container": "#1C253C",
+    "alpha": 0.10196078431372549,
+    "compositedRgb": [
+      0.20056901191849288,
+      0.23226451364859668,
+      0.3132641291810842
+    ],
+    "ratio": 1.3683357389356048,
+    "classification": "Preserved decorative contour; control identity is invariant body/eyes and independently contrasted focus ring. Not an essential-boundary pass claim."
+  },
+  "approvedKnownDarkExceptions": {
+    "mutedOnHover": 3.837,
+    "semanticAvatarBoundaryOnContainer": 2.425
+  },
+  "nativeLightAssertions": {
+    "deskCard": "#FAFBFD",
+    "chartAxis": "#59677D",
+    "avatarOuterBoundary": "#697A92",
+    "scrollbarThumb": "#697A92"
+  },
+  "exemptions": [
+    "disabled control copy",
+    "decorative grid/separators",
+    "unchanged DARK decorative contour"
+  ],
+  "importantHelperCopy": "DARK menu/palette hover helper copy changed centrally to secondary ink",
+  "nativeDarkScrollbar": {
+    "resolvedForeground": "#2A3144",
+    "classification": "Existing native DARK thumb is low contrast; baseline retained and explicitly excluded from a non-text contrast pass. Keyboard/wheel navigation remains available; owner UAT review."
+  },
+  "nativeLightScrollbarChecks": [
+    {
+      "nativeResolvedForeground": "#697A92",
+      "background": "#DDE3ED",
+      "surface": "surface.canvas",
+      "ratio": 3.3930303505981976,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "nativeResolvedForeground": "#697A92",
+      "background": "#F1F4F8",
+      "surface": "surface.primary",
+      "ratio": 3.96619917473241,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "nativeResolvedForeground": "#697A92",
+      "background": "#E8EDF4",
+      "surface": "surface.secondary",
+      "ratio": 3.7193575592076624,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "nativeResolvedForeground": "#697A92",
+      "background": "#FAFBFD",
+      "surface": "surface.card",
+      "ratio": 4.225839315036999,
+      "target": 3,
+      "pass": true
+    }
+  ]
+}

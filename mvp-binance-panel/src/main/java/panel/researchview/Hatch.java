@@ -19,6 +19,7 @@ public final class Hatch extends Pane {
     private double drawnH = -1;
 
     public Hatch(double period, Color color, double radius) {
+        panel.design.ByxTheme.observe(this, () -> { drawnW = -1; requestLayout(); });
         this.period = period;
         this.color = color;
         this.radius = radius;
@@ -47,7 +48,7 @@ public final class Hatch extends Pane {
         drawnH = h;
         GraphicsContext g = canvas.getGraphicsContext2D();
         g.clearRect(0, 0, w, h);
-        g.setStroke(color);
+        g.setStroke(panel.design.ByxTheme.paint(color.toString(), panel.design.ThemeToken.BORDER_ESSENTIAL));
         g.setLineWidth(period / Math.sqrt(2) * 1.0);
         double step = period * Math.sqrt(2);
         for (double x = -h; x < w + h; x += step) {

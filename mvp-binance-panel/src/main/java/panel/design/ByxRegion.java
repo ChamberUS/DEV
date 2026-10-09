@@ -264,7 +264,7 @@ public class ByxRegion extends StackPane {
             r.setArcWidth(8);
             r.setArcHeight(8);
             r.widthProperty().bind(widthProperty().subtract(32).multiply(w));
-            r.fillProperty().bind(javafx.beans.binding.Bindings.createObjectBinding(this::skeletonFill, shimmerPhase));
+            r.fillProperty().bind(javafx.beans.binding.Bindings.createObjectBinding(this::skeletonFill, shimmerPhase, ByxTheme.modeProperty()));
             r.getStyleClass().add("byx-skeleton-bar");
             skel.getChildren().add(r);
         }
@@ -293,8 +293,8 @@ public class ByxRegion extends StackPane {
     }
 
     private LinearGradient skeletonFill() {
-        Color base = DesignTokens.get().color("colors.surface.bg3");
-        Color hi = Color.web("#303958"); // destaque da referência (.sk)
+        Color base = ByxTheme.color(ThemeToken.SURFACE_ELEVATED);
+        Color hi = ByxTheme.paint("#303958", ThemeToken.SURFACE_HOVER); // destaque da referência (.sk)
         double p = shimmerPhase.get();
         if (p <= 0) {
             return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, base), new Stop(1, base));

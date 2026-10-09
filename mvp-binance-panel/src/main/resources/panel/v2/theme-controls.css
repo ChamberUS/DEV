@@ -1,0 +1,181 @@
+/* Central native LIGHT paint bindings; original DARK component declarations remain intact. */
+.root:byx-theme-light .nav-group { -fx-text-fill: -byx-disabled; -fx-font-size: 10.5px; -fx-font-family: "Inter SemiBold"; -fx-padding: 14 16 4 16; }
+.root:byx-theme-light .nav-item.selected { -fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-font-family: "Inter SemiBold"; }
+.root:byx-theme-light .scroll-bar .thumb { -fx-background-color: -byx-border-essential; -fx-background-radius: 6; }
+.root:byx-theme-light .stage:hover { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .stage-border-ok { -fx-border-color: -byx-line; }
+.root:byx-theme-light .stage-border-warn { -fx-border-color: -byx-line; }
+.root:byx-theme-light .stage-border-bad { -fx-border-color: -byx-line; }
+.root:byx-theme-light .btn-primary { -fx-background-color: -byx-trading; -fx-text-fill: white; }
+.root:byx-theme-light .btn-primary:hover { -fx-background-color: -byx-trading; }
+.root:byx-theme-light .btn-ghost:hover { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .chip:selected { -fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-border-color: -info; }
+.root:byx-theme-light .text-field, .root:byx-theme-light .combo-box-base, .root:byx-theme-light .spinner, .root:byx-theme-light .spinner .text-field { -fx-background-color: -panel2; -fx-border-color: -border; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: -text; -fx-prompt-text-fill: -byx-disabled; }
+.root:byx-theme-light .combo-box-popup .list-cell:hover { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .table-row-cell { -fx-background-color: -panel; -fx-border-color: transparent transparent -byx-bg2 transparent; -fx-cell-size: 34; }
+.root:byx-theme-light .table-row-cell:odd { -fx-background-color: -byx-bg0; }
+.root:byx-theme-light .table-row-cell:hover { -fx-background-color: -byx-bg1; }
+.root:byx-theme-light .table-row-cell:selected { -fx-background-color: -byx-bg3; }
+.root:byx-theme-light .log-view { -fx-background-color: -byx-bg0; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; }
+.root:byx-theme-light .log-view .list-cell { -fx-background-color: transparent; -fx-text-fill: -byx-text-secondary; -fx-padding: 1 10; }
+.root:byx-theme-light .chart-vertical-grid-lines, .root:byx-theme-light .chart-horizontal-grid-lines { -fx-stroke: -byx-bg2; }
+.root:byx-theme-light .chart-horizontal-zero-line { -fx-stroke: -byx-line; }
+.root:byx-theme-light .chart-line-symbol { -fx-background-color: -purple, -byx-bg0; }
+.root:byx-theme-light .dialog.dialog-pane .button:default { -fx-background-color: -byx-trading; -fx-text-fill: white; }
+.root:byx-theme-light .tooltip { -fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-font-size: 11.5px; }
+.root:byx-theme-light .ws-tab:selected { -fx-background-color: -byx-bg2; -fx-text-fill: -text; -fx-border-color: -info; }
+.root:byx-theme-light .root.trader {
+    -bg: -byx-bg0; -panel: -byx-bg1; -panel2: -byx-bg1; -border: -byx-line;
+    -text: -byx-text-primary; -muted: -byx-text-secondary; -text2: -byx-text-secondary; -disabled: -byx-disabled;
+    -ok: -byx-positive; -bad: -byx-negative; -warn: -byx-warning; -info: -byx-warning;
+    -fx-base: -byx-bg1;
+}
+.root:byx-theme-light .trader .sidebar { -fx-background-color: -byx-bg0; }
+.root:byx-theme-light .trader .nav-item.selected { -fx-background-color: -byx-bg2; -fx-text-fill: -byx-warning; }
+.root:byx-theme-light .trader .nav-item:hover { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .trader .ws-tab:selected { -fx-background-color: -byx-bg2; -fx-text-fill: -byx-warning; -fx-border-color: -byx-warning; }
+.root:byx-theme-light .trader .btn-primary { -fx-background-color: -byx-warning; -fx-text-fill: -byx-bg1; }
+.root:byx-theme-light .trader .table-row-cell:selected { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .trader .table-row-cell:odd { -fx-background-color: -byx-bg0; }
+.root:byx-theme-light .trader .table-row-cell:hover { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .trader .chip:selected, .root:byx-theme-light .trader .tab-pane > .tab-header-area .tab:selected { -fx-border-color: transparent transparent -byx-warning transparent; }
+.root:byx-theme-light .pos { -fx-text-fill: -byx-positive; -fx-font-family: "JetBrains Mono Medium", "Menlo"; -fx-font-size: 12px; }
+.root:byx-theme-light .neg { -fx-text-fill: -byx-negative; -fx-font-family: "JetBrains Mono Medium", "Menlo"; -fx-font-size: 12px; }
+.root:byx-theme-light .th-market-row { -fx-padding: 8; -fx-background-color: -byx-bg2; -fx-background-radius: 3; -fx-cursor: hand; }
+.root:byx-theme-light .auth-left { -fx-background-color: linear-gradient(to bottom right, -byx-bg0, -byx-bg1); }
+.root:byx-theme-light .auth-tagline { -fx-font-size: 20px; -fx-text-fill: -byx-warning; -fx-padding: 28 0 0 0; }
+.root:byx-theme-light .auth-input:focused { -fx-border-color: -byx-warning; }
+.root:byx-theme-light .menu-item:focused { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .btn-primary:pressed { -fx-background-color: -byx-disabled; }
+.root:byx-theme-light .trader .btn-primary:pressed { -fx-background-color: -byx-warning; }
+.root:byx-theme-light .btn-ghost:hover { -fx-border-color: -byx-hover; -fx-text-fill: -text; }
+.root:byx-theme-light .card.clickable:hover { -fx-background-color: -byx-bg1; -fx-border-color: -byx-hover; -fx-effect: dropshadow(gaussian, -byx-shadow-elevated, 8, 0, 0, 2); }
+.root:byx-theme-light .stage:hover { -fx-border-color: -byx-hover; }
+.root:byx-theme-light .seg-thumb { -fx-background-color: -byx-bg2; -fx-background-radius: 5; -fx-border-color: -info; -fx-border-radius: 5; }
+.root:byx-theme-light .menu-pop { -fx-background-color: -byx-bg1; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, -byx-shadow-elevated, 14, 0, 0, 4); -fx-min-width: 200; }
+.root:byx-theme-light .toast { -fx-background-color: -byx-bg2; -fx-border-color: -border; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12; -fx-effect: dropshadow(gaussian, -byx-shadow-elevated, 14, 0, 0, 4); }
+.root:byx-theme-light .skeleton { -fx-background-color: -byx-bg2; -fx-background-radius: 4; }
+.root:byx-theme-light .chart-watermark { -fx-text-fill: -byx-hover; -fx-font-family: "Inter Bold", "Inter"; -fx-font-weight: bold; -fx-font-size: 18px; }
+.root:byx-theme-light .root, .root:byx-theme-light .root.trader, .root:byx-theme-light .root.research, .root:byx-theme-light .root.byx {
+    -bg: -byx-bg-canvas; -panel: -byx-bg0; -panel2: -byx-bg1; -surface3: -byx-bg2;
+    -border: -byx-bg3; -text: -byx-text-primary; -text2: -byx-text-secondary; -muted: -byx-text-tertiary;
+    -disabled: -byx-disabled; -ok: -byx-positive; -bad: -byx-negative; -warn: -byx-warning;
+    -info: -byx-info; -purple: -byx-research; -aqua: -byx-byx; -accent: -byx-trading;
+    -fx-background-color: -bg; -fx-base: -panel2; -fx-control-inner-background: -panel;
+    -fx-font-family: "Inter"; -fx-font-size: 14px;
+}
+.root:byx-theme-light .pipeline-hatch { -fx-background-color: linear-gradient(from 0px 0px to 8px 8px, repeat, -byx-disabled 0%, -byx-disabled 50%, transparent 50%, transparent 100%); -fx-opacity: .5; }
+.root:byx-theme-light .holdout-hatch { -fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, -byx-bg2 0%, -byx-bg2 50%, -byx-bg1 50%, -byx-bg1 100%); }
+.root:byx-theme-light .text-field:focused, .root:byx-theme-light .password-field:focused, .root:byx-theme-light .auth-input:focused { -fx-border-color: -byx-trading, -byx-trading; }
+.root:byx-theme-light .treasury-lane-0 { -fx-border-color: -byx-feedback-success-surface; -fx-border-style: dashed; }
+.root:byx-theme-light .treasury-lane-1 { -fx-background-color: linear-gradient(from 0px 0px to 16px 16px, repeat, -byx-bg1 0%, -byx-bg1 50%, -byx-bg0 50%, -byx-bg0 100%); }
+.root:byx-theme-light .treasury-lane-2 { -fx-border-color: -byx-feedback-info-surface; }
+.root:byx-theme-light .treasury-lane-3 { -fx-border-color: -byx-feedback-error-surface; -fx-border-style: dotted; }
+.root:byx-theme-light .skeleton { -fx-background-color: linear-gradient(from 0% 0% to 200% 0%, repeat, -byx-bg2 25%, -byx-line 50%, -byx-bg2 75%); -fx-background-radius: 5; }
+.root:byx-theme-light .byx-auth-okc { -fx-min-width: 64; -fx-min-height: 64; -fx-max-width: 64; -fx-max-height: 64; -fx-background-color: -byx-feedback-success-surface; -fx-background-radius: 32; }
+.root:byx-theme-light .byx-verify-message.error { -fx-text-fill: -byx-negative; }
+.root:byx-theme-light .byx-btn.danger-outline { -fx-background-color: transparent; -fx-border-color: -byx-feedback-error-surface; -fx-border-width: 1; -fx-border-radius: 9; -fx-text-fill: -byx-negative; }
+.root:byx-theme-light .byx-btn.danger-outline:hover { -fx-background-color: -byx-feedback-error-surface; }
+.root:byx-theme-light .byx-btn.danger-outline:focus-visible, .root:byx-theme-light .root.focusall .byx-btn.danger-outline:focused {
+    -fx-border-color: -byx-text-primary, -byx-feedback-error-surface;
+    -fx-border-width: 2, 1;
+    -fx-border-insets: -4, 0;
+    -fx-border-radius: 13, 9;
+}
+.root:byx-theme-light .byx-spinner-track { -fx-stroke: -byx-line; -fx-fill: transparent; -fx-stroke-width: 2; }
+.root:byx-theme-light .byx-input:hover { -fx-background-color: -byx-hover, -byx-bg2; }
+.root:byx-theme-light .byx-badge.tone-accent { -fx-text-fill: -byx-accent; -fx-background-color: -byx-line; }
+.root:byx-theme-light .byx-chip.state-operational { -fx-background-color: -byx-feedback-success-surface; }
+.root:byx-theme-light .byx-chip.state-operational .byx-chip-text { -fx-text-fill: -byx-byx; }
+.root:byx-theme-light .byx-chip.state-connecting { -fx-background-color: -byx-feedback-info-surface; }
+.root:byx-theme-light .byx-chip.state-connecting .byx-chip-text { -fx-text-fill: -byx-info; }
+.root:byx-theme-light .byx-chip.state-reconnecting, .root:byx-theme-light .byx-chip.state-degraded { -fx-background-color: -byx-feedback-warning-surface; }
+.root:byx-theme-light .byx-chip.state-reconnecting .byx-chip-text, .root:byx-theme-light .byx-chip.state-degraded .byx-chip-text { -fx-text-fill: -byx-warning; }
+.root:byx-theme-light .byx-chip.state-unavailable { -fx-background-color: -byx-feedback-error-surface; }
+.root:byx-theme-light .byx-chip.state-unavailable .byx-chip-text { -fx-text-fill: -byx-negative; }
+.root:byx-theme-light .byx-chip.state-unavailable-expected { -fx-background-color: -byx-bg3; }
+.root:byx-theme-light .byx-chip.state-unavailable-expected .byx-chip-text { -fx-text-fill: -byx-text-secondary; }
+.root:byx-theme-light .byx-chip.state-unknown { -fx-background-color: transparent; -fx-border-color: -byx-line; -fx-border-width: 1; }
+.root:byx-theme-light .byx-chip.state-unknown .byx-chip-text { -fx-text-fill: -byx-text-secondary; }
+.root:byx-theme-light .byx-backdrop { -fx-background-color: -byx-bg-canvas; }
+.root:byx-theme-light .byx-res-gate.open { -fx-background-color: -byx-feedback-success-surface; }
+.root:byx-theme-light .byx-res-gate.locked { -fx-background-color: -byx-feedback-error-surface; }
+.root:byx-theme-light .byx-res-gate.sealed { -fx-background-color: -byx-bg2; }
+.root:byx-theme-light .byx-res-gate-icon { -fx-background-radius: 16; -fx-background-color: -byx-line; }
+.root:byx-theme-light .byx-res-gate.open .byx-res-gate-icon { -fx-background-color: -byx-feedback-success-surface; }
+.root:byx-theme-light .byx-res-gate.locked .byx-res-gate-icon { -fx-background-color: -byx-feedback-error-surface; }
+.root:byx-theme-light .byx-res-seg.complete { -fx-background-color: -byx-feedback-success-surface; }
+.root:byx-theme-light .byx-res-now { -fx-background-color: -byx-bg0; -fx-background-radius: 5; }
+.root:byx-theme-light .byx-env-banner { -fx-background-color: -byx-line, -byx-bg1; -fx-padding: 14 18 14 18; }
+.root:byx-theme-light .byx-home-card-stack:hover .byx-home-card-body { -fx-background-color: -byx-line, -byx-bg2; }
+.root:byx-theme-light .byx-avatar {
+    -fx-background-color: -byx-line, -byx-avatar-bg; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
+    -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;
+    -fx-padding: 0; -fx-cursor: hand;
+}
+.root:byx-theme-light .byx-avatar:hover { -fx-background-color: -byx-line, -byx-avatar-bg; }
+.root:byx-theme-light .byx-mascot-body { -fx-fill: -byx-bg-canvas; -fx-stroke: -byx-line; -fx-stroke-width: 1.6; }
+.root:byx-theme-light .byx-avatar-static {
+    -fx-background-color: -byx-line, -byx-bg2; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
+    -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;
+}
+.root:byx-theme-light .byx-menu-item.current { -fx-background-color: -byx-trading; }
+.root:byx-theme-light .byx-menu-item.danger .byx-menu-label { -fx-text-fill: -byx-negative; }
+.root:byx-theme-light .byx-menu-item.danger .byx-icon { -fx-stroke: -byx-negative; }
+.root:byx-theme-light .byx-panel {
+    -fx-background-color: -byx-line, -byx-bg1;
+    -fx-background-insets: 0, 1 0 0 0;
+    -fx-background-radius: 14, 14;
+    -fx-padding: 16;
+}
+.root:byx-theme-light .chart-grid-ink { -fx-background-color: -byx-line; }
+.root:byx-theme-light .chart-text-ink { -fx-background-color: -byx-text-tertiary; }
+.root:byx-theme-light .byx-desk-depth.ask { -fx-background-color: -byx-feedback-error-surface; -fx-background-radius: 4; }
+.root:byx-theme-light .byx-desk-depth.bid { -fx-background-color: -byx-feedback-success-surface; -fx-background-radius: 4; }
+.root:byx-theme-light .byx-desk-scroll.byx-panel { -fx-background-color: -byx-line, -byx-bg1; -fx-background-insets: 0, 1 0 0 0; -fx-background-radius: 14, 14; -fx-padding: 14; }
+.root:byx-theme-light .root, .root:byx-theme-light {
+ -bg: -byx-bg0; -panel: -byx-surface-card; -panel2: -byx-bg2; -surface3: -byx-bg3;
+ -border: -byx-line; -text: -byx-text-primary; -text2: -byx-text-secondary; -muted: -byx-text-tertiary; -disabled: -byx-disabled;
+ -ok: -byx-positive; -bad: -byx-negative; -warn: -byx-warning; -info: -byx-info; -purple: -byx-research; -aqua: -byx-byx; -accent: -byx-accent;
+ -fx-base: -byx-bg2; -fx-control-inner-background: -byx-surface-card; -fx-text-base-color: -byx-text-primary;
+ -fx-accent: -byx-accent; -fx-focus-color: -byx-focus-control; -fx-faint-focus-color: transparent;
+}
+.root:byx-theme-light .byx-mascot-body { -fx-fill: -byx-avatar-body; -fx-stroke: -byx-avatar-bodyBoundary; }
+.byx-mascot-body { -fx-fill: -byx-avatar-body; }
+.byx-mascot-eye { -fx-fill: -byx-avatar-eyes; }
+.root:byx-theme-light .byx-mascot-eye { -fx-fill: -byx-avatar-eyes; }
+.root:byx-theme-light .byx-avatar { -fx-background-color: -byx-avatar-boundary, -byx-avatar-bg; }
+.root:byx-theme-light .byx-avatar:hover { -fx-background-color: -byx-focus-avatar, -byx-avatar-bg; }
+.root:byx-theme-light .byx-panel { -fx-background-color: -byx-surface-card; }
+.root:byx-theme-light .byx-popover, .root:byx-theme-light .byx-menu { -fx-background-color: -byx-surface-popover; }
+.root:byx-theme-light .byx-dialog { -fx-background-color: -byx-surface-dialog; }
+.root:byx-theme-light .tooltip { -fx-background-color: -byx-surface-tooltip; -fx-text-fill: -byx-text-primary; -fx-border-color: -byx-border-essential; }
+.root:byx-theme-light .text-field, .root:byx-theme-light .password-field, .root:byx-theme-light .combo-box-base { -fx-prompt-text-fill: -byx-text-placeholder; -fx-text-fill: -byx-text-primary; }
+.root:byx-theme-light .byx-input { -fx-background-color: -byx-field-border, -byx-bg2; }
+.root:byx-theme-light .byx-btn:focused, .root:byx-theme-light .byx-input:focused { -fx-border-color: -byx-focus-control; }
+.root:byx-theme-light .byx-muted:hover { -fx-text-fill: -byx-text-secondary; }
+.root:byx-theme-light .chart-grid-ink { -fx-background-color: -byx-chart-grid; }
+.root:byx-theme-light .chart-text-ink { -fx-background-color: -byx-chart-axis; }
+.root:byx-theme-light .byx-res-gate.sealed { -fx-background-color: -byx-bg2; }
+
+/* Explicit interactive semantics, including legacy native controls. */
+.root:byx-theme-light .root.trader { -info: -byx-trading; -accent: -byx-trading; }
+.root:byx-theme-light .trader .btn-primary { -fx-background-color: -byx-trading; -fx-text-fill: -byx-text-on-accent; }
+.root:byx-theme-light .text-field, .root:byx-theme-light .password-field, .root:byx-theme-light .combo-box-base { -fx-border-color: -byx-field-border; -fx-prompt-text-fill: -byx-text-placeholder; }
+.root:byx-theme-light .byx-badge.tone-pos { -fx-background-color: -byx-feedback-success-surface; -fx-text-fill: -byx-feedback-success-text; }
+.root:byx-theme-light .byx-badge.tone-neg { -fx-background-color: -byx-feedback-error-surface; -fx-text-fill: -byx-feedback-error-text; }
+.root:byx-theme-light .byx-badge.tone-wrn { -fx-background-color: -byx-feedback-warning-surface; -fx-text-fill: -byx-feedback-warning-text; }
+.root:byx-theme-light .byx-badge.tone-inf { -fx-background-color: -byx-feedback-info-surface; -fx-text-fill: -byx-feedback-info-text; }
+.root:byx-theme-light .chart-vertical-grid-lines, .root:byx-theme-light .chart-horizontal-grid-lines { -fx-stroke: -byx-chart-grid; }
+.root:byx-theme-light .chart-plot-background { -fx-background-color: -byx-chart-canvas; }
+.root:byx-theme-light .axis { -fx-tick-label-fill: -byx-chart-axis; }
+.byx-theme-choice { -fx-padding: 12; -fx-background-color: -byx-bg2; -fx-background-radius: 8; -fx-border-color: -byx-line; -fx-border-radius: 8; -fx-text-fill: -byx-text-primary; }
+.byx-theme-choice:selected { -fx-border-color: -byx-accent; -fx-background-color: -byx-accent-tint; }
+.byx-theme-choice:focused { -fx-border-color: -byx-focus-control; -fx-border-width: 2; }
+.byx-theme-choice .radio { -fx-border-color: -byx-border-essential; -fx-border-radius: 12; -fx-background-color: -byx-bg2; }
+.byx-theme-choice:selected .dot { -fx-background-color: -byx-accent; }
+
+/* Meaningful helper copy on elevated/hover surfaces uses secondary; baseline muted tokens stay intact. */
+.root:byx-theme-dark .byx-menu-item:hover .byx-menu-key, .root:byx-theme-dark .byx-menu-item:focused .byx-menu-key,
+.root:byx-theme-dark .byx-palette-row:selected .byx-palette-hint, .root:byx-theme-dark .byx-palette-row:selected .byx-palette-type { -fx-text-fill: -byx-text-secondary; }
+.root:byx-theme-light.hc { -byx-text-secondary: #344156; -byx-text-tertiary: #49576D; -byx-line: #697A92; }

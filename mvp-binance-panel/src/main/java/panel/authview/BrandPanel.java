@@ -169,6 +169,7 @@ public final class BrandPanel extends StackPane {
         content.getStyleClass().add("byx-brand-content");
         getChildren().addAll(canvasHost, content);
 
+        panel.design.ByxTheme.observe(this, this::drawStill);
         motion.preference.addListener(new WeakChangeListener<>(modeListener));
         sceneProperty().addListener((o, a, scene) -> {
             if (scene == null) {
@@ -364,11 +365,11 @@ public final class BrandPanel extends StackPane {
         // varredura da tagline: banda clara em 150% p - 20% da largura (só FULL)
         if (wave) {
             double c = 1.5 * p - 0.20;
-            line1.setFill(sweep(c, Color.web("#CBD3E8"), Color.WHITE));
-            line2.setFill(sweep(c, Color.web("#AAB3C7"), Color.web("#D8DFF2")));
+            line1.setFill(sweep(c, panel.design.ByxTheme.paint("#CBD3E8", panel.design.ThemeToken.TEXT_PRIMARY), panel.design.ByxTheme.paint("#FFFFFF", panel.design.ThemeToken.TEXT_PRIMARY)));
+            line2.setFill(sweep(c, panel.design.ByxTheme.paint("#AAB3C7", panel.design.ThemeToken.TEXT_SECONDARY), panel.design.ByxTheme.paint("#D8DFF2", panel.design.ThemeToken.TEXT_PRIMARY)));
         } else {
-            line1.setFill(Color.web("#CBD3E8"));
-            line2.setFill(Color.web("#AAB3C7"));
+            line1.setFill(panel.design.ByxTheme.paint("#CBD3E8", panel.design.ThemeToken.TEXT_PRIMARY));
+            line2.setFill(panel.design.ByxTheme.paint("#AAB3C7", panel.design.ThemeToken.TEXT_SECONDARY));
         }
     }
 
@@ -395,8 +396,8 @@ public final class BrandPanel extends StackPane {
         }
         if (w != bandW) {
             bandW = w;
-            band.setFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(124, 150, 255, 0)),
-                    new Stop(0.5, Color.rgb(124, 150, 255, 0.07)), new Stop(1, Color.rgb(124, 150, 255, 0))));
+            band.setFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF", panel.design.ThemeToken.ACCENT_TRADING), 0)),
+                    new Stop(0.5, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF", panel.design.ThemeToken.ACCENT_TRADING), 0.07)), new Stop(1, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF", panel.design.ThemeToken.ACCENT_TRADING), 0))));
         }
         band.setVisible(true);
         band.setTranslateX((-0.2 + 1.4 * p) * w - band.getWidth() / 2);
@@ -416,7 +417,7 @@ public final class BrandPanel extends StackPane {
             glowW = w;
             glowH = h;
             glow.setFill(new RadialGradient(0, 0, w * 0.78, h * 0.38, w * 0.38, false, CycleMethod.NO_CYCLE,
-                    new Stop(0, Color.rgb(124, 150, 255, 1)), new Stop(1, Color.rgb(124, 150, 255, 0))));
+                    new Stop(0, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF", panel.design.ThemeToken.ACCENT_TRADING), 1)), new Stop(1, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF", panel.design.ThemeToken.ACCENT_TRADING), 0))));
         }
         double o = clamp(alpha);
         if (Math.abs(glow.getOpacity() - o) > 0.002) {
@@ -443,20 +444,20 @@ public final class BrandPanel extends StackPane {
         g.setTransform(0.5, 0, 0, 0.5, 0, 0);
         g.clearRect(0, 0, w, h);
         // fundo da região: bg1 + brilho inferior esquerdo (radial-gradient 20% 110% #7C96FF1A)
-        g.setFill(Color.web("#121723"));
+        g.setFill(panel.design.ByxTheme.paint("#121723", panel.design.ThemeToken.SURFACE_CARD));
         g.fillRect(0, 0, w, h);
         g.setFill(new RadialGradient(0, 0, w * 0.2, h * 1.1, 900, false, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.web("#7C96FF1A")), new Stop(1, Color.web("#7C96FF00"))));
+                new Stop(0, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF1A", panel.design.ThemeToken.ACCENT_TRADING), 0.10196078431372549)), new Stop(1, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#7C96FF00", panel.design.ThemeToken.ACCENT_TRADING), 0.0))));
         g.fillRect(0, 0, w, h);
         g.setFill(new RadialGradient(0, 0, w * 0.62, h * 0.55, w * 0.55, false, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.rgb(170, 176, 200, 0.05)), new Stop(1, Color.rgb(170, 176, 200, 0))));
+                new Stop(0, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#AAB0C8", panel.design.ThemeToken.ACCENT_TRADING), 0.05)), new Stop(1, panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#AAB0C8", panel.design.ThemeToken.ACCENT_TRADING), 0))));
         g.fillRect(0, 0, w, h);
         for (BrandFieldModel.Triangle tr : MODEL.triangles()) {
             double[] A = pos[tr.a()];
             double[] B = pos[tr.b()];
             double[] C = pos[tr.c()];
             double a = tr.fa() * (0.8 + 0.2 * Math.sin(tt * tr.sp() + tr.ph()));
-            g.setFill(Color.rgb(120, 140, 190, clamp(a)));
+            g.setFill(panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#788CBE", panel.design.ThemeToken.ACCENT_TRADING), clamp(a)));
             g.fillPolygon(new double[] {A[0] * w, B[0] * w, C[0] * w}, new double[] {A[1] * h, B[1] * h, C[1] * h}, 3);
         }
 
@@ -465,18 +466,18 @@ public final class BrandPanel extends StackPane {
         L.clearRect(0, 0, w, h);
         for (BrandFieldModel.Star s : MODEL.stars()) {
             double a = wave ? 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(tt * s.sp() + s.ph())) : 0.4;
-            L.setFill(Color.rgb(220, 228, 255, a));
+            L.setFill(panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#DCE4FF", panel.design.ThemeToken.ACCENT_TRADING), a));
             L.fillRect(s.x() * w, s.y() * h, s.s(), s.s());
         }
         L.setLineWidth(1);
         for (int[] e : MODEL.edges()) {
             double[] A = pos[e[0]];
             double[] B = pos[e[1]];
-            L.setStroke(Color.rgb(150, 170, 230, BrandFieldModel.EDGE_ALPHA));
+            L.setStroke(panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#96AAE6", panel.design.ThemeToken.ACCENT_TRADING), BrandFieldModel.EDGE_ALPHA));
             L.strokeLine(A[0] * w, A[1] * h, B[0] * w, B[1] * h);
         }
         for (double[] q : pos) {
-            L.setFill(Color.rgb(190, 205, 255, 0.3));
+            L.setFill(panel.design.ByxTheme.alpha(panel.design.ByxTheme.paint("#BECDFF", panel.design.ThemeToken.ACCENT_TRADING), 0.3));
             L.fillOval(q[0] * w - 1.2, q[1] * h - 1.2, 2.4, 2.4);
         }
     }

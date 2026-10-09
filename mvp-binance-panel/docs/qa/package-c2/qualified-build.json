@@ -1,0 +1,13 @@
+{
+  "frozenCompiled": "/tmp/byx-c2-final-compiled",
+  "sourceFiles": 627,
+  "compiledEntries": 757,
+  "counts": {
+    "tests": 923,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 922
+  },
+  "utc": "2026-10-09T17:29:45.092478+00:00"
+}

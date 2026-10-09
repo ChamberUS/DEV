@@ -20,6 +20,7 @@ public final class LegacyHost extends StackPane {
         for (String s : STYLESHEETS) {
             getStylesheets().add(LegacyHost.class.getResource(s).toExternalForm());
         }
+        for (String style : List.of("/panel/v2/theme-palette.css", "/panel/v2/theme-controls.css")) getStylesheets().add(LegacyHost.class.getResource(style).toExternalForm());
     }
 
     public LegacyHost(Node content) {

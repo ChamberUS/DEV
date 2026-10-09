@@ -152,6 +152,7 @@ final class ChartPanel extends VBox {
         private double drawnH = -1;
 
         Placeholder() {
+            panel.design.ByxTheme.observe(this, () -> { drawnW = -1; requestLayout(); });
             getStyleClass().add("byx-desk-placeholder");
             setId("desk-chart-placeholder");
             lines.setMouseTransparent(true);
@@ -224,11 +225,11 @@ final class ChartPanel extends VBox {
                 GraphicsContext g = lines.getGraphicsContext2D();
                 g.clearRect(0, 0, w, h);
                 g.setLineWidth(1);
-                g.setStroke(Color.web("#ffffff08"));
+                g.setStroke(panel.design.ByxTheme.paint("#ffffff08", panel.design.ThemeToken.CHART_GRID));
                 for (double y = h - 0.5; y > 0; y -= 60) { // repeating-linear-gradient(0deg ... 59px)
                     g.strokeLine(0, Math.floor(y) + 0.5, w, Math.floor(y) + 0.5);
                 }
-                g.setStroke(Color.web("#ffffff06"));
+                g.setStroke(panel.design.ByxTheme.paint("#ffffff06", panel.design.ThemeToken.CHART_GRID));
                 for (double x = 119.5; x < w; x += 120) {
                     g.strokeLine(x, 0, x, h);
                 }
