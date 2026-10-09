@@ -1,0 +1,46 @@
+{
+  "panel": {
+    "total": 895,
+    "pass": 894,
+    "fail": 0,
+    "error": 0,
+    "expectedSkip": 1,
+    "skipReason": "CaptureLiveObservationTest is opt-in; no scientific live-data qualification requested"
+  },
+  "newC1Tests": 29,
+  "native": [
+    {
+      "case": "native-visual",
+      "pass": 337,
+      "fail": 0
+    },
+    {
+      "case": "mascot-full",
+      "pass": 39,
+      "fail": 0
+    },
+    {
+      "case": "mascot-reduced",
+      "pass": 39,
+      "fail": 0
+    },
+    {
+      "case": "mascot-off",
+      "pass": 39,
+      "fail": 0
+    }
+  ],
+  "nativeTotalPass": 454,
+  "packagedRuntime": {
+    "pass": 9,
+    "fail": 0
+  },
+  "bundleClasspathI18nProbe": {
+    "pass": 13,
+    "fail": 0
+  },
+  "screenshots": 321,
+  "keyCountPerLanguage": 2115,
+  "sourceHashesStillMatch": true,
+  "status": "PACKAGE_C1_I18N_READY_FOR_UAT"
+}

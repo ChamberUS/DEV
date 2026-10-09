@@ -100,11 +100,13 @@ public final class SessionsScreen implements View {
     private void renderDevices() {
         VBox panel = Kit.panel("Trusted devices");
         panel.setId("sessions-devices");
-        panel.getChildren().add(Kit.muted("Loading trusted devices…"));
+        Label loading = Kit.muted("Loading trusted devices…");
+        loading.setId("trusted-devices-loading");
+        panel.getChildren().add(loading);
         body.getChildren().add(panel);
         if (!shown) return;
         read.load(data::trustedDevices, (devices, failure) -> {
-            panel.getChildren().removeIf(n -> n instanceof Label l && "Loading trusted devices…".equals(l.getText()));
+            panel.getChildren().removeIf(n -> n instanceof Label l && "trusted-devices-loading".equals(l.getId()));
             if (failure != null) {
                 region = new ByxRegion("Trusted devices", EnumSet.of(RegionState.UNAVAILABLE), motion);
                 region.setState(RegionState.UNAVAILABLE, ByxRegion.Detail.of("Trusted devices unavailable",

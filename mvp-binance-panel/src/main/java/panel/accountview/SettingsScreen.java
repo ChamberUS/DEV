@@ -140,7 +140,7 @@ public final class SettingsScreen implements View {
         panel.setId("settings-" + section.toLowerCase(java.util.Locale.ROOT));
         switch (section) {
             case "General" -> {
-                panel.getChildren().add(setting("Language", "Interface language. English is the only language in this build.", ByxBadge.of("ENGLISH", ByxBadge.Tone.NEUTRAL)));
+                panel.getChildren().add(setting("Language", "Changes immediately for this session. Resets to English when you sign out; not saved to the server.", new panel.i18n.LanguageSelector()));
                 panel.getChildren().add(setting("Primary workspace", "Where the app opens. This only sets the opening page; it changes nothing else.",
                         row("Primary workspace", new Kit.Segmented(List.of("Trading", "Research", "BYX"), pretty2(draft.primaryWorkspace()),
                                 v -> edit(new AccountData.Prefs(draft.motion(), draft.density(), draft.animatedIcons(), v.toUpperCase(), draft.followSystemMotion()))),
@@ -220,7 +220,7 @@ public final class SettingsScreen implements View {
         }
         content.getChildren().addAll(title, panel);
         if (!data.preferencesEditable() && List.of("General", "Appearance", "Accessibility").contains(section)) {
-            content.getChildren().add(1, Kit.muted("Preferences are read-only in this build. The configured motion and density remain active."));
+            content.getChildren().add(1, Kit.muted("Other preferences are read-only in this build. Language changes apply only to this session. The configured motion and density remain active."));
         }
     }
 

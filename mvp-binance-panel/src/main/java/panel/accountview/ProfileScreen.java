@@ -247,7 +247,7 @@ public final class ProfileScreen implements View {
             identity.getChildren().add(Kit.muted("No active session."));
             return;
         }
-        Label av = Fx.label(AccountModel.initials(u), "byx-section-title");
+        Label av = panel.i18n.LocaleView.literal(Fx.label(AccountModel.initials(u), "byx-section-title"));
         StackPane avatar = new StackPane(av);
         avatar.getStyleClass().add("byx-step-num");
         avatar.setMinSize(64, 64);
@@ -259,7 +259,7 @@ public final class ProfileScreen implements View {
         out.setOnAction(e -> signOut.run());
         HBox badges = new HBox(6, ByxBadge.of(AccountModel.role(u).toUpperCase(), ByxBadge.Tone.ACCENT),
                 u.emailVerified() ? ByxBadge.of("EMAIL VERIFIED", ByxBadge.Tone.POSITIVE) : ByxBadge.of("EMAIL NOT VERIFIED", ByxBadge.Tone.NEUTRAL));
-        identity.getChildren().addAll(avatar, Fx.label(u.username(), "byx-section-title"), Kit.muted("@" + u.username()), badges,
+        identity.getChildren().addAll(avatar, panel.i18n.LocaleView.literal(Fx.label(u.username(), "byx-section-title")), Kit.muted("@" + u.username()), badges,
                 Kit.dim("Your role comes from the authorization system. The interface never changes it."), new VBox(8, edit, out));
         details.getChildren().addAll(Kit.row("Display name", AccountModel.NOT_PROVIDED, false), Kit.row("Username", "@" + u.username(), false),
                 Kit.row("Email", u.maskedEmail(), false), Kit.row("Phone", u.maskedPhone(), false), Kit.row("Role", AccountModel.role(u), false),

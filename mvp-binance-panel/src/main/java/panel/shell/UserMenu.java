@@ -1,5 +1,7 @@
 package panel.shell;
 
+import panel.i18n.LocaleView;
+
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Bounds;
@@ -166,15 +168,16 @@ public final class UserMenu {
 
     private VBox build() {
         buttons.clear();
-        Label initials = new Label(ShellTopBar.initials(identity.name()));
+        Label initials = LocaleView.literal(new Label(ShellTopBar.initials(identity.name())));
         initials.getStyleClass().add("byx-avatar-static");
         initials.setMinSize(36, 36);
         initials.setPrefSize(36, 36);
         initials.setAlignment(Pos.CENTER);
-        Label name = new Label(identity.name());
+        Label name = LocaleView.literal(new Label(identity.name()));
         name.getStyleClass().add("byx-menu-name");
         name.setMinWidth(0);
         Label email = new Label(identity.email() == null ? "Email not provided by the API" : identity.email());
+        if (identity.email() != null) LocaleView.literal(email);
         email.getStyleClass().add("byx-menu-email");
         email.setMinWidth(0);
         VBox who = new VBox(2, name, email);

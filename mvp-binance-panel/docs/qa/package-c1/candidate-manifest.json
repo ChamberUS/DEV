@@ -1,0 +1,23 @@
+{
+  "artifact": "Final Package C1 local development UAT candidate with protected trading-state width; separate from RC1/A/B and all intermediate C1 builds; not a distribution release",
+  "version": "1.0.0-local-pkgc1-uat-20261009T082713Z",
+  "app": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc1-uat/1.0.0-local-pkgc1-uat-20261009T082713Z/BYX-MVP.app",
+  "zip": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc1-uat/1.0.0-local-pkgc1-uat-20261009T082713Z/BYX-MVP-1.0.0-local-pkgc1-uat-20261009T082713Z.zip",
+  "builtAtUtc": "2026-10-09T08:38:53.134472+00:00",
+  "zipSha256": "0556e453e9a804054d3f6e34671276af8714359fad73842d3494bc92bfb2c715",
+  "panelJarSha256": "4f2f6e004e52c1f62bad83a1714f41fb22e87288ec27998209d537bbfb02122c",
+  "serviceJarSha256": "9520ddc0566645fe8bbd48f0f23d8b7bb79ec10f4d8406dbe445fbc916852225",
+  "serviceJarEntriesIdenticalToApprovedPackageB": true,
+  "panelClassEntriesMatchTestedOutput": true,
+  "panelClassEntryCount": 686,
+  "i18nResourcesMatchTestedOutput": true,
+  "i18nResourceCount": 6,
+  "defaultProfile": "PRODUCTION_DISABLED",
+  "noTransactionLabOrTestHarnessInDefault": true,
+  "sourceManifest": "tested-source-hashes.json",
+  "signing": "Existing local Apple Development identity; Hardened Runtime; no new provisioning",
+  "profileExpiryUtc": "2026-10-13T16:49:55Z",
+  "packagingSourceUnchanged": true,
+  "smoke": "packaged-smoke/result.json",
+  "publication": "PUSH_NOT_ATTEMPTED"
+}

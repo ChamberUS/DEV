@@ -51,7 +51,7 @@ public class HypothesesView extends PageView {
     private static Button runButton(Snapshot s) {
         Button run = Ui.button("RUN ANALYSIS", "primary");
         run.setDisable(true);
-        Tooltip.install(run, new Tooltip("Not available: the backend has no hypothesis analysis command yet."));
+        run.setTooltip(new Tooltip("Not available: the backend has no hypothesis analysis command yet."));
         return run;
     }
 

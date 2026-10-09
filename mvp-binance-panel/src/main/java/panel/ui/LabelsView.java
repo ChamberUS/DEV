@@ -51,7 +51,7 @@ public class LabelsView extends PageView {
         run.setDisable(blocked || s.labelState == StageState.READY);
         agg.setDisable(blocked || s.labelState != StageState.READY);
         if (ctx.research.labelsRunning()) {
-            Tooltip.install(run, new Tooltip("A label job is already running."));
+            run.setTooltip(new Tooltip("A label job is already running."));
         }
         HBox actions = new HBox(8, Ui.label("PURE FORWARD MID LABELS", "card-title"), Ui.spacer(), status, run, agg);
         actions.setAlignment(javafx.geometry.Pos.CENTER_LEFT);

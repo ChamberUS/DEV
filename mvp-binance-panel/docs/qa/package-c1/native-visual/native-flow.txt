@@ -1,0 +1,337 @@
+PASS login labels EN
+PASS login labels PT_BR
+PASS locale does not authenticate
+PASS t-home stable route EN
+PASS t-home stable authority EN
+PASS t-home same view EN
+PASS t-home same mascot and handlers EN
+PASS t-home stable route PT_BR
+PASS t-home stable authority PT_BR
+PASS t-home same view PT_BR
+PASS t-home same mascot and handlers PT_BR
+PASS t-desk stable route EN
+PASS t-desk stable authority EN
+PASS t-desk same view EN
+PASS t-desk same mascot and handlers EN
+PASS t-desk stable route PT_BR
+PASS t-desk stable authority PT_BR
+PASS t-desk same view PT_BR
+PASS t-desk same mascot and handlers PT_BR
+PASS t-markets stable route EN
+PASS t-markets stable authority EN
+PASS t-markets same view EN
+PASS t-markets same mascot and handlers EN
+PASS t-markets stable route PT_BR
+PASS t-markets stable authority PT_BR
+PASS t-markets same view PT_BR
+PASS t-markets same mascot and handlers PT_BR
+PASS t-bot stable route EN
+PASS t-bot stable authority EN
+PASS t-bot same view EN
+PASS t-bot same mascot and handlers EN
+PASS t-bot stable route PT_BR
+PASS t-bot stable authority PT_BR
+PASS t-bot same view PT_BR
+PASS t-bot same mascot and handlers PT_BR
+PASS t-strategies stable route EN
+PASS t-strategies stable authority EN
+PASS t-strategies same view EN
+PASS t-strategies same mascot and handlers EN
+PASS t-strategies stable route PT_BR
+PASS t-strategies stable authority PT_BR
+PASS t-strategies same view PT_BR
+PASS t-strategies same mascot and handlers PT_BR
+PASS t-signals stable route EN
+PASS t-signals stable authority EN
+PASS t-signals same view EN
+PASS t-signals same mascot and handlers EN
+PASS t-signals stable route PT_BR
+PASS t-signals stable authority PT_BR
+PASS t-signals same view PT_BR
+PASS t-signals same mascot and handlers PT_BR
+PASS t-portfolio stable route EN
+PASS t-portfolio stable authority EN
+PASS t-portfolio same view EN
+PASS t-portfolio same mascot and handlers EN
+PASS t-portfolio stable route PT_BR
+PASS t-portfolio stable authority PT_BR
+PASS t-portfolio same view PT_BR
+PASS t-portfolio same mascot and handlers PT_BR
+PASS t-positions stable route EN
+PASS t-positions stable authority EN
+PASS t-positions same view EN
+PASS t-positions same mascot and handlers EN
+PASS t-positions stable route PT_BR
+PASS t-positions stable authority PT_BR
+PASS t-positions same view PT_BR
+PASS t-positions same mascot and handlers PT_BR
+PASS t-orders stable route EN
+PASS t-orders stable authority EN
+PASS t-orders same view EN
+PASS t-orders same mascot and handlers EN
+PASS t-orders stable route PT_BR
+PASS t-orders stable authority PT_BR
+PASS t-orders same view PT_BR
+PASS t-orders same mascot and handlers PT_BR
+PASS t-performance stable route EN
+PASS t-performance stable authority EN
+PASS t-performance same view EN
+PASS t-performance same mascot and handlers EN
+PASS t-performance stable route PT_BR
+PASS t-performance stable authority PT_BR
+PASS t-performance same view PT_BR
+PASS t-performance same mascot and handlers PT_BR
+PASS t-activity stable route EN
+PASS t-activity stable authority EN
+PASS t-activity same view EN
+PASS t-activity same mascot and handlers EN
+PASS t-activity stable route PT_BR
+PASS t-activity stable authority PT_BR
+PASS t-activity same view PT_BR
+PASS t-activity same mascot and handlers PT_BR
+PASS t-wallet stable route EN
+PASS t-wallet stable authority EN
+PASS t-wallet same view EN
+PASS t-wallet same mascot and handlers EN
+PASS t-wallet stable route PT_BR
+PASS t-wallet stable authority PT_BR
+PASS t-wallet same view PT_BR
+PASS t-wallet same mascot and handlers PT_BR
+PASS t-byx stable route EN
+PASS t-byx stable authority EN
+PASS t-byx same view EN
+PASS t-byx same mascot and handlers EN
+PASS t-byx stable route PT_BR
+PASS t-byx stable authority PT_BR
+PASS t-byx same view PT_BR
+PASS t-byx same mascot and handlers PT_BR
+PASS t-chain-data stable route EN
+PASS t-chain-data stable authority EN
+PASS t-chain-data same view EN
+PASS t-chain-data same mascot and handlers EN
+PASS t-chain-data stable route PT_BR
+PASS t-chain-data stable authority PT_BR
+PASS t-chain-data same view PT_BR
+PASS t-chain-data same mascot and handlers PT_BR
+PASS t-benefits stable route EN
+PASS t-benefits stable authority EN
+PASS t-benefits same view EN
+PASS t-benefits same mascot and handlers EN
+PASS t-benefits stable route PT_BR
+PASS t-benefits stable authority PT_BR
+PASS t-benefits same view PT_BR
+PASS t-benefits same mascot and handlers PT_BR
+PASS t-treasury stable route EN
+PASS t-treasury stable authority EN
+PASS t-treasury same view EN
+PASS t-treasury same mascot and handlers EN
+PASS t-treasury stable route PT_BR
+PASS t-treasury stable authority PT_BR
+PASS t-treasury same view PT_BR
+PASS t-treasury same mascot and handlers PT_BR
+PASS t-profile stable route EN
+PASS t-profile stable authority EN
+PASS t-profile same view EN
+PASS t-profile same mascot and handlers EN
+PASS t-profile stable route PT_BR
+PASS t-profile stable authority PT_BR
+PASS t-profile same view PT_BR
+PASS t-profile same mascot and handlers PT_BR
+PASS t-security stable route EN
+PASS t-security stable authority EN
+PASS t-security same view EN
+PASS t-security same mascot and handlers EN
+PASS t-security stable route PT_BR
+PASS t-security stable authority PT_BR
+PASS t-security same view PT_BR
+PASS t-security same mascot and handlers PT_BR
+PASS t-sessions stable route EN
+PASS t-sessions stable authority EN
+PASS t-sessions same view EN
+PASS t-sessions same mascot and handlers EN
+PASS t-sessions stable route PT_BR
+PASS t-sessions stable authority PT_BR
+PASS t-sessions same view PT_BR
+PASS t-sessions same mascot and handlers PT_BR
+PASS t-settings stable route EN
+PASS t-settings stable authority EN
+PASS t-settings same view EN
+PASS t-settings same mascot and handlers EN
+PASS t-settings stable route PT_BR
+PASS t-settings stable authority PT_BR
+PASS t-settings same view PT_BR
+PASS t-settings same mascot and handlers PT_BR
+PASS t-notifications stable route EN
+PASS t-notifications stable authority EN
+PASS t-notifications same view EN
+PASS t-notifications same mascot and handlers EN
+PASS t-notifications stable route PT_BR
+PASS t-notifications stable authority PT_BR
+PASS t-notifications same view PT_BR
+PASS t-notifications same mascot and handlers PT_BR
+PASS t-account-activity stable route EN
+PASS t-account-activity stable authority EN
+PASS t-account-activity same view EN
+PASS t-account-activity same mascot and handlers EN
+PASS t-account-activity stable route PT_BR
+PASS t-account-activity stable authority PT_BR
+PASS t-account-activity same view PT_BR
+PASS t-account-activity same mascot and handlers PT_BR
+PASS h-faq stable route EN
+PASS h-faq stable authority EN
+PASS h-faq same view EN
+PASS h-faq same mascot and handlers EN
+PASS h-faq stable route PT_BR
+PASS h-faq stable authority PT_BR
+PASS h-faq same view PT_BR
+PASS h-faq same mascot and handlers PT_BR
+PASS h-help stable route EN
+PASS h-help stable authority EN
+PASS h-help same view EN
+PASS h-help same mascot and handlers EN
+PASS h-help stable route PT_BR
+PASS h-help stable authority PT_BR
+PASS h-help same view PT_BR
+PASS h-help same mascot and handlers PT_BR
+PASS h-about stable route EN
+PASS h-about stable authority EN
+PASS h-about same view EN
+PASS h-about same mascot and handlers EN
+PASS h-about stable route PT_BR
+PASS h-about stable authority PT_BR
+PASS h-about same view PT_BR
+PASS h-about same mascot and handlers PT_BR
+PASS h-overview stable route EN
+PASS h-overview stable authority EN
+PASS h-overview same view EN
+PASS h-overview same mascot and handlers EN
+PASS h-overview stable route PT_BR
+PASS h-overview stable authority PT_BR
+PASS h-overview same view PT_BR
+PASS h-overview same mascot and handlers PT_BR
+PASS h-diagnostics stable route EN
+PASS h-diagnostics stable authority EN
+PASS h-diagnostics same view EN
+PASS h-diagnostics same mascot and handlers EN
+PASS h-diagnostics stable route PT_BR
+PASS h-diagnostics stable authority PT_BR
+PASS h-diagnostics same view PT_BR
+PASS h-diagnostics same mascot and handlers PT_BR
+PASS h-whats-new stable route EN
+PASS h-whats-new stable authority EN
+PASS h-whats-new same view EN
+PASS h-whats-new same mascot and handlers EN
+PASS h-whats-new stable route PT_BR
+PASS h-whats-new stable authority PT_BR
+PASS h-whats-new same view PT_BR
+PASS h-whats-new same mascot and handlers PT_BR
+PASS h-terms stable route EN
+PASS h-terms stable authority EN
+PASS h-terms same view EN
+PASS h-terms same mascot and handlers EN
+PASS h-terms stable route PT_BR
+PASS h-terms stable authority PT_BR
+PASS h-terms same view PT_BR
+PASS h-terms same mascot and handlers PT_BR
+PASS h-privacy stable route EN
+PASS h-privacy stable authority EN
+PASS h-privacy same view EN
+PASS h-privacy same mascot and handlers EN
+PASS h-privacy stable route PT_BR
+PASS h-privacy stable authority PT_BR
+PASS h-privacy same view PT_BR
+PASS h-privacy same mascot and handlers PT_BR
+PASS h-shortcuts stable route EN
+PASS h-shortcuts stable authority EN
+PASS h-shortcuts same view EN
+PASS h-shortcuts same mascot and handlers EN
+PASS h-shortcuts stable route PT_BR
+PASS h-shortcuts stable authority PT_BR
+PASS h-shortcuts same view PT_BR
+PASS h-shortcuts same mascot and handlers PT_BR
+PASS sys-status stable route EN
+PASS sys-status stable authority EN
+PASS sys-status same view EN
+PASS sys-status same mascot and handlers EN
+PASS sys-status stable route PT_BR
+PASS sys-status stable authority PT_BR
+PASS sys-status same view PT_BR
+PASS sys-status same mascot and handlers PT_BR
+PASS account menu EN
+PASS palette EN
+PASS modal retained across switch EN
+PASS account menu PT_BR
+PASS palette PT_BR
+PASS modal retained across switch PT_BR
+PASS USER cannot open Research in PT
+PASS USER locale cannot elevate authority
+PASS logout resets session UI locale
+PASS old shell disposed
+PASS ADMIN still needs MFA after locale switch
+PASS synthetic email verification
+PASS synthetic SMS verification
+PASS normal synthetic MFA gate completed
+PASS authorized Research overview EN
+PASS MFA authority preserved overview EN
+PASS authorized Research overview PT_BR
+PASS MFA authority preserved overview PT_BR
+PASS authorized Research capture EN
+PASS MFA authority preserved capture EN
+PASS authorized Research capture PT_BR
+PASS MFA authority preserved capture PT_BR
+PASS authorized Research sessions EN
+PASS MFA authority preserved sessions EN
+PASS authorized Research sessions PT_BR
+PASS MFA authority preserved sessions PT_BR
+PASS authorized Research dataset EN
+PASS MFA authority preserved dataset EN
+PASS authorized Research dataset PT_BR
+PASS MFA authority preserved dataset PT_BR
+PASS authorized Research labels EN
+PASS MFA authority preserved labels EN
+PASS authorized Research labels PT_BR
+PASS MFA authority preserved labels PT_BR
+PASS authorized Research features EN
+PASS MFA authority preserved features EN
+PASS authorized Research features PT_BR
+PASS MFA authority preserved features PT_BR
+PASS authorized Research hypotheses EN
+PASS MFA authority preserved hypotheses EN
+PASS authorized Research hypotheses PT_BR
+PASS MFA authority preserved hypotheses PT_BR
+PASS authorized Research validation EN
+PASS MFA authority preserved validation EN
+PASS authorized Research validation PT_BR
+PASS MFA authority preserved validation PT_BR
+PASS authorized Research execution EN
+PASS MFA authority preserved execution EN
+PASS authorized Research execution PT_BR
+PASS MFA authority preserved execution PT_BR
+PASS authorized Research paper EN
+PASS MFA authority preserved paper EN
+PASS authorized Research paper PT_BR
+PASS MFA authority preserved paper PT_BR
+PASS authorized Research live EN
+PASS MFA authority preserved live EN
+PASS authorized Research live PT_BR
+PASS MFA authority preserved live PT_BR
+PASS authorized Research jobs EN
+PASS MFA authority preserved jobs EN
+PASS authorized Research jobs PT_BR
+PASS MFA authority preserved jobs PT_BR
+PASS authorized Research logs EN
+PASS MFA authority preserved logs EN
+PASS authorized Research logs PT_BR
+PASS MFA authority preserved logs PT_BR
+PASS authorized Research settings EN
+PASS MFA authority preserved settings EN
+PASS authorized Research settings PT_BR
+PASS MFA authority preserved settings PT_BR
+PASS authorized Research users EN
+PASS MFA authority preserved users EN
+PASS authorized Research users PT_BR
+PASS MFA authority preserved users PT_BR
+PASS onboarding shown in PT
+PASS onboarding remains during switch
+PASS no missing key during native flow: []
+PASS no English fallback during native flow

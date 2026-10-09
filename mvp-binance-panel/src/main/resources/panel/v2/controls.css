@@ -266,3 +266,26 @@
 .byx-gallery-section { -fx-background-color: -byx-bg1; -fx-background-radius: 14; -fx-padding: 16; }
 .byx-gallery-region { -fx-background-color: -byx-bg2; -fx-background-radius: 12; -fx-padding: 16; }
 .byx-seg:selected { -fx-background-color: -byx-hover; -fx-border-color: -byx-accent; -fx-border-width: 0 0 2 0; -fx-border-radius: 9; }
+
+/* C1 language choice reuses the approved control palette and focus treatment. */
+.byx-language {
+    -fx-background-color: -byx-line, -byx-bg2;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
+    -fx-padding: 7 12;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+}
+.byx-language:focused {
+    -fx-background-color: -byx-focus-ring, -byx-accent, -byx-bg2;
+    -fx-background-insets: -3, 0, 1;
+    -fx-background-radius: 13, 10, 9;
+}
+.byx-language .list-cell, .byx-language-cell {
+    -fx-font-family: "Schibsted Grotesk";
+    -fx-font-size: 15px;
+    -fx-text-fill: -byx-text-primary;
+    -fx-background-color: -byx-bg2;
+}
+.byx-language-cell:filled:hover, .byx-language-cell:filled:selected { -fx-background-color: -byx-hover; }
+.byx-language .arrow { -fx-background-color: -byx-text-secondary; }

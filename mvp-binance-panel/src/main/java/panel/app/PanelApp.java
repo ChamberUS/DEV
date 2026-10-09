@@ -102,6 +102,8 @@ public class PanelApp extends Application {
         rootStack.getStyleClass().add("byx-app");
         ctx.motion.setActive(false);
         Scene scene = new Scene(rootStack, 1440, 900);
+        localeView = new panel.i18n.LocaleView(scene);
+        localeView.bind(stage.titleProperty());
         // cena: só o tema V2; as folhas legadas valem apenas dentro de LegacyHost
         StartupTrace.time("ByxTheme.apply", () -> { panel.design.ByxTheme.apply(scene); return null; });
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> ctx.adminAccess.touch());
@@ -164,6 +166,7 @@ public class PanelApp extends Application {
 
     @Override
     public void stop() {
+        if (localeView != null) localeView.close();
         mainActive = false;
         router.reset();
         chromeWatch.stop();
@@ -189,6 +192,7 @@ public class PanelApp extends Application {
     // ---- fluxo de autenticação -------------------------------------------------
 
     private void showEntry(String message) {
+        if (localeOwner != null) { panel.i18n.Strings.resetSession(); localeOwner = null; }
         signingOut = false;
         rootStack.setDisable(false);
         researchCheckGeneration++;
@@ -337,6 +341,8 @@ public class PanelApp extends Application {
         refresh.start();
     }
 
+    private panel.i18n.LocaleView localeView;
+    private Long localeOwner;
     private boolean signingOut;
 
     private void logout(String message) {
@@ -368,6 +374,8 @@ public class PanelApp extends Application {
     // ---- aplicação principal ---------------------------------------------------
 
     private void enterApp(User user) {
+        if (localeOwner != null && localeOwner.longValue() != user.id()) panel.i18n.Strings.resetSession();
+        localeOwner = user.id();
         signingOut = false;
         rootStack.setDisable(false);
         researchCheckGeneration++;

@@ -47,6 +47,7 @@ public final class AuthLayout extends HBox {
     private final StackPane pane = new StackPane();
     private final Label step = new Label();
     private final HBox top;
+    private final VBox topControls;
     private final VBox formHost = new VBox();
     private final HBox footer;
     private Breakpoint breakpoint;
@@ -89,13 +90,15 @@ public final class AuthLayout extends HBox {
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.getStyleClass().add("byx-auth-footer");
 
+        topControls = new VBox(8, top, new panel.i18n.LanguageSelector());
+        topControls.setMaxHeight(Region.USE_PREF_SIZE);
         // sem isso o HBox ocupa a altura toda do StackPane e centraliza o conteúdo
         top.setMaxHeight(Region.USE_PREF_SIZE);
         footer.setMaxHeight(Region.USE_PREF_SIZE);
-        StackPane.setAlignment(top, Pos.TOP_LEFT);
+        StackPane.setAlignment(topControls, Pos.TOP_LEFT);
         StackPane.setAlignment(footer, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(formHost, Pos.CENTER_LEFT);
-        pane.getChildren().addAll(formHost, top, footer);
+        pane.getChildren().addAll(formHost, topControls, footer);
         pane.getStyleClass().add("byx-auth-pane");
         getChildren().addAll(brand, pane);
         widthProperty().addListener((o, a, w) -> apply(Breakpoint.of(w.doubleValue())));
@@ -125,7 +128,7 @@ public final class AuthLayout extends HBox {
         pane.setPrefWidth(bp.pane);
         pane.setMaxWidth(bp.pane);
         pane.setPadding(new Insets(56, bp.padX, 56, bp.padX));
-        StackPane.setMargin(top, new Insets(24 - 56, 0, 0, 0));    // .ptop top 24
+        StackPane.setMargin(topControls, new Insets(24 - 56, 0, 0, 0));    // .ptop top 24
         StackPane.setMargin(footer, new Insets(0, 0, 22 - 56, 0)); // .pfoot bottom 22
         formHost.setMaxWidth(bp.form);
         formHost.setPrefWidth(bp.form);

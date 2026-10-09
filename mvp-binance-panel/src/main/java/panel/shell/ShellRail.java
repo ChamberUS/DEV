@@ -198,12 +198,16 @@ public final class ShellRail extends VBox {
     private static Label railLabel(String text) {
         Label label = new Label(text);
         label.getStyleClass().add("byx-rail-label");
+        if ("Settings".equals(text)) {
+            label.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(
+                    () -> panel.i18n.Strings.get("rail.settings.short"), panel.i18n.Strings.languageProperty()));
+        }
         label.setMinWidth(Region.USE_PREF_SIZE);
         return label;
     }
 
     private static Tooltip tooltip(String text) {
-        Tooltip t = new Tooltip(text);
+        Tooltip t = new panel.i18n.LocaleTooltip(text);
         t.getStyleClass().add("byx-tooltip");
         t.setShowDelay(Duration.millis(300)); // tokens.tooltip.delayMs
         return t;

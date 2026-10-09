@@ -63,6 +63,11 @@ public final class StatusDock extends HBox {
             label.setMinWidth(0); // 1280: texto termina em "…" em vez de cortar o dock
             label.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
             node.setMinWidth(0);
+            // Keep the trading state readable when longer translated neighbors compress the dock.
+            if ("live".equals(item.key())) {
+                label.setMinWidth(Region.USE_PREF_SIZE);
+                node.setMinWidth(Region.USE_PREF_SIZE);
+            }
             node.setOnAction(e -> {
                 if (this.item.target() != null) {
                     request.accept(this.item.target());
@@ -181,7 +186,7 @@ public final class StatusDock extends HBox {
             HBox box = new HBox(16, name);
             box.setAlignment(Pos.CENTER_LEFT);
             box.getStyleClass().add("byx-dock-grp");
-            box.setMinWidth(0);
+            box.setMinWidth(group.items().stream().anyMatch(i -> "live".equals(i.key())) ? Region.USE_COMPUTED_SIZE : 0);
             groups.add(box);
             for (Item i : group.items()) {
                 ItemView v = new ItemView(i);

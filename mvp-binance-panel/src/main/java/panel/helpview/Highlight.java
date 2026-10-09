@@ -41,7 +41,10 @@ public final class Highlight {
 
     public static TextFlow flow(String text, String query, String... baseClasses) {
         TextFlow flow = new TextFlow();
-        for (Object[] seg : split(text, query)) {
+        Runnable render = () -> {
+        flow.getChildren().clear();
+        String shown = panel.i18n.Presentation.text(text);
+        for (Object[] seg : split(shown, query)) {
             Text t = new Text((String) seg[0]);
             t.getStyleClass().addAll(baseClasses);
             if ((boolean) seg[1]) {
@@ -49,7 +52,16 @@ public final class Highlight {
             }
             flow.getChildren().add(t);
         }
-        flow.setAccessibleText(text);
+        flow.setAccessibleText(shown);
+        };
+        render.run();
+        javafx.beans.value.ChangeListener<panel.i18n.Strings.Lang> listener = (o,a,b) -> render.run();
+        flow.getProperties().put("byx.i18n.localeDelegate", listener);
+        javafx.beans.value.WeakChangeListener<panel.i18n.Strings.Lang> weakLocale = new javafx.beans.value.WeakChangeListener<>(listener);
+        flow.sceneProperty().addListener((o,a,b) -> {
+            if (a != null) panel.i18n.Strings.languageProperty().removeListener(weakLocale);
+            if (b != null) { render.run(); panel.i18n.Strings.languageProperty().addListener(weakLocale); }
+        });
         return flow;
     }
 }

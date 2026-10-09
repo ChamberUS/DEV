@@ -1,0 +1,641 @@
+{
+  "unexpectedSharedLongEnglishPhrases": [],
+  "sharedCopyRequiringGlossaryOrTechnicalInterpretation": {
+    "/usr/bin/false": [
+      "pt-BR-research-settings"
+    ],
+    "/var/folders/_y/ss9m5xx13z165trk969hq5fm0000gn/T/byx-c1-native-9266079839475290000/empty-project": [
+      "pt-BR-research-settings"
+    ],
+    "1 s": [
+      "pt-BR-research-hypotheses"
+    ],
+    "15 s": [
+      "pt-BR-research-hypotheses"
+    ],
+    "15m": [
+      "pt-BR-t-desk"
+    ],
+    "1h": [
+      "pt-BR-t-desk"
+    ],
+    "1m": [
+      "pt-BR-t-desk"
+    ],
+    "24H": [
+      "pt-BR-t-markets"
+    ],
+    "24h N/A": [
+      "pt-BR-t-desk"
+    ],
+    "250 ms": [
+      "pt-BR-research-hypotheses"
+    ],
+    "3 s": [
+      "pt-BR-research-hypotheses"
+    ],
+    "30 s": [
+      "pt-BR-research-hypotheses"
+    ],
+    "4h": [
+      "pt-BR-t-desk"
+    ],
+    "5 s": [
+      "pt-BR-research-hypotheses"
+    ],
+    "500 ms": [
+      "pt-BR-research-hypotheses"
+    ],
+    "5m": [
+      "pt-BR-t-desk"
+    ],
+    "60 s": [
+      "pt-BR-research-hypotheses"
+    ],
+    "@c1-user": [
+      "pt-BR-t-profile",
+      "pt-BR-t-sessions"
+    ],
+    "BETA": [
+      "pt-BR-onboarding",
+      "pt-BR-research-gate",
+      "pt-BR-t-home"
+    ],
+    "BINANCE USD-M FUTURES": [
+      "pt-BR-t-desk"
+    ],
+    "BOT": [
+      "pt-BR-t-desk"
+    ],
+    "BY BUYNNEX": [
+      "pt-BR-h-about",
+      "pt-BR-login"
+    ],
+    "BYX": [
+      "pt-BR-account-menu",
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-h-faq",
+      "pt-BR-h-help",
+      "pt-BR-h-overview",
+      "pt-BR-h-privacy",
+      "pt-BR-h-shortcuts",
+      "pt-BR-h-terms",
+      "pt-BR-h-whats-new",
+      "pt-BR-modal-switched-from-EN",
+      "pt-BR-notifications-popover",
+      "pt-BR-onboarding",
+      "pt-BR-palette",
+      "pt-BR-research-capture",
+      "pt-BR-research-dataset",
+      "pt-BR-research-execution",
+      "pt-BR-research-features",
+      "pt-BR-research-gate",
+      "pt-BR-research-hypotheses",
+      "pt-BR-research-jobs",
+      "pt-BR-research-labels",
+      "pt-BR-research-live",
+      "pt-BR-research-logs",
+      "pt-BR-research-overview",
+      "pt-BR-research-paper",
+      "pt-BR-research-sessions",
+      "pt-BR-research-settings",
+      "pt-BR-research-users",
+      "pt-BR-research-validation",
+      "pt-BR-sys-status",
+      "pt-BR-t-account-activity",
+      "pt-BR-t-activity",
+      "pt-BR-t-benefits",
+      "pt-BR-t-bot",
+      "pt-BR-t-byx",
+      "pt-BR-t-chain-data",
+      "pt-BR-t-desk",
+      "pt-BR-t-home",
+      "pt-BR-t-markets",
+      "pt-BR-t-notifications",
+      "pt-BR-t-orders",
+      "pt-BR-t-performance",
+      "pt-BR-t-portfolio",
+      "pt-BR-t-positions",
+      "pt-BR-t-profile",
+      "pt-BR-t-security",
+      "pt-BR-t-sessions",
+      "pt-BR-t-settings",
+      "pt-BR-t-signals",
+      "pt-BR-t-strategies",
+      "pt-BR-t-treasury",
+      "pt-BR-t-wallet"
+    ],
+    "BYX-MVP": [
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-login"
+    ],
+    "Backend": [
+      "pt-BR-account-menu",
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-h-faq",
+      "pt-BR-h-help",
+      "pt-BR-h-overview",
+      "pt-BR-h-privacy",
+      "pt-BR-h-shortcuts",
+      "pt-BR-h-terms",
+      "pt-BR-h-whats-new",
+      "pt-BR-modal-switched-from-EN",
+      "pt-BR-notifications-popover",
+      "pt-BR-onboarding",
+      "pt-BR-palette",
+      "pt-BR-research-capture",
+      "pt-BR-research-dataset",
+      "pt-BR-research-execution",
+      "pt-BR-research-features",
+      "pt-BR-research-gate",
+      "pt-BR-research-hypotheses",
+      "pt-BR-research-jobs",
+      "pt-BR-research-labels",
+      "pt-BR-research-live",
+      "pt-BR-research-logs",
+      "pt-BR-research-overview",
+      "pt-BR-research-paper",
+      "pt-BR-research-sessions",
+      "pt-BR-research-settings",
+      "pt-BR-research-users",
+      "pt-BR-research-validation",
+      "pt-BR-sys-status",
+      "pt-BR-t-account-activity",
+      "pt-BR-t-activity",
+      "pt-BR-t-benefits",
+      "pt-BR-t-bot",
+      "pt-BR-t-byx",
+      "pt-BR-t-chain-data",
+      "pt-BR-t-desk",
+      "pt-BR-t-home",
+      "pt-BR-t-markets",
+      "pt-BR-t-notifications",
+      "pt-BR-t-orders",
+      "pt-BR-t-performance",
+      "pt-BR-t-portfolio",
+      "pt-BR-t-positions",
+      "pt-BR-t-profile",
+      "pt-BR-t-security",
+      "pt-BR-t-sessions",
+      "pt-BR-t-settings",
+      "pt-BR-t-signals",
+      "pt-BR-t-strategies",
+      "pt-BR-t-treasury",
+      "pt-BR-t-wallet"
+    ],
+    "Binance ...": [
+      "pt-BR-t-markets"
+    ],
+    "Binance USD-M": [
+      "pt-BR-t-markets"
+    ],
+    "Binance USD-M Futures": [
+      "pt-BR-research-gate",
+      "pt-BR-t-desk",
+      "pt-BR-t-home"
+    ],
+    "Bot": [
+      "pt-BR-t-activity",
+      "pt-BR-t-bot",
+      "pt-BR-t-desk",
+      "pt-BR-t-markets",
+      "pt-BR-t-orders",
+      "pt-BR-t-performance",
+      "pt-BR-t-portfolio",
+      "pt-BR-t-positions",
+      "pt-BR-t-signals",
+      "pt-BR-t-strategies"
+    ],
+    "C1": [
+      "pt-BR-t-profile"
+    ],
+    "CU": [
+      "pt-BR-account-menu"
+    ],
+    "Checkpoint": [
+      "pt-BR-research-sessions"
+    ],
+    "DATASET N/A": [
+      "pt-BR-research-overview"
+    ],
+    "DRAWDOWN": [
+      "pt-BR-t-desk"
+    ],
+    "Dataset": [
+      "pt-BR-research-dataset",
+      "pt-BR-research-labels",
+      "pt-BR-research-overview"
+    ],
+    "Drawdown": [
+      "pt-BR-t-desk",
+      "pt-BR-t-markets",
+      "pt-BR-t-portfolio"
+    ],
+    "ETHUSDT": [
+      "pt-BR-research-gate",
+      "pt-BR-t-desk",
+      "pt-BR-t-home",
+      "pt-BR-t-markets"
+    ],
+    "ETHUSDT · 1M · CANDLES": [
+      "pt-BR-t-desk"
+    ],
+    "Enter": [
+      "pt-BR-h-shortcuts"
+    ],
+    "Esc": [
+      "pt-BR-h-shortcuts"
+    ],
+    "FAQ": [
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-h-faq",
+      "pt-BR-h-help",
+      "pt-BR-h-overview",
+      "pt-BR-h-privacy",
+      "pt-BR-h-shortcuts",
+      "pt-BR-h-terms",
+      "pt-BR-h-whats-new",
+      "pt-BR-login",
+      "pt-BR-palette",
+      "pt-BR-research-gate",
+      "pt-BR-t-home"
+    ],
+    "FINAL_HOLDOUT": [
+      "pt-BR-research-dataset",
+      "pt-BR-research-overview"
+    ],
+    "Features": [
+      "pt-BR-onboarding",
+      "pt-BR-research-capture",
+      "pt-BR-research-dataset",
+      "pt-BR-research-execution",
+      "pt-BR-research-features",
+      "pt-BR-research-hypotheses",
+      "pt-BR-research-jobs",
+      "pt-BR-research-labels",
+      "pt-BR-research-live",
+      "pt-BR-research-logs",
+      "pt-BR-research-overview",
+      "pt-BR-research-paper",
+      "pt-BR-research-sessions",
+      "pt-BR-research-settings",
+      "pt-BR-research-users",
+      "pt-BR-research-validation"
+    ],
+    "Final holdout": [
+      "pt-BR-t-benefits"
+    ],
+    "Global": [
+      "pt-BR-h-shortcuts"
+    ],
+    "H": [
+      "pt-BR-h-shortcuts"
+    ],
+    "HASHES": [
+      "pt-BR-research-dataset"
+    ],
+    "HOLD_TO_UNLOCK": [
+      "pt-BR-t-benefits"
+    ],
+    "Hash": [
+      "pt-BR-t-byx"
+    ],
+    "Java": [
+      "pt-BR-h-diagnostics"
+    ],
+    "JavaFX": [
+      "pt-BR-h-diagnostics"
+    ],
+    "Job": [
+      "pt-BR-research-jobs"
+    ],
+    "Jobs": [
+      "pt-BR-research-jobs"
+    ],
+    "K": [
+      "pt-BR-h-shortcuts"
+    ],
+    "LOCALNET": [
+      "pt-BR-account-menu",
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-h-faq",
+      "pt-BR-h-help",
+      "pt-BR-h-overview",
+      "pt-BR-h-privacy",
+      "pt-BR-h-shortcuts",
+      "pt-BR-h-terms",
+      "pt-BR-h-whats-new",
+      "pt-BR-modal-switched-from-EN",
+      "pt-BR-notifications-popover",
+      "pt-BR-onboarding",
+      "pt-BR-palette",
+      "pt-BR-research-capture",
+      "pt-BR-research-dataset",
+      "pt-BR-research-execution",
+      "pt-BR-research-features",
+      "pt-BR-research-gate",
+      "pt-BR-research-hypotheses",
+      "pt-BR-research-jobs",
+      "pt-BR-research-labels",
+      "pt-BR-research-live",
+      "pt-BR-research-logs",
+      "pt-BR-research-overview",
+      "pt-BR-research-paper",
+      "pt-BR-research-sessions",
+      "pt-BR-research-settings",
+      "pt-BR-research-users",
+      "pt-BR-research-validation",
+      "pt-BR-sys-status",
+      "pt-BR-t-account-activity",
+      "pt-BR-t-activity",
+      "pt-BR-t-benefits",
+      "pt-BR-t-bot",
+      "pt-BR-t-byx",
+      "pt-BR-t-chain-data",
+      "pt-BR-t-desk",
+      "pt-BR-t-home",
+      "pt-BR-t-markets",
+      "pt-BR-t-notifications",
+      "pt-BR-t-orders",
+      "pt-BR-t-performance",
+      "pt-BR-t-portfolio",
+      "pt-BR-t-positions",
+      "pt-BR-t-profile",
+      "pt-BR-t-security",
+      "pt-BR-t-sessions",
+      "pt-BR-t-settings",
+      "pt-BR-t-signals",
+      "pt-BR-t-strategies",
+      "pt-BR-t-treasury",
+      "pt-BR-t-wallet"
+    ],
+    "LONG": [
+      "pt-BR-t-positions"
+    ],
+    "Logs": [
+      "pt-BR-research-logs"
+    ],
+    "MAKER": [
+      "pt-BR-research-execution"
+    ],
+    "MANUAL_UNVERIFIED": [
+      "pt-BR-t-treasury"
+    ],
+    "MVP Binance": [
+      "pt-BR-research-overview"
+    ],
+    "Mac OS X 26.5.1": [
+      "pt-BR-h-diagnostics"
+    ],
+    "Microstructure Alpha": [
+      "pt-BR-t-strategies"
+    ],
+    "N/A": [
+      "pt-BR-research-capture",
+      "pt-BR-research-dataset",
+      "pt-BR-research-execution",
+      "pt-BR-research-features",
+      "pt-BR-research-labels",
+      "pt-BR-research-overview",
+      "pt-BR-t-bot",
+      "pt-BR-t-desk",
+      "pt-BR-t-markets",
+      "pt-BR-t-performance",
+      "pt-BR-t-portfolio",
+      "pt-BR-t-profile",
+      "pt-BR-t-security",
+      "pt-BR-t-signals"
+    ],
+    "OFF": [
+      "pt-BR-h-diagnostics",
+      "pt-BR-t-wallet"
+    ],
+    "OFFLINE": [
+      "pt-BR-t-byx"
+    ],
+    "P95": [
+      "pt-BR-research-labels"
+    ],
+    "P99": [
+      "pt-BR-research-labels"
+    ],
+    "PAPER": [
+      "pt-BR-h-about",
+      "pt-BR-t-treasury"
+    ],
+    "Paper": [
+      "pt-BR-t-treasury"
+    ],
+    "Paper / Shadow": [
+      "pt-BR-research-paper"
+    ],
+    "Perp": [
+      "pt-BR-t-markets"
+    ],
+    "Pure Mid": [
+      "pt-BR-research-labels"
+    ],
+    "REAL": [
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-research-settings"
+    ],
+    "SCHEMA": [
+      "pt-BR-research-labels"
+    ],
+    "SCHEMA · N/A": [
+      "pt-BR-research-overview"
+    ],
+    "SERVER_AUTHORIZATION_REQUIRED": [
+      "pt-BR-research-settings",
+      "pt-BR-t-benefits",
+      "pt-BR-t-treasury"
+    ],
+    "SHORT": [
+      "pt-BR-t-positions"
+    ],
+    "Schema": [
+      "pt-BR-research-features"
+    ],
+    "Sharpe": [
+      "pt-BR-t-performance"
+    ],
+    "Shift": [
+      "pt-BR-h-shortcuts"
+    ],
+    "Spread —": [
+      "pt-BR-t-desk"
+    ],
+    "Status": [
+      "pt-BR-onboarding",
+      "pt-BR-research-features",
+      "pt-BR-research-settings",
+      "pt-BR-research-users",
+      "pt-BR-t-bot",
+      "pt-BR-t-orders",
+      "pt-BR-t-sessions",
+      "pt-BR-t-signals",
+      "pt-BR-t-strategies"
+    ],
+    "TAKER": [
+      "pt-BR-research-execution"
+    ],
+    "TEST": [
+      "pt-BR-h-about"
+    ],
+    "TOTAL": [
+      "pt-BR-t-desk"
+    ],
+    "TRAIN": [
+      "pt-BR-research-dataset",
+      "pt-BR-research-overview"
+    ],
+    "Tab": [
+      "pt-BR-h-shortcuts"
+    ],
+    "Terminal": [
+      "pt-BR-onboarding",
+      "pt-BR-research-gate",
+      "pt-BR-t-home"
+    ],
+    "Txs": [
+      "pt-BR-t-byx"
+    ],
+    "UPNL": [
+      "pt-BR-t-desk",
+      "pt-BR-t-markets"
+    ],
+    "V...": [
+      "pt-BR-t-treasury"
+    ],
+    "VOLUME": [
+      "pt-BR-research-labels",
+      "pt-BR-t-markets"
+    ],
+    "WARN": [
+      "pt-BR-research-logs"
+    ],
+    "[LEGAL_PLACEHOLDER]": [
+      "pt-BR-h-privacy",
+      "pt-BR-h-terms"
+    ],
+    "ad••••@example.invalid": [
+      "pt-BR-research-settings"
+    ],
+    "anchor_count": [
+      "pt-BR-research-dataset"
+    ],
+    "c1-user": [
+      "pt-BR-account-menu",
+      "pt-BR-t-profile"
+    ],
+    "created_at": [
+      "pt-BR-research-dataset"
+    ],
+    "dataset_id": [
+      "pt-BR-research-dataset"
+    ],
+    "depth": [
+      "pt-BR-research-execution"
+    ],
+    "fees": [
+      "pt-BR-research-execution"
+    ],
+    "markout": [
+      "pt-BR-research-execution"
+    ],
+    "notional": [
+      "pt-BR-research-execution"
+    ],
+    "reports/research": [
+      "pt-BR-research-settings"
+    ],
+    "session_count": [
+      "pt-BR-research-dataset"
+    ],
+    "slippage": [
+      "pt-BR-research-execution"
+    ],
+    "spread": [
+      "pt-BR-research-execution"
+    ],
+    "uPnL": [
+      "pt-BR-t-positions"
+    ],
+    "user@example.invalid": [
+      "pt-BR-account-menu"
+    ],
+    "us••••@example.invalid": [
+      "pt-BR-t-profile"
+    ],
+    "v1": [
+      "pt-BR-t-strategies"
+    ],
+    "you@example.com": [
+      "pt-BR-login"
+    ],
+    "© [YEAR] Buynnex. [OWNERSHIP_PLACEHOLDER]": [
+      "pt-BR-h-about"
+    ],
+    "⌘K": [
+      "pt-BR-account-menu",
+      "pt-BR-h-about",
+      "pt-BR-h-diagnostics",
+      "pt-BR-h-faq",
+      "pt-BR-h-help",
+      "pt-BR-h-overview",
+      "pt-BR-h-privacy",
+      "pt-BR-h-shortcuts",
+      "pt-BR-h-terms",
+      "pt-BR-h-whats-new",
+      "pt-BR-modal-switched-from-EN",
+      "pt-BR-notifications-popover",
+      "pt-BR-onboarding",
+      "pt-BR-palette",
+      "pt-BR-research-capture",
+      "pt-BR-research-dataset",
+      "pt-BR-research-execution",
+      "pt-BR-research-features",
+      "pt-BR-research-gate",
+      "pt-BR-research-hypotheses",
+      "pt-BR-research-jobs",
+      "pt-BR-research-labels",
+      "pt-BR-research-live",
+      "pt-BR-research-logs",
+      "pt-BR-research-overview",
+      "pt-BR-research-paper",
+      "pt-BR-research-sessions",
+      "pt-BR-research-settings",
+      "pt-BR-research-users",
+      "pt-BR-research-validation",
+      "pt-BR-sys-status",
+      "pt-BR-t-account-activity",
+      "pt-BR-t-activity",
+      "pt-BR-t-benefits",
+      "pt-BR-t-bot",
+      "pt-BR-t-byx",
+      "pt-BR-t-chain-data",
+      "pt-BR-t-desk",
+      "pt-BR-t-home",
+      "pt-BR-t-markets",
+      "pt-BR-t-notifications",
+      "pt-BR-t-orders",
+      "pt-BR-t-performance",
+      "pt-BR-t-portfolio",
+      "pt-BR-t-positions",
+      "pt-BR-t-profile",
+      "pt-BR-t-security",
+      "pt-BR-t-sessions",
+      "pt-BR-t-settings",
+      "pt-BR-t-signals",
+      "pt-BR-t-strategies",
+      "pt-BR-t-treasury",
+      "pt-BR-t-wallet"
+    ]
+  }
+}

@@ -18,6 +18,7 @@ public final class Dialogs {
         a.setTitle(title);
         a.setHeaderText(title);
         style(a.getDialogPane());
+        localize(a);
         a.showAndWait();
     }
 
@@ -57,7 +58,25 @@ public final class Dialogs {
                 Ui.kvNode("FINAL_HOLDOUT", Ui.badge("LOCKED", "bad")));
         a.getDialogPane().setContent(box);
         style(a.getDialogPane());
+        localize(a);
         return a.showAndWait().filter(b -> b == run).isPresent();
+    }
+
+    private static void localize(Alert alert) {
+        var pane = alert.getDialogPane();
+        Runnable attach = () -> {
+            if (pane.getScene() == null || pane.getProperties().containsKey("byx.localeView")) return;
+            var view = new panel.i18n.LocaleView(pane.getScene());
+            view.bind(alert.titleProperty()); view.bind(alert.headerTextProperty()); view.bind(alert.contentTextProperty());
+            pane.getProperties().put("byx.localeView", view);
+        };
+        javafx.beans.value.ChangeListener<javafx.scene.Scene> listener = (o,a,b) -> attach.run();
+        pane.sceneProperty().addListener(listener); attach.run();
+        alert.setOnHidden(e -> {
+            pane.sceneProperty().removeListener(listener);
+            Object view = pane.getProperties().remove("byx.localeView");
+            if (view instanceof panel.i18n.LocaleView localeView) localeView.close();
+        });
     }
 
     private static panel.motion.MotionService motion;

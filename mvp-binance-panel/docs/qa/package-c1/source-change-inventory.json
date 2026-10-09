@@ -1,0 +1,41 @@
+{
+  "modified": [
+    "mvp-binance-panel/src/main/java/panel/tradeview/Fx.java",
+    "mvp-binance-panel/src/main/java/panel/ui/Dialogs.java",
+    "mvp-binance-panel/src/main/java/panel/ui/HypothesesView.java",
+    "mvp-binance-panel/src/main/java/panel/ui/LabelsView.java",
+    "mvp-binance-panel/src/main/java/panel/app/PanelApp.java",
+    "mvp-binance-panel/src/main/java/panel/shell/ShellRail.java",
+    "mvp-binance-panel/src/main/java/panel/shell/ShellPalette.java",
+    "mvp-binance-panel/src/main/java/panel/shell/UserMenu.java",
+    "mvp-binance-panel/src/main/java/panel/shell/StatusDock.java",
+    "mvp-binance-panel/src/main/java/panel/helpview/Highlight.java",
+    "mvp-binance-panel/src/main/java/panel/helpview/HelpContent.java",
+    "mvp-binance-panel/src/main/java/panel/homeview/HomeScreen.java",
+    "mvp-binance-panel/src/main/java/panel/accountview/ProfileScreen.java",
+    "mvp-binance-panel/src/main/java/panel/accountview/SessionsScreen.java",
+    "mvp-binance-panel/src/main/java/panel/accountview/SettingsScreen.java",
+    "mvp-binance-panel/src/main/java/panel/authview/AuthLayout.java",
+    "mvp-binance-panel/src/main/java/panel/i18n/Strings.java",
+    "mvp-binance-panel/src/main/java/panel/ui/trader/CandleChart.java",
+    "mvp-binance-panel/src/main/resources/panel/v2/controls.css",
+    "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
+    "mvp-binance-panel/src/main/resources/panel/i18n/package-b_pt-BR.properties"
+  ],
+  "added": [
+    "mvp-binance-panel/src/main/java/panel/i18n/Presentation.java",
+    "mvp-binance-panel/src/main/java/panel/i18n/LocaleView.java",
+    "mvp-binance-panel/src/main/java/panel/i18n/LanguageSelector.java",
+    "mvp-binance-panel/src/main/java/panel/i18n/DisplayFormats.java",
+    "mvp-binance-panel/src/main/java/panel/i18n/LocaleTooltip.java",
+    "mvp-binance-panel/src/main/resources/panel/i18n/ui_pt-BR.properties",
+    "mvp-binance-panel/src/main/resources/panel/i18n/ui_en.properties",
+    "mvp-binance-panel/src/test/java/panel/PackageC1CatalogTest.java",
+    "mvp-binance-panel/src/test/java/panel/PackageC1LiteralCoverageTest.java",
+    "mvp-binance-panel/src/test/java/panel/PackageC1AuthorityTest.java",
+    "mvp-binance-panel/src/test/java/panel/PackageC1FlowQa.java",
+    "mvp-binance-panel/src/test/java/panel/PackageC1RuntimeTest.java",
+    "mvp-binance-panel/src/test/java/panel/accountview/SettingsLocalizationTest.java"
+  ],
+  "removed": []
+}

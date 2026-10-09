@@ -98,7 +98,7 @@ public final class HelpContent {
     public static List<Faq> filter(FaqContent c, String categoryId, String query) {
         String q = query == null ? "" : query.trim().toLowerCase(java.util.Locale.ROOT);
         return c.items().stream().filter(f -> categoryId == null || f.category().equals(categoryId))
-                .filter(f -> q.isEmpty() || f.question().toLowerCase(java.util.Locale.ROOT).contains(q) || f.answer().toLowerCase(java.util.Locale.ROOT).contains(q))
+                .filter(f -> q.isEmpty() || panel.i18n.Presentation.text(f.question()).toLowerCase(java.util.Locale.ROOT).contains(q) || panel.i18n.Presentation.text(f.answer()).toLowerCase(java.util.Locale.ROOT).contains(q))
                 .toList();
     }
 }

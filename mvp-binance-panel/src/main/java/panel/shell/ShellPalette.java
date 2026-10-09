@@ -1,5 +1,7 @@
 package panel.shell;
 
+import panel.i18n.Presentation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -144,7 +146,7 @@ public final class ShellPalette {
         List<Entry> all = index.get();
         for (Group g : Group.values()) {
             List<Entry> hits = all.stream().filter(e -> e.group() == g)
-                    .filter(e -> q.isEmpty() || e.title().toLowerCase(Locale.ROOT).contains(q)).toList();
+                    .filter(e -> q.isEmpty() || Presentation.text(e.title()).toLowerCase(Locale.ROOT).contains(q) || e.title().toLowerCase(Locale.ROOT).contains(q)).toList();
             if (hits.isEmpty()) {
                 continue;
             }

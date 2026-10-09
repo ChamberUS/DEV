@@ -27,6 +27,13 @@ public class CandleChart extends Pane {
 
     public CandleChart(List<Candle> candles) {
         this.candles = candles;
+        javafx.beans.value.ChangeListener<panel.i18n.Strings.Lang> locale = (o,a,b) -> requestLayout();
+        getProperties().put("byx.i18n.localeDelegate", locale);
+        javafx.beans.value.WeakChangeListener<panel.i18n.Strings.Lang> weakLocale = new javafx.beans.value.WeakChangeListener<>(locale);
+        sceneProperty().addListener((o,a,b) -> {
+            if (a != null) panel.i18n.Strings.languageProperty().removeListener(weakLocale);
+            if (b != null) { requestLayout(); panel.i18n.Strings.languageProperty().addListener(weakLocale); }
+        });
         canvas.setManaged(false);
         setMinHeight(0);
         setPrefHeight(340);
@@ -74,10 +81,10 @@ public class CandleChart extends Pane {
         }
     }
 
-    /** Rótulo do eixo de preço: casas decimais conforme a amplitude visível; sempre Locale.US (como o resto do app). */
+    /** Rótulo do eixo de preço: casas decimais conforme a amplitude visível; localizadas apenas na apresentação. */
     private static String axis(double v, double range) {
         int decimals = range >= 20 ? 0 : range >= 2 ? 1 : range >= 0.2 ? 2 : 4;
-        return String.format(java.util.Locale.US, "%,." + decimals + "f", v);
+        return String.format(panel.i18n.Strings.locale(), "%,." + decimals + "f", v);
     }
 
     private static double y(double v, double hi, double lo, double h) {

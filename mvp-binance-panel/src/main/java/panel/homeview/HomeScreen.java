@@ -455,7 +455,7 @@ public final class HomeScreen implements View {
     private static Label missing() {
         Label l = Fx.label("—", "byx-desk-row-value", "mono", "dim");
         l.setAccessibleText(Strings.get("mk.na"));
-        javafx.scene.control.Tooltip.install(l, new javafx.scene.control.Tooltip(Strings.get("mk.na")));
+        l.setTooltip(new javafx.scene.control.Tooltip(Strings.get("mk.na")));
         return l;
     }
 

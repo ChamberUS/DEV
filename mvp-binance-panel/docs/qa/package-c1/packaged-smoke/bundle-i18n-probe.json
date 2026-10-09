@@ -1,0 +1,21 @@
+{
+  "exit": 0,
+  "passCount": 13,
+  "checks": [
+    "packaged EN catalog 2115 keys",
+    "packaged EN/PT key parity",
+    "packaged English presentation",
+    "packaged Portuguese switches same view",
+    "packaged Portuguese input prompt",
+    "packaged entered text remains literal",
+    "packaged language autonym",
+    "packaged exact financial display",
+    "packaged mascot announcement",
+    "packaged compact real-trading OFF state",
+    "packaged reset restores English",
+    "packaged catalog no missing or fallback",
+    "packaged disposable binding released"
+  ],
+  "classpath": "final packaged application JARs only plus external probe class",
+  "jvm": "standalone Java 21; embedded launcher qualified separately by native packaged smoke"
+}

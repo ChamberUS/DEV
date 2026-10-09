@@ -1,0 +1,18 @@
+[
+  {
+    "case": "native-visual",
+    "exit": 0
+  },
+  {
+    "case": "mascot-full",
+    "exit": 0
+  },
+  {
+    "case": "mascot-reduced",
+    "exit": 0
+  },
+  {
+    "case": "mascot-off",
+    "exit": 0
+  }
+]

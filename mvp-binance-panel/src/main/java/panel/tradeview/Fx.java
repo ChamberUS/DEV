@@ -18,7 +18,7 @@ public final class Fx {
     }
 
     public static void text(Labeled l, String t) {
-        if (!Objects.equals(l.getText(), t)) {
+        if (!Objects.equals(panel.i18n.LocaleView.originalText(l), t)) {
             l.setText(t);
         }
     }
