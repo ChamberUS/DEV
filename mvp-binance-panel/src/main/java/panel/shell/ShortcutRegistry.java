@@ -20,6 +20,7 @@ public final class ShortcutRegistry {
                     new Entry(List.of(MOD, "K"), "Open search and commands", "ByxShell.onShortcut + PanelApp scene filter"),
                     new Entry(List.of("?"), "Show keyboard shortcuts", "ByxShell.onHelpKey"),
                     new Entry(List.of(MOD, ","), "Open Settings", "ByxShell.onShortcut"),
+                    new Entry(List.of(MOD, "Shift", "H"), "Go to Home", "ByxShell.onShortcut + ShellRouter.requestHome"),
                     new Entry(List.of(MOD, "1…6"), "Go to a rail item in the current workspace", "ByxShell.onShortcut"),
                     new Entry(List.of("Esc"), "Close the open dialog, palette, panel or menu", "ByxOverlayHost"))),
             new Group("Lists, menus and FAQ", List.of(

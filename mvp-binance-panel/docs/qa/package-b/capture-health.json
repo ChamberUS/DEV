@@ -1,0 +1,32 @@
+{
+ "healthy": true,
+ "collectorPid": 54866,
+ "supervisorPid": 10657,
+ "partGrowthBytes": 81544,
+ "samples": [
+  {
+   "utc": "2026-10-09T04:39:02.557297+00:00",
+   "parts": [
+    {
+     "path": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-09/microstructure-20261009T042900Z-usd_m_futures/events-00002.jsonl.gz.part",
+     "bytes": 2918670,
+     "modifiedTimeNs": 1791520742152933345
+    }
+   ]
+  },
+  {
+   "utc": "2026-10-09T04:39:08.679517+00:00",
+   "parts": [
+    {
+     "path": "/Users/buynnex-corp/dev/mvp-binance/data/microstructure/futures/ETHUSDT/2026-10-09/microstructure-20261009T042900Z-usd_m_futures/events-00002.jsonl.gz.part",
+     "bytes": 3000214,
+     "modifiedTimeNs": 1791520747806964427
+    }
+   ]
+  }
+ ],
+ "metadataOnly": true,
+ "signalsSent": 0,
+ "scientificDataRead": false,
+ "researchTouched": false
+}

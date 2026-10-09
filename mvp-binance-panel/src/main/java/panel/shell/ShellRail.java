@@ -233,8 +233,26 @@ public final class ShellRail extends VBox {
         p.setMinSize(32, 32);
         p.setPrefSize(32, 32);
         p.setMaxSize(32, 32);
-        p.setAccessibleText("BYX-MVP");
-        return p;
+        p.setMouseTransparent(true); // the button owns the pointer; the drawing never steals events
+        // AB01: the logo is a real button (pointer + Enter/Space + Tab), same action as the palette and the shortcut
+        Button b = new Button();
+        b.setGraphic(p);
+        b.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        b.getStyleClass().add("byx-logo-button");
+        b.setMinSize(40, 40);
+        b.setPrefSize(40, 40);
+        b.setMaxSize(40, 40);
+        b.setAccessibleText(panel.i18n.Strings.get("logo.label"));
+        b.setTooltip(tooltip(panel.i18n.Strings.get("logo.tip").replace("⌘⇧H", shortcutPrefix.startsWith("⌘") ? "⌘⇧H" : "Ctrl+Shift+H")));
+        b.setOnAction(e -> router.requestHome());
+        logoButton = b;
+        return b;
+    }
+
+    private Button logoButton;
+
+    public Button logoButton() {
+        return logoButton;
     }
 
     private void moveIndicator(int index, boolean animate) {

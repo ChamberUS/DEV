@@ -47,6 +47,11 @@ public final class AuthScreens {
 
         /** Encerra a sessão atual (sair, ou sessão aberta por tentativa descartada). */
         panel.auth.SessionOperation prepareLogout();
+
+        /** B02: whether the Service lets people create accounts. No such operation exists yet, so the default is UNAVAILABLE. */
+        default RegistrationAvailability registrationAvailability() {
+            return RegistrationAvailability.UNAVAILABLE;
+        }
     }
 
     private static final PseudoClass ERROR = PseudoClass.getPseudoClass("error");
@@ -81,6 +86,7 @@ public final class AuthScreens {
     private final ByxField identifier = ByxField.text("Email or username");
     private final ByxField password = ByxField.password("Password");
     private final ByxButton signIn;
+    private boolean accessOpen;
 
     /**
      * request: pede rota ao roteador; onLoggedIn: sessão real aberta (o roteador decide o destino);
@@ -257,7 +263,7 @@ public final class AuthScreens {
         nodes.add(identifier);
         nodes.add(password);
         nodes.add(signIn);
-        nodes.add(note(starting ? "Starting the local service. Sign-in is enabled as soon as it is ready." : "Accounts are created by an administrator."));
+        nodes.add(starting ? note("Starting the local service. Sign-in is enabled as soon as it is ready.") : accessNote());
         layout.show("Sign in", nodes);
         if (s == LoginController.State.RATE_LIMITED && countdown == null) {
             startCountdown();
@@ -266,6 +272,38 @@ public final class AuthScreens {
             (s == LoginController.State.INVALID ? password.input() : identifier.input().getText().isBlank() ? identifier.input() : password.input())
                     .requestFocus();
         }
+    }
+
+    /**
+     * Registration presentation (B02). Honest by construction: whatever the Service reports, the login only shows text; there is no sign-up
+     * form, no role choice and no invitation field. "How do I get access?" expands plain guidance and nothing else.
+     */
+    private Node accessNote() {
+        RegistrationAvailability availability = services.registrationAvailability();
+        String line = switch (availability) {
+            case UNKNOWN -> panel.i18n.Strings.get("login.regUnknown");
+            case INVITE -> panel.i18n.Strings.get("login.inviteTitle");
+            case UNAVAILABLE, OPEN -> panel.i18n.Strings.get("login.regOff");
+        };
+        Label l = note(line);
+        l.setId("registration-note");
+        if (availability == RegistrationAvailability.UNKNOWN) {
+            return l;
+        }
+        Button how = link(panel.i18n.Strings.get("login.howAccess"), () -> {
+            accessOpen = !accessOpen;
+            renderLogin();
+        });
+        how.setId("registration-how");
+        how.setAccessibleText(panel.i18n.Strings.get("login.howAccess") + (accessOpen ? ", expanded" : ", collapsed"));
+        VBox box = new VBox(6, l, how);
+        if (accessOpen) {
+            Label body = note(availability == RegistrationAvailability.INVITE ? panel.i18n.Strings.get("login.inviteBody")
+                    : panel.i18n.Strings.get("login.howAccessBody"));
+            body.setId("registration-body");
+            box.getChildren().add(body);
+        }
+        return box;
     }
 
     private static String clock(Duration d) {

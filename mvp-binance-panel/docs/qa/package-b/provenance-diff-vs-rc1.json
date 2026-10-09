@@ -1,0 +1,29 @@
+{
+ "panelJar": {
+  "added": 68,
+  "removed": 0,
+  "changed": 34,
+  "changedByPackage": {
+   "panel/accountview": 1,
+   "panel/app": 6,
+   "panel/authview": 4,
+   "panel/byxview": 6,
+   "panel/shell": 12,
+   "panel/ui": 2,
+   "panel/v2": 3
+  },
+  "addedByPackage": {
+   "design": 1,
+   "panel/app": 1,
+   "panel/authview": 1,
+   "panel/byxview": 17,
+   "panel/homeview": 24,
+   "panel/i18n": 6,
+   "panel/shell": 2,
+   "panel/shell/avatar": 16
+  },
+  "removedEntries": []
+ },
+ "serviceJarEntriesIdenticalToRC1": true,
+ "noTxLabClassesInDefault": true
+}

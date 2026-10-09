@@ -341,29 +341,34 @@ class ChainDataScreenTest {
         });
     }
 
+    /** Package B (B03): the mascot moved to the persistent header avatar. This page keeps its data, states and notes and has no mascot at all. */
     @Test
-    void oneMascotPerScreenTheEmptyStateTakesItOverAndTheHeaderOneIsInteractiveAndAlive() throws Exception {
+    void chainDataHasNoDecorativeMascotAndEmptyStatesStayInformative() throws Exception {
         DeskHarness.fx(() -> {
-            panel.mascot.MascotGuide.session().resetSession();
             FakeReader r = new FakeReader();
             ChainDataScreen s = new ChainDataScreen(new MotionService(), CLOCK, r, null, SYNC, SYNC);
             s.onShow();
-            var header = s.headerMascot();
-            assertTrue(header.isVisible() && !header.isMouseTransparent(), "the header mascot is interactive (click = hint)");
+            assertTrue(noMascot(s.node()), "no MascotView anywhere in the page");
             r.merchantPages.add(new Reply<>(true, null, Freshness.LIVE, 0, new ChainModules.Page<>(List.of()), null));
             button(s, "chain-merchants-go").fire();
             assertEquals("EMPTY", badge(s, "chain-merchants"));
-            assertFalse(header.isVisible() || header.isManaged(), "one presence per screen: the empty state hosts the mascot, the header one steps aside");
+            assertTrue(noMascot(s.node()), "the empty state is plain text now, not a mascot");
             r.merchantPages.add(new Reply<>(true, null, Freshness.LIVE, 0, new ChainModules.Page<>(List.of(m("1"))), null));
             button(s, "chain-merchants-go").fire();
-            assertTrue(header.isVisible() && header.isManaged(), "back in the header once the list has items");
             r.payment = Reply.failed(Failure.NOT_FOUND);
             input(s, "chain-payment-input").setText("42");
             button(s, "chain-payment-go").fire();
             input(s, "chain-payment-input").setText("43");
             button(s, "chain-payment-go").fire();
             assertEquals("NOT FOUND", badge(s, "chain-payment"), "repeated not-found lookups stay calm: no exception, normal UI");
+            assertTrue(noMascot(s.node()));
             s.dispose();
         });
+    }
+
+    private static boolean noMascot(Node root) {
+        List<Node> all = new ArrayList<>();
+        collect(root, all);
+        return all.stream().noneMatch(n -> n instanceof panel.mascot.MascotView);
     }
 }

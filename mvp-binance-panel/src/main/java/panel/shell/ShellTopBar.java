@@ -26,8 +26,9 @@ public final class ShellTopBar extends HBox {
     private final Label adminBadge = ByxBadge.of("ADMIN SESSION", ByxBadge.Tone.ACCENT);
     private final Label mockBadge = ByxBadge.data(ByxBadge.Data.DEMO_DATA);
     private final Button avatar = new Button();
+    private final panel.shell.avatar.MascotAvatar mascot;
 
-    public ShellTopBar(WorkspaceSwitcher switcher, String shortcutPrefix) {
+    public ShellTopBar(WorkspaceSwitcher switcher, String shortcutPrefix, panel.motion.MotionService motion) {
         this.switcher = switcher;
         getStyleClass().add("byx-topbar");
         setAlignment(Pos.CENTER_LEFT);
@@ -93,6 +94,8 @@ public final class ShellTopBar extends HBox {
         avatar.setMinSize(36, 36);
         avatar.setPrefSize(36, 36);
         avatar.setMaxSize(36, 36);
+        // B03: the mascot IS the avatar, drawn inside this same button (never re-parented, never recreated per page)
+        mascot = new panel.shell.avatar.MascotAvatar(avatar, motion);
 
         getChildren().addAll(switcher, breadcrumb, spacer, mockBadge, search, bell, adminBadge, avatar);
     }
@@ -111,6 +114,19 @@ public final class ShellTopBar extends HBox {
 
     public Button avatar() {
         return avatar;
+    }
+
+    public panel.shell.avatar.MascotAvatar mascot() {
+        return mascot;
+    }
+
+    /** Where real pending operations are reported so the avatar can show them (never simulated). */
+    public panel.shell.avatar.Operations operations() {
+        return mascot.operations();
+    }
+
+    public void dispose() {
+        mascot.dispose();
     }
 
     public String crumbText() {
@@ -154,8 +170,7 @@ public final class ShellTopBar extends HBox {
     }
 
     public void setUser(String displayName) {
-        avatar.setText(initials(displayName));
-        avatar.setAccessibleText("Account menu, " + displayName);
+        mascot.setUserName(displayName); // accessible name only: the artwork is the same mascot for every account
     }
 
     static String initials(String name) {

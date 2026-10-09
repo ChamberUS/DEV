@@ -137,7 +137,15 @@ public final class UserMenu {
         }
     }
 
+    private final javafx.beans.property.ReadOnlyBooleanWrapper openState = new javafx.beans.property.ReadOnlyBooleanWrapper(this, "open");
+
+    /** True while the menu popover is open (the avatar's eyes look at the menu; no second state is kept anywhere else). */
+    public javafx.beans.property.ReadOnlyBooleanProperty openProperty() {
+        return openState.getReadOnlyProperty();
+    }
+
     private void updateExpanded(boolean on) {
+        openState.set(on);
         avatar.getStyleClass().remove("expanded");
         if (on) {
             avatar.getStyleClass().add("expanded");

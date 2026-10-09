@@ -8,6 +8,10 @@
 /* ---------- rail ---------- */
 .byx-rail { -fx-background-color: -byx-bg1; -fx-padding: 14 0 14 0; -fx-spacing: 4; }
 .byx-logo-bar { -fx-fill: -byx-accent; }
+/* AB01: the logo is a button (Home). Transparent, same focus language as the rail items. */
+.byx-logo-button { -fx-background-color: transparent; -fx-background-radius: 10; -fx-padding: 0; -fx-cursor: hand; }
+.byx-logo-button:hover { -fx-background-color: -byx-bg2; }
+.byx-logo-button:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 10; }
 .byx-rail-item {
     -fx-background-color: transparent;
     -fx-background-radius: 12;
@@ -81,13 +85,22 @@
 }
 .byx-admin-badge { -fx-font-size: 12px; -fx-padding: 5 12 5 12; -fx-min-height: 26; } /* P2.4: 122x26 */
 .byx-avatar {
-    -fx-background-color: #FFFFFF1A, -byx-bg3; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
+    -fx-background-color: #FFFFFF1A, -byx-avatar-bg; -fx-background-insets: 0, 1; -fx-background-radius: 18, 17;
     -fx-text-fill: -byx-text-primary; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 13px;
     -fx-padding: 0; -fx-cursor: hand;
 }
-.byx-avatar:hover { -fx-background-color: #FFFFFF40, -byx-bg3; }
-.byx-avatar.expanded { -fx-background-color: -byx-accent, -byx-bg0, -byx-bg3; -fx-background-insets: -2, 0, 0; -fx-background-radius: 20, 18, 18; }
-.byx-avatar:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-insets: -4; -fx-border-radius: 22; }
+.byx-avatar:hover { -fx-background-color: #FFFFFF40, -byx-avatar-bg; }
+.byx-avatar.expanded { -fx-background-color: -byx-accent, -byx-bg0, -byx-avatar-bg; -fx-background-insets: -2, 0, 0; -fx-background-radius: 20, 18, 18; }
+.byx-avatar:focus-visible { -fx-border-color: -byx-trading; -fx-border-width: 2; -fx-border-insets: -4; -fx-border-radius: 22; } /* MOTION §3: 2 px accent.trading outside the circle */
+/* B03 mascot artwork (vector, 100-unit box). Colors only through tokens. */
+.byx-mascot-body { -fx-fill: -byx-bg-canvas; -fx-stroke: #FFFFFF2E; -fx-stroke-width: 1.6; }
+.byx-mascot-eye { -fx-fill: -byx-text-primary; }
+.byx-mascot-ring { -fx-fill: transparent; -fx-stroke-width: 2.4; -fx-stroke-line-cap: round; }
+.byx-mascot-ring-1 { -fx-stroke: -byx-ring-1; }
+.byx-mascot-ring-2 { -fx-stroke: -byx-ring-2; }
+.byx-mascot-ring-3 { -fx-stroke: -byx-ring-3; }
+.byx-mascot-ring-4 { -fx-stroke: -byx-ring-4; }
+.byx-mascot-ring-5 { -fx-stroke: -byx-ring-5; }
 
 /* ---------- status dock ---------- */
 .byx-dock { -fx-background-color: -byx-bg1; -fx-padding: 0 20 0 20; }

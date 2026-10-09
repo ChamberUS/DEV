@@ -25,6 +25,7 @@ public final class CommandPalette {
     /** qa: build LOCAL_QA (a chain pública está configurada no serviço); só então aparecem as ferramentas de revisão (galeria do mascote). */
     public static List<Command> commands(boolean admin, boolean verified, boolean qa) {
         List<Command> result = new ArrayList<>();
+        result.add(new Command("t-home", "Go to Home", "")); // AB01: first item, same action as the logo
         result.add(new Command("t-desk", "Go to Trading Desk", ""));
         result.add(new Command("t-markets", "Open Markets", ""));
         result.add(new Command("t-portfolio", "Open Portfolio", ""));

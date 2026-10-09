@@ -49,6 +49,15 @@
     -byx-banner-success: #7FE6B8;
     -byx-banner-info: #8ED8FF;
 
+    /* Package B additions (BYX_PACKAGE_B_TOKENS.json): avatar background and the five loading rings sampled from the mascot reel */
+    -byx-bg-canvas: #05070B;
+    -byx-avatar-bg: #1c253c;
+    -byx-ring-1: #B369D1;
+    -byx-ring-2: #69B6D3;
+    -byx-ring-3: #69D3A6;
+    -byx-ring-4: #D3C869;
+    -byx-ring-5: #D36990;
+
     /* shadows.focusRing / errorRing */
     -byx-focus-ring: #7C96FF21;
     -byx-error-ring: #FF7A7A1A;

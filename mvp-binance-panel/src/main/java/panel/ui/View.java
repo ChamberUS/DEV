@@ -15,6 +15,18 @@ public interface View {
     /** Descarta a edição pendente (chamado depois que o usuário confirmou sair). */
     default void discardChanges() { }
 
+    /** Quantas alterações não salvas (para o aviso de navegação); 0 sem edição pendente. */
+    default int unsavedChangeCount() { return hasUnsavedChanges() ? 1 : 0; }
+
+    /** A view consegue salvar a edição pendente ao sair (false: o aviso não oferece "Save and go"). */
+    default boolean canSaveChanges() { return false; }
+
+    /**
+     * Salva a edição pendente de forma síncrona e devolve true só quando ficou salva (leitura de volta). Nunca finge: se o serviço
+     * não autoriza ou a gravação falha, devolve false e a edição continua pendente.
+     */
+    default boolean saveChanges() { return false; }
+
     /** A view passou a ser a visível: inicie timers/animações próprias aqui. */
     default void onShow() { }
 

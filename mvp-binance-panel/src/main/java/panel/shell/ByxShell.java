@@ -55,7 +55,7 @@ public final class ByxShell extends StackPane {
         getStyleClass().add("byx-shell");
         rail = new ShellRail(router, motion, shortcutPrefix);
         switcher = new WorkspaceSwitcher(motion, this::pickWorkspace);
-        topBar = new ShellTopBar(switcher, shortcutPrefix);
+        topBar = new ShellTopBar(switcher, shortcutPrefix, motion);
         dock = new StatusDock(motion, router::request);
         v2Content.getStyleClass().add("byx-v2-content");
         v2Content.setMinSize(0, 0);
@@ -187,7 +187,7 @@ public final class ByxShell extends StackPane {
             return;
         }
         ShellContext c = ShellRoutes.contextOf(r);
-        topBar.setBreadcrumb(c.workspace ? null : c.label.toUpperCase(java.util.Locale.ROOT), crumb.apply(r));
+        topBar.setBreadcrumb(c.workspace || c == ShellContext.HOME ? null : c.label.toUpperCase(java.util.Locale.ROOT), crumb.apply(r));
     }
 
     public void setOnOpenSearch(Runnable r) {
@@ -266,6 +266,12 @@ public final class ByxShell extends StackPane {
             e.consume();
             return;
         }
+        // AB01: Cmd/Ctrl+Shift+H = Home (verified free: the registry has K, comma, 1..6; macOS Hide is Cmd+H without Shift)
+        if (new KeyCodeCombination(KeyCode.H, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN).match(e)) {
+            router.requestHome();
+            e.consume();
+            return;
+        }
         if (new KeyCodeCombination(KeyCode.COMMA, KeyCombination.SHORTCUT_DOWN).match(e)) {
             router.request(ShellRoutes.SETTINGS);
             e.consume();
@@ -307,6 +313,7 @@ public final class ByxShell extends StackPane {
             workspaceMascot.dispose();
         }
         router.routeProperty().removeListener(routeListener);
+        topBar.dispose();
         rail.dispose();
         switcher.dispose();
         overlay.dispose();

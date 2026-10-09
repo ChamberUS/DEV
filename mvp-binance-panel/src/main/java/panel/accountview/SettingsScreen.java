@@ -314,6 +314,27 @@ public final class SettingsScreen implements View {
     }
 
     @Override
+    public int unsavedChangeCount() {
+        return (draft.motion().equals(saved.motion()) ? 0 : 1) + (draft.density().equals(saved.density()) ? 0 : 1)
+                + (draft.animatedIcons() == saved.animatedIcons() ? 0 : 1) + (draft.primaryWorkspace().equals(saved.primaryWorkspace()) ? 0 : 1)
+                + (draft.followSystemMotion() == saved.followSystemMotion() ? 0 : 1);
+    }
+
+    @Override
+    public boolean canSaveChanges() {
+        return data.preferencesEditable();
+    }
+
+    @Override
+    public boolean saveChanges() {
+        if (!canSaveChanges()) {
+            return false;
+        }
+        save();
+        return !dirty();
+    }
+
+    @Override
     public void discardChanges() {
         draft = saved;
         saveError = null;

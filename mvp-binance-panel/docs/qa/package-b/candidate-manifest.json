@@ -1,0 +1,38 @@
+{
+ "artifact": "BYX-MVP LOCAL development candidate for Package B user acceptance (NOT a release; not RC1; not distributed)",
+ "version": "1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z",
+ "builtAtUtc": "2026-10-09T04:54:12.169039+00:00",
+ "sourceHead": "9d3eb1e50ea4cc03e9523d4e178dd83e8836fb38",
+ "branch": "feature/byx-ui-redesign-v1",
+ "workingTreeNote": "HEAD plus the uncommitted work that RC1 was also built from, plus Package B; nothing committed, nothing pushed",
+ "panelSourceTreeSha256": "5857255a130bca2e8f2ac17846c1ccec236829d7d70056b0b7bcfd7a9ec76c3a",
+ "panelSourceFileCount": 588,
+ "zip": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgb-uat/1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z/BYX-MVP-1.0.0-local-pkgb-uat-9d3eb1e50ea4-20261009T045154Z.zip",
+ "zipSha256": "88122d266440b98430949aa1b28ec9c9aaeb05b61d69026bc3bd9ac09b91fb88",
+ "zipBytes": 182981133,
+ "panelJarSha256": "fd0af17b8f117443d409bb6fe7bd4a72c23d7ff3e5bb133b4d238ca1a9b68b7c",
+ "serviceJarSha256": "9520ddc0566645fe8bbd48f0f23d8b7bb79ec10f4d8406dbe445fbc916852225",
+ "recipe": {
+  "command": "byx-packaging/build-app.sh --out <dir> --embedded-profile byx-packaging/provisioning/out/service.provisionprofile --chain-profile production-disabled",
+  "sameAsRC1Recipe": true,
+  "packagingScriptsUnmodified": true
+ },
+ "chainProfile": "PRODUCTION_DISABLED (DEFAULT build; no Transaction Lab classes)",
+ "rc1": {
+  "path": "byx-packaging/build/local-rc1/1.0.0-local-rc1-9d3eb1e50ea4-20261009T002639Z",
+  "zipSha256Expected": "cd382408cf2ef256413273d0778d23f74f508dabe3d79d05150f7e9ffa04a2d7",
+  "zipSha256Now": "cd382408cf2ef256413273d0778d23f74f508dabe3d79d05150f7e9ffa04a2d7",
+  "preserved": true
+ },
+ "signing": "Apple Development (local development identity), Hardened Runtime, not notarized, not Developer ID",
+ "safety": {
+  "REAL_USER_KEY": "NOT AUTHORIZED",
+  "REAL_TX": "DISABLED",
+  "BROADCASTS": 0,
+  "REAL_FUNDS": 0,
+  "REAL_USER_WALLETS": 0,
+  "ETHUSDT_RESEARCH": "UNTOUCHED"
+ },
+ "provenanceDiffVsRC1": "docs/qa/package-b/provenance-diff-vs-rc1.json",
+ "packagedSmoke": "docs/qa/package-b/packaged-smoke/result.json"
+}

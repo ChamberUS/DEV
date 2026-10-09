@@ -10,7 +10,9 @@ public enum ShellContext {
     BYX("BYX", "byx", true),
     ACCOUNT("Account", "trader", false),
     HELP("Help", "trader", false),
-    SYSTEM("System", "trader", false);
+    SYSTEM("System", "trader", false),
+    /** Home (Package B): not a workspace. Its rail is a launcher to the main destinations. */
+    HOME("Home", "trader", false);
 
     public final String label;
     /** Classe de contexto das folhas legadas e do acento V2 (account usa o acento Ion de trading). */

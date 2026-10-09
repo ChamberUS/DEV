@@ -241,7 +241,8 @@ class ByxScreensTest {
             treasury.onHide();
             assertFalse(treasury.timerRunning());
             treasury.dispose();
-            BenefitsScreen benefits = new BenefitsScreen(CLOCK, data);
+            // B04: the screen reads off the FX thread; this test injects synchronous executors so the first paint is deterministic
+            BenefitsScreen benefits = new BenefitsScreen(CLOCK, data, Runnable::run, Runnable::run, () -> panel.shell.avatar.Operations.NONE, new MotionService());
             show(benefits.node());
             assertFalse(benefits.timerRunning());
             String b = texts(benefits.node());

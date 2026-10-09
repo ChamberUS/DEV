@@ -73,3 +73,18 @@
 .byx-faq-q { -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-font-size: 15px; -fx-fill: -byx-text-primary; }
 .byx-faq-a { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px; -fx-fill: -byx-text-secondary; }
 .byx-hit { -fx-fill: -byx-accent; -fx-underline: true; }
+
+/* ---------- Home (Package B / B01) ---------- */
+.byx-home-row { -fx-background-color: transparent; -fx-background-radius: 8; -fx-padding: 8 10 8 10; -fx-cursor: hand; -fx-min-height: 40; }
+.byx-home-row:hover { -fx-background-color: -byx-bg2; }
+.byx-home-row:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 8; }
+.byx-home-card-button { -fx-background-color: transparent; -fx-background-radius: 14; -fx-padding: 0; -fx-cursor: hand; }
+.byx-home-card-stack:hover .byx-home-card-body { -fx-background-color: #FFFFFF14, -byx-bg2; }
+.byx-home-card-button:focus-visible { -fx-border-color: -byx-text-primary; -fx-border-width: 2; -fx-border-radius: 14; }
+.byx-home-card.unavailable { -fx-opacity: 0.85; }
+.byx-home-search {
+    -fx-background-color: -byx-line, -byx-bg0; -fx-background-insets: 0, 1; -fx-background-radius: 10, 9;
+    -fx-text-fill: -byx-text-primary; -fx-prompt-text-fill: -byx-text-tertiary; -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 14px;
+    -fx-padding: 7 12 7 12;
+}
+.byx-home-search:focused { -fx-background-color: -byx-focus-ring, -byx-accent, -byx-bg0; -fx-background-insets: -3, 0, 1; -fx-background-radius: 12, 10, 9; }

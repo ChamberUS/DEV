@@ -23,6 +23,10 @@ public final class ShellRoutes {
     }
 
     public static final String SETTINGS = "t-settings";
+    /** Home (Package B). Prefix {@code t-} keeps it outside {@link #isResearch}: Home never needs admin verification. */
+    public static final String HOME = "t-home";
+    /** Rail of the Home context: a launcher. Destinations keep their own context (and rail) once opened. */
+    private static final List<String> HOME_RAIL = List.of(HOME, "t-desk", "t-markets", "t-byx", "t-benefits", "h-faq");
     private static final Map<String, Route> ROUTES = new LinkedHashMap<>();
 
     private static void add(String id, ShellContext c, String title, String rail, String icon, int order) {
@@ -30,6 +34,7 @@ public final class ShellRoutes {
     }
 
     static {
+        add(HOME, ShellContext.HOME, "Home", "Home", "home", 0);
         // Trading (referência: Desk, Markets, Bot, Wallet = Portfolio, Orders)
         add("t-desk", ShellContext.TRADING, "Trading Desk", "Desk", "desk", 0);
         add("t-markets", ShellContext.TRADING, "Markets & Portfolio", "Markets", "markets", 1);
@@ -116,6 +121,9 @@ public final class ShellRoutes {
 
     /** Itens do rail do contexto, na ordem do atalho. */
     public static List<Route> rail(ShellContext c) {
+        if (c == ShellContext.HOME) {
+            return HOME_RAIL.stream().map(ROUTES::get).toList();
+        }
         return ROUTES.values().stream().filter(r -> r.context() == c && r.inRail())
                 .sorted(java.util.Comparator.comparingInt(Route::rail)).toList();
     }
@@ -129,6 +137,7 @@ public final class ShellRoutes {
             case ACCOUNT -> "t-profile";
             case HELP -> "h-faq";
             case SYSTEM -> "sys-status";
+            case HOME -> HOME;
         };
     }
 

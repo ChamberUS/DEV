@@ -1,0 +1,147 @@
+{
+  "$schema": "informal",
+  "name": "BYX Package B tokens",
+  "version": "B-design-1",
+  "source": "V2 handoff tokens reused; Package B additions marked.",
+  "note": "Values are design reference for native JavaFX; do not copy CSS. Light theme NOT implemented: only the semantic names below must be used so a light set can be added later.",
+  "color": {
+    "dark": {
+      "bg.canvas": "#05070B",
+      "bg.0": "#0B0E16",
+      "bg.1": "#121723",
+      "bg.2": "#1A2030",
+      "bg.3": "#232A3D",
+      "bg.hover": "#2C3550",
+      "line": "#2A3144",
+      "text.primary": "#EEF1F8",
+      "text.secondary": "#AAB3C7",
+      "text.tertiary": "#8791A8",
+      "text.disabled": "#566079",
+      "accent.trading": "#7C96FF",
+      "accent.research": "#B896FF",
+      "accent.byx": "#5ED6C4",
+      "status.positive": "#42D79B",
+      "status.negative": "#FF7A7A",
+      "status.warning": "#E9B44C",
+      "status.info": "#5CC8FF",
+      "avatar.bg": "#1c253c",
+      "ring.1": "#B369D1",
+      "ring.2": "#69B6D3",
+      "ring.3": "#69D3A6",
+      "ring.4": "#D3C869",
+      "ring.5": "#D36990"
+    },
+    "light": {
+      "status": "NOT_DEFINED_YET",
+      "requirement": "Every color must be consumed through the semantic name above; no hex in components."
+    }
+  },
+  "radius": {
+    "card": 14,
+    "input": 10,
+    "menu": 9,
+    "small": 6,
+    "avatar": "circle"
+  },
+  "layout": {
+    "rail": 68,
+    "header": 56,
+    "dock": 38,
+    "viewports": [
+      "1440x900",
+      "1920x1080",
+      "1100x700 (reduced)",
+      "900x640 (reduced)"
+    ],
+    "breakpoints": {
+      "searchCollapsesToIcon": 1100,
+      "workspaceLabelsCompact": 1000
+    }
+  },
+  "typography": {
+    "ui": "Schibsted Grotesk (fallback system)",
+    "data": "JetBrains Mono (tabular)",
+    "h1": "24/30 600",
+    "h2": "18/24 600",
+    "h3": "15/20 600",
+    "body": "14/20",
+    "kicker": "12/16 600 uppercase +0.06em"
+  },
+  "density": {
+    "compact": {
+      "note": "default; as prototype"
+    },
+    "comfortable": {
+      "note": "+~15% vertical row padding; same type scale"
+    }
+  },
+  "motion": {
+    "press": 110,
+    "hover": 160,
+    "gazeBack": 220,
+    "enter": 320,
+    "settle": 500,
+    "easing": "cubic-bezier(.2,.8,.2,1)",
+    "easingInOut": "cubic-bezier(.4,0,.2,1)",
+    "reduced": {
+      "press": 60,
+      "hover": 80,
+      "gazeBack": 100,
+      "enter": 100,
+      "settle": 100,
+      "translate": 0
+    },
+    "off": {
+      "all": 0
+    }
+  },
+  "mascot": {
+    "viewBox": "0 0 100 100",
+    "bodyScale": 0.82,
+    "sizeHeader": 36,
+    "sizeLab": "up to 5x",
+    "gaze": {
+      "tauMs": 80,
+      "clampX": 5.2,
+      "clampY": 4.2,
+      "bodyLean": 0.12,
+      "menuOpenTarget": [
+        0,
+        3.4
+      ],
+      "loadingAmplitude": 0.6
+    },
+    "blink": {
+      "minMs": 4200,
+      "maxMs": 6800,
+      "seed": 7
+    },
+    "operation": {
+      "showDelayMs": 300,
+      "minShowMs": 500,
+      "deadlineMs": 15000,
+      "errorHoldMs": 4000
+    },
+    "rings": {
+      "count": 5,
+      "extentVsBody": 1.4,
+      "orbitMsPerRev": 1200,
+      "tiltMs": 600,
+      "orbitIsProposal": true
+    },
+    "clickReaction": {
+      "phases": [
+        110,
+        160,
+        220
+      ],
+      "totalMs": 490
+    }
+  },
+  "package_B_additions": [
+    "avatar.bg",
+    "ring.1..5",
+    "mascot.*",
+    "badge DEMO (warning outline dashed)"
+  ]
+}

@@ -49,11 +49,14 @@ public class PanelApp extends Application {
     }
     private final Map<String, View> views = new LinkedHashMap<>();
     /** Views já portadas para V2: vivem no host V2 do shell, não no LegacyHost. */
-    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-desk", "t-markets", "overview", "capture",
+    private static final java.util.Set<String> V2_VIEWS = java.util.Set.of("t-home", "t-desk", "t-markets", "overview", "capture",
             "t-byx", "t-wallet", "t-benefits", "t-treasury", "t-chain-data", "t-mascot-gallery", "t-tx-lab",
             "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
             "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts",
             "sys-status", "sys-unavailable");
+    /** Package B: entry page and welcome state per ACCOUNT, in memory (preference persistence is not authorized in this build). */
+    private final panel.homeview.LandingPreference landing = new panel.homeview.LandingPreference();
+    private panel.shell.NavigationGuard.Handle leaveGuard;
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -346,17 +349,23 @@ public class PanelApp extends Application {
         if (signingOut) return;
         signingOut = true;
         toast(ToastType.INFO, "Signing out…");
+        panel.shell.avatar.Operations operations = ops();
+        panel.shell.avatar.Operations.Token logoutOp = operations.begin("auth.logout");
         mainActive = false;
         closeTwoFactor();
         rootStack.setDisable(true);
         var release = ctx.auth.prepareLogout();
         Thread worker = new Thread(() -> {
             try { release.run(); } catch (RuntimeException unavailable) { /* AuthService clears presentation in finally. */ }
-            Platform.runLater(() -> release.deliver(() -> {
-                signingOut = false;
-                rootStack.setDisable(false);
-                showEntry(message);
-            }));
+            Platform.runLater(() -> {
+                boolean delivered = release.deliver(() -> {
+                    operations.end(logoutOp, true, null);
+                    signingOut = false;
+                    rootStack.setDisable(false);
+                    showEntry(message);
+                });
+                if (!delivered) operations.end(logoutOp, true, "SUPERSEDED"); // a newer session owns the UI: this one only stops claiming to be busy
+            });
         }, "authority-sign-out");
         worker.setDaemon(true);
         worker.start();
@@ -386,12 +395,13 @@ public class PanelApp extends Application {
         router.reset();
         if (activeView != null) { activeView.onHide(); activeView = null; }
 
+        views.put("t-home", new panel.homeview.HomeScreen(ctx.motion, java.time.Clock.systemUTC(), homeData(user), this::show));
         views.put("t-desk", new TradingDesk(ctx.motion, ctx.trading.snapshot::get, java.time.Clock.systemDefaultZone()));
         panel.byxview.ByxData byxData = new ByxDataAdapter(ctx);
         java.time.Clock clock = java.time.Clock.systemUTC();
         views.put("t-byx", new panel.byxview.NetworkScreen(ctx.motion, clock, byxData));
         views.put("t-wallet", new panel.byxview.WalletScreen(ctx.motion, clock, byxData, this::show));
-        views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData));
+        views.put("t-benefits", new panel.byxview.BenefitsScreen(clock, byxData, null, null, this::ops, ctx.motion));
         views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
         views.put("t-mascot-gallery", new panel.mascot.MascotGallery(ctx.motion, panel.mascot.MascotAssets.shared())); // vazio até ser aberto (lazy); só aparece na palette em LOCAL_QA
         if (qaBuild()) { // Transaction Lab (sintético): só em LOCAL_QA; no build DEFAULT a tela nem é construída e o serviço responde TX_DISABLED a tudo
@@ -459,9 +469,12 @@ public class PanelApp extends Application {
         pendingReturn = null;
         show(start);
         render(ctx.research.snapshot.get());
-        if (panel.systemview.FirstRunModel.showsOnboarding(ctx.settings.onboardingCompleted, true)) {
+        // B02: the one-step welcome appears at most once per ACCOUNT per run, and never when this install already completed onboarding.
+        if (!landing.welcomeSeen(panel.homeview.LandingPreference.key(user.id()))
+                && panel.systemview.FirstRunModel.showsOnboarding(ctx.settings.onboardingCompleted, true)) {
+            long welcomeUser = user.id();
             Platform.runLater(() -> { // só se nenhuma outra camada abriu nesse intervalo
-                if (mainActive && shell != null && shell.overlay().openDialogs() == 0 && shell.mainOverlay() == null) openOnboarding(false);
+                if (mainActive && shell != null && activeUserId == welcomeUser && shell.overlay().openDialogs() == 0 && shell.mainOverlay() == null) openOnboarding(false);
             });
         }
         expiryWatch = new Timeline(new KeyFrame(Duration.seconds(10), e -> watchAdminSession()));
@@ -529,6 +542,10 @@ public class PanelApp extends Application {
             if (shell != null && shell.overlay().openDialogs() == 0) openOnboarding(true);
             return;
         }
+        if (panel.shell.ShellRoutes.HOME.equals(id)) { // AB01: logo, palette, shortcut and cards share one action (no-op when already Home)
+            router.requestHome();
+            return;
+        }
         router.request(id);
     }
 
@@ -564,15 +581,21 @@ public class PanelApp extends Application {
         return panel.shell.ShellRouter.Decision.ALLOW;
     }
 
-    /** Edição não salva (Profile, Settings): pergunta antes de sair; cancelar mantém a rota e limpa o pedido pendente. */
+    /**
+     * Edição não salva (Profile, Settings): aviso de 3 escolhas (Stay here / Discard and go / Save and go), foco inicial em Stay.
+     * Stay (ou Esc) mantém a rota e limpa o pedido pendente; nada é descartado em silêncio. Save and go só navega se a página
+     * confirmou que salvou (leitura de volta); falha mantém a edição e a página.
+     */
     private void confirmLeave(String target, panel.nav.Navigator.Ticket ticket) {
         View leaving = activeView;
-        shell.overlay().confirm("Discard changes?", "You have unsaved changes. If you leave now they are lost.", "Discard", true, () -> {
+        Runnable stay = () -> {
+            if (router.pending() == ticket) router.cancelPending();
+        };
+        if (leaveGuard != null && leaveGuard.dialog().isOpen()) leaveGuard.dialog().close(); // a newer request replaces the older prompt
+        leaveGuard = panel.shell.NavigationGuard.open(shell.overlay(), ctx.motion, leaving.unsavedChangeCount(), leaving.canSaveChanges(), stay, () -> {
             leaving.discardChanges();
             show(target);
-        }, () -> {
-            if (router.pending() == ticket) router.cancelPending();
-        });
+        }, leaving::saveChanges, () -> show(target));
     }
 
     private boolean checkingTrustedDevice;
@@ -585,6 +608,8 @@ public class PanelApp extends Application {
         // Both evaluation and trusted-device checks use IPC. Only presentation runs on FX.
         if (checkingTrustedDevice) return panel.shell.ShellRouter.Decision.PENDING;
         checkingTrustedDevice = true;
+        panel.shell.avatar.Operations operations = ops();
+        panel.shell.avatar.Operations.Token gateOp = operations.begin("research.verification"); // real IPC below; ended with its real result
         long checkGeneration = researchCheckGeneration;
         var sessionId = ctx.sessions.user().orElseThrow().id();
         var scope = ctx.auth.captureSession();
@@ -596,6 +621,7 @@ public class PanelApp extends Application {
                 if (decision == panel.auth.AccessDecision.REQUIRES_2FA) trusted = ctx.adminAccess.tryTrustedDevice(scope);
             } catch (RuntimeException e) {
                 Platform.runLater(() -> {
+                    operations.end(gateOp, false, "RESEARCH_CHECK_FAILED");
                     if (checkGeneration != researchCheckGeneration) return;
                     checkingTrustedDevice = false;
                     if (mainActive && ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isPresent()
@@ -606,6 +632,7 @@ public class PanelApp extends Application {
             var outcome = decision;
             boolean deviceTrusted = trusted;
             Platform.runLater(() -> {
+                operations.end(gateOp, true, null); // the check returned; what it decided is shown by the existing UI, not by the avatar
                 if (checkGeneration != researchCheckGeneration) return;
                 checkingTrustedDevice = false;
                 if (!mainActive || ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
@@ -787,7 +814,7 @@ public class PanelApp extends Application {
         byxWorkspace = toByx;
         trader = toTrader;
         lastView.put(toTrader, id);
-        stage.setTitle(AppBranding.title(id.equals("t-byx") ? "BYX Network" : id.startsWith("h-") ? "Help" : id.startsWith("sys-") ? "System" : toTrader ? "Trading" : "Research"));
+        stage.setTitle(AppBranding.title(id.equals("t-home") ? "Home" : id.equals("t-byx") ? "BYX Network" : id.startsWith("h-") ? "Help" : id.startsWith("sys-") ? "System" : toTrader ? "Trading" : "Research"));
         View next = views.get(id);
         next.onSnapshot(ctx.research.snapshot.get());
         ctx.transitions.show(views.values().stream().map(View::node).toList(), next.node(), changedWorkspace);
@@ -815,7 +842,7 @@ public class PanelApp extends Application {
             if (!mainActive) return;
             Snapshot s = ctx.research.snapshot.get();
             ctx.trading.update(s);
-            for (String id : new String[] {"t-desk", "t-markets"}) {
+            for (String id : new String[] {"t-home", "t-desk", "t-markets"}) {
                 View v = views.get(id);
                 if (v != null && v == activeView) v.onSnapshot(s); // fora de vista, o Desk se atualiza ao ser exibido
             }
@@ -852,11 +879,19 @@ public class PanelApp extends Application {
         return panel.authview.SessionReturn.DEFAULT_ROUTE;
     }
 
+    /**
+     * Entry page after sign-in. Precedence (SPEC §1): authorized deep link (resolved by the caller) > this account's choice > an explicit
+     * non-default workspace stored by an earlier version > Home. "TRADING" is the legacy default and not read as a choice of the Terminal.
+     */
     private String primaryRoute(User user) {
+        String account = panel.homeview.LandingPreference.key(user.id());
+        if (landing.hasChoice(account)) {
+            return landing.route(account, views::containsKey);
+        }
         return switch (ctx.settings.primaryWorkspace) {
             case "BYX" -> "t-byx";
-            case "RESEARCH" -> user.admin() ? "overview" : panel.authview.SessionReturn.DEFAULT_ROUTE;
-            default -> panel.authview.SessionReturn.DEFAULT_ROUTE;
+            case "RESEARCH" -> user.admin() ? "overview" : panel.shell.ShellRoutes.HOME;
+            default -> panel.shell.ShellRoutes.HOME;
         };
     }
 
@@ -930,15 +965,40 @@ public class PanelApp extends Application {
     }
 
     /** Onboarding (diálogo persistente): só guarda o workspace de abertura e a conclusão; nada mais é tocado. */
+    /** B02 welcome (one step). replay = the user asked for it explicitly (palette/Home), otherwise first use of this account in this run. */
     private void openOnboarding(boolean replay) {
-        if (shell == null) return;
+        if (shell == null || !mainActive) return;
         var owner = shell;
-        panel.systemview.OnboardingDialog.open(owner.overlay(), ctx.motion, ctx.settings.primaryWorkspace, r -> {
-            if (shell != owner || !mainActive) return;
-            // Persisting these preferences is frozen by ServerAuthorization. Do not mutate the
-            // in-memory settings, show success, or navigate as though persistence succeeded.
-            toast(ToastType.WARNING, "Onboarding preferences are read-only in this build.");
-        });
+        long userId = activeUserId;
+        String account = panel.homeview.LandingPreference.key(userId);
+        var user = ctx.sessions.user().map(u -> u.user()).orElse(null);
+        if (user == null || user.id() != userId) return;
+        landing.markWelcomeSeen(account); // marked on display: a quick logout/login in the same run does not show it again
+        var net = ctx.byx.snapshot();
+        var facts = new panel.homeview.WelcomeDialog.Facts(user.username(), user.admin() ? "Admin" : "Trader",
+                !"ENABLED".equalsIgnoreCase(ctx.trading.snapshot.get().trading), net == null ? null : net.environment());
+        panel.homeview.WelcomeDialog.open(owner.overlay(), ctx.motion, facts, landing.startFor(account), r -> {
+            if (shell != owner || !mainActive || activeUserId != userId) return;
+            panel.homeview.LandingPreference.Start before = landing.startFor(account);
+            landing.choose(account, r.start());
+            if (r.start() != before || replay) toast(ToastType.INFO, "Start page applies until you quit the app.");
+            show(r.start() == panel.homeview.LandingPreference.Start.TERMINAL && views.containsKey("t-desk") ? "t-desk" : panel.shell.ShellRoutes.HOME);
+        }, () -> { });
+    }
+
+    private panel.homeview.HomeScreen.Data homeData(User user) {
+        return new panel.homeview.HomeScreen.Data() {
+            @Override public String displayName() { return user.username(); }
+            @Override public TraderSnapshot trader() { return ctx.trading.snapshot.get(); }
+            @Override public panel.model.ByxSnapshot network() { return ctx.byx.snapshot(); }
+            @Override public boolean researchVisible() { return views.containsKey("overview"); }
+            @Override public boolean walletVerified() {
+                return "VERIFIED".equals(ctx.byx.snapshot().identity()) && panel.shell.WalletStatus.empty(() -> ctx.byxWallets.wallets()).isPresent();
+            }
+            @Override public panel.homeview.HomeMarkets.Catalog catalog() { return panel.homeview.HomeMarkets.productionCatalog(); }
+            @Override public void retryCatalog() { /* the supported catalog is a platform constant; nothing to re-request */ }
+            @Override public void replayWelcome() { openOnboarding(true); }
+        };
     }
 
     // ---- Help (sessão) e modo público ------------------------------------------------
@@ -1029,7 +1089,13 @@ public class PanelApp extends Application {
                 user.admin() ? "Admin" : "Trader"));
         notificationPanel = new panel.shell.NotificationPanel(shell.overlay(), shell.topBar().notifications(), ctx.motion);
         userMenu.setItems(userMenuItems());
+        shell.topBar().mascot().bindMenuOpen(userMenu.openProperty()); // the eyes look at the menu while the existing menu is open
         rootStack.getChildren().setAll(shell);
+    }
+
+    /** Real pending operations report here so the header avatar can show them (D-13). Tokens of a previous shell/session are inert. */
+    private panel.shell.avatar.Operations ops() {
+        return shell == null ? panel.shell.avatar.Operations.NONE : shell.topBar().operations();
     }
 
     private void closeShell() {

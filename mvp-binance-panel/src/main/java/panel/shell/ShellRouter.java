@@ -73,6 +73,19 @@ public final class ShellRouter {
         return true;
     }
 
+    /**
+     * AB01: a ação ÚNICA de "ir para o Início" (logo, paleta e atalho). No-op quando o Início já está na tela e nada está pendente (sem
+     * reexibir a View, sem piscar); com um pedido pendente para outro destino, o pedido do Início o substitui (último pedido vence).
+     * Devolve true se pediu navegação. Não decide permissão: o gate do roteador continua sendo a única autoridade.
+     */
+    public boolean requestHome() {
+        if (ShellRoutes.HOME.equals(route()) && pending() == null) {
+            return false;
+        }
+        request(ShellRoutes.HOME);
+        return true;
+    }
+
     /** Cancela o pedido pendente (ex.: verificação cancelada pelo usuário). A rota atual não muda. */
     public void cancelPending() {
         navigator.cancelPending();
