@@ -1,0 +1,12 @@
+{
+  "stage": "PRE_PUSH_VERIFIED",
+  "localSha": "e357a078606de4f09adbcdc3fabdc3183c36dc6f",
+  "remoteShaBefore": "0fc68013413577216c4586cbab6d7f6f18a700d6",
+  "upstream": "origin/feature/byx-ui-redesign-v1",
+  "excludedIgnoredQaSources": [
+    "mvp-binance-panel/src/main/java/panel/app/QaApp.java",
+    "mvp-binance-panel/src/main/java/panel/app/UserMenuProbe.java"
+  ],
+  "sourceHashCheck": "all published build/test inputs match final tested sources",
+  "timestamp": "2026-10-09T06:00:32.328904+00:00"
+}

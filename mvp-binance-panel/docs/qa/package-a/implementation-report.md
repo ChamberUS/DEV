@@ -1,6 +1,6 @@
 # BYX-MVP — Package A functional corrections and UX hardening
 
-Implementation: `PACKAGE_A_IMPLEMENTED_READY_FOR_UAT`. Publication: `PUSH_NOT_ATTEMPTED` (commit preparation).
+Implementation: `PACKAGE_A_IMPLEMENTED_READY_FOR_UAT`. Publication: `GIT_PUSH_VERIFIED` (code commit independently confirmed on GitHub).
 
 ## Preflight and provenance
 
@@ -100,14 +100,14 @@ This is a local development UAT candidate, not a production custody/trading rele
 
 ## Git audit and publication
 
-Commits created so far:
+Published commits:
 
 - Historical approved baseline: `66efd2384a67074049255a4675083dd3fda3a66e` (`chore(panel): record approved U V W qualification baseline`).
 - Package B: `6a2a73dc77291e406bfe10f2097fdfd3805a5f72` (`feat(panel): implement approved Package B redesign`).
-- Package A: pending this report/source commit.
+- Package A: `e357a078606de4f09adbcdc3fabdc3183c36dc6f` (`fix(panel): harden settings navigation and keyboard UX`).
 
 Staged diffs and file names were reviewed at each boundary. Automated private-key/token/credential/file-size scans found **0 findings**; test data is deterministic/synthetic and no runtime Keychain/catalog/auth state is included. All 1,437 unpublished ancestor text blobs were also audited; none contains detected secret material, no blob exceeds 10 MB, and ancestor changes are confined to these three related components. Generated apps, archives, raw captures, logs/XML, inventories, local tooling, private signing/provisioning materials and unrelated projects are excluded. The tested source hashes match the state being staged.
 
-Target remains existing feature branch `origin/feature/byx-ui-redesign-v1` on verified `https://github.com/ChamberUS/DEV.git`; default branch main is not a target. GitHub reports this feature branch unprotected and push permission granted. Remote ancestry is checked again immediately before ordinary non-force push. Publication verification will be appended after the push. No reset, clean, stash, discard, force push, rebase, history rewrite or automatic PR/merge.
+Target remains existing feature branch `origin/feature/byx-ui-redesign-v1` on verified `https://github.com/ChamberUS/DEV.git`; default branch main is not a target. GitHub reports this feature branch unprotected and push permission granted. Remote ancestry is checked again immediately before ordinary non-force push. Ordinary push succeeded; independent `git ls-remote` returned the exact Package A SHA `e357a078606de4f09adbcdc3fabdc3183c36dc6f`. The tracked `publication-verification.json` records the code publication; a following documentation-only commit records these results. Final documentation publication SHA is retained in the separate durable checkpoint and user handoff. No reset, clean, stash, discard, force push, rebase, history rewrite or automatic PR/merge.
 
 `REAL USER KEY = NOT AUTHORIZED` · `REAL TX = DISABLED` · `BROADCASTS = 0` · `REAL FUNDS = 0` · `REAL USER WALLETS = 0` · `ETHUSDT RESEARCH = UNTOUCHED`.
