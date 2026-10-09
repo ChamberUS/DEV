@@ -1,0 +1,40 @@
+{
+  "metadataOnly": true,
+  "signalsSent": 0,
+  "scientificDataRead": false,
+  "samples": [
+    {
+      "utc": "2026-10-09T05:38:35.286363+00:00",
+      "parts": [
+        {
+          "relativePath": "microstructure-20261009T053359Z-usd_m_futures/events-00001.jsonl.gz.part",
+          "bytes": 12353837,
+          "modifiedTimeNs": 1791524314786726214
+        }
+      ],
+      "processes": "10657     1 /bin/bash\n54866 10657 /usr/local/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "utc": "2026-10-09T05:40:11.097435+00:00",
+      "parts": [
+        {
+          "relativePath": "microstructure-20261009T053359Z-usd_m_futures/events-00001.jsonl.gz.part",
+          "bytes": 16769617,
+          "modifiedTimeNs": 1791524410976623591
+        }
+      ]
+    },
+    {
+      "utc": "2026-10-09T05:49:51.724161+00:00",
+      "parts": [
+        {
+          "relativePath": "microstructure-20261009T053359Z-usd_m_futures/events-00003.jsonl.gz.part",
+          "bytes": 10193453,
+          "modifiedTimeNs": 1791524990981699489
+        }
+      ]
+    }
+  ],
+  "partGrowthBytes": 10193453,
+  "healthy": true
+}

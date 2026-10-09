@@ -37,6 +37,12 @@ public final class NotificationPanel {
         opener.setOnAction(e -> toggle());
     }
 
+    public void dispose() {
+        if (panel != null) overlay.closePopover(panel);
+        opener.setOnAction(null);
+        region = null;
+    }
+
     public boolean isOpen() {
         return panel != null && overlay.isPopoverOpen(panel);
     }
@@ -54,6 +60,7 @@ public final class NotificationPanel {
     }
 
     public void open() {
+        if (isOpen()) return; // do not rebuild a live surface or dispose its replacement through an old callback
         Label title = new Label("Notifications");
         title.getStyleClass().add("byx-section-title-sm");
         Region spacer = new Region();

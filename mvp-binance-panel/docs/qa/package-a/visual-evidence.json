@@ -1,0 +1,344 @@
+{
+  "nativeJavaFxOnly": true,
+  "syntheticTestDataOnly": true,
+  "largerThanPhysicalDisplayRenderedUsingActualRootInTemporaryScene": true,
+  "screenshots": [
+    {
+      "path": "visual/final/flow-FULL/benefits-admin-1100x700.png",
+      "sha256": "958d646e2f9f013ebf22964eba8e257a7e640ee30fca38234c5533b3db32ffce",
+      "bytes": 114813,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-FULL/benefits-admin-1440x900.png",
+      "sha256": "a56922032963e5951d455f0ac4fb810c03b885ba6fd293ccba16e77d19b4b023",
+      "bytes": 154270,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-FULL/benefits-admin-1920x1080.png",
+      "sha256": "82976d6ff28d9422101579c75019308e69e3e4f2156d1d9f3fe9ecf1e6f888f3",
+      "bytes": 178076,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "visual/final/flow-FULL/guard-1440x900.png",
+      "sha256": "d78c722d68509bba08483a509561efdba9ca9a3e3b570a86bdebf5047a827c5f",
+      "bytes": 56186,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-FULL/login-1100x700.png",
+      "sha256": "71abcb06b99eda6794c35ff142af90e9465903f74f7d93fd27b4b0b9e7d04c77",
+      "bytes": 217269,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-FULL/login-1440x900.png",
+      "sha256": "b7d7b7e678f61f9ffc8843e9aaaac6620b1761be4f6f246e1c0691a761868f0b",
+      "bytes": 324219,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-FULL/welcome-1100x700.png",
+      "sha256": "d75b3cd84568567a9d157f34c5f42511b9a3f651c7eb4b14c4875e4331c795e5",
+      "bytes": 100125,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-FULL/welcome-1440x900.png",
+      "sha256": "ce7b5cf47da891c2923a4302990f1b1e4977dce6a2607e046fbede11fcaac6ef",
+      "bytes": 139121,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-OFF/benefits-admin-1100x700.png",
+      "sha256": "cd2ff65103d45c983613ed1aa9de56cf14b42798c9847c7f1cfa0bf3eea5a4d5",
+      "bytes": 114782,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-OFF/benefits-admin-1440x900.png",
+      "sha256": "9c3cb66c10875e7e4921b1f3c629c446e15ebf02225af014a30bdfb139adef67",
+      "bytes": 154257,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-OFF/benefits-admin-1920x1080.png",
+      "sha256": "db0abed7bdd6161c8c92759c6793111d94dd2f6c22f8a22f9b1dbaef2ddb9516",
+      "bytes": 178056,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "visual/final/flow-OFF/guard-1440x900.png",
+      "sha256": "6db14308f974e68a8be80237506af900eda3b88eb59cfd84ca5fd945fddd7dd6",
+      "bytes": 56177,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-OFF/login-1100x700.png",
+      "sha256": "645373ddf6894f73e442e985922e597042885e635b09b62f0c2bd97b5eb97abe",
+      "bytes": 190264,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-OFF/login-1440x900.png",
+      "sha256": "2409bbe7c14b98c9b94f90958c2633d8323d269752160e50313ceaddf3313d06",
+      "bytes": 279392,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-OFF/welcome-1100x700.png",
+      "sha256": "0dc9a5c052908484c8807ee1ee109feb76dbeda1d09ddb912c8c64eff7dc63b3",
+      "bytes": 100087,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-OFF/welcome-1440x900.png",
+      "sha256": "3bd93c4f94571122bbfc988903f082fe4aeb0050c5f6aeb4a39b3d5fa2dbba29",
+      "bytes": 139102,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-REDUCED/benefits-admin-1100x700.png",
+      "sha256": "cd2ff65103d45c983613ed1aa9de56cf14b42798c9847c7f1cfa0bf3eea5a4d5",
+      "bytes": 114782,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-REDUCED/benefits-admin-1440x900.png",
+      "sha256": "9c3cb66c10875e7e4921b1f3c629c446e15ebf02225af014a30bdfb139adef67",
+      "bytes": 154257,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-REDUCED/benefits-admin-1920x1080.png",
+      "sha256": "db0abed7bdd6161c8c92759c6793111d94dd2f6c22f8a22f9b1dbaef2ddb9516",
+      "bytes": 178056,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "visual/final/flow-REDUCED/guard-1440x900.png",
+      "sha256": "6db14308f974e68a8be80237506af900eda3b88eb59cfd84ca5fd945fddd7dd6",
+      "bytes": 56177,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-REDUCED/login-1100x700.png",
+      "sha256": "645373ddf6894f73e442e985922e597042885e635b09b62f0c2bd97b5eb97abe",
+      "bytes": 190264,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-REDUCED/login-1440x900.png",
+      "sha256": "2409bbe7c14b98c9b94f90958c2633d8323d269752160e50313ceaddf3313d06",
+      "bytes": 279392,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/flow-REDUCED/welcome-1100x700.png",
+      "sha256": "0dc9a5c052908484c8807ee1ee109feb76dbeda1d09ddb912c8c64eff7dc63b3",
+      "bytes": 100087,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/flow-REDUCED/welcome-1440x900.png",
+      "sha256": "6a562fbb040ae3dfadb52179558e5c01ec78599faa61912c3b760673a2d36b0f",
+      "bytes": 139125,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/routes/001-t-home-1920x1080.png",
+      "sha256": "77497ea558b4974eb8ca87518ea280fcaec74e0fd054f85b18195d89bfdfab31",
+      "bytes": 159553,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "visual/final/routes/002-t-home-1440x900.png",
+      "sha256": "f989af38f35906e6ad0bf2103033ddfbaee34ddc4cc040a4b31fc2770d2bdaaa",
+      "bytes": 126192,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/routes/003-t-home-1100x700.png",
+      "sha256": "b5722c26ad575788156ff8ec7e21d877c5684ca6ea76bf02bb5af8c4d3bf4a80",
+      "bytes": 83268,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/004-t-desk-1100x700.png",
+      "sha256": "161e38744f93c12ce800234fcc291974d08ff14cb08dfa8b74791a3e74ae2ace",
+      "bytes": 88811,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/005-t-markets-1100x700.png",
+      "sha256": "bbafdb1c084f40f7b954a50329fb9a793f4a72f7414ffe7e743c5e40bb3b6445",
+      "bytes": 81810,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/006-t-orders-1100x700.png",
+      "sha256": "bdb2c20c9cf6a770941eccc8bbf7ffeeedf7237c7551b354f8f3f6c3996c7e26",
+      "bytes": 51041,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/007-t-wallet-1100x700.png",
+      "sha256": "a42e53351a2da6ff27a42fb4532730669c2ed3370917d2c0ff91798b9eb04b06",
+      "bytes": 83255,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/008-t-byx-1100x700.png",
+      "sha256": "101c66dd5bc49c65d0c3af2838d372a917199acab5f31d99006a87e285893362",
+      "bytes": 86331,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/009-t-chain-data-1100x700.png",
+      "sha256": "79b5b316530da5a1a244a280df45517c008f5f0ce890b7397caaa1aa5ec9a7dc",
+      "bytes": 74439,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/010-t-benefits-1100x700.png",
+      "sha256": "3dd706fb8a793829685452ec65cfd0c0f31b7dbaad91acd009f14126589558d5",
+      "bytes": 116601,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/011-overview-1100x700.png",
+      "sha256": "e5dd632fc77f531e5183a93e4f2b6520e05dfc1221a445255464a05907571526",
+      "bytes": 96233,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/012-t-profile-1100x700.png",
+      "sha256": "1746300661cda9f3535ccfc60cb9c5f56437be8a9dee77f11c68ce32497593b1",
+      "bytes": 91117,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/013-t-security-1100x700.png",
+      "sha256": "13c1f28c34f6ffc39a45b1118afced8701bd0e86b6a29029256978b361345bf5",
+      "bytes": 92025,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/014-t-settings-1920x1080.png",
+      "sha256": "e3f80781d9fe5846ad1cc88cf04226d87bde89dc1fee0a0cc7d6e23de7b578bd",
+      "bytes": 93333,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "visual/final/routes/015-t-settings-1440x900.png",
+      "sha256": "9a486403fe3dd425b18df7ff90589a5a5f16a8530385d9bc54a8bb510503f5df",
+      "bytes": 87447,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/routes/016-t-settings-1100x700.png",
+      "sha256": "0ec6036876c6908a69de1431464d512bb65abbdce0480ec0c18f9894af0afa9a",
+      "bytes": 82593,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/018-menu-1100x700.png",
+      "sha256": "1338e7b3c360332d52a63727da7b7c3a63d6b2f96c710b530aba50ccda53d5f4",
+      "bytes": 96350,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/021-notifications-1100x700.png",
+      "sha256": "c118910e2ad1b5175af7aef98257e2a4a14a7dc2a8292a8922ea0c7e1ef9cb38",
+      "bytes": 97199,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/024-palette-1100x700.png",
+      "sha256": "4715c2134df58c344d5fea6b40393d5c1321c7b054855686f821b9168db50315",
+      "bytes": 85499,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/026-h-help-1100x700.png",
+      "sha256": "6adf7e67fc811ada6c1b8f70b7c82c27a24a7c9b29a8594c2678f40aa31a5d4c",
+      "bytes": 86214,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/routes/027-h-faq-1100x700.png",
+      "sha256": "ba6754170dc10304aecbf58e0e9dcda3b78bbd9ed6e42275773cb5b97dc362e8",
+      "bytes": 72614,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/settings/settings-dirty-1100x700.png",
+      "sha256": "af22976dd7713e334b6c631e13a7cfa903252c96b9b3232089f06f91575f1c77",
+      "bytes": 80470,
+      "width": 1100,
+      "height": 700
+    },
+    {
+      "path": "visual/final/settings/settings-dirty-1440x900.png",
+      "sha256": "32046f49c3679848b18ec4894d2ae8e9f69f779b7813a3c34b498a2af8d6774c",
+      "bytes": 84705,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "visual/final/settings/settings-dirty-1920x1080.png",
+      "sha256": "c9eeaed97f8abe04ae622f21d3edc67f3546a10dfed146696f383bb92232fa00",
+      "bytes": 90124,
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "inspection": "Settings before/after, 1100px header and representative Home, Benefits, dialogs, menus, notifications and palette reviewed; target dimensions/integrity checked. Compact dock secondary labels retain their documented tooltip/accessibility ellipsis policy."
+}

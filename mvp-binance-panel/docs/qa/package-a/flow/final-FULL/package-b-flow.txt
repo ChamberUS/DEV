@@ -1,0 +1,40 @@
+PASS starts at login
+PASS registration shown as unavailable, no create-account button
+PASS default landing is Home: t-home
+PASS one-step welcome shown on first use of this account
+PASS welcome has no credential field
+PASS logo is a focusable button
+PASS header avatar is the mascot artwork, no initials
+PASS welcome choice (Terminal) opens the Terminal: t-desk
+PASS welcome closed
+PASS logo goes Home
+PASS logo on Home is a no-op
+PASS dirty page is shown
+PASS logo with unsaved changes asks first
+PASS default focus is Stay here
+PASS Stay keeps the page and the edit
+PASS Esc on the guard also stays
+PASS a failed save neither navigates nor discards
+PASS Save and go saves, then navigates: route=t-home saves=2 dirty=false dialogs=0
+PASS Discard and go discards only on explicit request
+PASS Benefits opens
+PASS Benefits: authorization state is explicit
+PASS Benefits: no upgrade wording
+PASS Refresh finished: no operation left pending
+PASS avatar has exactly its 3 scene filters while signed in
+PASS sign out asks first: dialogs=1
+PASS signed out
+PASS avatar disposed on logout: no filters, no timer
+PASS another account lands on Home (the admin's Terminal choice did not leak): t-home
+PASS welcome shown for the new account
+PASS a fresh avatar for the new session
+PASS Esc dismisses the welcome
+PASS USER cannot open Research: t-home
+PASS toast explains the restriction
+PASS the Research gate's real check ended: operation not left pending
+PASS USER Benefits: authorization state
+PASS the admin's own Terminal choice applies again in this run: t-desk
+PASS welcome is NOT shown again after a normal login
+PASS previous avatar stayed disposed
+PASS logo still goes Home after repeated sessions
+RESULT failures=0

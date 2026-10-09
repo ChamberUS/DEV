@@ -104,12 +104,6 @@ public class PanelApp extends Application {
         Scene scene = new Scene(rootStack, 1440, 900);
         // cena: só o tema V2; as folhas legadas valem apenas dentro de LegacyHost
         StartupTrace.time("ByxTheme.apply", () -> { panel.design.ByxTheme.apply(scene); return null; });
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (mainActive && new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K,
-                    javafx.scene.input.KeyCombination.SHORTCUT_DOWN).match(e)) {
-                openPalette(); e.consume();
-            }
-        });
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> ctx.adminAccess.touch());
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> ctx.adminAccess.touch());
         stage.focusedProperty().addListener((o, a, focused) -> { if (focused) ctx.refreshSystemMotion(); });
@@ -593,9 +587,12 @@ public class PanelApp extends Application {
         };
         if (leaveGuard != null && leaveGuard.dialog().isOpen()) leaveGuard.dialog().close(); // a newer request replaces the older prompt
         leaveGuard = panel.shell.NavigationGuard.open(shell.overlay(), ctx.motion, leaving.unsavedChangeCount(), leaving.canSaveChanges(), stay, () -> {
+            if (router.pending() != ticket || activeView != leaving) return;
             leaving.discardChanges();
             show(target);
-        }, leaving::saveChanges, () -> show(target));
+        }, () -> router.pending() == ticket && activeView == leaving && leaving.saveChanges(), () -> {
+            if (router.pending() == ticket && activeView == leaving) show(target);
+        });
     }
 
     private boolean checkingTrustedDevice;
@@ -804,6 +801,9 @@ public class PanelApp extends Application {
             return;
         }
         if (palette != null) palette.close();
+        if (shell != null) shell.overlay().closePopovers();
+        if (leaveGuard != null && leaveGuard.dialog().isOpen()) leaveGuard.dialog().close();
+        leaveGuard = null;
         closeTwoFactor();
         if (lastDisplayed != null && !lastDisplayed.equals(id) && !lastDisplayed.equals("sys-unavailable")) previousRoute = lastDisplayed;
         lastDisplayed = id;
@@ -1100,6 +1100,10 @@ public class PanelApp extends Application {
 
     private void closeShell() {
         if (shell != null) {
+            if (leaveGuard != null) leaveGuard.dialog().close();
+            leaveGuard = null;
+            if (userMenu != null) userMenu.dispose();
+            if (notificationPanel != null) notificationPanel.dispose();
             shell.dispose();
             shell = null;
             palette = null;

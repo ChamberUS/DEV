@@ -140,23 +140,23 @@ public final class SettingsScreen implements View {
         panel.setId("settings-" + section.toLowerCase(java.util.Locale.ROOT));
         switch (section) {
             case "General" -> {
-                panel.getChildren().add(Kit.setting("Language", "Interface language. English is the only language in this build.", ByxBadge.of("ENGLISH", ByxBadge.Tone.NEUTRAL)));
-                panel.getChildren().add(Kit.setting("Primary workspace", "Where the app opens. This only sets the opening page; it changes nothing else.",
+                panel.getChildren().add(setting("Language", "Interface language. English is the only language in this build.", ByxBadge.of("ENGLISH", ByxBadge.Tone.NEUTRAL)));
+                panel.getChildren().add(setting("Primary workspace", "Where the app opens. This only sets the opening page; it changes nothing else.",
                         row("Primary workspace", new Kit.Segmented(List.of("Trading", "Research", "BYX"), pretty2(draft.primaryWorkspace()),
                                 v -> edit(new AccountData.Prefs(draft.motion(), draft.density(), draft.animatedIcons(), v.toUpperCase(), draft.followSystemMotion()))),
                                 !draft.primaryWorkspace().equals(saved.primaryWorkspace()))));
-                panel.getChildren().add(Kit.setting("Onboarding tour", "Replay the short introduction. It never changes your account.", go("Replay onboarding", "sys-onboarding")));
-                panel.getChildren().add(Kit.setting("Time zone display", "Times are shown in your local time zone.", ByxBadge.of("LOCAL TIME", ByxBadge.Tone.NEUTRAL)));
+                panel.getChildren().add(setting("Onboarding tour", "Replay the short introduction. It never changes your account.", go("Replay onboarding", "sys-onboarding")));
+                panel.getChildren().add(setting("Time zone display", "Times are shown in your local time zone.", ByxBadge.of("LOCAL TIME", ByxBadge.Tone.NEUTRAL)));
             }
             case "Appearance" -> {
                 Kit.Segmented theme = new Kit.Segmented(List.of("Dark", "Light"), "Dark", t -> { });
                 theme.disable("Light", true);
-                panel.getChildren().add(Kit.setting("Theme", "Dark is the only theme in this version.", new HBox(8, theme,
+                panel.getChildren().add(setting("Theme", "Dark is the only theme in this version.", new HBox(8, theme,
                         ByxBadge.availability(ByxBadge.Availability.COMING_SOON))));
-                panel.getChildren().add(Kit.setting("Density", "Compact fits more rows. Trading always stays dense.", row("Density", new Kit.Segmented(
+                panel.getChildren().add(setting("Density", "Compact fits more rows. Trading always stays dense.", row("Density", new Kit.Segmented(
                         List.of("Comfortable", "Compact"), pretty(draft.density()), v -> edit(new AccountData.Prefs(draft.motion(), v.toUpperCase(), draft.animatedIcons(), draft.primaryWorkspace(), draft.followSystemMotion()))),
                         !draft.density().equals(saved.density()))));
-                panel.getChildren().add(Kit.setting("Motion", "FULL plays every transition. REDUCED removes movement and keeps feedback. OFF changes instantly.",
+                panel.getChildren().add(setting("Motion", "FULL plays every transition. REDUCED removes movement and keeps feedback. OFF changes instantly.",
                         row("Motion", new Kit.Segmented(List.of("FULL", "REDUCED", "OFF"), draft.motion(),
                                 v -> edit(new AccountData.Prefs(v, draft.density(), draft.animatedIcons(), draft.primaryWorkspace(), draft.followSystemMotion()))), !draft.motion().equals(saved.motion()))));
                 ByxToggle icons = new ByxToggle(motion, "Animated icons");
@@ -166,7 +166,7 @@ public final class SettingsScreen implements View {
                         edit(new AccountData.Prefs(draft.motion(), draft.density(), b, draft.primaryWorkspace(), draft.followSystemMotion()));
                     }
                 });
-                panel.getChildren().add(Kit.setting("Animated icons", "Play icon animations. They follow the motion mode.",
+                panel.getChildren().add(setting("Animated icons", "Play icon animations. They follow the motion mode.",
                         row("Animated icons", icons, draft.animatedIcons() != saved.animatedIcons())));
             }
             case "Trading" -> {
@@ -174,32 +174,32 @@ public final class SettingsScreen implements View {
                 for (String o : List.of("5m", "15m", "1h", "4h")) {
                     tf.disable(o, true);
                 }
-                panel.getChildren().add(Kit.setting("Default timeframe", "The backend only provides 1m candles for now.", tf));
-                panel.getChildren().add(Kit.setting("Live trading", "Controlled by the system after validation. It is not a preference and can not be enabled here.",
+                panel.getChildren().add(setting("Default timeframe", "The backend only provides 1m candles for now.", tf));
+                panel.getChildren().add(setting("Live trading", "Controlled by the system after validation. It is not a preference and can not be enabled here.",
                         lockedBadge("OFF · LOCKED")));
             }
             case "Research" -> {
-                panel.getChildren().add(Kit.setting("Validation and final holdout", "Gated by the research guard. Not a preference.",
+                panel.getChildren().add(setting("Validation and final holdout", "Gated by the research guard. Not a preference.",
                         lockedBadge("LOCKED · SEALED")));
                 if (data.adminSession()) {
-                    panel.getChildren().add(Kit.setting("Project paths and admin settings", "Research project, CLI path and users.", go("Open admin settings", "settings")));
+                    panel.getChildren().add(setting("Project paths and admin settings", "Research project, CLI path and users.", go("Open admin settings", "settings")));
                 }
             }
             case "BYX" -> {
-                panel.getChildren().add(Kit.setting("Default network", "Network shown when BYX opens.", new HBox(8, ByxBadge.of("LOCALNET", ByxBadge.Tone.WARNING),
+                panel.getChildren().add(setting("Default network", "Network shown when BYX opens.", new HBox(8, ByxBadge.of("LOCALNET", ByxBadge.Tone.WARNING),
                         ByxBadge.of("DEVNET UNAVAILABLE", ByxBadge.Tone.NEUTRAL))));
-                panel.getChildren().add(Kit.setting("TEST asset labels", "TEST and NO FINANCIAL VALUE labels are always shown.", ByxBadge.of("ALWAYS ON", ByxBadge.Tone.NEUTRAL)));
-                panel.getChildren().add(Kit.setting("RPC endpoint", "Set in BYX Network by an administrator.",
+                panel.getChildren().add(setting("TEST asset labels", "TEST and NO FINANCIAL VALUE labels are always shown.", ByxBadge.of("ALWAYS ON", ByxBadge.Tone.NEUTRAL)));
+                panel.getChildren().add(setting("RPC endpoint", "Set in BYX Network by an administrator.",
                         ByxBadge.availability(ByxBadge.Availability.PERMISSION_REQUIRED)));
             }
-            case "Notifications" -> panel.getChildren().add(Kit.setting("Notification categories", "No notification service is connected in this build.",
+            case "Notifications" -> panel.getChildren().add(setting("Notification categories", "No notification service is connected in this build.",
                     ByxBadge.availability(ByxBadge.Availability.UNAVAILABLE)));
             case "Security" -> {
-                panel.getChildren().add(Kit.setting("Password, verification and recovery", "Change your password and review admin verification.", go("Open Security", "t-security")));
-                panel.getChildren().add(Kit.setting("Sessions", "Where you are signed in.", go("Open Sessions", "t-sessions")));
+                panel.getChildren().add(setting("Password, verification and recovery", "Change your password and review admin verification.", go("Open Security", "t-security")));
+                panel.getChildren().add(setting("Sessions", "Where you are signed in.", go("Open Sessions", "t-sessions")));
             }
             case "Accessibility" -> {
-                panel.getChildren().add(Kit.setting("Motion", "Same setting as Motion under Appearance.", goSection("Go to Motion", "Appearance")));
+                panel.getChildren().add(setting("Motion", "Same setting as Motion under Appearance.", goSection("Go to Motion", "Appearance")));
                 ByxToggle follow = new ByxToggle(motion, "Follow system setting");
                 follow.setSelected(draft.followSystemMotion());
                 follow.selectedProperty().addListener((o, a, b) -> {
@@ -207,21 +207,50 @@ public final class SettingsScreen implements View {
                         edit(new AccountData.Prefs(draft.motion(), draft.density(), draft.animatedIcons(), draft.primaryWorkspace(), b));
                     }
                 });
-                panel.getChildren().add(Kit.setting("Follow system setting", "Use REDUCED when the operating system asks for reduced motion. The system can only reduce motion, never add it.",
+                panel.getChildren().add(setting("Follow system setting", "Use REDUCED when the operating system asks for reduced motion. The system can only reduce motion, never add it.",
                         row("Follow system setting", follow, draft.followSystemMotion() != saved.followSystemMotion())));
-                panel.getChildren().add(Kit.setting("Motion in effect", "What the app is using now, after your choice and the system setting.",
+                panel.getChildren().add(setting("Motion in effect", "What the app is using now, after your choice and the system setting.",
                         Fx.label(data.effectiveMotion(), "byx-mono")));
             }
             default -> {
-                panel.getChildren().add(Kit.setting("Version", "Read from the build.", Fx.label(AppInfo.VERSION + " · " + AppInfo.build(), "byx-mono")));
-                panel.getChildren().add(Kit.setting("Environment", "Current environment.", ByxBadge.of(AppInfo.ENVIRONMENT, ByxBadge.Tone.WARNING)));
-                panel.getChildren().add(Kit.setting("More", "About BYX and what is new.", new HBox(8, go("About BYX", "h-about"), go("What's new", "h-whats-new"))));
+                panel.getChildren().add(setting("Version", "Read from the build.", Fx.label(AppInfo.VERSION + " · " + AppInfo.build(), "byx-mono")));
+                panel.getChildren().add(setting("Environment", "Current environment.", ByxBadge.of(AppInfo.ENVIRONMENT, ByxBadge.Tone.WARNING)));
+                panel.getChildren().add(setting("More", "About BYX and what is new.", new HBox(8, go("About BYX", "h-about"), go("What's new", "h-whats-new"))));
             }
         }
         content.getChildren().addAll(title, panel);
         if (!data.preferencesEditable() && List.of("General", "Appearance", "Accessibility").contains(section)) {
             content.getChildren().add(1, Kit.muted("Preferences are read-only in this build. The configured motion and density remain active."));
         }
+    }
+
+    /** Keep preference labels legible at the supported minimum instead of squeezing segmented controls. */
+    private static Node setting(String title, String description, Node control) {
+        Label heading = Fx.label(title, "byx-section-title-sm");
+        Label detail = Kit.muted(description);
+        VBox copy = new VBox(2, heading, detail);
+        copy.setMinWidth(0);
+        HBox.setHgrow(copy, Priority.ALWAYS);
+        if (control instanceof Region r) r.setMinWidth(Region.USE_PREF_SIZE);
+        HBox wide = new HBox(16);
+        wide.setAlignment(Pos.CENTER_LEFT);
+        VBox row = new VBox(12);
+        row.getStyleClass().add("byx-desk-row");
+        Runnable arrange = () -> {
+            double required = 240 + control.prefWidth(-1) + 16 + row.getInsets().getLeft() + row.getInsets().getRight();
+            boolean compact = row.getWidth() > 0 && row.getWidth() < required;
+            if (compact && row.getChildren().contains(wide)) {
+                wide.getChildren().clear();
+                row.getChildren().setAll(copy, control);
+            } else if (!compact && !row.getChildren().contains(wide)) {
+                row.getChildren().clear();
+                wide.getChildren().setAll(copy, control);
+                row.getChildren().setAll(wide);
+            }
+        };
+        row.widthProperty().addListener((o,a,b) -> arrange.run());
+        arrange.run();
+        return row;
     }
 
     private Node row(String name, Node control, boolean changed) {
@@ -270,6 +299,8 @@ public final class SettingsScreen implements View {
         }
         if (saveBar == null) {
             saveCount = Fx.label("", "byx-body");
+            saveCount.setWrapText(true);
+            saveCount.setMinWidth(0);
             ByxButton discard = new ByxButton("Discard", ByxButton.Variant.SECONDARY, motion);
             discard.setOnAction(e -> discardChanges());
             saveButton = new ByxButton("Save changes", ByxButton.Variant.PRIMARY, motion);
@@ -352,9 +383,14 @@ public final class SettingsScreen implements View {
     }
 
     @Override
+    public void onShow() {
+        updateBar();
+    }
+
+    @Override
     public void onHide() {
         ByxOverlayHost host = overlay.get();
-        if (host != null && saveBar != null && !dirty()) {
+        if (host != null && saveBar != null) {
             host.hideSaveBar();
             saveBar = null;
         }

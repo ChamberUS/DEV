@@ -67,21 +67,21 @@ public final class NavigationGuard {
         ByxOverlayHost.DialogHandle[] ref = new ByxOverlayHost.DialogHandle[1];
         boolean[] done = {false};
         stay.setOnAction(e -> {
-            if (!done[0]) {
+            if (!done[0] && ref[0].isOpen()) {
                 done[0] = true;
                 ref[0].close();
                 onStay.run();
             }
         });
         discard.setOnAction(e -> {
-            if (!done[0]) {
+            if (!done[0] && ref[0].isOpen()) {
                 done[0] = true;
                 ref[0].close();
                 onDiscard.run();
             }
         });
         save.setOnAction(e -> {
-            if (done[0]) {
+            if (done[0] || !ref[0].isOpen()) {
                 return;
             }
             boolean saved;

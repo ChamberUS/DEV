@@ -73,6 +73,7 @@ public final class ShellPalette {
     }
 
     public void open() {
+        if (overlay.openDialogs() > 0) return;
         if (isOpen()) {
             input.requestFocus(); // open > close > open: continua aberta com o campo focado
             return;

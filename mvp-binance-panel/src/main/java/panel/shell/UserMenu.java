@@ -57,17 +57,28 @@ public final class UserMenu {
     private VBox panel;
     private final List<Button> buttons = new ArrayList<>();
 
+    private final javafx.event.EventHandler<KeyEvent> avatarKeys = e -> {
+        if (e.getCode() == KeyCode.DOWN || e.getCode() == KeyCode.UP) {
+            open(e.getCode() == KeyCode.DOWN);
+            e.consume();
+        }
+    };
+
+    public void dispose() {
+        close();
+        avatar.setOnAction(null);
+        avatar.removeEventFilter(KeyEvent.KEY_PRESSED, avatarKeys);
+        identity = new Identity("", null, "");
+        items = List.of();
+        buttons.clear();
+    }
+
     public UserMenu(ByxOverlayHost overlay, Button avatar, ShellRouter router) {
         this.overlay = overlay;
         this.avatar = avatar;
         this.router = router;
         avatar.setOnAction(e -> toggle(true));
-        avatar.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (e.getCode() == KeyCode.DOWN || e.getCode() == KeyCode.UP) {
-                open(e.getCode() == KeyCode.DOWN);
-                e.consume();
-            }
-        });
+        avatar.addEventFilter(KeyEvent.KEY_PRESSED, avatarKeys);
         updateExpanded(false);
     }
 
@@ -264,6 +275,10 @@ public final class UserMenu {
             case UP -> focus(focusedIndex() < 0 ? buttons.size() - 1 : focusedIndex() - 1);
             case HOME -> focus(0);
             case END -> focus(buttons.size() - 1);
+            case ENTER -> {
+                int i = focusedIndex();
+                if (i >= 0) buttons.get(i).fire();
+            }
             case ESCAPE -> close();
             case TAB -> close();
             default -> {

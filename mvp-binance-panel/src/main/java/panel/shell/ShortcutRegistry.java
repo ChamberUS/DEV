@@ -17,7 +17,7 @@ public final class ShortcutRegistry {
 
     public static final List<Group> GROUPS = List.of(
             new Group("Global", List.of(
-                    new Entry(List.of(MOD, "K"), "Open search and commands", "ByxShell.onShortcut + PanelApp scene filter"),
+                    new Entry(List.of(MOD, "K"), "Open search and commands", "ByxShell.onShortcut"),
                     new Entry(List.of("?"), "Show keyboard shortcuts", "ByxShell.onHelpKey"),
                     new Entry(List.of(MOD, ","), "Open Settings", "ByxShell.onShortcut"),
                     new Entry(List.of(MOD, "Shift", "H"), "Go to Home", "ByxShell.onShortcut + ShellRouter.requestHome"),

@@ -96,6 +96,14 @@ public class ByxOverlayHost extends StackPane {
     private Runnable paletteOnClose;
     private Node saveBar;
     private long generation;
+    private boolean disposed;
+    private Insets saveBarMargin = new Insets(16);
+    private final javafx.event.EventHandler<KeyEvent> keyHandler = this::onKey;
+    private final javafx.event.EventHandler<MouseEvent> outsideHandler = this::onPressOutside;
+    private final ChangeListener<Scene> sceneListener = (o, a, b) -> {
+        if (a != null) a.focusOwnerProperty().removeListener(this.focusGuard);
+        if (b != null && !disposed) b.focusOwnerProperty().addListener(this.focusGuard);
+    };
     private final ChangeListener<Node> focusGuard = (o, a, b) -> keepFocusInDialog(b);
 
     public ByxOverlayHost(Node content, MotionService motion) {
@@ -117,16 +125,9 @@ public class ByxOverlayHost extends StackPane {
         toastStack.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         StackPane.setAlignment(toastStack, Pos.BOTTOM_LEFT);
         StackPane.setMargin(toastStack, new Insets(16));
-        addEventFilter(KeyEvent.KEY_PRESSED, this::onKey);
-        addEventFilter(MouseEvent.MOUSE_PRESSED, this::onPressOutside);
-        sceneProperty().addListener((o, a, b) -> {
-            if (a != null) {
-                a.focusOwnerProperty().removeListener(focusGuard);
-            }
-            if (b != null) {
-                b.focusOwnerProperty().addListener(focusGuard);
-            }
-        });
+        addEventFilter(KeyEvent.KEY_PRESSED, keyHandler);
+        addEventFilter(MouseEvent.MOUSE_PRESSED, outsideHandler);
+        sceneProperty().addListener(sceneListener);
     }
 
     public Pane layer(OverlayLayer l) {
@@ -169,8 +170,19 @@ public class ByxOverlayHost extends StackPane {
 
     // ---------------------------------------------------------------- save bar (30)
 
+    public void setSaveBarMargin(Insets margin) {
+        saveBarMargin = margin;
+        if (saveBar != null) StackPane.setMargin(saveBar, margin);
+    }
+
     public void showSaveBar(Node bar) {
+        if (bar == saveBar) return;
         hideSaveBar();
+        // StackPane stretches resizable children to their max height, irrespective of alignment.
+        if (bar instanceof Region r) r.setMaxHeight(Region.USE_PREF_SIZE);
+        stopTracked(bar);
+        layers.get(OverlayLayer.SAVEBAR).getChildren().remove(bar);
+        StackPane.setMargin(bar, saveBarMargin);
         saveBar = bar;
         StackPane.setAlignment(bar, Pos.BOTTOM_CENTER);
         layers.get(OverlayLayer.SAVEBAR).getChildren().add(bar);
@@ -204,6 +216,7 @@ public class ByxOverlayHost extends StackPane {
         }
         generation++;
         popover.setManaged(false);
+        popover.getProperties().put("byx.popover.position", new javafx.geometry.Point2D(x, y));
         popover.relocate(x, y);
         popovers.add(popover);
         layers.get(OverlayLayer.POPOVER).getChildren().add(popover);
@@ -211,7 +224,37 @@ public class ByxOverlayHost extends StackPane {
             p.applyCss();
             p.autosize();
         }
+        if (popover.getProperties().get("byx.popover.owner") instanceof Node owner) {
+            javafx.beans.InvalidationListener anchorListener = ignored -> positionPopover(popover);
+            owner.localToSceneTransformProperty().addListener(anchorListener);
+            owner.layoutBoundsProperty().addListener(anchorListener);
+            popover.getProperties().put("byx.popover.detach", (Runnable) () -> {
+                owner.localToSceneTransformProperty().removeListener(anchorListener);
+                owner.layoutBoundsProperty().removeListener(anchorListener);
+            });
+        }
+        positionPopover(popover);
         enter(popover, "menuOpen", -4);
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        for (Node p : popovers) positionPopover(p);
+    }
+
+    /** Recompute from the header owner; its geometry listeners are removed on logical close. */
+    private void positionPopover(Node p) {
+        var point = (javafx.geometry.Point2D) p.getProperties().get("byx.popover.position");
+        double x = point.getX(), y = point.getY();
+        double w = p.getLayoutBounds().getWidth(), h = p.getLayoutBounds().getHeight();
+        if (p.getProperties().get("byx.popover.owner") instanceof Node owner && owner.getScene() == getScene()) {
+            var b = owner.getLocalToSceneTransform().transform(owner.getLayoutBounds());
+            var anchor = sceneToLocal(b.getMaxX(), b.getMaxY() + 8);
+            x = anchor.getX() - w;
+            y = anchor.getY();
+        }
+        p.relocate(Math.max(8, Math.min(x, getWidth() - w - 8)), Math.max(8, Math.min(y, getHeight() - h - 8)));
     }
 
     public void closePopovers() {
@@ -225,6 +268,7 @@ public class ByxOverlayHost extends StackPane {
         if (!popovers.remove(p)) {
             return;
         }
+        if (p.getProperties().remove("byx.popover.detach") instanceof Runnable detach) detach.run();
         // callback antes da saída: em OFF o nó sai da cena na hora e o foco que estava nele se perderia
         if (p.getProperties().remove("byx.popover.onClosed") instanceof Runnable r) {
             r.run();
@@ -364,6 +408,7 @@ public class ByxOverlayHost extends StackPane {
             return;
         }
         h.open = false;
+        h.panel.setDisable(true); // exiting controls cannot execute an obsolete decision
         dialogs.remove(h);
         generation++;
         exit(h.holder, "dialogClose", layers.get(OverlayLayer.DIALOG));
@@ -385,7 +430,8 @@ public class ByxOverlayHost extends StackPane {
         VBox copy = new VBox(2, type, body);
         HBox.setHgrow(copy, Priority.ALWAYS);
         ByxButton dismiss = new ByxButton("Dismiss", ByxButton.Variant.GHOST, motion).small();
-        dismiss.setFocusTraversable(false);
+        dismiss.setFocusTraversable(true);
+        dismiss.setMinWidth(Region.USE_PREF_SIZE);
         HBox t = new HBox(12, ByxIcon.of(kind.icon, 18, kind.tone), copy, dismiss);
         t.getStyleClass().addAll("byx-toast", "toast-" + kind.name().toLowerCase(java.util.Locale.ROOT));
         t.setAlignment(Pos.TOP_LEFT);
@@ -474,8 +520,8 @@ public class ByxOverlayHost extends StackPane {
                 case POPOVER -> closePopovers();
                 default -> { }
             }
-        } else if (e.getCode() == KeyCode.TAB && !dialogs.isEmpty()) {
-            List<Node> f = focusables(dialogs.peek().panel);
+        } else if (e.getCode() == KeyCode.TAB && (!dialogs.isEmpty() || palette != null)) {
+            List<Node> f = focusables(dialogs.isEmpty() ? palette : dialogs.peek().panel);
             if (f.isEmpty()) {
                 e.consume();
                 return;
@@ -511,7 +557,7 @@ public class ByxOverlayHost extends StackPane {
     public void requestFocusDeferred(Node target) {
         long g = generation;
         javafx.application.Platform.runLater(() -> {
-            if (g == generation && target.getScene() != null) {
+            if (!disposed && g == generation && target.getScene() == getScene()) {
                 target.requestFocus();
             }
         });
@@ -568,6 +614,7 @@ public class ByxOverlayHost extends StackPane {
     /** opacity 0→1 e escala .98→1 só em FULL (reducedScale 1). */
     private void popIn(Node n, String token) {
         Duration d = motion == null ? Duration.ZERO : motion.duration(token);
+        n.setMouseTransparent(false);
         n.setOpacity(1);
         n.setScaleX(1);
         n.setScaleY(1);
@@ -592,6 +639,7 @@ public class ByxOverlayHost extends StackPane {
     /** Entrada com deslocamento vertical (fromY) só em FULL. */
     private void enter(Node n, String token, double fromY) {
         Duration d = motion == null ? Duration.ZERO : motion.duration(token);
+        n.setMouseTransparent(false);
         n.setOpacity(1);
         n.setTranslateY(0);
         if (d.equals(Duration.ZERO)) {
@@ -641,21 +689,38 @@ public class ByxOverlayHost extends StackPane {
         }
     }
 
+    private static void stopTree(Node n) {
+        stopTracked(n);
+        stopToastTimer(n);
+        if (n instanceof Parent p) p.getChildrenUnmodifiable().forEach(ByxOverlayHost::stopTree);
+    }
+
     /** Remove tudo e para animações/timers (descarte do host). */
     public void dispose() {
+        if (disposed) return;
+        disposed = true;
+        generation++;
+        closePopovers();
+        closePalette();
+        removeEventFilter(KeyEvent.KEY_PRESSED, keyHandler);
+        removeEventFilter(MouseEvent.MOUSE_PRESSED, outsideHandler);
+        sceneProperty().removeListener(sceneListener);
         for (DialogHandle h : List.copyOf(dialogs)) {
             h.open = false;
         }
         dialogs.clear();
         popovers.clear();
         palette = null;
+        paletteBackdrop = null;
+        paletteOpener = null;
+        paletteOnClose = null;
         saveBar = null;
         for (Node t : List.copyOf(toasts)) {
             stopToastTimer(t);
         }
         toasts.clear();
         for (Pane p : layers.values()) {
-            p.getChildren().forEach(ByxOverlayHost::stopTracked);
+            stopTree(p);
         }
         toastStack.getChildren().clear();
         layers.forEach((l, p) -> {

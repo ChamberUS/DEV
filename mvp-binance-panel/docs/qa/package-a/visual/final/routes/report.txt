@@ -1,0 +1,39 @@
+SHOT t-home-1920x1080 scene=1920x1080
+ROUTE requested=t-home actual=t-home role=ADMIN
+SHOT t-home-1440x900 scene=1440x900
+ROUTE requested=t-home actual=t-home role=ADMIN
+SHOT t-home-1100x700 scene=1100x700
+ROUTE requested=t-home actual=t-home role=ADMIN
+SHOT t-desk-1100x700 scene=1100x700
+ROUTE requested=t-desk actual=t-desk role=ADMIN
+SHOT t-markets-1100x700 scene=1100x700
+ROUTE requested=t-markets actual=t-markets role=ADMIN
+SHOT t-orders-1100x700 scene=1100x700
+ROUTE requested=t-orders actual=t-orders role=ADMIN
+SHOT t-wallet-1100x700 scene=1100x700
+ROUTE requested=t-wallet actual=t-wallet role=ADMIN
+SHOT t-byx-1100x700 scene=1100x700
+ROUTE requested=t-byx actual=t-byx role=ADMIN
+SHOT t-chain-data-1100x700 scene=1100x700
+ROUTE requested=t-chain-data actual=t-chain-data role=ADMIN
+SHOT t-benefits-1100x700 scene=1100x700
+ROUTE requested=t-benefits actual=t-benefits role=ADMIN
+SHOT overview-1100x700 scene=1100x700
+ROUTE requested=overview actual=overview role=ADMIN
+SHOT t-profile-1100x700 scene=1100x700
+ROUTE requested=t-profile actual=t-profile role=ADMIN
+SHOT t-security-1100x700 scene=1100x700
+ROUTE requested=t-security actual=t-security role=ADMIN
+SHOT t-settings-1920x1080 scene=1920x1080
+ROUTE requested=t-settings actual=t-settings role=ADMIN
+SHOT t-settings-1440x900 scene=1440x900
+ROUTE requested=t-settings actual=t-settings role=ADMIN
+SHOT t-settings-1100x700 scene=1100x700
+ROUTE requested=t-settings actual=t-settings role=ADMIN
+SHOT menu-1100x700 scene=1100x700
+SHOT notifications-1100x700 scene=1100x700
+SHOT palette-1100x700 scene=1100x700
+SHOT h-help-1100x700 scene=1100x700
+ROUTE requested=h-help actual=h-help role=ADMIN
+SHOT h-faq-1100x700 scene=1100x700
+ROUTE requested=h-faq actual=h-faq role=ADMIN

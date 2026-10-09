@@ -54,7 +54,9 @@ public final class ShellRouter {
         }
         Navigator.Ticket t = navigator.begin(target);
         switch (gate.evaluate(target, t)) {
-            case ALLOW -> commit(target);
+            case ALLOW -> {
+                if (navigator.isCurrent(t)) commit(target);
+            }
             case DENY -> {
                 if (navigator.isCurrent(t)) {
                     navigator.cancelPending();

@@ -1,0 +1,365 @@
+{
+  "boundary": "package-b",
+  "stagedFiles": 71,
+  "stagedBytes": 1317646,
+  "findings": [],
+  "diffSha256": "121060ad06976ce96ef562f21ffeae5cc00dafa2ba645605de45fce760fb411e",
+  "files": [
+    {
+      "path": "mvp-binance-panel/docs/package-b/CODE_MAP.md",
+      "bytes": 8135,
+      "sha256": "f3576cde084bab01d83a0d05bf4bfb459b96b1d3c8197a4c7612c5772e2eb64c"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/candidate-manifest.json",
+      "bytes": 2128,
+      "sha256": "a959b6b5d2888c23f8868acf2c92ce4cb87e8e11e6a1a060ad00b0337164c1a9"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/capture-health.json",
+      "bytes": 861,
+      "sha256": "213771b3af2efd55eda9e945e969986bef90f56f9bb0f9146755e67a022f0de4"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/flow/package-b-flow-FULL.txt",
+      "bytes": 1712,
+      "sha256": "c44568d9b32c7bfa28730af276b51d6147f0d0de9e41ecce2952ee360ddcaefb"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/flow/package-b-flow-OFF.txt",
+      "bytes": 1712,
+      "sha256": "c44568d9b32c7bfa28730af276b51d6147f0d0de9e41ecce2952ee360ddcaefb"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/flow/package-b-flow-REDUCED.txt",
+      "bytes": 1712,
+      "sha256": "c44568d9b32c7bfa28730af276b51d6147f0d0de9e41ecce2952ee360ddcaefb"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/implementation-report.md",
+      "bytes": 21560,
+      "sha256": "d98a00465e44a08dadf0e908a33168beac6325093ac86a5cccf9042528dd8f14"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/packaged-smoke/result.json",
+      "bytes": 1081,
+      "sha256": "240d4b06e9f5b3286d9190479dac3c8605fa0c5749a4fff3193fe4057c16c1a8"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/panel-source-hashes.json",
+      "bytes": 80714,
+      "sha256": "f2fcb156c0c8d76bdbb7bb4fada05e58ac8292175e58e6b471af86ef715927bc"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/provenance-diff-vs-rc1.json",
+      "bytes": 551,
+      "sha256": "064762fd92d06887fbeab490fab153a3944a28465934d0ed7915372b49965dbc"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/visual/avatar/contact-sheet.png",
+      "bytes": 348410,
+      "sha256": "1612f47e0ead8f4b23b24fdb699b7f2dcb54a4e61ddab4976e8a1c90e1d4ec50"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/visual/benefits/benefits-unauthorized-1100x700.png",
+      "bytes": 118244,
+      "sha256": "acc73e8e517373e3994b16b739f8f392f6b5773ddba48ef6d493c245de673a91"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-b/visual/real/shell-full-compact/001-t-home-1920x1080.png",
+      "bytes": 159498,
+      "sha256": "e0a480cbe0bee9f1b4d7fc92c625cca98f28c96f63742b1a1f0a9136390e1628"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/accountview/SettingsScreen.java",
+      "bytes": 17325,
+      "sha256": "853a8b9bdfd838315818851fb2ca7627f0e1b750fe049bf35721f2bc4550f7f3"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/app/PanelApp.java",
+      "bytes": 65544,
+      "sha256": "3a53406201800780fa4b0ed05a8cf9d831b4ce971e0ee8a34e1568a540dbe93d"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/authview/AuthScreens.java",
+      "bytes": 21906,
+      "sha256": "486fdc9bbd2ab738787fbb2b08042e493a1f76631ce4fb6b6cd87ecd3a59e919"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/authview/RegistrationAvailability.java",
+      "bytes": 1140,
+      "sha256": "89a342ae45b9f9a632a8f0043c505da526e6bedd1d3262168290a326f31ff358"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/byxview/BenefitsScreen.java",
+      "bytes": 23748,
+      "sha256": "065d520f72791db569a985f0c708f4a290fb4a621bce1c1f6713fbb53107371b"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/byxview/BenefitsState.java",
+      "bytes": 7189,
+      "sha256": "d6a68d29052de0ffc6bbb4ab20cb5fec8efa7d824209031a868826377c489fe7"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/byxview/ChainDataScreen.java",
+      "bytes": 25327,
+      "sha256": "6e6c1ae3e8475a717a59acd9b4cd880ae41d74381f686eb3abf3eb36f3eee46a"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/homeview/HomeMarkets.java",
+      "bytes": 6599,
+      "sha256": "9e82e3183412cf7e6b6aee5015c13180520f7a03544ada024bc62dc82ea1718a"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/homeview/HomeScreen.java",
+      "bytes": 29230,
+      "sha256": "525a3b373dbaa83891d42452417f0b5fd27273cd0bc256da403605f7f1822b9e"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/homeview/LandingPreference.java",
+      "bytes": 2408,
+      "sha256": "d002aa1847db6b10da1a8262a5d9b0e29e1e47d593c23ae4891232df414f762c"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/homeview/ServiceCards.java",
+      "bytes": 3201,
+      "sha256": "767d14152366d8f484aaa3e269c1655603f9a4980954b817d792a9ad63777032"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/homeview/WelcomeDialog.java",
+      "bytes": 5353,
+      "sha256": "f73e87f0329a6abf961281e4ac7d464b5478631da2f1a9ae35e0db45773ebac1"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/i18n/Strings.java",
+      "bytes": 2412,
+      "sha256": "02a70c50f3f1d8b4c35ef710928fa5a5439c811763024ba41445fb513eb53518"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ByxShell.java",
+      "bytes": 12266,
+      "sha256": "3d318a65e3427b835702633c8d146d0f338b4eafcd84e734e8f2025612a2415c"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/NavigationGuard.java",
+      "bytes": 4884,
+      "sha256": "b0fe0611c7617e4309129f1a86d3c9b1061d6c53a69f65dbfc0d0f2c08d77ada"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShellContext.java",
+      "bytes": 1101,
+      "sha256": "99d7245d268209f2598d7e1f169d91e77a0cd8ffe5917c95a833ba1e27625801"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShellIcons.java",
+      "bytes": 2504,
+      "sha256": "4e2157dfb278b16e56d19baa108241bab0f2eb67162645013cdc1194c0d635bc"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShellRail.java",
+      "bytes": 10703,
+      "sha256": "6ad2345930abfb4c2088a0659343da8a2d47a12593fce98f0c6f35c055a960ed"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShellRouter.java",
+      "bytes": 3890,
+      "sha256": "ddc3f7211a64fc007420e1e0d4b4c7b969945e4d2012e917e1aa64d75974c139"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShellRoutes.java",
+      "bytes": 8286,
+      "sha256": "d7d8b31e4d31aa9e66637feaf7ec1c2c6d59bfd22d1fa5b1e73c344a51a913ed"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShellTopBar.java",
+      "bytes": 7176,
+      "sha256": "7a06245e31037b1209d94681157629880af5a655ab43a6b816de494543212dfa"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/ShortcutRegistry.java",
+      "bytes": 2333,
+      "sha256": "f5d28e1dab5ddc51abc75a01ff85cfb3ff305d5f333d742a50006a89c95633b0"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/UserMenu.java",
+      "bytes": 10378,
+      "sha256": "7d1542ba9df3aa091c8fb0cb6e66611fb1ae39e65148ed98d5a6d4f9c4a9b27d"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/avatar/AvatarMotion.java",
+      "bytes": 11022,
+      "sha256": "62172c7f8646d2eebe1a20c946532a07980783605da80569ed917632c758422b"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/avatar/AvatarPaths.java",
+      "bytes": 2046,
+      "sha256": "3f91627189f87760024ee1b366702ed2ae83df4ac320c80fe4f30fdc39fa5bed"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/avatar/MascotAvatar.java",
+      "bytes": 20406,
+      "sha256": "8eef22bd633fe9f0807a01cf976bcbeb15d378d65c08d20f219a7a91e3d08e12"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/avatar/MascotTokens.java",
+      "bytes": 4041,
+      "sha256": "9fcb4696dff29551558d3fdee2e25e77367fae5a4927f51672c732219ef0fa15"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/avatar/OperationRegistry.java",
+      "bytes": 6135,
+      "sha256": "5ee276105afb65e7e2560684932f4463c1938340d95cb0dfa081a369f5394ceb"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/avatar/Operations.java",
+      "bytes": 1057,
+      "sha256": "3bed5d60a7648230f48f5d35eb0cbded4b43c651d8b203c8f7fba6d54622c76d"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/ui/CommandPalette.java",
+      "bytes": 6473,
+      "sha256": "a8f2da528c2b761d455f8832854cb5b3ab583e6c95b7e779070e72f44af6b700"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/ui/View.java",
+      "bytes": 1533,
+      "sha256": "14693f132c4d58132b3a742dc4ce9f1ada1f9b367274684625ceb30af3e0fb96"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/design/BYX_PACKAGE_B_TOKENS.json",
+      "bytes": 3368,
+      "sha256": "80f97dda41b6511ce8a1198fb90c0adad9ca6aa40e07d8ae839ffa819b59584f"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_en.properties",
+      "bytes": 3033,
+      "sha256": "b93eeece8ef5fc9a89005896c4282a4d83eb5caf25b62e8f783de4fa0a38a7a8"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
+      "bytes": 3193,
+      "sha256": "199ca684b71f576579683c7712978a805637d450246bdcc9d231b16861717267"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/i18n/package-b_en.properties",
+      "bytes": 13891,
+      "sha256": "da9f23f790aabdf72d43a898bcf9b8009512f4d69026771267c24c1d18c2f53d"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/i18n/package-b_pt-BR.properties",
+      "bytes": 15062,
+      "sha256": "ea6cfea715899fa75667fcad2f0133e12e12953933a631e1fc981962b44a4048"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/v2/screens.css",
+      "bytes": 7683,
+      "sha256": "c7ee071691251d50db579e0c4ef17ca71d47107183cb0b026064a17804412cfb"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/v2/shell.css",
+      "bytes": 11531,
+      "sha256": "4ad4ef9eca8975e99f81d2ad992a785850c1db319696604cf423db94f1dfd76d"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/v2/tokens.css",
+      "bytes": 2444,
+      "sha256": "13881d8ad6479c48a11b4324f19629b684625ff8939ef712b7a52f5ce2934b48"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/AvatarHeaderTest.java",
+      "bytes": 9602,
+      "sha256": "cb9db36ac59d614579999d9f80a7869fc3da3a4269fc0656e9faa48d72824e8b"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/EntryPresentationTest.java",
+      "bytes": 9835,
+      "sha256": "bbd46e1553dedecc2457a894e3d9fd024a6e4f481d5e3ab1958bf9f8a43499e6"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/HomeNavigationTest.java",
+      "bytes": 9419,
+      "sha256": "83de335962d6a360181207648f65b4d660ed041ec5df4e6d57804245f9b48339"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/HomeScreenTest.java",
+      "bytes": 11753,
+      "sha256": "846c5bd0cab6a0dc00fdbd42694ae8934de25b1b3059f991e20015a027adacea"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/HomeVisualQa.java",
+      "bytes": 6221,
+      "sha256": "e51f7337e4293334db49451c83cfbcc765ec80f4f3045c07eae2af0beb79a0d4"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/HomeVisualQaAccess.java",
+      "bytes": 350,
+      "sha256": "2ea0d2d57f98eb3dff2dbb3f23a333a5aefbe9e765092f8ba7b901905837adf7"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/PackageBFlowQa.java",
+      "bytes": 21116,
+      "sha256": "df2571650adef7111dc01620485097bf6f76e0754cbf778acf35e915704aad72"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/byxview/BenefitsScreenTest.java",
+      "bytes": 13987,
+      "sha256": "aad1d5d582a95b105922e01e2752c95d786a192a812acef3a0b902e38589f5e8"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/byxview/BenefitsStateTest.java",
+      "bytes": 7750,
+      "sha256": "42f91a45d8f454ca03e3486363c7bfd8693b30bb267138ba0e86187ad7660a95"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/byxview/BenefitsVisualQa.java",
+      "bytes": 4023,
+      "sha256": "ca79d3e7f619e1776486aa0cc186654db7be2f9107ef332dc6babeecd204dba3"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/byxview/ByxScreensTest.java",
+      "bytes": 20724,
+      "sha256": "da3b731e22162254f3f66566c86a10b7d6520af3e315e12379cde4118bc3d791"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/byxview/ChainDataScreenTest.java",
+      "bytes": 20893,
+      "sha256": "d7d9affc0eac18a70d804487f65294a6ab85915c034deebe21a797f5dc8e091a"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/homeview/HomeMarketsTest.java",
+      "bytes": 5743,
+      "sha256": "8b37a2b72f4c4ece18c81fe34a7100fe5a8405f3eefc1f00b4a687123c556dc0"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/homeview/ServiceCardsAndLandingTest.java",
+      "bytes": 3816,
+      "sha256": "d2debf49f5510aa400cdeaa6f00c1cbb1f4faddc88d21b0d108e28ed1c97068f"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/i18n/StringsParityTest.java",
+      "bytes": 1714,
+      "sha256": "4e55ba384e5196a7d1c3232e6e13a3d79ff3e6c7441a03ada3574adbbf97b580"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/shell/avatar/AvatarMotionTest.java",
+      "bytes": 8831,
+      "sha256": "522370603d4db7f69e13250bdec95e9d7d2f6ef679bde563d9475e227bba069b"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/shell/avatar/AvatarVisualQa.java",
+      "bytes": 8271,
+      "sha256": "5d5188a3e2d5558417d6dd1c44e81e92dc533d579d7c407fcebb515c3fdb311c"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/shell/avatar/MascotAvatarTest.java",
+      "bytes": 13895,
+      "sha256": "83d4334a38c593ab32086906a7adc16a71e9adbe7cfcb740e786efbc142cf09e"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/shell/avatar/OperationRegistryTest.java",
+      "bytes": 5564,
+      "sha256": "2899872e57ce0270bf10215321e6dd276e0afd3d1d19bb80caf4a718269df4e4"
+    }
+  ],
+  "review": "Paths, staged diff, exact qualified source provenance and test-only synthetic fixtures reviewed; no local account state, tokens, keys, captures, provisioning/private certificates, logs or generated outputs."
+}

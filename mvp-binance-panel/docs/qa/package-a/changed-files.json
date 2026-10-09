@@ -1,0 +1,13 @@
+[
+  "mvp-binance-panel/src/main/java/panel/accountview/SettingsScreen.java",
+  "mvp-binance-panel/src/main/java/panel/app/PanelApp.java",
+  "mvp-binance-panel/src/main/java/panel/design/ByxOverlayHost.java",
+  "mvp-binance-panel/src/main/java/panel/shell/ByxShell.java",
+  "mvp-binance-panel/src/main/java/panel/shell/NavigationGuard.java",
+  "mvp-binance-panel/src/main/java/panel/shell/NotificationPanel.java",
+  "mvp-binance-panel/src/main/java/panel/shell/ShellPalette.java",
+  "mvp-binance-panel/src/main/java/panel/shell/ShellRouter.java",
+  "mvp-binance-panel/src/main/java/panel/shell/ShellTopBar.java",
+  "mvp-binance-panel/src/main/java/panel/shell/ShortcutRegistry.java",
+  "mvp-binance-panel/src/main/java/panel/shell/UserMenu.java"
+]

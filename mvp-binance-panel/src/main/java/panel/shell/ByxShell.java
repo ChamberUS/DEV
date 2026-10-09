@@ -34,6 +34,8 @@ public final class ByxShell extends StackPane {
     private final Map<ShellContext, String> lastRoute = new EnumMap<>(ShellContext.class);
     private final ChangeListener<String> routeListener = (o, a, b) -> applyRoute(b);
     private final String shortcutPrefix;
+    private final javafx.event.EventHandler<KeyEvent> shortcutHandler = this::onShortcut;
+    private final javafx.event.EventHandler<KeyEvent> helpHandler = this::onHelpKey;
     private final MotionService motion;
     private Predicate<String> available = id -> true;
     private Function<String, String> crumb = id -> ShellRoutes.get(id).map(ShellRoutes.Route::title).orElse(id);
@@ -71,10 +73,11 @@ public final class ByxShell extends StackPane {
         frame.setLeft(rail);
         frame.getStyleClass().add("byx-frame");
         overlay = new ByxOverlayHost(frame, motion);
+        overlay.setSaveBarMargin(new javafx.geometry.Insets(0, 16, 38 + 16, 68 + 16));
         overlay.setToastMargin(new javafx.geometry.Insets(0, 0, 38 + 16, 68 + 16)); // acima do dock, ao lado do rail
         getChildren().add(overlay);
-        addEventFilter(KeyEvent.KEY_PRESSED, this::onShortcut);
-        addEventFilter(KeyEvent.KEY_TYPED, this::onHelpKey);
+        addEventFilter(KeyEvent.KEY_PRESSED, shortcutHandler);
+        addEventFilter(KeyEvent.KEY_TYPED, helpHandler);
         router.routeProperty().addListener(routeListener);
         topBar.search().setOnAction(e -> openSearch.run());
         if (router.route() != null) {
@@ -258,7 +261,7 @@ public final class ByxShell extends StackPane {
     /** Cmd/Ctrl+1..5 = itens do rail do contexto atual; Cmd/Ctrl+, = Settings; Cmd/Ctrl+K = busca. */
     private void onShortcut(KeyEvent e) {
         // diálogo aberto (camada 70): atalhos não navegam por trás dele
-        if (!e.isShortcutDown() || overlay.openDialogs() > 0) {
+        if (e.isConsumed() || !e.isShortcutDown() || overlay.openDialogs() > 0) {
             return;
         }
         if (new KeyCodeCombination(KeyCode.K, KeyCombination.SHORTCUT_DOWN).match(e)) {
@@ -286,7 +289,7 @@ public final class ByxShell extends StackPane {
             case DIGIT6 -> 6;
             default -> 0;
         };
-        if (n > 0 && rail.context() != null) {
+        if (n > 0 && !e.isShiftDown() && !e.isAltDown() && rail.context() != null) {
             List<ShellRoutes.Route> items = ShellRoutes.rail(rail.context()).stream().filter(r -> available.test(r.id())).toList();
             if (n <= items.size()) {
                 router.request(items.get(n - 1).id());
@@ -309,6 +312,9 @@ public final class ByxShell extends StackPane {
     }
 
     public void dispose() {
+        removeEventFilter(KeyEvent.KEY_PRESSED, shortcutHandler);
+        removeEventFilter(KeyEvent.KEY_TYPED, helpHandler);
+        openSearch = () -> { };
         if (workspaceMascot != null) {
             workspaceMascot.dispose();
         }

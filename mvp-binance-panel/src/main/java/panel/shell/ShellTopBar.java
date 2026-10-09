@@ -41,10 +41,11 @@ public final class ShellTopBar extends HBox {
         contextChip.setVisible(false);
         contextChip.setManaged(false);
         crumb.getStyleClass().add("byx-crumb");
-        crumb.setMinWidth(0);
+        crumb.setMinWidth(Region.USE_PREF_SIZE);
         HBox breadcrumb = new HBox(8, contextChip, crumb);
         breadcrumb.getStyleClass().add("byx-breadcrumb");
         breadcrumb.setAlignment(Pos.CENTER_LEFT);
+        breadcrumb.setMinWidth(Region.USE_PREF_SIZE);
         HBox.setHgrow(breadcrumb, Priority.SOMETIMES);
 
         Region spacer = new Region();
@@ -59,11 +60,16 @@ public final class ShellTopBar extends HBox {
         HBox.setHgrow(gap, Priority.ALWAYS);
         HBox searchGraphic = new HBox(10, ByxIcon.path(ShellIcons.path("search"), 16, null), prompt, gap, key);
         searchGraphic.setAlignment(Pos.CENTER_LEFT);
-        searchGraphic.setPrefWidth(320 - 24);
+        searchGraphic.setMinWidth(0);
+        searchGraphic.prefWidthProperty().bind(search.widthProperty().subtract(24));
+        prompt.setMinWidth(0);
+        prompt.visibleProperty().bind(search.widthProperty().greaterThanOrEqualTo(220));
+        prompt.managedProperty().bind(prompt.visibleProperty());
+        key.setMinWidth(Region.USE_PREF_SIZE);
         search.setGraphic(searchGraphic);
         search.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         search.getStyleClass().add("byx-search");
-        search.setMinSize(320, 36);
+        search.setMinSize(96, 36); // compact search preserves the full destination and account controls
         search.setPrefSize(320, 36);
         search.setMaxSize(320, 36);
         search.setAccessibleText("Search or jump to, " + shortcutPrefix + "K");

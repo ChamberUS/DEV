@@ -1,0 +1,14 @@
+{
+  "FULL": {
+    "passed": 39,
+    "failed": 0
+  },
+  "REDUCED": {
+    "passed": 39,
+    "failed": 0
+  },
+  "OFF": {
+    "passed": 39,
+    "failed": 0
+  }
+}
