@@ -10,6 +10,14 @@ public class SessionManager {
     private UserSession user;
     private AdminSession admin;
     private final List<Runnable> onLogout = new ArrayList<>();
+    private final List<Runnable> presentationChanges = new ArrayList<>();
+
+    /** Disposable presentation observer; never grants authority or performs backend work. */
+    public synchronized AutoCloseable subscribePresentation(Runnable listener) {
+        presentationChanges.add(listener);
+        return () -> { synchronized (SessionManager.this) { presentationChanges.remove(listener); } };
+    }
+    private void presentationChanged() { new ArrayList<>(presentationChanges).forEach(Runnable::run); }
 
     public synchronized void login(User u, java.time.Instant now) {
         logout();
@@ -46,6 +54,7 @@ public class SessionManager {
         if (user != null && user.user().id() == u.id()) {
             // atualizar a APRESENTAÇÃO do mesmo usuário não é uma nova sessão: a identidade (id) é estável; só login/logout a trocam
             user = new UserSession(u, user.loggedInAt(), user.id());
+            presentationChanged();
         }
     }
 
@@ -53,6 +62,7 @@ public class SessionManager {
         user = null;
         admin = null;
         new ArrayList<>(onLogout).forEach(Runnable::run);
+        presentationChanged();
     }
 
     public synchronized void onLogout(Runnable r) {

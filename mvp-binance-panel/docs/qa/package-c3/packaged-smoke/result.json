@@ -1,0 +1,50 @@
+{
+ "version": "1.0.0-local-pkgc3-uat-20261009T191714Z",
+ "app": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc3-uat/1.0.0-local-pkgc3-uat-20261009T191714Z/BYX-MVP Package C3 UAT.app",
+ "cases": [
+  {
+   "case": "signed bundle verifies (deep strict)",
+   "pass": true
+  },
+  {
+   "case": "offline: Panel reports UNAVAILABLE (no Service)",
+   "pass": true
+  },
+  {
+   "case": "DEFAULT nested Service ready",
+   "pass": true
+  },
+  {
+   "case": "Panel <-> Service: packaged_verified, CONNECTED, protocol 1",
+   "pass": true
+  },
+  {
+   "case": "DEFAULT: TX mutation/signing/broadcast disabled",
+   "pass": true
+  },
+  {
+   "case": "packaged Panel starts: FX pulse and Service READY",
+   "pass": true
+  },
+  {
+   "case": "packaged Panel restart: FX pulse and Service READY",
+   "pass": true
+  },
+  {
+   "case": "Service restart keeps DEFAULT deny",
+   "pass": true
+  },
+  {
+   "case": "no owned process remains",
+   "pass": true
+  },
+  {
+   "case": "Service socket cleaned",
+   "pass": true
+  },
+  {
+   "case": "no authority snapshot or wallet catalog was initialized",
+   "pass": true
+  }
+ ]
+}

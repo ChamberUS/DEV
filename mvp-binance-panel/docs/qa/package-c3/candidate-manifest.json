@@ -1,0 +1,52 @@
+{
+  "status": "PACKAGE_C3_IMPLEMENTED_READY_FOR_UAT",
+  "version": "1.0.0-local-pkgc3-uat-20261009T191714Z",
+  "displayName": "BYX-MVP Package C3 UAT",
+  "app": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc3-uat/1.0.0-local-pkgc3-uat-20261009T191714Z/BYX-MVP Package C3 UAT.app",
+  "zip": "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc3-uat/1.0.0-local-pkgc3-uat-20261009T191714Z/BYX-MVP-Package-C3-UAT-1.0.0-local-pkgc3-uat-20261009T191714Z.zip",
+  "zipSha256": "b229e5ee81195ca9e97ffdfde607a7d0bdfede48fb20903789672acbfd65defc",
+  "panelJarSha256": "94cab6b7e35b319e4fbbd3f73b0bb3b614162c34069cbf3b8f25b53f281a88ac",
+  "serviceJarSha256": "9520ddc0566645fe8bbd48f0f23d8b7bb79ec10f4d8406dbe445fbc916852225",
+  "serviceEntriesIdenticalToC1": true,
+  "panelClassEntriesMatchQualifiedTestOutput": true,
+  "panelClassEntryCount": 703,
+  "matchedCompiledEntries": 771,
+  "requiredThemeResourcesMatch": [
+    "design/BYX_PACKAGE_C2_TOKENS.json",
+    "panel/v2/theme-palette.css",
+    "panel/v2/theme-controls.css",
+    "panel/i18n/appearance_en.properties",
+    "panel/i18n/appearance_pt-BR.properties",
+    "panel/i18n/notifications_en.properties",
+    "panel/i18n/notifications_pt-BR.properties"
+  ],
+  "defaultProfile": "PRODUCTION_DISABLED",
+  "walletCapability": "DISABLED",
+  "noTxLabOrTestHarnessInDefault": true,
+  "buildRecipe": [
+    "/Users/buynnex-corp/dev/byx-packaging/build-app.sh",
+    "--out",
+    "/Users/buynnex-corp/dev/byx-packaging/build/local-pkgc3-uat/1.0.0-local-pkgc3-uat-20261009T191714Z",
+    "--embedded-profile",
+    "/Users/buynnex-corp/dev/byx-packaging/provisioning/out/service.provisionprofile",
+    "--chain-profile",
+    "production-disabled"
+  ],
+  "pipelineSha256": "8d1bc91c73037e16c27f1afb6e536f43ddcb0226d842c29973a42cb21259c80c",
+  "postProcess": "CFBundleDisplayName + separate app filename; re-signed with same qualified identity, identifier, designated requirement and entitlements",
+  "signing": "Existing local Apple Development + Hardened Runtime; no reprovisioning",
+  "publication": "AUTHORIZED_FINAL_COMMIT_PREPARATION",
+  "builtAtUtc": "2026-10-09T19:18:37.055960+00:00",
+  "sourceHead": "1a35f0da76032898430c6cd0ea69961665a687c4",
+  "sourceState": "audited uncommitted C3; unrelated work preserved",
+  "qualifiedSourceManifest": "tested-source-hashes.json",
+  "panelSuite": "977 total / 976 PASS / 0 FAIL / 0 ERROR / 1 expected SKIP",
+  "nativeChecks": {
+    "OFF": 173,
+    "FULL": 133,
+    "REDUCED": 133
+  },
+  "nativeSceneSnapshots": 60,
+  "signedLauncherSmoke": "11/11 PASS",
+  "humanUat": "APPROVED_BY_OWNER_FINAL_PUBLICATION_REQUEST"
+}

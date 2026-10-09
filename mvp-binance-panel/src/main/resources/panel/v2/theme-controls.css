@@ -179,3 +179,15 @@
 .root:byx-theme-dark .byx-menu-item:hover .byx-menu-key, .root:byx-theme-dark .byx-menu-item:focused .byx-menu-key,
 .root:byx-theme-dark .byx-palette-row:selected .byx-palette-hint, .root:byx-theme-dark .byx-palette-row:selected .byx-palette-type { -fx-text-fill: -byx-text-secondary; }
 .root:byx-theme-light.hc { -byx-text-secondary: #344156; -byx-text-tertiary: #49576D; -byx-line: #697A92; }
+
+/* C3 native notification list: shared semantic lookups, no palette literals. */
+.byx-notification-list { -fx-background-color: -byx-bg0; -fx-border-color: -byx-line; -fx-border-radius: 8; -fx-background-radius: 8; }
+.byx-notification-list .list-cell { -fx-background-color: -byx-bg0; -fx-text-fill: -byx-text-primary; -fx-padding: 10; }
+.byx-notification-list .list-cell:filled:selected { -fx-background-color: -byx-bg2; -fx-border-color: -byx-focus-control; }
+.byx-notification-list:focused { -fx-border-color: -byx-focus-control; -fx-border-width: 2; }
+.byx-notification-severity { -fx-text-fill: -byx-text-primary; -fx-font-size: 18; -fx-font-weight: bold; }
+
+.byx-notification-list .scroll-bar, .byx-notification-list .scroll-bar .track { -fx-background-color: -byx-bg0; }
+.byx-notification-list .scroll-bar .thumb { -fx-background-color: -byx-text-secondary; -fx-background-radius: 4; }
+.byx-notification-list .scroll-bar .increment-button, .byx-notification-list .scroll-bar .decrement-button { -fx-background-color: -byx-bg0; -fx-padding: 3; }
+.byx-notification-list .scroll-bar .increment-arrow, .byx-notification-list .scroll-bar .decrement-arrow { -fx-background-color: -byx-text-secondary; }

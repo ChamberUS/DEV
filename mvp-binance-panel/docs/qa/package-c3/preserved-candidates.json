@@ -1,0 +1,10 @@
+{
+  "package-c1": {
+    "zipSha256": "0556e453e9a804054d3f6e34671276af8714359fad73842d3494bc92bfb2c715",
+    "preserved": true
+  },
+  "package-c2": {
+    "zipSha256": "c8998f79ff65e079ebae09d6e2fcb9b53c07d9e49048241be98db19a2de7ba08",
+    "preserved": true
+  }
+}

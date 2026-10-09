@@ -26,6 +26,7 @@ public final class LocalServiceMonitor implements AutoCloseable {
     private long generation;
     private boolean everConnected;
     private boolean polling;
+    private Consumer<LocalServiceStatus> generationResult;
 
     public LocalServiceMonitor(LocalServiceClient client, Consumer<LocalServiceStatus> onResult) {
         this(client::probe, onResult);
@@ -44,11 +45,15 @@ public final class LocalServiceMonitor implements AutoCloseable {
         return scheduler != null;
     }
 
-    public synchronized void start() {
+    public synchronized void start() { start(onResult); }
+
+    /** Capture a publisher for this generation; old callbacks cannot acquire a newer session's observer. */
+    public synchronized void start(Consumer<LocalServiceStatus> scopedResult) {
         if (scheduler != null) {
             return;
         }
         generation++;
+        generationResult = java.util.Objects.requireNonNull(scopedResult);
         snapshot = LocalServiceStatus.unknown();
         everConnected = false;
         scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -57,7 +62,7 @@ public final class LocalServiceMonitor implements AutoCloseable {
             return t;
         });
         long g = generation;
-        scheduler.scheduleWithFixedDelay(() -> poll(g), 0, PERIOD_SECONDS, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(() -> poll(g, scopedResult), 0, PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
     /** Sondagem imediata (Retry real). Ignorada se já há uma em curso. */
@@ -66,10 +71,11 @@ public final class LocalServiceMonitor implements AutoCloseable {
             return;
         }
         long g = generation;
-        scheduler.execute(() -> poll(g));
+        Consumer<LocalServiceStatus> result = generationResult;
+        scheduler.execute(() -> poll(g, result));
     }
 
-    private void poll(long g) {
+    private void poll(long g, Consumer<LocalServiceStatus> resultObserver) {
         boolean ever;
         synchronized (this) {
             if (g != generation || scheduler == null) {
@@ -83,7 +89,7 @@ public final class LocalServiceMonitor implements AutoCloseable {
             result = client.probe(ever);
         } finally {
             synchronized (this) {
-                polling = false;
+                if (g == generation) polling = false;
             }
         }
         synchronized (this) {
@@ -93,11 +99,11 @@ public final class LocalServiceMonitor implements AutoCloseable {
             everConnected |= result.connected();
             snapshot = result;
         }
-        onResult.accept(result);
+        resultObserver.accept(result);
     }
 
     public synchronized void stop() {
-        generation++;
+        generation++; polling = false; generationResult = null;
         if (scheduler != null) {
             scheduler.shutdownNow();
             scheduler = null;

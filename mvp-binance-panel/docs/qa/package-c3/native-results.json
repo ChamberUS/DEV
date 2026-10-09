@@ -1,0 +1,17 @@
+{
+  "OFF": {
+    "pass": 173,
+    "fail": 0,
+    "log": "native-qualified/native-flow.txt"
+  },
+  "FULL": {
+    "pass": 133,
+    "fail": 0,
+    "log": "native-full-qualified/native-flow.txt"
+  },
+  "REDUCED": {
+    "pass": 133,
+    "fail": 0,
+    "log": "native-reduced-qualified/native-flow.txt"
+  }
+}

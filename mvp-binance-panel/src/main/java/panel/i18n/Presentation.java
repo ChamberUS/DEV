@@ -16,6 +16,9 @@ public final class Presentation {
         for (Strings.Lang language : Strings.Lang.values()) {
             Properties table = Strings.table(language);
             for (String key : new TreeSet<>(table.stringPropertyNames())) {
+                // C3 renders this domain directly by stable keys. Do not let shared source phrases
+                // change the approved C1 generic-copy adapter's translation precedence.
+                if (key.startsWith("notification.")) continue;
                 String text = table.getProperty(key);
                 KEYS.putIfAbsent(text, key);
                 KEYS.putIfAbsent(text.toUpperCase(Locale.ROOT), key);

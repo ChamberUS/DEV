@@ -1,0 +1,25 @@
+{
+  "firstFullSuite": {
+    "total": 973,
+    "failures": 1,
+    "errors": 0,
+    "skips": 1,
+    "failure": "unchanged C1 relativeTimeAndAvailabilityHaveTranslations: new direct notification phrase changed generic adapter precedence",
+    "fix": "Exclude notification domain from Presentation indexing; retain direct Strings render-time lookup"
+  },
+  "nativeVisualCorrections": [
+    "Constrain cell preferred width to viewport; wrap descriptions",
+    "Use existing semantic tokens for notification scrollbar in DARK/LIGHT",
+    "Preserve selected ID across Scene reattachment",
+    "Reserve intrinsic severity-glyph width to prevent ellipsis"
+  ],
+  "existingTestsModified": false,
+  "intermediateLogsAndImages": "retained locally; final screenshots only in native-qualified",
+  "firstPackagedSmoke": {
+    "passed": 8,
+    "failed": 3,
+    "reason": "JAVA_TOOL_OPTIONS test-isolation override rejected by existing hardened peer environment policy",
+    "fix": "Remove override; use qualified minimal C2 environment with isolated BYX_LOCAL_SERVICE_HOME",
+    "securityPolicyModified": false
+  }
+}

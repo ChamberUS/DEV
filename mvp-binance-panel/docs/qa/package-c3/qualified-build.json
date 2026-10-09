@@ -1,0 +1,13 @@
+{
+  "frozenCompiled": "/tmp/byx-c3-final-compiled",
+  "sourceFiles": 637,
+  "compiledEntries": 771,
+  "counts": {
+    "tests": 977,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 976
+  },
+  "utc": "2026-10-09T19:17:13.894130+00:00"
+}

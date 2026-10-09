@@ -1,0 +1,24 @@
+{
+  "protectedNonPanelFiles": 2956,
+  "nonPanelChanges": 0,
+  "testedSourceFiles": 637,
+  "testedSourceMatches": true,
+  "sourceChanges": {
+    "modified": 8,
+    "added": 10,
+    "deleted": 0
+  },
+  "unrelatedWorktreeEntriesPreserved": 2966,
+  "indexClean": true,
+  "headUnchanged": true,
+  "sourceSensitivePatternFindings": 0,
+  "securityReview": "closed event vocabulary; no arbitrary payload/params; synthetic credential literals in tests only; source files contain no real credentials or developer signing identities",
+  "gates": {
+    "realUserKey": "NOT_AUTHORIZED",
+    "realTx": "DISABLED",
+    "broadcasts": 0,
+    "realFunds": 0,
+    "realUserWallets": 0,
+    "ethusdtResearch": "UNTOUCHED"
+  }
+}

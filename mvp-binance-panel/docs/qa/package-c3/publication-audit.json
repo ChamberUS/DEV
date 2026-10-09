@@ -1,0 +1,428 @@
+{
+  "status": "AUDITED_FOR_AUTHORIZED_C3_PUBLICATION",
+  "utc": "2026-10-09T20:26:14.480831+00:00",
+  "baseline": "1a35f0da76032898430c6cd0ea69961665a687c4",
+  "branch": "feature/byx-ui-redesign-v1",
+  "remote": "https://github.com/ChamberUS/DEV.git",
+  "humanUat": "APPROVED_BY_OWNER",
+  "sourceMatches": 637,
+  "sourceChanges": {
+    "modified": 8,
+    "added": 10
+  },
+  "protectedNonPanelFilesUnchanged": 2955,
+  "excludedFinderMetadataChanged": [
+    "byx-packaging/.DS_Store"
+  ],
+  "outsidePanelStatusEntriesPreserved": 2966,
+  "freshRegressionRequired": false,
+  "reason": "Source/resources/tests identical to qualified UAT candidate; only publication documentation updated",
+  "suite": {
+    "tests": 977,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "nativePass": 439,
+  "signedSmokePass": 11,
+  "sensitivePatternFindings": 0,
+  "review": "Closed event vocabulary and synthetic test fixtures reviewed; PNG metadata only IHDR/IDAT/IEND; local logs/state/provisioning/bundles excluded",
+  "files": [
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/localservice/LocalServiceMonitor.java",
+      "sha256": "c91f0f046b22d51b5456656aa1bdbea9cfbcfb8efc9297550faebf807727ffd4"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/app/PanelApp.java",
+      "sha256": "7dc76dd2aaefd5c10eeb8dc551f0ed1bb0b91327bda4c42443b0e2e5656521a8"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/auth/SessionManager.java",
+      "sha256": "dbab609cdfaa7c33414555fa64dbb8d7ca9ff9a17d8e3d523845b5af3960867c"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/shell/NotificationPanel.java",
+      "sha256": "4a5d5b604408f1f5617919023b56cd58a745d185cb531b032ddfa521562b238c"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/accountview/NotificationsScreen.java",
+      "sha256": "a44add9ee25cd6a36cf16109fc4282af5806bb794e8e304a0db141955bd8b21a"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/i18n/Strings.java",
+      "sha256": "4b690a5740ef15a245e55cd849287812b1e4e5574a0782a9267d63e5f9b661ba"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/i18n/Presentation.java",
+      "sha256": "463956594cc47634cb2c3f7618a7e2cd271fd87e7079729f716b98c6f6cf57cd"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/notifications/NotificationEvent.java",
+      "sha256": "0f977b2ce225387d3c5af0c9ff05e273e61fa9b797cf7e6535fab549af2a2a6e"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/notifications/ServiceNotificationObserver.java",
+      "sha256": "74861a26cbb42f31a0245165d934f6f18a471553c25d1d66646f788b9f771006"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/notifications/NotificationCenter.java",
+      "sha256": "0dbd789b6feea0fb4db88f8d3661d4ec0f11ac098ce43cc0cdeaf27f03637066"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/java/panel/notifications/NotificationCenterView.java",
+      "sha256": "ad6dc32a5a2b21226eff83f2a8b4b4b976c32d8a9deb59c4bf895c95e010207a"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/v2/theme-controls.css",
+      "sha256": "813ce88b1f5b93eab95bb7035be52bc25854894834a6d3268014aea7a3811f9c"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/i18n/notifications_en.properties",
+      "sha256": "9cb88f406ef90f36b15564beee1b618f9181d0b444b436f468c7239e383ce1d1"
+    },
+    {
+      "path": "mvp-binance-panel/src/main/resources/panel/i18n/notifications_pt-BR.properties",
+      "sha256": "3b0fa2b0ea5c8a7cae74bfb4e19a019b23ea3189fefde464b63320403cedd3f5"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/PackageC3NotificationTest.java",
+      "sha256": "e118473a1626f42f329289f6b49c147d85cf8ba13577ef98edb68c6048d9acd0"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/PackageC3NotificationViewTest.java",
+      "sha256": "911cbe60effc6571beb1a11cee27d49035c049432dbdbd09cd16cd44993991b8"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/PackageC3FlowQa.java",
+      "sha256": "4fbf44bd1a72778c16fd545406f448f086d2fdf7b9bbda6357bb788a17b63383"
+    },
+    {
+      "path": "mvp-binance-panel/src/test/java/panel/PackageC3AppIsolationTest.java",
+      "sha256": "3f662a8de94ca05f1ed6358c7e01e3ae259f7e9105112a585243d6e0101d160c"
+    },
+    {
+      "path": "mvp-binance-panel/docs/package-c3/EVENT_SOURCE_AUDIT.md",
+      "sha256": "09dba2e1343d475ff0aff87d1ce5c4ad0dbefa14cf61b5dcfe78338a20c4841d"
+    },
+    {
+      "path": "mvp-binance-panel/docs/package-c3/TEST_MATRIX.md",
+      "sha256": "297c26ecd29712e09e9c628d89067d54f54e45bfa6827bce661867a3fec3f8a7"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/implementation-report.md",
+      "sha256": "79eff4f9327aca113ab6f0005e3b4ee4a9cd34d34591fc97c47d20e1f28ad298"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/candidate-manifest.json",
+      "sha256": "7fbb7b6669762fae0792249f3b0a40f54507a07e4af598fa885195c9c8d3819a"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/candidate-version.txt",
+      "sha256": "c63b971ea1dd97fb9dd5fbdf968d676b066cf86c76a1f9d1dae69fb8b02932f9"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/final-safety-audit.json",
+      "sha256": "fbe71bac07e25fa04fba07d65307260f6192c471e4b97c3956bfb83f5bbb22f6"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/intermediate-findings.json",
+      "sha256": "ba964bed6a75d5cba08facb5ba2fccbd86adad95a8801a24596976a51f01f26d"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-results.json",
+      "sha256": "f02c1a04d3e09650e497ccb317a2e864036cf935825022df1db24f1981808d41"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/panel-suite-summary.json",
+      "sha256": "5896bbcee13c19f72fd2d9d3aba6b9e42607e88a28b0c4413f8674bc5a9fc647"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/preserved-candidates.json",
+      "sha256": "275d37a0abc2b1030347a9f4bbfb3c0fe71e53fd4e67a8335eda7647b1adddbe"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/qualified-build.json",
+      "sha256": "462c6ecbd54de69c223bc4b8cdf4ec570f0e09b44bcd1c6c275625df83c41267"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/source-change-inventory.json",
+      "sha256": "df3c0d3fda78c604aa6c5dce2122a231947025f19f6fb5a5736fecdb6fb151e2"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/tested-output-entry-hashes.json",
+      "sha256": "9c146c521e5b729148d779773b8789f4983161ff1bc92a90a29a477d45469601"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/tested-source-hashes.json",
+      "sha256": "7ee283f952eae6bd7f288734f8e4579ad4c14bd30b80f6c80d7519ad01d00105"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/visual-manifest.json",
+      "sha256": "8cc027230f18a095d831408cffe26a99b8b03c43adf57891d73e88dba8b69e33"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/packaged-smoke/result.json",
+      "sha256": "33a7f0257209fd4aacbd4cb479bd4d4f86cdc688f85cb50bf9f7dc7c9a68cdf2"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/native-flow.txt",
+      "sha256": "b787fc551d28cae0cb5c3333b80d32be2fe6390240b6537a0d0bae9bd1c812a5"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-full-qualified/native-flow.txt",
+      "sha256": "c37a52e0aa560badefd1f801af6ec27cfa2017a0f92a37b2ec736753b598318e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-reduced-qualified/native-flow.txt",
+      "sha256": "c37a52e0aa560badefd1f801af6ec27cfa2017a0f92a37b2ec736753b598318e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-empty-1100x700.png",
+      "sha256": "16d77e7a03c26a4a17c37df2eb5e793e65e547c0721fbd08531f1556d26054c9"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-empty-1440x900.png",
+      "sha256": "749703c2c44f0f0db38076c712aafda3fe9d2231019173c52a0f3b9e1429c6e5"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-empty-1920x1080.png",
+      "sha256": "801345174ca7779bffb9b3f160bdb6a605cbc00bf5ec4fffa952a00072e33a4d"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-offline-read-1100x700.png",
+      "sha256": "2fa8e19307cb115d22c788c78c49ebbcec09bf6d92a7bd8c6e8813369a38772f"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-offline-read-1440x900.png",
+      "sha256": "8a03c5cf8969a0e1bb6afe92197bb33510aca0974bf89f7df82e114d0395724e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-offline-read-1920x1080.png",
+      "sha256": "cf5bdc4de90e279235d15aa8d7683862b1657c2763eb7aab05a8fa2a07670664"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-offline-unread-1100x700.png",
+      "sha256": "c4becb6726e9d4368854464cec9c54edb9dfb9b0d0b8520bba09c74f1cf660c6"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-offline-unread-1440x900.png",
+      "sha256": "4903c24051cc2da2633c0637c9d9d20e391ce663ee495959dc95537e276acde5"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-offline-unread-1920x1080.png",
+      "sha256": "0f8eb6d0b264c7fed2758dd963562a225cc68d2f85bc207af92aaf1dc02808f8"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-recovered-1100x700.png",
+      "sha256": "7a7a1d83e6bc6e03a7b3e0703d5740275200b72c70b7265afbac48c510d26da6"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-recovered-1440x900.png",
+      "sha256": "890eb4ce775847a2091afcc154ebef37de8ce7446bd4ffd7bd1bb40683fcb6d7"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-recovered-1920x1080.png",
+      "sha256": "3cca8aecd92fe46e0bcd3f7eeaedfddfdbdf283155167dfdbc37b443d63da70f"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-service-error-1100x700.png",
+      "sha256": "8bdf36f7ac6faf015714036b2fbc137afb4f1f8b5543a0586f40f72b90980d15"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-service-error-1440x900.png",
+      "sha256": "1b93654f77518fbb59533002f973a57403f33ff26fccc029655d7deb9c2ec35b"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-en-service-error-1920x1080.png",
+      "sha256": "52a9166c865c31494b2ba2b312296d913b663616ae948fa1f55150dd5ab0d00e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-empty-1100x700.png",
+      "sha256": "d5422eb0ae70a266d4bf3d45383848cdfb57bc84b8b9d82775720b0680eca03e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-empty-1440x900.png",
+      "sha256": "5e2770c672c9be9c3e45d2015311eab5aad03118ed50d5d6063527a4e76f2cac"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-empty-1920x1080.png",
+      "sha256": "25c840f5edaa5a8f99066dc799bb1c04fb5792044d3d74b64a9683beb1ace59d"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-offline-read-1100x700.png",
+      "sha256": "d4affacbf0da6a97e0e561cf82c8faf225f460557fe809804373d48b9fca7f15"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-offline-read-1440x900.png",
+      "sha256": "e4468757bf61f21878b8704ac9fc41f0c3ed5193f09af012d5eb302adc63f8b0"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-offline-read-1920x1080.png",
+      "sha256": "66084059371a8c0ba7979933715b27a648278313ecc65eb1f8ecac873d839f71"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-offline-unread-1100x700.png",
+      "sha256": "36f8e89fef3865f501ae0661e62c17040400230bb3a23a89c8ae242645dab5e8"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-offline-unread-1440x900.png",
+      "sha256": "3f1060cf079371891ef0aef85be8004095850edb6ac70696bfaedd3878bfe758"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-offline-unread-1920x1080.png",
+      "sha256": "a5b5f5dac76df38418d4bc76ca4246a7b0767b444d1e9cb1ba0aa24fbe1897f2"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-recovered-1100x700.png",
+      "sha256": "6d031d948c56b2ab42c54dc30b8d927990d865adad76849a1374ef231676611c"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-recovered-1440x900.png",
+      "sha256": "07e8a204d06c037d0a328d31dedee64d9fe43104b62f9da92544cfb6de2ab6f0"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-recovered-1920x1080.png",
+      "sha256": "f4fa94d051a173d2530a6e0a73b3650ae64fcd43de7e9b007d4f8737b5c16a8d"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-service-error-1100x700.png",
+      "sha256": "1fd14eb93be9dbfa6c865e414c0ceaa1bd602a7ed19391595c5b73e789ea91a6"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-service-error-1440x900.png",
+      "sha256": "ba255b6f1d80bbb6b452722492347584c1fd7a88737b23e26e1c2f2d187beb94"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/dark-pt-BR-service-error-1920x1080.png",
+      "sha256": "64a713a8392cdb5614c63222efb1a3c5487fdb56f2c46ac8ea771c7115761c0a"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-empty-1100x700.png",
+      "sha256": "ecc88170f8d08201abba21ab87ab790282c054d8663abfe28d2ba655fcc62611"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-empty-1440x900.png",
+      "sha256": "e93e46587b8bbfed52add6ac55a4cf78142974aabc2140ceec07672421405dbb"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-empty-1920x1080.png",
+      "sha256": "c018cb9258b5366353b2cd41aacaa27c7dc3a2d48fee17cba2810816cb41c4a7"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-offline-read-1100x700.png",
+      "sha256": "0344e9a146d0074c1ea000ed81dcebde26ad84e67f65c2481b93f5e348bbfe9c"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-offline-read-1440x900.png",
+      "sha256": "9fa9bdb51ca2a7bc7ce587b2126cae222c37065cfaf1b69cec099c68b05e9999"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-offline-read-1920x1080.png",
+      "sha256": "81cba719b7603103a1ed67ebf72b1986c0b296c9ed296ffd0ac3d4a3e739525f"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-offline-unread-1100x700.png",
+      "sha256": "b101a6d1305937f9aba2ef7c9b5249957381f3ebd25c55bfe291e718aee2bed9"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-offline-unread-1440x900.png",
+      "sha256": "7d9549b4165bb52082866b31d4a6e2a2241072465682abd939ac28ed7846288a"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-offline-unread-1920x1080.png",
+      "sha256": "a95c3f46ff4ab5656f32f2f93f95dfc85802183ca9024b29cda78e9a349dc6fd"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-recovered-1100x700.png",
+      "sha256": "75e5720b39e3a43f43e9dd1f429a3d376ee13f7ec4718fc26e306fbcd47a37fc"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-recovered-1440x900.png",
+      "sha256": "1a8f6e73129f6de6841ba864d4319f4207c2d301f2509ea27090f1d45d5dfa33"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-recovered-1920x1080.png",
+      "sha256": "b62644d59a3fcf04aeeb833150c8b84747826e7996eb282bed0efac9190afbf7"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-service-error-1100x700.png",
+      "sha256": "7fa92c0fdf3a29e36ef2e3831e691d0571087d36d7653cdf156c04e9eb42c7f9"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-service-error-1440x900.png",
+      "sha256": "3fb898d7c0d2983496c39c5e680026f04c68d8be0c171d7ea79e959dc92c4e7d"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-en-service-error-1920x1080.png",
+      "sha256": "60e9dfbe4242fb5f71f3d881182d2879531d24ca5a6ae1986d1691784d978327"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-empty-1100x700.png",
+      "sha256": "889ab2e93f88754648d60ea2b888496ab10559d11bb981937ac5c61eca65aabc"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-empty-1440x900.png",
+      "sha256": "00101715f4df7cb122f0a0d97be5893512636e7b016597ec17c1f502655f1dec"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-empty-1920x1080.png",
+      "sha256": "ea105defa6a700cac382344dacccfa8d39c1359f6baa6493459e5fe3b030059e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-offline-read-1100x700.png",
+      "sha256": "42a35b359de4cd7b5958a5eb327712bff8d6aab1797d57e36924fb7548bd9d19"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-offline-read-1440x900.png",
+      "sha256": "647af4873e8b06cd587216d9c788a2e854d95666e7f09d769ad450437449d938"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-offline-read-1920x1080.png",
+      "sha256": "be65fd1253219b5f3c437c8c918c92d752d88338942ddeffd27321186b22ce56"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-offline-unread-1100x700.png",
+      "sha256": "1618c6751225744c077921cff486df01bc5c345752b7d9b6a953d9bd350c7741"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-offline-unread-1440x900.png",
+      "sha256": "ad9c1c4b2e99cd6dcccdaaf0580794d99ee3bf3de84742f019b5d4962c2e3998"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-offline-unread-1920x1080.png",
+      "sha256": "ab3669b58c0c58d309ad8ea16217808deefba93406fe424e30f22df3ddfc25fe"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-recovered-1100x700.png",
+      "sha256": "940b5f2747a2b64aed43774f57e97b18bea155da2f677718772c2a1cae630ce9"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-recovered-1440x900.png",
+      "sha256": "40d3981c2b657330850d108300f9684afe434c890e343719858948277f8a59f3"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-recovered-1920x1080.png",
+      "sha256": "dff55d77ee473a0221f65bf427dc14470610534d231d7a5fe5ad5c49977ffc9b"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-service-error-1100x700.png",
+      "sha256": "9fa3ee71a8eba2d6c1ad9c6d91550c50ac95608bf726d2460cf220ea5d91a526"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-service-error-1440x900.png",
+      "sha256": "055da38ab6e07e1aaa026aa6b42f6aa75258dc62ef9640a351886560c5e9666e"
+    },
+    {
+      "path": "mvp-binance-panel/docs/qa/package-c3/native-qualified/light-pt-BR-service-error-1920x1080.png",
+      "sha256": "eadedc0f32d2715d00e0997454df43ddbc60e84db48cefad269e5bd284e46d9c"
+    }
+  ],
+  "gates": {
+    "realUserKey": "NOT_AUTHORIZED",
+    "realTx": "DISABLED",
+    "broadcasts": 0,
+    "realFunds": 0,
+    "realUserWallets": 0,
+    "ethusdtResearch": "UNTOUCHED"
+  }
+}

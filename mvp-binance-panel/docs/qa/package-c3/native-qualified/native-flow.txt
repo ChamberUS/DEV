@@ -1,0 +1,173 @@
+PASS new session history contains no fabricated activity
+PASS empty popover fits EN DARK 1920
+PASS empty popover fits EN DARK 1440
+PASS empty popover fits EN DARK 1100
+PASS empty theme/locale preserve event identity and read state EN DARK
+PASS empty session and shell stable EN DARK
+PASS empty mascot stable EN DARK
+PASS empty popover fits EN LIGHT 1920
+PASS empty popover fits EN LIGHT 1440
+PASS empty popover fits EN LIGHT 1100
+PASS empty theme/locale preserve event identity and read state EN LIGHT
+PASS empty session and shell stable EN LIGHT
+PASS empty mascot stable EN LIGHT
+PASS empty popover fits PT_BR DARK 1920
+PASS empty popover fits PT_BR DARK 1440
+PASS empty popover fits PT_BR DARK 1100
+PASS empty theme/locale preserve event identity and read state PT_BR DARK
+PASS empty session and shell stable PT_BR DARK
+PASS empty mascot stable PT_BR DARK
+PASS empty popover fits PT_BR LIGHT 1920
+PASS empty popover fits PT_BR LIGHT 1440
+PASS empty popover fits PT_BR LIGHT 1100
+PASS empty theme/locale preserve event identity and read state PT_BR LIGHT
+PASS empty session and shell stable PT_BR LIGHT
+PASS empty mascot stable PT_BR LIGHT
+PASS actual absent Service probe publishes availability
+PASS initial absence is not a disconnect
+PASS offline-unread popover fits EN DARK 1920
+PASS offline-unread popover fits EN DARK 1440
+PASS offline-unread popover fits EN DARK 1100
+PASS offline-unread theme/locale preserve event identity and read state EN DARK
+PASS offline-unread session and shell stable EN DARK
+PASS offline-unread mascot stable EN DARK
+PASS offline-unread popover fits EN LIGHT 1920
+PASS offline-unread popover fits EN LIGHT 1440
+PASS offline-unread popover fits EN LIGHT 1100
+PASS offline-unread theme/locale preserve event identity and read state EN LIGHT
+PASS offline-unread session and shell stable EN LIGHT
+PASS offline-unread mascot stable EN LIGHT
+PASS offline-unread popover fits PT_BR DARK 1920
+PASS offline-unread popover fits PT_BR DARK 1440
+PASS offline-unread popover fits PT_BR DARK 1100
+PASS offline-unread theme/locale preserve event identity and read state PT_BR DARK
+PASS offline-unread session and shell stable PT_BR DARK
+PASS offline-unread mascot stable PT_BR DARK
+PASS offline-unread popover fits PT_BR LIGHT 1920
+PASS offline-unread popover fits PT_BR LIGHT 1440
+PASS offline-unread popover fits PT_BR LIGHT 1100
+PASS offline-unread theme/locale preserve event identity and read state PT_BR LIGHT
+PASS offline-unread session and shell stable PT_BR LIGHT
+PASS offline-unread mascot stable PT_BR LIGHT
+PASS local mark all read
+PASS offline-read popover fits EN DARK 1920
+PASS offline-read popover fits EN DARK 1440
+PASS offline-read popover fits EN DARK 1100
+PASS offline-read theme/locale preserve event identity and read state EN DARK
+PASS offline-read session and shell stable EN DARK
+PASS offline-read mascot stable EN DARK
+PASS offline-read popover fits EN LIGHT 1920
+PASS offline-read popover fits EN LIGHT 1440
+PASS offline-read popover fits EN LIGHT 1100
+PASS offline-read theme/locale preserve event identity and read state EN LIGHT
+PASS offline-read session and shell stable EN LIGHT
+PASS offline-read mascot stable EN LIGHT
+PASS offline-read popover fits PT_BR DARK 1920
+PASS offline-read popover fits PT_BR DARK 1440
+PASS offline-read popover fits PT_BR DARK 1100
+PASS offline-read theme/locale preserve event identity and read state PT_BR DARK
+PASS offline-read session and shell stable PT_BR DARK
+PASS offline-read mascot stable PT_BR DARK
+PASS offline-read popover fits PT_BR LIGHT 1920
+PASS offline-read popover fits PT_BR LIGHT 1440
+PASS offline-read popover fits PT_BR LIGHT 1100
+PASS offline-read theme/locale preserve event identity and read state PT_BR LIGHT
+PASS offline-read session and shell stable PT_BR LIGHT
+PASS offline-read mascot stable PT_BR LIGHT
+PASS service-error popover fits EN DARK 1920
+PASS service-error popover fits EN DARK 1440
+PASS service-error popover fits EN DARK 1100
+PASS service-error theme/locale preserve event identity and read state EN DARK
+PASS service-error session and shell stable EN DARK
+PASS service-error mascot stable EN DARK
+PASS service-error popover fits EN LIGHT 1920
+PASS service-error popover fits EN LIGHT 1440
+PASS service-error popover fits EN LIGHT 1100
+PASS service-error theme/locale preserve event identity and read state EN LIGHT
+PASS service-error session and shell stable EN LIGHT
+PASS service-error mascot stable EN LIGHT
+PASS service-error popover fits PT_BR DARK 1920
+PASS service-error popover fits PT_BR DARK 1440
+PASS service-error popover fits PT_BR DARK 1100
+PASS service-error theme/locale preserve event identity and read state PT_BR DARK
+PASS service-error session and shell stable PT_BR DARK
+PASS service-error mascot stable PT_BR DARK
+PASS service-error popover fits PT_BR LIGHT 1920
+PASS service-error popover fits PT_BR LIGHT 1440
+PASS service-error popover fits PT_BR LIGHT 1100
+PASS service-error theme/locale preserve event identity and read state PT_BR LIGHT
+PASS service-error session and shell stable PT_BR LIGHT
+PASS service-error mascot stable PT_BR LIGHT
+PASS no raw Service payload retained
+PASS confirmed recovery event
+PASS recovered popover fits EN DARK 1920
+PASS recovered popover fits EN DARK 1440
+PASS recovered popover fits EN DARK 1100
+PASS recovered theme/locale preserve event identity and read state EN DARK
+PASS recovered session and shell stable EN DARK
+PASS recovered mascot stable EN DARK
+PASS recovered popover fits EN LIGHT 1920
+PASS recovered popover fits EN LIGHT 1440
+PASS recovered popover fits EN LIGHT 1100
+PASS recovered theme/locale preserve event identity and read state EN LIGHT
+PASS recovered session and shell stable EN LIGHT
+PASS recovered mascot stable EN LIGHT
+PASS recovered popover fits PT_BR DARK 1920
+PASS recovered popover fits PT_BR DARK 1440
+PASS recovered popover fits PT_BR DARK 1100
+PASS recovered theme/locale preserve event identity and read state PT_BR DARK
+PASS recovered session and shell stable PT_BR DARK
+PASS recovered mascot stable PT_BR DARK
+PASS recovered popover fits PT_BR LIGHT 1920
+PASS recovered popover fits PT_BR LIGHT 1440
+PASS recovered popover fits PT_BR LIGHT 1100
+PASS recovered theme/locale preserve event identity and read state PT_BR LIGHT
+PASS recovered session and shell stable PT_BR LIGHT
+PASS recovered mascot stable PT_BR LIGHT
+PASS one surface iteration 0
+PASS one popover iteration 0
+PASS one surface iteration 1
+PASS one popover iteration 1
+PASS one surface iteration 2
+PASS one popover iteration 2
+PASS one surface iteration 3
+PASS one popover iteration 3
+PASS one surface iteration 4
+PASS one popover iteration 4
+PASS one surface iteration 5
+PASS one popover iteration 5
+PASS one surface iteration 6
+PASS one popover iteration 6
+PASS one surface iteration 7
+PASS one popover iteration 7
+PASS one surface iteration 8
+PASS one popover iteration 8
+PASS one surface iteration 9
+PASS one popover iteration 9
+PASS one surface iteration 10
+PASS one popover iteration 10
+PASS one surface iteration 11
+PASS one popover iteration 11
+PASS one surface iteration 12
+PASS one popover iteration 12
+PASS one surface iteration 13
+PASS one popover iteration 13
+PASS one surface iteration 14
+PASS one popover iteration 14
+PASS one surface iteration 15
+PASS one popover iteration 15
+PASS one surface iteration 16
+PASS one popover iteration 16
+PASS one surface iteration 17
+PASS one popover iteration 17
+PASS one surface iteration 18
+PASS one popover iteration 18
+PASS one surface iteration 19
+PASS one popover iteration 19
+PASS same mascot after repeated notifications
+PASS mascot listener contract preserved
+PASS notification events never authorize Research
+PASS actual logout clears notifications
+PASS old callback rejected after logout
+PASS no missing localization keys
+PASS no unexpected English fallback

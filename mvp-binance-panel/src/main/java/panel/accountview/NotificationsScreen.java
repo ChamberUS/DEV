@@ -17,12 +17,13 @@ import panel.ui.View;
 import panel.v2.Kit;
 
 /**
- * Notifications V2. Sem serviço de notificações o estado é UNAVAILABLE (e não EMPTY): INTENTIONALLY PRESERVED da decisão do
- * Passo 5. Nenhuma notificação demonstrativa entra no produto; os filtros existem desabilitados.
+ * Existing Account destination: shares session notification state with the header popover.
+ * The source-less compatibility constructor preserves its honest unavailable state.
  */
 public final class NotificationsScreen implements View {
     private final ScrollPane scroll;
     private final ByxRegion region;
+    private panel.notifications.NotificationCenterView centerView;
 
     public NotificationsScreen(MotionService motion) {
         FlowPane chips = new FlowPane(6, 6);
@@ -42,8 +43,17 @@ public final class NotificationsScreen implements View {
         scroll = Kit.scroll(page);
     }
 
+
+    /** Existing Account destination shares the same session history as the header popover. */
+    public NotificationsScreen(panel.notifications.NotificationCenter center,
+            java.util.function.Consumer<panel.notifications.NotificationEvent.Destination> navigate) {
+        region = null;
+        centerView = new panel.notifications.NotificationCenterView(center, navigate, java.time.Clock.systemUTC());
+        VBox page = Kit.page(14); page.getChildren().add(centerView); scroll = Kit.scroll(page);
+    }
+
     RegionState state() {
-        return region.state();
+        return region == null ? RegionState.READY : region.state();
     }
 
     @Override
@@ -56,6 +66,7 @@ public final class NotificationsScreen implements View {
     }
 
     public void dispose() {
-        region.dispose();
+        if (region != null) region.dispose();
+        if (centerView != null) centerView.close();
     }
 }

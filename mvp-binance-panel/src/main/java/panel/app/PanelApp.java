@@ -74,6 +74,9 @@ public class PanelApp extends Application {
     private panel.shell.ShellPalette palette;
     private panel.shell.UserMenu userMenu;
     private panel.shell.NotificationPanel notificationPanel;
+    private final panel.notifications.NotificationCenter notifications = new panel.notifications.NotificationCenter();
+    private final panel.notifications.ServiceNotificationObserver notificationService = new panel.notifications.ServiceNotificationObserver(notifications);
+    private AutoCloseable notificationSessionObserver;
     private boolean trader = true;
     private boolean mainActive;
     private boolean researchStarted;
@@ -93,6 +96,11 @@ public class PanelApp extends Application {
         StartupTrace.mark("PanelApp.start enter");
         StartupTrace.heartbeat();
         this.stage = stage;
+        notificationSessionObserver = ctx.sessions.subscribePresentation(() -> {
+            var owner = notifications.scope(); var current = ctx.sessions.user();
+            if (owner != null && (current.isEmpty() || !current.get().id().equals(owner.session())
+                    || current.get().user().admin() != owner.admin())) notifications.invalidate();
+        });
         // fontes do tema V2 (login): uma vez, pelo carregador do tema; as do tema legado (Inter, JetBrains Mono Bold) só depois da 1ª imagem
         StartupTrace.time("fonts (V2)", () -> { panel.design.ByxFonts.load(); return null; });
         EmptyState.init(ctx.icons);
@@ -111,7 +119,7 @@ public class PanelApp extends Application {
         stage.focusedProperty().addListener((o, a, focused) -> { if (focused) ctx.refreshSystemMotion(); });
         ctx.refreshSystemMotion();
         ctx.onMarketData = this::onMarketTick;
-        ctx.onLocalService = r -> Platform.runLater(() -> recovery.retryFinished("service", panel.systemview.SystemStatusModel.serviceState(r)));
+        ctx.onLocalService = result -> Platform.runLater(() -> recovery.retryFinished("service", panel.systemview.SystemStatusModel.serviceState(result)));
         stage.iconifiedProperty().addListener((o, a, iconified) -> ctx.motion.setActive(stage.isShowing() && !iconified));
         stage.showingProperty().addListener((o, a, showing) -> ctx.motion.setActive(showing && !stage.isIconified()));
         ctx.motion.reference.bind(rootStack);
@@ -166,6 +174,9 @@ public class PanelApp extends Application {
 
     @Override
     public void stop() {
+        notifications.invalidate();
+        if (notificationSessionObserver != null) try { notificationSessionObserver.close(); } catch (Exception ignored) { }
+        ctx.onLocalService = result -> {};
         if (localeView != null) localeView.close();
         mainActive = false;
         router.reset();
@@ -192,6 +203,7 @@ public class PanelApp extends Application {
     // ---- fluxo de autenticação -------------------------------------------------
 
     private void showEntry(String message) {
+        notifications.invalidate(); notificationService.reset();
         if (localeOwner != null) { panel.i18n.Strings.resetSession(); panel.design.ByxTheme.resetSession(); localeOwner = null; }
         signingOut = false;
         rootStack.setDisable(false);
@@ -376,6 +388,8 @@ public class PanelApp extends Application {
     private void enterApp(User user) {
         if (localeOwner != null && localeOwner.longValue() != user.id()) { panel.i18n.Strings.resetSession(); panel.design.ByxTheme.resetSession(); }
         localeOwner = user.id();
+        ctx.localService.stop(); // end the previous monitor generation before binding the new notification owner
+        notifications.start(ctx.sessions.user().orElseThrow()); notificationService.reset();
         signingOut = false;
         rootStack.setDisable(false);
         researchCheckGeneration++;
@@ -426,7 +440,7 @@ public class PanelApp extends Application {
         views.put("t-profile", new panel.accountview.ProfileScreen(ctx.motion, accountData, this::show, this::confirmSignOut));
         views.put("t-security", new panel.accountview.SecurityScreen(ctx.motion, clock, accountData, this::show, overlayOf));
         views.put("t-sessions", new panel.accountview.SessionsScreen(ctx.motion, clock, accountData, overlayOf));
-        views.put("t-notifications", new panel.accountview.NotificationsScreen(ctx.motion));
+        views.put("t-notifications", new panel.accountview.NotificationsScreen(notifications, destination -> show(destination.route)));
         views.put("t-account-activity", new panel.accountview.ActivityScreen(clock, accountData));
         views.put("t-settings", new panel.accountview.SettingsScreen(ctx.motion, accountData, this::show, overlayOf));
         registerHelpViews();
@@ -460,7 +474,13 @@ public class PanelApp extends Application {
         lastView.put(true, "t-desk");
         lastView.put(false, "overview");
         mainActive = true;
-        ctx.localService.start(); // sondagem do serviço local: só leitura de estado, nunca navega
+        var notificationOwner = notifications.scope();
+        ctx.localService.start(result -> Platform.runLater(() -> {
+            if (!notifications.accepts(notificationOwner)
+                    || ctx.sessions.user().filter(u -> u.id().equals(notificationOwner.session())).isEmpty()) return;
+            notificationService.observe(notificationOwner, result);
+            recovery.retryFinished("service", panel.systemview.SystemStatusModel.serviceState(result));
+        })); // same existing read-only probe, with a generation-scoped publisher
         ctx.scientificCapture.start(); // captura científica real: só leitura, fora da FX, depois do login
         ctx.market.start(); // assinatura tipada do mercado público (ETHUSDT) no serviço local
         // retorno depois de sessão expirada (P3.11): rota capturada na expiração, resolvida para esta sessão
@@ -526,6 +546,8 @@ public class PanelApp extends Application {
         boolean authorized = ctx.adminAccess.hasValidAdminSession();
         updateLock(false);
         if (!authorized && !trader) {
+            notifications.publish(notifications.scope(), panel.notifications.NotificationEvent.Type.ADMIN_EXPIRED,
+                    java.util.UUID.randomUUID(), java.time.Instant.now());
             toast(ToastType.WARNING, "Admin session expired. Re-authorize to open Research.");
             show(lastView.get(true));
         }
@@ -676,7 +698,11 @@ public class PanelApp extends Application {
         System.err.println("BYX_RESEARCH_GATE_ERROR code=overlay_open_failed type=" + error.getClass().getSimpleName());
         closeTwoFactor();
         router.cancelPending();
-        if (shell != null) toast(ToastType.ERROR, "Admin verification could not be opened. Research stays locked.");
+        if (shell != null) {
+            notifications.publish(notifications.scope(), panel.notifications.NotificationEvent.Type.RESEARCH_ACCESS_FAILED,
+                    java.util.UUID.randomUUID(), java.time.Instant.now());
+            toast(ToastType.ERROR, "Admin verification could not be opened. Research stays locked.");
+        }
     }
 
     /** Compatibilidade com os harnesses de QA: verificação para o pedido pendente atual. */
@@ -1095,7 +1121,7 @@ public class PanelApp extends Application {
         userMenu = new panel.shell.UserMenu(shell.overlay(), shell.topBar().avatar(), router);
         userMenu.setIdentity(new panel.shell.UserMenu.Identity(user.username(), blankToNull(user.email()),
                 user.admin() ? "Admin" : "Trader"));
-        notificationPanel = new panel.shell.NotificationPanel(shell.overlay(), shell.topBar().notifications(), ctx.motion);
+        notificationPanel = new panel.shell.NotificationPanel(shell.overlay(), shell.topBar().notifications(), ctx.motion, notifications, destination -> show(destination.route), shell.topBar()::setUnread);
         userMenu.setItems(userMenuItems());
         shell.topBar().mascot().bindMenuOpen(userMenu.openProperty()); // the eyes look at the menu while the existing menu is open
         rootStack.getChildren().setAll(shell);

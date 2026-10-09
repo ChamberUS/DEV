@@ -1,0 +1,95 @@
+{
+  "changes": [
+    {
+      "path": "src/main/java/panel/localservice/LocalServiceMonitor.java",
+      "status": "modified",
+      "sha256": "c91f0f046b22d51b5456656aa1bdbea9cfbcfb8efc9297550faebf807727ffd4"
+    },
+    {
+      "path": "src/main/java/panel/app/PanelApp.java",
+      "status": "modified",
+      "sha256": "7dc76dd2aaefd5c10eeb8dc551f0ed1bb0b91327bda4c42443b0e2e5656521a8"
+    },
+    {
+      "path": "src/main/java/panel/auth/SessionManager.java",
+      "status": "modified",
+      "sha256": "dbab609cdfaa7c33414555fa64dbb8d7ca9ff9a17d8e3d523845b5af3960867c"
+    },
+    {
+      "path": "src/main/java/panel/shell/NotificationPanel.java",
+      "status": "modified",
+      "sha256": "4a5d5b604408f1f5617919023b56cd58a745d185cb531b032ddfa521562b238c"
+    },
+    {
+      "path": "src/main/java/panel/accountview/NotificationsScreen.java",
+      "status": "modified",
+      "sha256": "a44add9ee25cd6a36cf16109fc4282af5806bb794e8e304a0db141955bd8b21a"
+    },
+    {
+      "path": "src/main/java/panel/i18n/Strings.java",
+      "status": "modified",
+      "sha256": "4b690a5740ef15a245e55cd849287812b1e4e5574a0782a9267d63e5f9b661ba"
+    },
+    {
+      "path": "src/main/java/panel/i18n/Presentation.java",
+      "status": "modified",
+      "sha256": "463956594cc47634cb2c3f7618a7e2cd271fd87e7079729f716b98c6f6cf57cd"
+    },
+    {
+      "path": "src/main/java/panel/notifications/NotificationEvent.java",
+      "status": "added",
+      "sha256": "0f977b2ce225387d3c5af0c9ff05e273e61fa9b797cf7e6535fab549af2a2a6e"
+    },
+    {
+      "path": "src/main/java/panel/notifications/ServiceNotificationObserver.java",
+      "status": "added",
+      "sha256": "74861a26cbb42f31a0245165d934f6f18a471553c25d1d66646f788b9f771006"
+    },
+    {
+      "path": "src/main/java/panel/notifications/NotificationCenter.java",
+      "status": "added",
+      "sha256": "0dbd789b6feea0fb4db88f8d3661d4ec0f11ac098ce43cc0cdeaf27f03637066"
+    },
+    {
+      "path": "src/main/java/panel/notifications/NotificationCenterView.java",
+      "status": "added",
+      "sha256": "ad6dc32a5a2b21226eff83f2a8b4b4b976c32d8a9deb59c4bf895c95e010207a"
+    },
+    {
+      "path": "src/main/resources/panel/v2/theme-controls.css",
+      "status": "modified",
+      "sha256": "813ce88b1f5b93eab95bb7035be52bc25854894834a6d3268014aea7a3811f9c"
+    },
+    {
+      "path": "src/main/resources/panel/i18n/notifications_en.properties",
+      "status": "added",
+      "sha256": "9cb88f406ef90f36b15564beee1b618f9181d0b444b436f468c7239e383ce1d1"
+    },
+    {
+      "path": "src/main/resources/panel/i18n/notifications_pt-BR.properties",
+      "status": "added",
+      "sha256": "3b0fa2b0ea5c8a7cae74bfb4e19a019b23ea3189fefde464b63320403cedd3f5"
+    },
+    {
+      "path": "src/test/java/panel/PackageC3NotificationTest.java",
+      "status": "added",
+      "sha256": "e118473a1626f42f329289f6b49c147d85cf8ba13577ef98edb68c6048d9acd0"
+    },
+    {
+      "path": "src/test/java/panel/PackageC3NotificationViewTest.java",
+      "status": "added",
+      "sha256": "911cbe60effc6571beb1a11cee27d49035c049432dbdbd09cd16cd44993991b8"
+    },
+    {
+      "path": "src/test/java/panel/PackageC3FlowQa.java",
+      "status": "added",
+      "sha256": "4fbf44bd1a72778c16fd545406f448f086d2fdf7b9bbda6357bb788a17b63383"
+    },
+    {
+      "path": "src/test/java/panel/PackageC3AppIsolationTest.java",
+      "status": "added",
+      "sha256": "3f662a8de94ca05f1ed6358c7e01e3ae259f7e9105112a585243d6e0101d160c"
+    }
+  ],
+  "deleted": []
+}
