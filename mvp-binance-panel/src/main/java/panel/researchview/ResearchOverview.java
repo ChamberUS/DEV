@@ -475,6 +475,10 @@ public final class ResearchOverview extends GridPane implements View {
 
         GuardTile(ResearchModel.Gate gate) {
             getStyleClass().add("byx-res-gate");
+            name.setMinWidth(Region.USE_PREF_SIZE);
+            state.setMinWidth(Region.USE_PREF_SIZE);
+            note.setMinWidth(0);
+            note.setWrapText(true);
             Node glyph = ByxIcon.of(switch (gate.kind()) {
                 case OPEN -> "unlock";
                 case LOCKED -> "lock";

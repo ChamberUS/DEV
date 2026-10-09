@@ -14,7 +14,7 @@ import panel.security.AccessDeniedException;
 public class TwoFactorFlow {
     public enum State { PENDING_EMAIL, EMAIL_SENT, EMAIL_VERIFIED, PENDING_SMS, SMS_SENT, SMS_VERIFIED, COMPLETE, EXPIRED, FAILED }
 
-    private final AuthorityGateway gateway;
+    private final AuthService.SessionScope scope;
     private final AdminAccessService access;
     private final Clock clock;
     private final Instant createdAt;
@@ -27,8 +27,8 @@ public class TwoFactorFlow {
     private long emailResend = 30;
     private long smsResend = 30;
 
-    TwoFactorFlow(AuthorityGateway gateway, AdminAccessService access, Clock clock) {
-        this.gateway = gateway;
+    TwoFactorFlow(AuthService.SessionScope scope, AdminAccessService access, Clock clock) {
+        this.scope = scope;
         this.access = access;
         this.clock = clock;
         this.createdAt = clock.instant();
@@ -43,7 +43,7 @@ public class TwoFactorFlow {
     }
 
     private void requireAlive() {
-        if (cancelled || !clock.instant().isBefore(createdAt.plusSeconds(600))) {
+        if (cancelled || !scope.isCurrent() || !clock.instant().isBefore(createdAt.plusSeconds(600))) {
             state = State.EXPIRED;
             throw new AccessDeniedException("Verification expired. Start again.");
         }
@@ -58,7 +58,7 @@ public class TwoFactorFlow {
                 return new TwoFactorNotConfiguredException();
             }
             case "AUTH_REQUIRED", "AUTHORITY_UNAVAILABLE" -> {
-                access.sessionLost();
+                access.sessionLost(scope);
                 return new AccessDeniedException("Verification expired. Start again.");
             }
             case "CHALLENGE_EXPIRED" -> {
@@ -76,7 +76,7 @@ public class TwoFactorFlow {
         if (emailVerified() || complete()) {
             throw new IllegalStateException("Email already verified");
         }
-        AuthorityGateway.Reply r = gateway.beginSecondFactor();
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::beginSecondFactor);
         if (!r.ok()) {
             if (!r.code().equals("COOLDOWN") && !r.code().equals("TOO_MANY_SENDS") && !r.code().equals("RATE_LIMITED")) {
                 state = State.FAILED;
@@ -100,20 +100,20 @@ public class TwoFactorFlow {
     }
 
     public synchronized TwoFactorResult verifyEmail(String code) {
-        if (cancelled || !clock.instant().isBefore(createdAt.plusSeconds(600))) {
+        if (cancelled || !scope.isCurrent() || !clock.instant().isBefore(createdAt.plusSeconds(600))) {
             state = State.EXPIRED;
             return TwoFactorResult.EXPIRED;
         }
         if (state != State.EMAIL_SENT) {
             return TwoFactorResult.NO_CHALLENGE;
         }
-        AuthorityGateway.Reply r = gateway.verifySecondFactor(challenge, code == null ? "" : code);
+        AuthorityGateway.Reply r = scope.call(g -> g.verifySecondFactor(challenge, code == null ? "" : code));
         if (r.ok()) {
             state = State.EMAIL_VERIFIED;
             return TwoFactorResult.OK;
         }
         if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
-            access.sessionLost();
+            access.sessionLost(scope);
         }
         TwoFactorResult t = map(r);
         if (t == TwoFactorResult.EXPIRED) {
@@ -130,7 +130,7 @@ public class TwoFactorFlow {
             throw new IllegalStateException("Verify email first");
         }
         state = State.PENDING_SMS;
-        AuthorityGateway.Reply r = gateway.sendSecondFactorSms();
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::sendSecondFactorSms);
         if (!r.ok()) {
             state = State.EMAIL_VERIFIED;
             throw failure(r, true);
@@ -141,25 +141,25 @@ public class TwoFactorFlow {
     }
 
     public synchronized TwoFactorResult verifySms(String code) {
-        if (cancelled || !clock.instant().isBefore(createdAt.plusSeconds(600))) {
+        if (cancelled || !scope.isCurrent() || !clock.instant().isBefore(createdAt.plusSeconds(600))) {
             state = State.EXPIRED;
             return TwoFactorResult.EXPIRED;
         }
         if (state != State.SMS_SENT) {
             return TwoFactorResult.NO_CHALLENGE;
         }
-        AuthorityGateway.Reply r = gateway.verifySecondFactorSms(code == null ? "" : code);
+        AuthorityGateway.Reply r = scope.call(g -> g.verifySecondFactorSms(code == null ? "" : code));
         if (r.ok()) {
             state = State.SMS_VERIFIED;
-            state = State.COMPLETE;
-            access.completed(); // pede a elevação AO SERVIÇO (que decide); falhar aqui não concede nada
+            if (!access.completed(scope)) { state = State.EXPIRED; return TwoFactorResult.EXPIRED; }
+            state = State.COMPLETE; // only after Service elevation and current-session read-back
             return TwoFactorResult.OK;
         }
         if (r.code().equals("DENIED")) {
             throw failure(r, true);
         }
         if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
-            access.sessionLost();
+            access.sessionLost(scope);
         }
         TwoFactorResult t = map(r);
         if (t == TwoFactorResult.EXPIRED) {
@@ -177,7 +177,7 @@ public class TwoFactorFlow {
             throw new AccessDeniedException("Verification is not complete");
         }
         if (trust) {
-            access.trustCurrent();
+            access.trustCurrent(scope);
         }
         finished = true;
     }
@@ -187,7 +187,7 @@ public class TwoFactorFlow {
     }
 
     public boolean complete() {
-        return state == State.COMPLETE && !cancelled;
+        return state == State.COMPLETE && !cancelled && scope.isCurrent();
     }
 
     public long resendSeconds(boolean phone) {

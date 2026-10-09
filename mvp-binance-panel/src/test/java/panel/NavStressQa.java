@@ -53,10 +53,8 @@ public final class NavStressQa {
     }
 
     static void check(boolean ok, String what) {
-        if (!ok) {
-            failures++;
-            lines.add("FAIL " + what);
-        }
+        lines.add((ok ? "PASS " : "FAIL ") + what);
+        if (!ok) failures++;
     }
 
     public static final class App extends PanelApp {
@@ -71,10 +69,24 @@ public final class NavStressQa {
         private final List<String> routeLog = new ArrayList<>();
         private final List<String> trace = new ArrayList<>();
         private int iteration;
+        private boolean dataOnlyIdle;
+        private int inputEventsBlocked;
 
         @Override
         public void start(Stage stage) {
             super.start(stage);
+            // This fixture observes data-driven navigation on a shared desktop. Mouse/key input is
+            // excluded only during its no-user-input holds; ActionEvents and router requests remain unfiltered.
+            stage.getScene().addEventFilter(javafx.scene.input.MouseEvent.ANY, event -> {
+                if (dataOnlyIdle && (event.getEventType() == javafx.scene.input.MouseEvent.MOUSE_PRESSED
+                        || event.getEventType() == javafx.scene.input.MouseEvent.MOUSE_RELEASED
+                        || event.getEventType() == javafx.scene.input.MouseEvent.MOUSE_CLICKED)) {
+                    inputEventsBlocked++; event.consume();
+                }
+            });
+            stage.getScene().addEventFilter(javafx.scene.input.KeyEvent.ANY, event -> {
+                if (dataOnlyIdle) { inputEventsBlocked++; event.consume(); }
+            });
             try {
                 ctx = (AppContext) field("ctx");
                 router = (ShellRouter) field("router");
@@ -84,6 +96,9 @@ public final class NavStressQa {
                 panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "shell-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, null);
                 RouteTrace.attach(router, routeLog, trace);
+                router.routeProperty().addListener((o, from, to) -> {
+                    if (dataOnlyIdle) lines.add("IDLE_ROUTE_STACK " + java.util.Arrays.toString(new Throwable().getStackTrace()));
+                });
                 after(600, () -> {
                     User admin = ctx.auth.login("qa-admin", "shell-qa-pass-1".toCharArray());
                     invoke("afterLogin", User.class, admin);
@@ -143,6 +158,8 @@ public final class NavStressQa {
         }
 
         private void idle(String ws, int n, Runnable done) {
+            dataOnlyIdle = true;
+            inputEventsBlocked = 0;
             after(1500, () -> {
                 routeLog.clear();
                 trace.clear();
@@ -155,6 +172,8 @@ public final class NavStressQa {
                 data.setOnFinished(e -> {
                     check(ws.equals(router.route()) && routeLog.isEmpty(), scenario + "#" + n + " " + ws + " idle " + seconds + "s ticks=" + ticks[0]
                             + " route=" + router.route() + " log=" + routeLog + dump());
+                    lines.add("INFO idle=" + ws + " mouse/key events excluded=" + inputEventsBlocked + "; ActionEvents unfiltered");
+                    dataOnlyIdle = false;
                     done.run();
                 });
                 data.play();

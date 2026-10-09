@@ -41,11 +41,11 @@ class LoginControllerTest {
     private final AtomicInteger staleSessionsEnded = new AtomicInteger();
     private char[] lastPassword;
 
-    private LoginController controller(LoginController.Authenticator auth) {
-        return new LoginController((id, pw) -> {
+    private LoginController controller(TestAuthenticationRequests.Authenticator auth) {
+        return new LoginController(() -> TestAuthenticationRequests.create((id, pw) -> {
             lastPassword = pw;
             return auth.login(id, pw);
-        }, worker, fx, loggedIn::add, staleSessionsEnded::incrementAndGet);
+        }, staleSessionsEnded::incrementAndGet), worker, fx, loggedIn::add);
     }
 
     private static User user() {

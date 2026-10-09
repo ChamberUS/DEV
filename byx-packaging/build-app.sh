@@ -5,7 +5,7 @@
 # --chain-profile escolhe o perfil da chain pública do serviço NO BUILD (padrão: production-disabled = NOT_CONFIGURED, sem rede). Perfil desconhecido: FALHA. Não há troca em runtime.
 # Topologia (medida): um helper com application-identifier PRÓPRIO dentro do bundle do painel é encerrado pelo macOS (o perfil do bundle
 # principal não o autoriza); por isso o serviço é um app-like aninhado em Contents/Helpers/ com o seu perfil. O runtime é UM só em
-# disco (clone APFS). Pré-requisito: painel e serviço já empacotados (mvn package); este script NÃO roda a suíte.
+# disco (clone APFS). O script empacota painel e serviço com o mesmo perfil; não roda a suíte.
 set -euo pipefail
 HERE="${0:A:h}"; ROOT="${HERE:h}"
 source "$HERE/identity.env"
@@ -28,14 +28,23 @@ APP="$OUT/$BYX_APP_NAME.app"; CONTENTS="$APP/Contents"; HELPER="$CONTENTS/Helper
 IDENT="${BYX_SIGN_IDENTITY:-$(security find-identity -v -p codesigning | awk '/Apple Development/ {print $2; exit}')}"
 [[ -n "$IDENT" ]] || { echo "nenhuma identidade Apple Development encontrada (BYX_SIGN_IDENTITY)"; exit 3; }
 PANEL_JAR="$ROOT/mvp-binance-panel/target/mvp-binance-panel-0.1.0.jar"; SERVICE_JAR="$ROOT/byx-local-service/target/byx-local-service-0.1.0.jar"
+( cd "$ROOT/mvp-binance-panel" && mvn -o -q clean package -DskipTests -Dbyx.chain.profile="$CHAIN_ENUM" )
+if [[ "$CHAIN_ENUM" == "PRODUCTION_DISABLED" ]]; then
+  if jar tf "$PANEL_JAR" | grep -q "^panel/txview/"; then echo "BLOCKED: QA classes in DEFAULT panel"; exit 4; fi
+else
+  jar tf "$PANEL_JAR" | grep -q "^panel/txview/TransactionLab.class$" || { echo "BLOCKED: LOCAL_QA Lab absent"; exit 4; }
+fi
 echo "== 0. JAR do serviço com o perfil de chain do build: $CHAIN_ENUM (sem rodar a suíte)"
 ( cd "$ROOT/byx-local-service" && mvn -o -q package -DskipTests -Dbyx.chain.profile="$CHAIN_ENUM" )
 [[ "$(unzip -p "$SERVICE_JAR" byx/chain-profile.txt)" == "$CHAIN_ENUM" ]] || { echo "JAR sem o perfil esperado"; exit 4; }
 [[ -f "$PANEL_JAR" && -f "$SERVICE_JAR" ]] || { echo "rode 'mvn package' no painel e no serviço antes"; exit 4; }
-CERT_NAME=$(security find-identity -v -p codesigning | awk -F'"' '/Apple Development/ {print $2; exit}')
-TEAM=$(security find-certificate -c "$CERT_NAME" -p | openssl x509 -noout -subject -nameopt multiline | awk '/organizationalUnitName/ {print $3; exit}')
+read -r IDENT TEAM < <(python3 "$HERE/resolve-signing-identity.py" "$IDENT") || { echo "BLOCKED: signing identity"; exit 5; }
 [[ "$TEAM" =~ '^[A-Z0-9]{10}$' ]] || { echo "Team ID não encontrado no certificado"; exit 5; }
 dr() { echo "=designated => identifier \"$1\" and anchor apple generic and certificate leaf[subject.OU] = \"$TEAM\""; }
+if [[ -n "$PROFILE" ]]; then
+  read -r P_APPID P_TEAM P_PREFIX P_EXP < <(python3 "$HERE/validate-provisioning.py" "$PROFILE" "$BYX_SERVICE_ID" "$TEAM" --certificate-sha1 "$IDENT" --shell) || { echo "BLOCKED: perfil service"; exit 7; }
+  echo "perfil service OK: $P_APPID · team $P_TEAM · expira $P_EXP"
+fi
 rm -rf "$OUT"; mkdir -p "$OUT/input" "$OUT/svc-input"
 
 echo "== 1. dependências de execução (sem escopo de teste)"
@@ -44,6 +53,11 @@ cp "$PANEL_JAR" "$OUT/input/"
 # dependências do SERVIÇO: as do próprio projeto (fonte única; não depende do que o painel traz)
 ( cd "$ROOT/byx-local-service" && mvn -o -q dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory="$OUT/svc-input" )
 cp "$SERVICE_JAR" "$OUT/svc-input/"
+if [[ $CANARY -eq 1 ]]; then
+  ( cd "$ROOT/byx-local-service" && mvn -o -q test-compile )
+  python3 "$HERE/package-qa-tests.py" "$ROOT/byx-local-service/target/test-classes" "$OUT/svc-input/byx-service-qa-fixtures.jar" --canary-only
+  cp "$OUT/svc-input/byx-service-qa-fixtures.jar" "$OUT/input/"
+fi
 MODS=java.base,java.desktop,java.naming,java.net.http,java.sql,java.logging,java.xml,java.management,jdk.jfr,jdk.unsupported,jdk.crypto.ec
 
 echo "== 2. app do painel (jpackage, runtime embutido via jlink)"
@@ -56,6 +70,16 @@ fi
 jpackage --type app-image --name "$BYX_APP_NAME" --dest "$OUT" --input "$OUT/input" --main-jar mvp-binance-panel-0.1.0.jar --main-class panel.app.Main \
   --app-version "$BYX_BUNDLE_VERSION" --vendor "BYX-MVP" --mac-package-identifier "$BYX_APP_ID" --mac-package-name "$BYX_APP_NAME" --add-modules "$MODS" \
   ${EXTRA_APP[@]+"${EXTRA_APP[@]}"} >/dev/null
+if [[ $CANARY -eq 1 ]]; then
+  python3 - "$CONTENTS/app/byx-secret-reader.cfg" <<'PYCFG'
+import sys
+p=sys.argv[1]
+s=open(p).read()
+if 'app.classpath=$APPDIR/byx-service-qa-fixtures.jar' not in s.splitlines():
+    s += "\napp.classpath=$APPDIR/byx-service-qa-fixtures.jar\n"
+open(p,"w").write(s)
+PYCFG
+fi
 
 echo "== 3. helpers aninhados (app-likes com identidade e perfil próprios; runtime = clone APFS do mesmo runtime)"
 # Medido: direitos restritos (application-identifier) só valem no executável PRINCIPAL de um bundle cujo perfil os autoriza; um lançador extra é
@@ -107,16 +131,19 @@ PY
 }
 harden() { # $1=executável a substituir  $2=.cfg de origem  $3=classe principal  $4...=opções -D extras de build (PASS_ARGS, SQLITE_NATIVE)
   local exe="$1" cfg="$2" mc="$3"; shift 3
-  clang -arch x86_64 -O2 -Wall -Werror -mmacosx-version-min=12.0 -DMAIN_CLASS="\"$mc\"" -DJAR_LIST="$(jars_of "$cfg")" "$@" -framework Security -framework CoreFoundation -o "$exe" "$HERE/launcher/byx-launcher.c"
+  clang -arch x86_64 -O2 -Wall -Werror -mmacosx-version-min=12.0 -DMAIN_CLASS="\"$mc\"" -DJAR_LIST="$(jars_of "$cfg")" -DEXPECTED_ID="\"$([[ "$exe" == "$CONTENTS/MacOS/"* ]] && echo "$BYX_APP_ID" || echo "$BYX_SERVICE_ID")\"" -DEXPECTED_TEAM="\"$TEAM\"" "$@" -framework Security -framework CoreFoundation -o "$exe" "$HERE/launcher/byx-launcher.c"
 }
 for h in "${HELPERS[@]}"; do
   n="${h%%:*}"
   case "$n" in
-    byx-local-service|byx-auth-qa) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}";;
+    byx-local-service) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}" -DPASS_ARGS;;
+    byx-auth-qa) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}" -DPASS_ARGS -DREJECT_INJECTION;;
     byx-migrate|byx-migrate-qa) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}" -DPASS_ARGS -DSQLITE_NATIVE;;
+    *) harden "$CONTENTS/Helpers/$n.app/Contents/MacOS/$n" "$CONTENTS/Helpers/$n.app/Contents/app/$n.cfg" "${h##*:}" -DPASS_ARGS -DREJECT_INJECTION;;
   esac
 done
 harden "$CONTENTS/MacOS/$BYX_APP_NAME" "$CONTENTS/app/$BYX_APP_NAME.cfg" panel.app.Main -DPASS_ARGS -DSQLITE_NATIVE   # o painel: argv só depois da classe principal
+[[ $CANARY -eq 1 ]] && harden "$CONTENTS/MacOS/byx-secret-reader" "$CONTENTS/app/byx-secret-reader.cfg" byx.service.secrets.SecretCanaryReader -DPASS_ARGS -DREJECT_INJECTION
 [[ $CANARY -eq 1 ]] && harden "$CONTENTS/MacOS/byx-auth-client" "$CONTENTS/app/byx-auth-client.cfg" panel.localservice.AuthorityQaCli -DPASS_ARGS
 echo "== 4. nativos do painel pré-extraídos (nada é extraído em tempo de execução: biblioteca não assinada seria recusada pelo library validation)"
 unzip -qjo "$M2/org/openjfx/javafx-graphics/21.0.5/javafx-graphics-21.0.5-mac.jar" '*.dylib' -d "$CONTENTS/app"
@@ -128,13 +155,6 @@ plutil -remove NSMicrophoneUsageDescription "$CONTENTS/Info.plist"; plutil -repl
 echo "== 5. perfil e direitos do helper (valores LIDOS do perfil; menor privilégio)"
 SVC_ENT="$ENT/service.entitlements"
 if [[ -n "$PROFILE" ]]; then
-  security cms -D -i "$PROFILE" > "$OUT/profile.plist" 2>/dev/null || { echo "perfil ilegível"; exit 7; }
-  read -r P_APPID P_TEAM P_PREFIX < <(python3 -c "
-import plistlib,sys
-d=plistlib.load(open(sys.argv[1],'rb'))
-print(d['Entitlements']['com.apple.application-identifier'], d['TeamIdentifier'][0], d['ApplicationIdentifierPrefix'][0])" "$OUT/profile.plist")
-  [[ "$P_APPID" == "$P_PREFIX.$BYX_SERVICE_ID" ]] || { echo "o perfil autoriza '$P_APPID', esperado '$P_PREFIX.$BYX_SERVICE_ID'"; exit 7; }
-  [[ "$P_TEAM" == "$TEAM" ]] || { echo "Team do perfil ($P_TEAM) difere do certificado ($TEAM)"; exit 7; }
   SVC_ENT="$OUT/service.keychain.entitlements"
   sed "s/__TEAM__/$P_TEAM/g; s/__APPLICATION_IDENTIFIER__/$P_APPID/g" "$ENT/service.keychain.entitlements.template" > "$SVC_ENT"
   for h in "${HELPERS[@]}"; do cp "$PROFILE" "$CONTENTS/Helpers/${h%%:*}.app/Contents/embedded.provisionprofile"; done

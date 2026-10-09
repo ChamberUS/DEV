@@ -16,19 +16,21 @@ import panel.service.EntitlementService;
 /** Liga as telas BYX V2 aos serviços existentes. Só leituras: nada assina, transmite ou move fundos. */
 final class ByxDataAdapter implements ByxData {
     private final AppContext ctx;
+    private final panel.auth.AuthService.SessionScope session;
 
     ByxDataAdapter(AppContext ctx) {
         this.ctx = ctx;
+        this.session = ctx.auth.captureSession();
     }
 
     @Override public ByxSnapshot network() { return ctx.byx.snapshot(); }
     @Override public String accountOperationsUnavailableReason() { return panel.security.ServerAuthorization.REQUIRED; }
 
-    @Override public boolean sessionActive() { return ctx.sessions.user().isPresent(); }
+    @Override public boolean sessionActive() { return session.isCurrent(); }
 
-    @Override public panel.wallet.WalletGateway walletLifecycleGateway() { return new panel.wallet.WalletGateway(ctx.authority); }
+    @Override public panel.wallet.WalletGateway walletLifecycleGateway() { return new panel.wallet.WalletGateway(session); }
 
-    @Override public boolean admin() { return ctx.adminAccess.hasValidAdminSession(); }
+    @Override public boolean admin() { return session.isCurrent() && ctx.adminAccess.hasValidAdminSession(); }
 
     @Override
     public ByxConfig config() {

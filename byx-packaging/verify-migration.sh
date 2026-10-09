@@ -5,7 +5,7 @@
 set -uo pipefail
 HERE="${0:A:h}"; APP="${1:-$HERE/build-canary/BYX-MVP.app}"
 MIG="$APP/Contents/Helpers/byx-migrate-qa.app/Contents/MacOS/byx-migrate-qa"; SVC="$APP/Contents/Helpers/byx-auth-qa.app/Contents/MacOS/byx-auth-qa"; CLI="$APP/Contents/MacOS/byx-auth-client"
-QA="$(mktemp -d /tmp/byx-migqa.XXXXXX)"; chmod 700 "$QA"; LEG="$QA/legacy"; AUTH="$QA/qa-authority"; PW="$LEG/qa-passwords.json"
+QA="$(mktemp -d /private/tmp/byx-migqa.XXXXXX)"; chmod 700 "$QA"; LEG="$QA/legacy"; AUTH="$QA/qa-authority"; PW="$LEG/qa-passwords.json"
 PASS=0; FAIL=0; SVC_PID=""
 ok()   { PASS=$((PASS+1)); echo "PASS  $1"; }
 bad()  { FAIL=$((FAIL+1)); echo "FAIL  $1  [$2]"; }

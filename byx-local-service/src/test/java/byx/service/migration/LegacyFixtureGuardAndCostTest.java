@@ -31,7 +31,7 @@ class LegacyFixtureGuardAndCostTest {
 
     @Test
     void syntheticLegacySourcesAreNeverBuiltWithTheServiceHasher() throws IOException {
-        String qa = Files.readString(Path.of("src/main/java/byx/service/migration/MigrateQaMain.java"));
+        String qa = Files.readString(Path.of("src/test/java/byx/service/migration/MigrateQaMain.java"));
         assertTrue(qa.contains("LegacyPanelHash.hash("), "the packaged migration QA builds source hashes with the legacy reference");
         assertFalse(qa.contains(".hash(") && qa.replace("LegacyPanelHash.hash(", "").contains(".hash("), "...and never with PasswordVerifier.hash");
         assertFalse(qa.contains("PasswordVerifier"), "the QA main does not even import the service verifier");
@@ -46,7 +46,9 @@ class LegacyFixtureGuardAndCostTest {
                 }
             }
         }
-        assertEquals(Set.of("LegacyPanelHash.java", "MigrateQaMain.java"), users, "the legacy reference is referenced only by the QA main (never by production code)");
+        assertEquals(Set.of(), users, "the synthetic legacy oracle and QA main are absent from all production sources");
+        assertTrue(Files.exists(Path.of("src/test/java/byx/service/migration/LegacyPanelHash.java")));
+        assertTrue(qa.contains("LegacyPanelHash"), "QA still uses the exact legacy algorithm rather than the service hasher");
     }
 
     @Test

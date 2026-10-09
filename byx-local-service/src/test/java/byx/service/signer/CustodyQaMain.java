@@ -35,14 +35,17 @@ public final class CustodyQaMain {
     public static void main(String[] args) throws Exception {
         String cmd = args.length > 0 ? args[0] : new String(System.in.readNBytes(256)).trim().split("\\s+")[0];
         String arg = args.length > 1 ? args[1] : null;
+        if (cmd.equals("fencing-profile")) { byx.service.identity.FencingTiming.enable(); System.out.println("fencing.jvmEntered=true"); System.out.flush(); cmd = "fencing-timeout"; }
         put("role.selfTeam", String.valueOf(byx.service.identity.PeerIdentity.selfTeamId()));
         if (java.util.Set.of("wallet-panel-service", "wallet-panel-default-runtime", "wallet-panel-orphan-metadata", "wallet-panel-key-mismatch", "wallet-panel-orphan-key", "wallet-panel-clean-orphan", "wallet-panel-corrupt-metadata").contains(cmd)) { WalletPanelQaService.run(args); return; }
         if(cmd.startsWith("wallet-")) {
             WalletLifecycleQaMain.run(args);
             System.exit(0);
         }
+        if (cmd.equals("runtime-verify")) { PackagedRuntimeQaMain.run(); return; }
         if (cmd.startsWith("fencing-")) {
             CustodyFencingQaMain.run(cmd);
+            if (!byx.service.identity.FencingTiming.snapshot().isEmpty()) { System.out.println("fencing.timing=" + new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(byx.service.identity.FencingTiming.snapshot())); }
             System.exit(0);
         }
         switch (cmd) {

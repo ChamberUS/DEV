@@ -108,8 +108,10 @@ class ResearchGateReproductionTest {
     }
 
     private App open(Boolean emailVerified, Boolean phoneVerified) throws Exception {
+        App created = FxSupport.fx(App::new);
+        created.init(); // launcher thread in production; never initialize persistence on FX
         app = FxSupport.fx(() -> {
-            App a = new App();
+            App a = created;
             a.authority.emailVerifiedOverride = emailVerified;
             a.authority.phoneVerifiedOverride = phoneVerified;
             a.start(new Stage());

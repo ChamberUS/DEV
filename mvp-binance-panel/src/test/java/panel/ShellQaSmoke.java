@@ -35,7 +35,7 @@ public final class ShellQaSmoke {
         Path settings = Files.createDirectories(home.resolve(".mvp-binance-panel"));
         Files.writeString(settings.resolve("security.properties"), "security.dev.mode=true\n");
         Files.writeString(settings.resolve("settings.properties"), "dataSource=REAL\nprojectPath=" + home.resolve("empty-project")
-                + "\ncliPath=/usr/bin/false\nmotion=" + System.getProperty("byx.qa.motion", "FULL") + "\ndensity=COMPACT\nonboardingCompleted=true\n");
+                + "\ncliPath=/usr/bin/false\nmotion=" + System.getProperty("byx.qa.motion", "FULL") + "\ndensity=" + System.getProperty("byx.qa.density", "COMPACT") + "\nonboardingCompleted=true\n");
         System.setProperty("user.home", home.toString());
         Application.launch(App.class, args);
         Files.write(output.resolve("report.txt"), report);
@@ -67,7 +67,7 @@ public final class ShellQaSmoke {
                 Field f = PanelApp.class.getDeclaredField("ctx");
                 f.setAccessible(true);
                 ctx = (AppContext) f.get(this);
-                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "shell-qa-pass-1", panel.security.Role.ADMIN, false);
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "shell-qa-pass-1", panel.security.Role.valueOf(System.getProperty("byx.qa.role", "ADMIN")), false);
                 invoke("showEntry", String.class, null); // sai do first-run: a entrada passa a ser o Login
                 later(this::next);
             } catch (Throwable e) {
@@ -78,12 +78,14 @@ public final class ShellQaSmoke {
         private void enter() throws Exception {
             User admin = ctx.auth.login("qa-admin", "shell-qa-pass-1".toCharArray());
             invoke("afterLogin", User.class, admin);
+            if (admin.role() == panel.security.Role.ADMIN) {
             var flow = ctx.adminAccess.startTwoFactor();
             flow.sendEmailCode();
             flow.verifyEmail(panel.QaContext.dev().lastCode());
             flow.sendSmsCode();
             flow.verifySms(panel.QaContext.dev().lastCode());
             flow.finish(false);
+            }
             entered = true;
         }
 
@@ -135,6 +137,10 @@ public final class ShellQaSmoke {
                 width = Integer.parseInt(wh[0]);
                 height = Integer.parseInt(wh[1]);
             }
+            if (route.equals("login") && entered) {
+                invoke("logout", String.class, null);
+                entered = false;
+            }
             if (!route.equals("login")) {
                 if (!entered) {
                     enter();
@@ -142,7 +148,14 @@ public final class ShellQaSmoke {
                 invoke("show", String.class, route);
             }
             later(() -> {
+                String actual = ((panel.shell.ShellRouter) field("router")).route();
+                String expected = route.equals("login") ? panel.authview.AuthScreens.LOGIN : route;
+                boolean deniedResearch = System.getProperty("byx.qa.role", "ADMIN").equals("USER")
+                        && (route.equals("overview") || route.equals("capture"));
+                if (deniedResearch ? expected.equals(actual) : !expected.equals(actual))
+                    throw new AssertionError("Unexpected route: requested=" + expected + " actual=" + actual);
                 shot(step.replace('@', '-'));
+                report.add("ROUTE requested=" + expected + " actual=" + actual + " role=" + System.getProperty("byx.qa.role", "ADMIN"));
                 next();
             });
         }
@@ -162,7 +175,7 @@ public final class ShellQaSmoke {
             var image = off.snapshot(null);
             off.setRoot(new javafx.scene.layout.Pane());
             window.setRoot(root);
-            Path file = output.resolve(name + ".png");
+            Path file = output.resolve(String.format("%03d-%s.png", index, name));
             javax.imageio.ImageIO.write(ControlGalleryTest.toAwt(image), "png", file.toFile());
             report.add("SHOT " + name + " scene=" + (int) image.getWidth() + "x" + (int) image.getHeight());
         }

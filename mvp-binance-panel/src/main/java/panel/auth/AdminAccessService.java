@@ -40,7 +40,7 @@ public class AdminAccessService implements AdminGate {
         this.auth = auth;
         this.devices = devices;
         this.clock = clock;
-        devices.onChanged = this::refreshQuietly;
+        devices.onChanged = scope -> { try { refresh(scope); } catch (RuntimeException ignored) { } };
         sessions.onLogout(this::cancelChallenge);
         // com o usuário ATIVO a sessão no serviço é mantida viva e a representação sincronizada; ocioso (sem entrada por 60 s) deixa o prazo ocioso do serviço correr
         keepalive.scheduleWithFixedDelay(this::keepaliveTick, 20, 20, TimeUnit.SECONDS);
@@ -57,24 +57,22 @@ public class AdminAccessService implements AdminGate {
     }
 
     /** O serviço não reconhece mais a sessão (ou ficou indisponível): a representação local acaba e a interface volta ao login. */
-    void sessionLost() {
-        gateway.forgetSession();
-        sessions.logout();
-    }
+    void sessionLost(AuthService.SessionScope scope) { scope.invalidate(); }
 
     /** Relê o estado no serviço e sincroniza a representação. Vazio = sem sessão válida (a representação já foi encerrada). */
-    public Optional<JsonNode> refresh() {
-        if (sessions.user().isEmpty()) {
-            return Optional.empty();
-        }
-        AuthorityGateway.Reply r = gateway.sessionStatus();
+    public Optional<JsonNode> refresh() { return refresh(auth.captureSession()); }
+
+    private Optional<JsonNode> refresh(AuthService.SessionScope scope) {
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::sessionStatus);
         if (!r.ok()) {
-            sessionLost(); // fecha: sem o serviço não há sessão
+            if (!r.code().equals("STALE_AUTH_OPERATION")) sessionLost(scope);
             return Optional.empty();
         }
-        apply(r.result(), AuthMethod.TWO_FACTOR);
-        secondFactorConfigured = r.result().path("secondFactorConfigured").asBoolean(false);
-        return Optional.of(r.result());
+        boolean applied = scope.present(() -> {
+            apply(r.result(), AuthMethod.TWO_FACTOR);
+            secondFactorConfigured = r.result().path("secondFactorConfigured").asBoolean(false);
+        });
+        return applied ? Optional.of(r.result()) : Optional.empty();
     }
 
     private void refreshQuietly() {
@@ -103,11 +101,13 @@ public class AdminAccessService implements AdminGate {
         return secondFactorConfigured;
     }
 
-    public AccessDecision evaluate() {
+    public AccessDecision evaluate() { return evaluate(auth.captureSession()); }
+
+    public AccessDecision evaluate(AuthService.SessionScope scope) {
         if (sessions.user().isEmpty()) {
             return AccessDecision.SESSION_EXPIRED;
         }
-        Optional<JsonNode> st = refresh();
+        Optional<JsonNode> st = refresh(scope);
         if (st.isEmpty()) {
             return AccessDecision.SESSION_EXPIRED;
         }
@@ -118,11 +118,13 @@ public class AdminAccessService implements AdminGate {
     }
 
     /** Compatibilidade da UI: confiança do dispositivo nunca substitui MFA recente na elevação. */
-    public boolean tryTrustedDevice() {
+    public boolean tryTrustedDevice() { return tryTrustedDevice(auth.captureSession()); }
+
+    public boolean tryTrustedDevice(AuthService.SessionScope scope) {
         if (sessions.user().isEmpty()) {
             return false;
         }
-        Optional<JsonNode> st = refresh();
+        Optional<JsonNode> st = refresh(scope);
         if (st.isEmpty() || !"ADMIN".equals(st.get().path("role").asText()) || st.get().path("elevated").asBoolean(false)) {
             return false;
         }
@@ -130,42 +132,37 @@ public class AdminAccessService implements AdminGate {
         if (!st.get().path("mfaRecent").asBoolean(false)) {
             return false;
         }
-        AuthorityGateway.Reply r = gateway.adminElevation();
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::adminElevation);
         if (!r.ok()) {
             if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
-                sessionLost();
+                sessionLost(scope);
             }
             return false;
         }
-        sessions.revokeAdmin();
-        apply(r.result(), AuthMethod.TWO_FACTOR);
-        return hasValidAdminSession();
+        return scope.present(() -> { sessions.revokeAdmin(); apply(r.result(), AuthMethod.TWO_FACTOR); }) && hasValidAdminSession();
     }
 
-    public TwoFactorFlow startTwoFactor() {
-        if (evaluate() != AccessDecision.REQUIRES_2FA) {
-            throw new AccessDeniedException("Two-factor is not applicable");
+    public TwoFactorFlow startTwoFactor() { return startTwoFactor(auth.captureSession()); }
+
+    public TwoFactorFlow startTwoFactor(AuthService.SessionScope scope) {
+        if (evaluate(scope) != AccessDecision.REQUIRES_2FA) throw new AccessDeniedException("Two-factor is not applicable");
+        TwoFactorFlow flow = new TwoFactorFlow(scope, this, clock);
+        if (!scope.present(() -> { cancelChallenge(); active = flow; })) {
+            flow.cancel();
+            throw new AccessDeniedException("Session changed");
         }
-        cancelChallenge();
-        TwoFactorFlow flow = new TwoFactorFlow(gateway, this, clock);
-        active = flow;
         return flow;
     }
 
-    /** O 2º fator foi concluído NO SERVIÇO: pede a elevação (que ele concede ou nega). */
-    void completed() {
-        AuthorityGateway.Reply r = gateway.adminElevation();
-        if (r.ok()) {
-            sessions.revokeAdmin();
-            apply(r.result(), AuthMethod.TWO_FACTOR);
-        } else if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) {
-            sessionLost();
-        }
+    /** Elevation is always decided by the Service; an old flow cannot publish it for a newer session. */
+    boolean completed(AuthService.SessionScope scope) {
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::adminElevation);
+        if (r.ok()) return scope.present(() -> { sessions.revokeAdmin(); apply(r.result(), AuthMethod.TWO_FACTOR); });
+        if (r.code().equals("AUTH_REQUIRED") || r.code().equals("AUTHORITY_UNAVAILABLE")) sessionLost(scope);
+        return false;
     }
 
-    void trustCurrent() {
-        devices.trustCurrent();
-    }
+    void trustCurrent(AuthService.SessionScope scope) { devices.trustCurrent(scope); }
 
     public boolean hasValidAdminSession() {
         return sessions.user().filter(s -> s.user().admin() && s.user().active()).isPresent() && sessions.admin().filter(s -> s.validAt(clock.instant())).isPresent();
@@ -207,14 +204,23 @@ public class AdminAccessService implements AdminGate {
         // intencionalmente vazio
     }
 
+    public void close() {
+        cancelChallenge();
+        keepalive.shutdownNow();
+    }
+
     @Override
-    public User requireAdmin() {
-        var status = refresh();
+    public User requireAdmin() { return requireAdmin(auth.captureSession()); }
+
+    public User requireAdmin(AuthService.SessionScope scope) {
+        var status = refresh(scope);
         if (status.isEmpty() || !"ADMIN".equals(status.get().path("role").asText())
                 || !status.get().path("elevated").asBoolean(false)
                 || !status.get().path("mfaRecent").asBoolean(false)) {
             throw new AccessDeniedException("Administrator session required");
         }
-        return sessions.user().orElseThrow().user();
+        java.util.concurrent.atomic.AtomicReference<User> user = new java.util.concurrent.atomic.AtomicReference<>();
+        if (!scope.present(() -> user.set(sessions.user().orElseThrow().user()))) throw new AccessDeniedException("Session changed");
+        return user.get();
     }
 }

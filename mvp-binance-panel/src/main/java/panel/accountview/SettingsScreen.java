@@ -121,6 +121,7 @@ public final class SettingsScreen implements View {
     }
 
     private void edit(AccountData.Prefs next) {
+        if (!data.preferencesEditable()) return;
         draft = next;
         saveError = null;
         updateBar();
@@ -218,9 +219,13 @@ public final class SettingsScreen implements View {
             }
         }
         content.getChildren().addAll(title, panel);
+        if (!data.preferencesEditable() && List.of("General", "Appearance", "Accessibility").contains(section)) {
+            content.getChildren().add(1, Kit.muted("Preferences are read-only in this build. The configured motion and density remain active."));
+        }
     }
 
     private Node row(String name, Node control, boolean changed) {
+        control.setDisable(!data.preferencesEditable());
         HBox h = new HBox(8, control);
         h.setAlignment(Pos.CENTER_RIGHT);
         if (changed) {
@@ -284,6 +289,7 @@ public final class SettingsScreen implements View {
     }
 
     void save() {
+        if (!data.preferencesEditable()) return;
         try {
             data.savePrefs(draft);
             saved = data.prefs();

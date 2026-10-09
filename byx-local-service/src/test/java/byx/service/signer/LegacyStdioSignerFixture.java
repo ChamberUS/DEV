@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** Inert in production. The package-private process composition has no production caller or external configuration. */
-public final class SignerClient {
-    public static final SignerClient UNAVAILABLE = new SignerClient();
+/** Test-only V2.1S stdio harness. Never included in a main/packaged JAR; custody is the sole runtime transport. */
+final class LegacyStdioSignerFixture {
+    public static final LegacyStdioSignerFixture UNAVAILABLE = new LegacyStdioSignerFixture();
     private static final int MAX_FRAME = 8192;
     private static final Set<String> RESPONSE = Set.of("protocolVersion", "requestId", "status", "publicKey", "signature", "txRaw", "txHash", "bindingDigest");
     private final Path binary;
@@ -37,9 +37,9 @@ public final class SignerClient {
     private final Set<String> attempted = ConcurrentHashMap.newKeySet();
     private final ObjectMapper json = new ObjectMapper().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
 
-    private SignerClient() { binary = null; expectedHash = null; publicKey = null; arguments = List.of(); timeout = Duration.ZERO; }
+    private LegacyStdioSignerFixture() { binary = null; expectedHash = null; publicKey = null; arguments = List.of(); timeout = Duration.ZERO; }
 
-    SignerClient(Path binary, String expectedHash, byte[] publicKey, List<String> fixedArguments, Duration timeout) {
+    LegacyStdioSignerFixture(Path binary, String expectedHash, byte[] publicKey, List<String> fixedArguments, Duration timeout) {
         if (!binary.isAbsolute() || !binary.normalize().equals(binary) || expectedHash == null || !expectedHash.matches("[0-9a-f]{64}")
                 || timeout.toMillis() < 50 || timeout.toMillis() > 5000) throw new IllegalArgumentException("SIGNING_FAILED");
         this.binary = binary; this.expectedHash = expectedHash; this.publicKey = publicKey.clone();
@@ -90,28 +90,19 @@ public final class SignerClient {
         try (var parser = json.getFactory().createParser(response)) {
             root = json.readTree(parser); if (parser.nextToken() != null) throw new IOException("SIGNING_FAILED");
         }
-        return verifySigned(root, request, material, publicKey);
+        return SignedResponseVerifier.verifySigned(root, request, material, publicKey);
     }
 
-    /** Independent verification of a V2.1S response (shared by the stdio client and the custody client): every binding, low-S signature, TxRaw and tx hash. */
-    static SignedTx verifySigned(JsonNode root, TxSignRequest request, CosmosBankSend.Material material, byte[] publicKey) throws IOException {
-        if (root == null || !root.isObject() || root.size() != RESPONSE.size()) throw new IOException("SIGNING_FAILED");
-        var names = root.fieldNames(); while (names.hasNext()) if (!RESPONSE.contains(names.next())) throw new IOException("SIGNING_FAILED");
-        if (!root.get("protocolVersion").isIntegralNumber() || !root.get("protocolVersion").canConvertToInt() || root.get("protocolVersion").intValue() != 1) throw new IOException("SIGNING_FAILED");
-        for (String key : RESPONSE) if (!key.equals("protocolVersion") && !root.get(key).isTextual()) throw new IOException("SIGNING_FAILED");
-        if (!root.get("requestId").textValue().equals(request.quote().id().value()) || !root.get("status").textValue().equals("SIGNED")
-                || !root.get("bindingDigest").textValue().equals(material.binding()) || !root.get("publicKey").textValue().equals(CosmosBankSend.HEX.formatHex(publicKey))) throw new IOException("SIGNING_FAILED");
-        String signature = root.get("signature").textValue(), rawHex = root.get("txRaw").textValue();
-        if (!signature.matches("[0-9a-f]{128}") || !rawHex.matches("[0-9a-f]{2,4096}") || rawHex.length() % 2 != 0) throw new IOException("SIGNING_FAILED");
-        byte[] sig = CosmosBankSend.HEX.parseHex(signature), raw = CosmosBankSend.HEX.parseHex(rawHex);
-        if (!Arrays.equals(raw, CosmosBankSend.raw(material, sig)) || !root.get("txHash").textValue().equals(CosmosBankSend.hash(raw)) || !CosmosBankSend.verify(material, sig)) throw new IOException("SIGNING_FAILED");
-        return new SignedTx(raw, root.get("txHash").textValue().toUpperCase(java.util.Locale.ROOT));
+    private static int effectiveUid() throws IOException {
+        var identity = byx.service.identity.CodeIdentity.load();
+        if (identity == null) throw new IOException("SIGNING_FAILED");
+        return identity.effectiveUid();
     }
 
     private void verifyIdentity() throws IOException {
         for (Path p = binary; p != null; p = p.getParent()) if (Files.isSymbolicLink(p)) throw new IOException("SIGNING_FAILED");
         if (!Files.isRegularFile(binary, LinkOption.NOFOLLOW_LINKS) || !Files.isExecutable(binary) || Files.size(binary) > 16 * 1024 * 1024
-                || ((Number) Files.getAttribute(binary, "unix:uid", LinkOption.NOFOLLOW_LINKS)).longValue() != new com.sun.security.auth.module.UnixSystem().getUid()
+                || ((Number) Files.getAttribute(binary, "unix:uid", LinkOption.NOFOLLOW_LINKS)).longValue() != effectiveUid()
                 || !Files.getOwner(binary).equals(Files.getOwner(binary.getParent()))) throw new IOException("SIGNING_FAILED");
         for (Path p : List.of(binary, binary.getParent())) {
             var perms = Files.getPosixFilePermissions(p, LinkOption.NOFOLLOW_LINKS);

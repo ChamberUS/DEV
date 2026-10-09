@@ -65,10 +65,10 @@ class StartupResponsivenessTest {
             MotionService motion = new MotionService();
             motion.preference.set(MotionPreference.FULL);
             AuthScreens screens = new AuthScreens(motion, new AuthScreens.Services() {
-                @Override public User login(String id, char[] pw) { throw new AuthService.LoginException(AuthService.Failure.INVALID_CREDENTIALS, null); }
+                @Override public panel.auth.AuthenticationRequest beginLogin() { return panel.TestAuthenticationRequests.create((id, pw) -> { throw new AuthService.LoginException(AuthService.Failure.INVALID_CREDENTIALS, null); }); }
                 @Override public void createInitialAdmin(String u, String e, char[] p, String ph) { }
-                @Override public void changeOwnPassword(long id, char[] c, char[] n) { }
-                @Override public void endSession() { }
+                @Override public panel.auth.SessionOperation preparePasswordChange(long id, char[] c, char[] n) { return panel.TestAuthenticationRequests.operation(() -> { }); }
+                @Override public panel.auth.SessionOperation prepareLogout() { return panel.TestAuthenticationRequests.operation(() -> { }); }
             }, r -> { }, u -> { }, () -> { }, m -> { }, r -> { }, null);
             Scene s = new Scene((javafx.scene.Parent) screens.node(), 1440, 900);
             ByxTheme.apply(s);

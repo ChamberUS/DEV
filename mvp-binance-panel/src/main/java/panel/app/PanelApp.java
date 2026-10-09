@@ -54,12 +54,6 @@ public class PanelApp extends Application {
             "t-profile", "t-security", "t-sessions", "t-notifications", "t-account-activity", "t-settings",
             "h-faq", "h-help", "h-diagnostics", "h-about", "h-overview", "h-whats-new", "h-terms", "h-privacy", "h-shortcuts",
             "sys-status", "sys-unavailable");
-    /** Thread de trabalho do Transaction Lab (QA): nenhuma chamada ao serviço na thread FX. */
-    private static final java.util.concurrent.Executor TX_LAB_WORKER = r -> {
-        Thread t = new Thread(r, "tx-lab");
-        t.setDaemon(true);
-        t.start();
-    };
     private final StackPane content = new StackPane();
     private final javafx.animation.Timeline chromeWatch = new Timeline(new KeyFrame(Duration.seconds(1), e -> { if (this.mainActive) { watchAdminSession(); updateStatusDock(ctx.research.snapshot.get()); } }));
     private boolean byxWorkspace;
@@ -86,10 +80,15 @@ public class PanelApp extends Application {
     private Node tfOverlay;
 
     @Override
+    public void init() {
+        // Application.init runs on the launcher thread: settings and SQLite never block an FX pulse.
+        this.ctx = StartupTrace.time("createContext (AppContext)", this::createContext);
+    }
+
+    @Override
     public void start(Stage stage) {
         StartupTrace.mark("PanelApp.start enter");
         StartupTrace.heartbeat();
-        this.ctx = StartupTrace.time("createContext (AppContext)", this::createContext);
         this.stage = stage;
         // fontes do tema V2 (login): uma vez, pelo carregador do tema; as do tema legado (Inter, JetBrains Mono Bold) só depois da 1ª imagem
         StartupTrace.time("fonts (V2)", () -> { panel.design.ByxFonts.load(); return null; });
@@ -138,31 +137,53 @@ public class PanelApp extends Application {
     }
 
     private void runtimeDiagnostics(Scene scene) {
-        StringBuilder diagnostic = new StringBuilder("BYX_RUNTIME classes=").append(PanelApp.class.getProtectionDomain().getCodeSource().getLocation())
-                .append(" java=").append(System.getProperty("java.version"))
-                .append(" javafx=").append(System.getProperty("javafx.version"))
-                .append(" scene=").append(scene.getWidth()).append("x").append(scene.getHeight())
-                .append(" scale=").append(stage.getOutputScaleX()).append("x").append(stage.getOutputScaleY())
-                .append(" motion=").append(ctx.motion.preference.get()).append(" density=").append(ctx.settings.density)
-                .append(" motionSource=").append(java.nio.file.Files.exists(java.nio.file.Path.of(System.getProperty("user.home"), ".mvp-binance-panel", "settings.properties")) ? "persisted-settings" : "default");
-        for (String css : scene.getStylesheets()) {
-            try (var input = java.net.URI.create(css).toURL().openStream()) {
-                diagnostic.append(" css=").append(css).append(" sha256=")
-                        .append(java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input.readAllBytes())));
-            } catch (java.io.IOException | java.security.NoSuchAlgorithmException error) {
-                diagnostic.append(" cssReadError=").append(error.getClass().getSimpleName());
-            }
-        }
+        if (!Boolean.getBoolean("byx.runtime.diagnostics")) return;
+        String ui = "BYX_RUNTIME classes=" + PanelApp.class.getProtectionDomain().getCodeSource().getLocation()
+                + " java=" + System.getProperty("java.version") + " javafx=" + System.getProperty("javafx.version")
+                + " scene=" + scene.getWidth() + "x" + scene.getHeight()
+                + " scale=" + stage.getOutputScaleX() + "x" + stage.getOutputScaleY()
+                + " motion=" + ctx.motion.preference.get() + " density=" + ctx.settings.density;
+        var cssFiles = java.util.List.copyOf(scene.getStylesheets());
+        var home = java.nio.file.Path.of(System.getProperty("user.home"));
         scene.getRoot().applyCss();
-        scene.getRoot().lookupAll(".label").stream().filter(n -> n instanceof Label).findFirst()
-                .ifPresent(n -> diagnostic.append(" font=").append(((Label)n).getFont()));
-        if (Boolean.getBoolean("byx.runtime.diagnostics")) { // só sob demanda: contém caminhos locais e hashes das folhas
-            System.out.println(diagnostic);
-        }
+        String font = scene.getRoot().lookupAll(".label").stream().filter(n -> n instanceof Label).findFirst()
+                .map(n -> " font=" + ((Label)n).getFont()).orElse("");
+        Thread worker = new Thread(() -> {
+            StringBuilder diagnostic = new StringBuilder(ui).append(" motionSource=")
+                    .append(java.nio.file.Files.exists(home.resolve(".mvp-binance-panel/settings.properties")) ? "persisted-settings" : "default");
+            for (String css : cssFiles) {
+                try (var input = java.net.URI.create(css).toURL().openStream()) {
+                    diagnostic.append(" css=").append(css).append(" sha256=")
+                            .append(java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input.readAllBytes())));
+                } catch (java.io.IOException | java.security.NoSuchAlgorithmException error) {
+                    diagnostic.append(" cssReadError=").append(error.getClass().getSimpleName());
+                }
+            }
+            System.out.println(diagnostic.append(font));
+        }, "runtime-diagnostics");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     @Override
-    public void stop() { ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.scientificCapture.close(); ctx.byx.close(); ctx.byxBenefits.close(); }
+    public void stop() {
+        mainActive = false;
+        router.reset();
+        chromeWatch.stop();
+        if (expiryWatch != null) expiryWatch.stop();
+        closeTwoFactor();
+        if (authScreens != null) authScreens.dispose();
+        disposePublic();
+        views.values().forEach(View::dispose);
+        views.clear();
+        closeShell();
+        twoFactorWorker.shutdownNow();
+        ctx.auth.close();
+        ctx.closePresentation();
+        ctx.adminAccess.close();
+        ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close();
+        ctx.scientificCapture.close(); ctx.byx.close(); ctx.byxBenefits.close();
+    }
 
     private void applyDensity() {
         if (shell != null) shell.content().setComfortable("COMFORTABLE".equals(ctx.settings.density));
@@ -171,12 +192,20 @@ public class PanelApp extends Application {
     // ---- fluxo de autenticação -------------------------------------------------
 
     private void showEntry(String message) {
+        signingOut = false;
+        rootStack.setDisable(false);
+        researchCheckGeneration++;
+        authServiceGeneration++;
+        checkingTrustedDevice = false;
         mainActive = false;
         ctx.market.stop(); // logout/troca de usuário cancela a assinatura de mercado
         ctx.localService.stop();
         ctx.scientificCapture.stop();
+        closeTwoFactor();
+        views.values().forEach(View::dispose);
+        views.clear();
         closeShell();
-        if (activeView != null) { activeView.onHide(); activeView = null; }
+        activeView = null;
         router.reset();
         chromeWatch.stop();
         if (expiryWatch != null) {
@@ -206,10 +235,13 @@ public class PanelApp extends Application {
      * "Sign in" ou "Retry". Só apresenta; a autenticação continua passando pelo mesmo canal verificado. Resultado de um login já
      * descartado (logout/troca de tela) é ignorado.
      */
+    private long authServiceGeneration;
+
     private void startAuthService(panel.authview.AuthScreens screens) {
         if (!ctx.authority.launchesBundledService()) {
             return; // autoridade injetada (teste/QA): não há serviço do bundle para subir, o login não é bloqueado
         }
+        long readinessTicket = ++authServiceGeneration;
         screens.setServiceReadiness(panel.authview.AuthScreens.ServiceReadiness.STARTING, () -> startAuthService(screens));
         Thread launcher = new Thread(() -> {
             boolean ok;
@@ -220,7 +252,7 @@ public class PanelApp extends Application {
             }
             boolean ready = ok;
             Platform.runLater(() -> {
-                if (authScreens == screens) {
+                if (authScreens == screens && readinessTicket == authServiceGeneration) {
                     StartupTrace.mark("auth service " + (ready ? "READY" : "UNAVAILABLE"));
                     screens.setServiceReadiness(ready ? panel.authview.AuthScreens.ServiceReadiness.READY
                             : panel.authview.AuthScreens.ServiceReadiness.UNAVAILABLE, () -> startAuthService(screens));
@@ -234,10 +266,16 @@ public class PanelApp extends Application {
     /** Operações reais por trás das telas de entrada. */
     private panel.authview.AuthScreens.Services authServices() {
         return new panel.authview.AuthScreens.Services() {
-            @Override public User login(String identifier, char[] password) { return ctx.auth.login(identifier, password); }
+            @Override public panel.auth.AuthenticationRequest beginLogin() { return ctx.auth.beginLogin(); }
             @Override public void createInitialAdmin(String u, String email, char[] pw, String phone) { ctx.userService.createInitialAdmin(u, email, pw, phone); }
-            @Override public void changeOwnPassword(long id, char[] current, char[] next) { ctx.userService.changeOwnPassword(id, current, next); }
-            @Override public void endSession() { ctx.auth.logout(); }
+            @Override public panel.auth.SessionOperation preparePasswordChange(long id, char[] current, char[] next) {
+                var scope = ctx.auth.captureSession();
+                return new panel.auth.SessionOperation() {
+                    @Override public void run() { ctx.userService.changeOwnPassword(scope, id, current, next); }
+                    @Override public boolean deliver(Runnable callback) { return scope.present(callback); }
+                };
+            }
+            @Override public panel.auth.SessionOperation prepareLogout() { return ctx.auth.prepareLogout(); }
         };
     }
 
@@ -286,19 +324,51 @@ public class PanelApp extends Application {
     }
 
     private void afterPasswordChanged() {
-        User fresh = ctx.auth.refreshUser().orElse(null); // a SESSÃO no serviço decide (a troca obrigatória limpou o marcador lá)
-        if (fresh == null) { showEntry("Session expired. Please sign in again."); return; }
-        enterApp(fresh);
+        var screens = authScreens;
+        var scope = ctx.auth.captureSession();
+        Thread refresh = new Thread(() -> {
+            User user;
+            try { user = ctx.auth.refreshUser(scope).orElse(null); } catch (RuntimeException e) { user = null; }
+            User fresh = user;
+            Platform.runLater(() -> {
+                if (authScreens != screens || !scope.isLatestOutcome()) return;
+                if (fresh == null) showEntry("Session expired. Please sign in again.");
+                else enterApp(fresh);
+            });
+        }, "password-session-readback");
+        refresh.setDaemon(true);
+        refresh.start();
     }
 
+    private boolean signingOut;
+
     private void logout(String message) {
-        ctx.auth.logout();
-        showEntry(message);
+        if (signingOut) return;
+        signingOut = true;
+        toast(ToastType.INFO, "Signing out…");
+        mainActive = false;
+        closeTwoFactor();
+        rootStack.setDisable(true);
+        var release = ctx.auth.prepareLogout();
+        Thread worker = new Thread(() -> {
+            try { release.run(); } catch (RuntimeException unavailable) { /* AuthService clears presentation in finally. */ }
+            Platform.runLater(() -> release.deliver(() -> {
+                signingOut = false;
+                rootStack.setDisable(false);
+                showEntry(message);
+            }));
+        }, "authority-sign-out");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     // ---- aplicação principal ---------------------------------------------------
 
     private void enterApp(User user) {
+        signingOut = false;
+        rootStack.setDisable(false);
+        researchCheckGeneration++;
+        checkingTrustedDevice = false;
         activeUserId = user.id();
         sessionExpiredShown = false;
         if (authScreens != null) {
@@ -325,7 +395,7 @@ public class PanelApp extends Application {
         views.put("t-treasury", new panel.byxview.TreasuryScreen(byxData));
         views.put("t-mascot-gallery", new panel.mascot.MascotGallery(ctx.motion, panel.mascot.MascotAssets.shared())); // vazio até ser aberto (lazy); só aparece na palette em LOCAL_QA
         if (qaBuild()) { // Transaction Lab (sintético): só em LOCAL_QA; no build DEFAULT a tela nem é construída e o serviço responde TX_DISABLED a tudo
-            views.put("t-tx-lab", new panel.txview.TransactionLab(ctx.motion, panel.txview.TxLabService.over(ctx.authority), TX_LAB_WORKER, Platform::runLater, System::currentTimeMillis));
+            TxLabBuild.register(views, ctx);
         }
         views.put("t-chain-data", new panel.byxview.ChainDataScreen(ctx.motion, clock, new panel.localservice.ModuleReadClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome())), byxData));
         // LEGACY / NO V2 REFERENCE: vincular e revogar a posse (prova externa); o V2 de BYX é somente leitura
@@ -411,7 +481,7 @@ public class PanelApp extends Application {
             @Override public boolean labelsRunning() { return ctx.research.labelsRunning(); }
             @Override public int failedJobs() { return (int) ctx.jobs.jobs.stream().filter(j -> j.state.get() == panel.model.JobState.FAILED).count(); }
         }, this::show));
-        views.put("capture", new panel.researchview.CaptureScreen(ctx.motion, java.time.Clock.systemUTC(), ctx.captureMonitor, ctx.adminAccess,
+        views.put("capture", new panel.researchview.CaptureScreen(ctx.motion, java.time.Clock.systemUTC(), ctx.captureMonitor,
                 ctx.adminAccess::hasValidAdminSession, ctx.research.snapshot::get));
         views.put("sessions", new SessionsView(ctx));
         views.put("dataset", new DatasetView(ctx));
@@ -506,59 +576,67 @@ public class PanelApp extends Application {
     }
 
     private boolean checkingTrustedDevice;
+    private long researchCheckGeneration;
     private final panel.nav.Navigator navigator = new panel.nav.Navigator();
     private final panel.shell.ShellRouter router = new panel.shell.ShellRouter(navigator, this::evaluateRoute, this::display);
     private View activeView;
 
     private panel.shell.ShellRouter.Decision requestResearch(String target, panel.nav.Navigator.Ticket ticket) {
-        String destination = views.containsKey(target) ? target : "overview";
-        switch (ctx.adminAccess.evaluate()) {
-            case ALREADY_AUTHORIZED -> {
-                if (!views.containsKey(target)) {
-                    router.complete(ticket, destination); // destino desconhecido: Overview
-                    return panel.shell.ShellRouter.Decision.PENDING;
-                }
-                return panel.shell.ShellRouter.Decision.ALLOW;
+        // Both evaluation and trusted-device checks use IPC. Only presentation runs on FX.
+        if (checkingTrustedDevice) return panel.shell.ShellRouter.Decision.PENDING;
+        checkingTrustedDevice = true;
+        long checkGeneration = researchCheckGeneration;
+        var sessionId = ctx.sessions.user().orElseThrow().id();
+        var scope = ctx.auth.captureSession();
+        Thread check = new Thread(() -> {
+            panel.auth.AccessDecision decision;
+            boolean trusted = false;
+            try {
+                decision = ctx.adminAccess.evaluate(scope);
+                if (decision == panel.auth.AccessDecision.REQUIRES_2FA) trusted = ctx.adminAccess.tryTrustedDevice(scope);
+            } catch (RuntimeException e) {
+                Platform.runLater(() -> {
+                    if (checkGeneration != researchCheckGeneration) return;
+                    checkingTrustedDevice = false;
+                    if (mainActive && ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isPresent()
+                            && router.pending() != null) researchGateFailed(e);
+                });
+                return;
             }
-            case REQUIRES_2FA -> {
-                if (checkingTrustedDevice) return panel.shell.ShellRouter.Decision.PENDING; // o ticket mais recente decide
-                checkingTrustedDevice = true;
-                var sessionId = ctx.sessions.user().orElseThrow().id();
-                Thread check = new Thread(() -> {
-                    boolean result;
-                    try { result = ctx.adminAccess.tryTrustedDevice(); }
-                    catch (RuntimeException e) { result = false; }
-                    boolean trusted = result;
-                    javafx.application.Platform.runLater(() -> {
-                        checkingTrustedDevice = false;
-                        try {
-                            if (ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
-                            panel.nav.Navigator.Ticket latest = router.pending();
-                            if (latest == null) return; // o usuário navegou para outro lugar enquanto a verificação rodava
-                            String latestDestination = views.containsKey(latest.target()) ? latest.target() : "overview";
-                            if (trusted && ctx.adminAccess.hasValidAdminSession()) {
+            var outcome = decision;
+            boolean deviceTrusted = trusted;
+            Platform.runLater(() -> {
+                if (checkGeneration != researchCheckGeneration) return;
+                checkingTrustedDevice = false;
+                if (!mainActive || ctx.sessions.user().filter(u -> u.id().equals(sessionId)).isEmpty()) return;
+                panel.nav.Navigator.Ticket latest = router.pending();
+                if (latest == null || !panel.shell.ShellRoutes.isResearch(latest.target())) return;
+                String destination = views.containsKey(latest.target()) ? latest.target() : "overview";
+                try {
+                    switch (outcome) {
+                        case ALREADY_AUTHORIZED -> router.complete(latest, destination);
+                        case REQUIRES_2FA -> {
+                            if (deviceTrusted && ctx.adminAccess.hasValidAdminSession()) {
                                 updateLock(true);
-                                router.complete(latest, latestDestination);
-                            } else showTwoFactor(latest, latestDestination);
-                        } catch (RuntimeException e) {
-                            researchGateFailed(e);
+                                router.complete(latest, destination);
+                            } else showTwoFactor(latest, destination);
                         }
-                    });
-                }, "trusted-device-check");
-                check.setDaemon(true); check.start();
-                return panel.shell.ShellRouter.Decision.PENDING;
-            }
-            case FORBIDDEN_NOT_ADMIN -> {
-                ctx.adminAccess.noteDenied("research workspace requested");
-                deny("Access restricted to administrators.");
-                return panel.shell.ShellRouter.Decision.DENY;
-            }
-            case SESSION_EXPIRED -> {
-                if (shell != null) sessionExpired(); else logout("Session expired. Please sign in again.");
-                return panel.shell.ShellRouter.Decision.DENY;
-            }
-        }
-        return panel.shell.ShellRouter.Decision.DENY;
+                        case FORBIDDEN_NOT_ADMIN -> {
+                            router.cancelPending();
+                            ctx.adminAccess.noteDenied("research workspace requested");
+                            deny("Access restricted to administrators.");
+                        }
+                        case SESSION_EXPIRED -> {
+                            router.cancelPending();
+                            sessionExpired();
+                        }
+                    }
+                } catch (RuntimeException e) { researchGateFailed(e); }
+            });
+        }, "trusted-device-check");
+        check.setDaemon(true);
+        check.start();
+        return panel.shell.ShellRouter.Decision.PENDING;
     }
 
     /** Falha ao abrir a verificação do Research: fail-closed. Código fixo, sem mensagem da exceção (pode ter contato/código); o Research segue bloqueado. */
@@ -581,7 +659,8 @@ public class PanelApp extends Application {
         if (shell == null) return;
         User user = ctx.sessions.user().orElseThrow().user();
         panel.authview.AdminVerificationView[] ref = new panel.authview.AdminVerificationView[1];
-        ref[0] = new panel.authview.AdminVerificationView(ctx.motion, this::startAdminVerification, twoFactorWorker,
+        var scope = ctx.auth.captureSession();
+        ref[0] = new panel.authview.AdminVerificationView(ctx.motion, () -> startAdminVerification(scope), twoFactorWorker,
                 javafx.application.Platform::runLater, user.maskedEmail(), user.maskedPhone(), ctx.developmentLabel != null, () -> {
                     closeTwoFactor();
                     updateLock(true);
@@ -601,10 +680,10 @@ public class PanelApp extends Application {
     });
 
     /** Abre o desafio real; providers ausentes viram NOT CONFIGURED com o status real de cada um. */
-    private panel.authview.AdminVerificationView.Flow startAdminVerification() {
+    private panel.authview.AdminVerificationView.Flow startAdminVerification(panel.auth.AuthService.SessionScope scope) {
         TwoFactorFlowAdapter adapter;
         try {
-            adapter = new TwoFactorFlowAdapter(ctx.adminAccess.startTwoFactor());
+            adapter = new TwoFactorFlowAdapter(ctx.adminAccess.startTwoFactor(scope));
         } catch (panel.auth.TwoFactorNotConfiguredException e) {
             throw new panel.authview.AdminVerificationView.NotConfigured(
                     "Email and SMS providers run inside the local service and are not configured there.\nProvider setup is part of the authority migration (see the migration plan).");
@@ -784,7 +863,7 @@ public class PanelApp extends Application {
     /** Build LOCAL_QA = o serviço tem a chain pública configurada (o perfil é decidido no build do serviço; o painel só observa). */
     private boolean qaBuild() {
         String s = ctx.byx.snapshot().chainState();
-        return s != null && !"NOT_CONFIGURED".equals(s);
+        return TxLabBuild.available() && s != null && !"NOT_CONFIGURED".equals(s);
     }
 
     private panel.systemview.SystemStatusModel.Inputs statusInputs() {
@@ -853,18 +932,12 @@ public class PanelApp extends Application {
     /** Onboarding (diálogo persistente): só guarda o workspace de abertura e a conclusão; nada mais é tocado. */
     private void openOnboarding(boolean replay) {
         if (shell == null) return;
-        panel.systemview.OnboardingDialog.open(shell.overlay(), ctx.motion, ctx.settings.primaryWorkspace, r -> {
-            ctx.settings.onboardingCompleted = true;
-            if (r.completed()) ctx.settings.primaryWorkspace = r.workspace();
-            try {
-                ctx.settings.save();
-            } catch (java.io.IOException e) {
-                toast(ToastType.WARNING, "Onboarding preferences could not be saved.");
-            }
-            if (!replay && r.completed()) {
-                User u = ctx.sessions.user().map(x -> x.user()).orElse(null);
-                if (u != null) show(primaryRoute(u));
-            }
+        var owner = shell;
+        panel.systemview.OnboardingDialog.open(owner.overlay(), ctx.motion, ctx.settings.primaryWorkspace, r -> {
+            if (shell != owner || !mainActive) return;
+            // Persisting these preferences is frozen by ServerAuthorization. Do not mutate the
+            // in-memory settings, show success, or navigate as though persistence succeeded.
+            toast(ToastType.WARNING, "Onboarding preferences are read-only in this build.");
         });
     }
 

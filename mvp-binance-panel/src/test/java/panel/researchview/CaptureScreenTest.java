@@ -44,18 +44,14 @@ class CaptureScreenTest {
         final CaptureMonitorService service = new CaptureMonitorService(() -> {
             reads.incrementAndGet();
             return fixture;
-        }, () -> {
+        }, () -> () -> {
             if (!allowed.get()) {
                 throw new AccessDeniedException("denied");
             }
-        });
+        }, () -> allowed.get() && session.get());
         Snapshot snapshot = ResearchFixtures.trainReady(5, true);
-        final CaptureScreen screen = new CaptureScreen(motion, clock, service, () -> {
-            if (!allowed.get()) {
-                throw new AccessDeniedException("denied");
-            }
-            return null;
-        }, session::get, () -> snapshot);
+        final CaptureScreen screen = new CaptureScreen(motion, clock, service,
+                () -> allowed.get() && session.get(), () -> snapshot);
         final ShellRouter router = new ShellRouter(new Navigator(), (t, k) -> ShellRouter.Decision.ALLOW, id -> { });
         final ByxShell shell = new ByxShell(router, motion, new LegacyHost());
         Scene scene;
@@ -114,6 +110,7 @@ class CaptureScreenTest {
     @Test
     void monitorAndTimerExistOnlyWhileVisibleAndAuthorised() throws Exception {
         Env e = DeskHarness.fx(Env::new);
+        DeskHarness.fx(e.screen::onShow);
         try {
             DeskHarness.fx(() -> {
                 e.size(1440, 900);
@@ -159,6 +156,7 @@ class CaptureScreenTest {
     @Test
     void deniedOrExpiredAdminNeverStartsAnything() throws Exception {
         Env e = DeskHarness.fx(Env::new);
+        DeskHarness.fx(e.screen::onShow);
         try {
             DeskHarness.fx(() -> {
                 e.size(1440, 900);

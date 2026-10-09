@@ -66,12 +66,12 @@ class FinalVisualQa {
                     QaShots.shoot("t-desk", holder, m, "onboarding" + sz, s[0], s[1]);
                     // Login (entrada V2) com o rodapé público
                     var screens = new AuthScreens(m, new AuthScreens.Services() {
-                        @Override public User login(String id, char[] pw) {
+                        @Override public panel.auth.AuthenticationRequest beginLogin() { return panel.TestAuthenticationRequests.create((id, pw) -> {
                             throw new AuthService.LoginException(AuthService.Failure.INVALID_CREDENTIALS, null);
-                        }
+                        }); }
                         @Override public void createInitialAdmin(String u, String e, char[] p, String ph) { }
-                        @Override public void changeOwnPassword(long id, char[] c, char[] n) { }
-                        @Override public void endSession() { }
+                        @Override public panel.auth.SessionOperation preparePasswordChange(long id, char[] c, char[] n) { return panel.TestAuthenticationRequests.operation(() -> { }); }
+                        @Override public panel.auth.SessionOperation prepareLogout() { return panel.TestAuthenticationRequests.operation(() -> { }); }
                     }, r -> { }, u -> { }, () -> { }, x -> { }, r -> { }, null);
                     Scene scene = new Scene((javafx.scene.Parent) screens.node(), s[0], s[1]);
                     ByxTheme.apply(scene);

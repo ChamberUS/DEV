@@ -196,6 +196,9 @@ func SelfCheck() (string, bool) {
 	if !ok || filepath.Base(real) != signerAppName || filepath.Base(filepath.Dir(real)) != "Helpers" || filepath.Base(filepath.Dir(filepath.Dir(real))) != "Contents" {
 		return "", false
 	}
+	if !SafeInstallPath(filepath.Join(real, "Contents", "MacOS", "byx-signer-helper-qa"), real) {
+		return "", false
+	}
 	return real, true
 }
 
@@ -233,7 +236,7 @@ func Serve(invocation string, helperBundle string, stdout io.Writer, fds, socks,
 		return reject(conn, "caller code identity")
 	}
 	callerReal, ok := RealPath(callerPath)
-	if !ok || filepath.Dir(callerReal) != filepath.Dir(helperBundle) {
+	if !ok || filepath.Dir(callerReal) != filepath.Dir(helperBundle) || !SafeInstallPath(callerReal, callerReal) {
 		return reject(conn, "caller origin") // must live in the same Contents/Helpers directory of the same bundle
 	}
 	callerFresh = func() bool {
@@ -243,7 +246,7 @@ func Serve(invocation string, helperBundle string, stdout io.Writer, fds, socks,
 		}
 		path, rc := CheckToken(freshToken, requirement(ServiceID), true)
 		real, ok := RealPath(path)
-		return rc == 0 && ok && real == callerReal
+		return rc == 0 && ok && real == callerReal && SafeInstallPath(real, real)
 	}
 	defer func() { callerFresh = func() bool { return false } }()
 
@@ -261,7 +264,9 @@ func Serve(invocation string, helperBundle string, stdout io.Writer, fds, socks,
 		return 6
 	}
 	if Pending(conn) {
-		return 6 // trailing bytes after the single frame
+		// Refuse extra bytes before decoding or touching Keychain. Return the same
+		// closed public failure as the lifecycle EOF guard, regardless of arrival timing.
+		return answer(conn, Reply{Status: StatusFailed})
 	}
 	o, err := decodeOuter(frame)
 	if err != nil || o.ProtocolVersion != ProtocolVersion || o.Type != "request" || o.InvocationID != invocation || o.Challenge != challenge || !opNames[o.Op] ||

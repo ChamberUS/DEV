@@ -38,6 +38,7 @@ public class SettingsView extends PageView {
         javafx.scene.Node[] fields = {project, cli, reports, theme, poll, source};
         for (int i = 0; i < names.length; i++) {
             g.add(Ui.label(names[i], "muted"), 0, i);
+            fields[i].setDisable(true);
             g.add(fields[i], 1, i);
         }
         project.setPrefWidth(520);
@@ -48,26 +49,6 @@ public class SettingsView extends PageView {
         var status = Ui.label("", "muted");
         save.setDisable(true);
         status.setText(panel.security.ServerAuthorization.REQUIRED);
-        save.setOnAction(e -> {
-            try {
-                ctx.adminAccess.requireAdmin();
-            } catch (panel.security.AccessDeniedException ex) {
-                status.setText(ex.getMessage());
-                return;
-            }
-            st.projectPath = project.getText().trim();
-            st.cliPath = cli.getText().trim();
-            st.reportsPath = reports.getText().trim();
-            st.pollSeconds = Math.max(2, poll.getValue());
-            st.dataSource = source.getValue();
-            try {
-                st.save();
-                status.setText("Saved");
-            } catch (IOException ex) {
-                status.setText("Could not save: " + ex.getMessage());
-            }
-            ctx.research.reschedule();
-        });
         page.getChildren().add(Ui.pageHeader("Admin settings", "Project paths, research, security and users"));
         page.getChildren().add(Ui.card("Paths & behavior", g, new HBox(10, save, status)));
         page.getChildren().add(Ui.card("Safety",
@@ -79,7 +60,7 @@ public class SettingsView extends PageView {
 
     @Override
     protected int stateKey(Snapshot s) {
-        return java.util.Objects.hash(super.stateKey(s), ctx.audit.recent(1), ctx.adminAccess.hasValidAdminSession());
+        return java.util.Objects.hash(super.stateKey(s), ctx.adminAccess.hasValidAdminSession());
     }
 
     private void security(VBox page) {
@@ -90,11 +71,9 @@ public class SettingsView extends PageView {
                 Ui.kv("Phone", user == null ? null : user.maskedPhone()),
                 Ui.kv("Email verification", user == null ? null : (user.emailVerified() ? "Verified" : "Not verified")),
                 Ui.kv("Phone verification", user == null ? null : (user.phoneVerified() ? "Verified" : "Not verified"))));
-        VBox events = Ui.card("Recent security events");
-        for (var e : ctx.audit.recent(12)) {
-            events.getChildren().add(Ui.label(panel.util.Fmt.dateTime(java.time.Instant.parse(e.ts())) + "  " + e.event() + "  " + e.actor(), "mono"));
-        }
-        page.getChildren().add(events);
+        var activity = Ui.button("Open account activity", "ghost");
+        activity.setOnAction(e -> ctx.navigate.accept("t-account-activity"));
+        page.getChildren().add(Ui.card("Security events", wrapped("Account activity is read asynchronously on the Activity screen."), activity));
     }
 
     private static javafx.scene.control.Label wrapped(String text) {

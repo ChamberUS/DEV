@@ -10,7 +10,9 @@ bad() { FAIL=$((FAIL+1)); echo "FAIL  $1  [$2]"; }
 has() { [[ "$2" == *"$3"* ]] && ok "$1" || bad "$1" "esperado '$3' em: ${2:0:400}"; }
 not() { [[ "$2" != *"$3"* ]] && ok "$1" || bad "$1" "NÃO deveria conter '$3'"; }
 run_as() { env -i HOME="$HOME" PATH=/usr/bin:/bin "$@" 2>&1; }
-cleanup() { run_as "$SV" cleanup >/dev/null 2>&1; }
+PROBE_DIR=$(mktemp -d /private/tmp/byx-custody-security-qa.XXXXXX) || exit 2
+chmod 700 "$PROBE_DIR"
+cleanup() { run_as "$SV" cleanup >/dev/null 2>&1; rm -f "$PROBE_DIR/ready.bin"; rmdir "$PROBE_DIR"; }
 trap cleanup EXIT
 [[ -x "$H" && -x "$SV" && -x "$PN" ]] || { echo "rode ./build-custody-qa.sh antes"; exit 2; }
 
@@ -45,15 +47,16 @@ R=$("$T/client-wrongrole" spawn "$H" count ""); has "MESMO Team, outro role (com
 REFA="plant$(python3 -c 'import secrets;print(secrets.token_hex(8))')"; run_as "$SV" plant "$REFA" | grep -q "plant=PROVISIONED" && ok "item sintético plantado pelo chamador legítimo ($REFA)" || bad "plant" ""
 R=$("$T/client-unsigned" spawn "$H" lookup "$REFA"); has "KeyRef válida + processo errado: CALLER_UNTRUSTED (não FOUND)" "$R" "CALLER_UNTRUSTED"; not "  nenhuma chave derivada para o chamador errado" "$R" "publicKey"
 # helper executado DIRETAMENTE pelo Terminal, outro processo se conecta
-INV=$(python3 -c "import secrets;print(secrets.token_hex(16))"); rm -f /tmp/byx-qa-ready.bin
-( printf "%s\n" "$INV" | env -i "$H" > /tmp/byx-qa-ready.bin 2>/dev/null ) & sleep 1.5
-SOCK=$(python3 -c "import struct,json;b=open('/tmp/byx-qa-ready.bin','rb').read();n=struct.unpack('>I',b[:4])[0];print(json.loads(b[4:4+n])['path'])" 2>/dev/null)
-HPID=$(pgrep -f "Contents/MacOS/byx-signer-helper-qa" | head -1)
+INV=$(python3 -c "import secrets;print(secrets.token_hex(16))"); touch "$PROBE_DIR/ready.bin"; chmod 600 "$PROBE_DIR/ready.bin"
+( printf "%s\n" "$INV" | env -i "$H" > "$PROBE_DIR/ready.bin" 2>/dev/null ) & sleep 1.5
+SOCK=$(python3 -c "import sys,struct,json;b=open(sys.argv[1],'rb').read();n=struct.unpack('>I',b[:4])[0];print(json.loads(b[4:4+n])['path'])" "$PROBE_DIR/ready.bin" 2>/dev/null)
+HPID=$(python3 -c "import sys,struct,json;b=open(sys.argv[1],'rb').read();n=struct.unpack('>I',b[:4])[0];print(json.loads(b[4:4+n])['pid'])" "$PROBE_DIR/ready.bin" 2>/dev/null)
 NET=$(lsof -a -nP -p "$HPID" -i 2>/dev/null | grep -vc COMMAND); [[ "$NET" == "0" ]] && ok "signer em execução: ZERO sockets inet (lsof -i)" || bad "sockets inet no signer" "$NET"
 FDS=$(lsof -a -nP -p "$HPID" 2>/dev/null | awk 'NR>1 && $4 ~ /^[0-9]+[urw]?$/ {print $4}' | tr -d 'urw' | sort -un | tr '\n' ' '); echo "  fds do signer: $FDS"
 R=$("$T/client-unsigned" attach "$SOCK" "$INV" lookup "$REFA"); has "helper iniciado DIRETAMENTE pelo Terminal + chamador errado: CALLER_UNTRUSTED" "$R" "CALLER_UNTRUSTED"; has "  keychainCalls = 0" "$R" "\"keychainCalls\":0"
 sleep 1
-R=$(run_as JAVA_TOOL_OPTIONS=-Dinjected=1 "$SV" scenario | grep -E "firstCall|qa.call"); echo "  injected: ${R:0:200}"; has "service role com JAVA_TOOL_OPTIONS injetado: CALLER_UNTRUSTED" "$R" "CALLER_UNTRUSTED"
+R=$(run_as JAVA_TOOL_OPTIONS=-Dinjected=1 "$SV" scenario); RC=$?
+[[ "$RC" == 74 && "$R" == *"launcher: environment injection rejected"* && "$R" != *"qa.role"* ]] && ok "service role com JAVA_TOOL_OPTIONS: launcher recusa antes da JVM/Keychain" || bad "environment injection must fail before JVM" "$RC:${R:0:200}"
 R=$(run_as "$PN" scenario "$C/Helpers/byx-signer-helper-qa.app"); has "PANEL role -> signer: CALLER_UNTRUSTED" "$R" "CALLER_UNTRUSTED"; has "  keychainCalls = 0" "$R" "keychainCalls=0"
 
 echo "== 4. signer errado -> SERVICE (o service recusa ANTES de executar)"

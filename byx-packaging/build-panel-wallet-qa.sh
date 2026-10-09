@@ -21,6 +21,8 @@ p=sys.argv[1];s=open(p).read().replace('byx.service.signer.CustodyQaMain','panel
 s=s.replace('app.classpath=$APPDIR/byx-local-service-custody-qa-tests.jar','app.classpath=$APPDIR/byx-panel-wallet-qa-tests.jar')
 open(p,'w').write(s)
 PY
+TEAM="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.team-identifier' "$OUT/signer-qa.entitlements")"
+python3 "$HERE/harden-qa-launcher.py" "$C/MacOS/byx-wallet-panel-qa" "$C/app/byx-wallet-panel-qa.cfg" panel.wallet.WalletPanelQaMain "$BYX_APP_ID" "$TEAM"
 codesign --force --options runtime --timestamp=none -s "$IDENT" --identifier "$BYX_APP_ID" --entitlements "$HERE/entitlements/app.entitlements" "$C/MacOS/byx-wallet-panel-qa"
 codesign --force --options runtime --timestamp=none -s "$IDENT" --identifier "$BYX_APP_ID" --entitlements "$HERE/entitlements/app.entitlements" "$APP"
 codesign --verify --deep --strict "$APP"

@@ -20,4 +20,7 @@ public interface View {
 
     /** A view deixou de ser visível (ou a sessão acabou): pare timers/animações próprias aqui. */
     default void onHide() { }
+
+    /** The session discarded this view permanently. Release owned workers/listeners. */
+    default void dispose() { onHide(); }
 }

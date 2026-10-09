@@ -128,7 +128,7 @@ class CaptureRuntimeResolverTest {
         FxSupport.fx(() -> new Scene(card));
         var first = new CountDownLatch(1); var second = new CountDownLatch(1);
         var firstPublished = new AtomicBoolean(); var last = new AtomicReference<CaptureSnapshot>();
-        var service = new CaptureMonitorService(probe, () -> {});
+        var service = new CaptureMonitorService(probe, () -> () -> {}, () -> true);
         try {
             FxSupport.fx(() -> service.start(s -> {
                 card.show(s); last.set(s);

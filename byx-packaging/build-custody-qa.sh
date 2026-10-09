@@ -12,13 +12,13 @@ SIGNER_ID="${BYX_APP_ID}.signer.qa"; WRONG_ID="${BYX_APP_ID}.wrongrole.qa"
 SIGNER_PROFILE="$HERE/provisioning/out/signer-qa.provisionprofile"; SERVICE_PROFILE="$HERE/provisioning/out/service.provisionprofile"
 IDENT="${BYX_SIGN_IDENTITY:-$(security find-identity -v -p codesigning | awk '/Apple Development/ {print $2; exit}')}"
 [[ -n "$IDENT" ]] || { echo "nenhuma identidade Apple Development"; exit 3; }
-TEAM=$(security find-certificate -c "Apple Development" -p | openssl x509 -noout -subject -nameopt multiline | awk '/organizationalUnitName/ {print $3; exit}')
+read -r IDENT TEAM < <(python3 "$HERE/resolve-signing-identity.py" "$IDENT") || { echo "BLOCKED: signing identity"; exit 5; }
 dr() { echo "=designated => identifier \"$1\" and anchor apple generic and certificate leaf[subject.OU] = \"$TEAM\""; }
 sign() { codesign --force --options runtime --timestamp=none -s "$IDENT" "$@"; }
 
 echo "== 0. perfil do signer QA (aceitação)"
-security cms -D -i "$SIGNER_PROFILE" > /tmp/byx-signer-qa.profile.plist 2>/dev/null || { echo "BLOCKED: perfil ilegível"; exit 7; }
-read -r P_APPID P_TEAM P_PREFIX P_EXP < <(python3 -c "import plistlib,datetime;d=plistlib.load(open('/tmp/byx-signer-qa.profile.plist','rb'));assert d['ExpirationDate']>datetime.datetime.utcnow();print(d['Entitlements']['com.apple.application-identifier'],d['TeamIdentifier'][0],d['ApplicationIdentifierPrefix'][0],d['ExpirationDate'].strftime('%Y-%m-%dT%H:%M:%S'))") || { echo "BLOCKED: perfil vencido/ilegível"; exit 7; }
+read -r P_APPID P_TEAM P_PREFIX P_EXP < <(python3 "$HERE/validate-provisioning.py" "$SIGNER_PROFILE" "$SIGNER_ID" "$TEAM" --certificate-sha1 "$IDENT" --shell) || { echo "BLOCKED: perfil signer QA"; exit 7; }
+python3 "$HERE/validate-provisioning.py" "$SERVICE_PROFILE" "$BYX_SERVICE_ID" "$TEAM" --certificate-sha1 "$IDENT" >/dev/null || exit 7
 [[ "$P_APPID" == "$P_PREFIX.$SIGNER_ID" && "$P_TEAM" == "$TEAM" ]] || { echo "BLOCKED: perfil não autoriza $P_PREFIX.$SIGNER_ID para o Team $TEAM (autoriza $P_APPID / $P_TEAM)"; exit 7; }
 GROUP="$P_PREFIX.$SIGNER_ID.keys"
 echo "perfil OK: $P_APPID · team $P_TEAM · grupo $GROUP · expira $P_EXP UTC"
@@ -32,7 +32,7 @@ APP="$OUT/$BYX_APP_NAME.app"; C="$APP/Contents"
 echo "== 2. jar de teste (runner sintético) e binários Go (-tags qa)"
 ( cd "$ROOT/byx-local-service" && mvn -o -q test-compile )
 TJAR="$OUT/byx-local-service-custody-qa-tests.jar"
-jar cf "$TJAR" -C "$ROOT/byx-local-service/target/test-classes" .
+python3 "$HERE/package-qa-tests.py" "$ROOT/byx-local-service/target/test-classes" "$TJAR"
 ( cd "$ROOT/byx-local-service/signer-helper" && CGO_ENABLED=1 go build -tags qa -trimpath -o "$OUT/byx-signer-helper-qa.bin" ./cmd/byx-signer-helper-qa && CGO_ENABLED=1 go build -tags qa -trimpath -o "$OUT/byx-custody-qa-client.bin" ./cmd/byx-custody-qa-client )
 
 echo "== 3. signer QA (app-like, identidade e perfil PRÓPRIOS; grupo exclusivo)"
@@ -69,6 +69,7 @@ p=sys.argv[1]; s=open(p).read().replace("app.mainclass=byx.service.secrets.Secre
 s=s.replace("app.classpath=$APPDIR/byx-local-service-0.1.0.jar","app.classpath=$APPDIR/byx-local-service-0.1.0.jar\napp.classpath=$APPDIR/byx-local-service-custody-qa-tests.jar")
 open(p,"w").write(s)
 PY
+python3 "$HERE/harden-qa-launcher.py" "$SV/Contents/MacOS/byx-custody-qa-service" "$SV/Contents/app/byx-custody-qa-service.cfg" byx.service.signer.CustodyQaMain "$BYX_SERVICE_ID" "$TEAM"
 sign --identifier "$BYX_SERVICE_ID" -r "$(dr "$BYX_SERVICE_ID")" --entitlements "$OUT/service.keychain.entitlements" "$SV"
 cp "$C/MacOS/byx-secret-reader" "$C/MacOS/byx-custody-qa-panel"; cp "$C/app/byx-secret-reader.cfg" "$C/app/byx-custody-qa-panel.cfg"; cp "$TJAR" "$C/app/"
 python3 - "$C/app/byx-custody-qa-panel.cfg" <<'PY'
@@ -78,6 +79,7 @@ s=s.replace("app.classpath=$APPDIR/mvp-binance-panel-0.1.0.jar","app.classpath=$
 open(p,"w").write(s)
 PY
 grep -q "CustodyQaMain" "$C/app/byx-custody-qa-panel.cfg" || { echo "BLOCKED: cfg do papel painel"; exit 5; }
+python3 "$HERE/harden-qa-launcher.py" "$C/MacOS/byx-custody-qa-panel" "$C/app/byx-custody-qa-panel.cfg" byx.service.signer.CustodyQaMain "$BYX_APP_ID" "$TEAM"
 sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$HERE/entitlements/app.entitlements" "$C/MacOS/byx-custody-qa-panel"
 sign --identifier "$BYX_APP_ID" -r "$(dr "$BYX_APP_ID")" --entitlements "$HERE/entitlements/app.entitlements" "$APP"
 

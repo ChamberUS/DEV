@@ -32,13 +32,13 @@ class AuthKeyboardTest {
 
         Fixture() {
             screens = new AuthScreens(new MotionService(), new AuthScreens.Services() {
-                @Override public User login(String id, char[] pw) {
+                @Override public panel.auth.AuthenticationRequest beginLogin() { return panel.TestAuthenticationRequests.create((id, pw) -> {
                     attempts.add(id);
                     throw new AuthService.LoginException(AuthService.Failure.INVALID_CREDENTIALS, null);
-                }
+                }); }
                 @Override public void createInitialAdmin(String u, String e, char[] p, String ph) { }
-                @Override public void changeOwnPassword(long id, char[] c, char[] n) { }
-                @Override public void endSession() { }
+                @Override public panel.auth.SessionOperation preparePasswordChange(long id, char[] c, char[] n) { return panel.TestAuthenticationRequests.operation(() -> { }); }
+                @Override public panel.auth.SessionOperation prepareLogout() { return panel.TestAuthenticationRequests.operation(() -> { }); }
             }, routes::add, u -> { }, () -> { }, m -> { }, r -> { }, null);
             Scene s = new Scene((javafx.scene.Parent) screens.node(), 1440, 900);
             ByxTheme.apply(s);

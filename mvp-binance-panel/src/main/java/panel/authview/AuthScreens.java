@@ -39,14 +39,14 @@ public final class AuthScreens {
 
     /** Operações reais usadas pelas telas (AuthService / UserService). */
     public interface Services {
-        User login(String identifier, char[] password);
+        panel.auth.AuthenticationRequest beginLogin();
 
         void createInitialAdmin(String username, String email, char[] password, String phone);
 
-        void changeOwnPassword(long userId, char[] current, char[] next);
+        panel.auth.SessionOperation preparePasswordChange(long userId, char[] current, char[] next);
 
         /** Encerra a sessão atual (sair, ou sessão aberta por tentativa descartada). */
-        void endSession();
+        panel.auth.SessionOperation prepareLogout();
     }
 
     private static final PseudoClass ERROR = PseudoClass.getPseudoClass("error");
@@ -68,6 +68,9 @@ public final class AuthScreens {
     private final LoginController login;
     private final Runnable onPasswordChanged;
     private final Consumer<String> onSetupDone;
+    private long screenGeneration;
+    private boolean disposed;
+    private char[] pendingCurrent, pendingNext;
     private String route;
     private String notice;
     private User changing;
@@ -96,7 +99,7 @@ public final class AuthScreens {
             t.setDaemon(true);
             return t;
         });
-        login = new LoginController(services::login, worker, Platform::runLater, onLoggedIn, services::endSession);
+        login = new LoginController(services::beginLogin, worker, Platform::runLater, onLoggedIn);
         login.stateProperty().addListener((o, a, s) -> {
             layout.brand().setLoading(s == LoginController.State.LOADING);
             if (LOGIN.equals(route)) {
@@ -137,6 +140,7 @@ public final class AuthScreens {
     /** Aplica a rota de entrada (chamado só pelo roteador). notice: aviso real (ex.: sessão expirada). */
     public void show(String id, String noticeText, User mustChange) {
         stopCountdown();
+        screenGeneration++;
         route = id;
         notice = noticeText;
         changing = mustChange;
@@ -369,30 +373,44 @@ public final class AuthScreens {
         change.setDefaultButton(true);
         ByxButton out = new ByxButton("Sign out", ByxButton.Variant.SECONDARY, motion).wide();
         out.setOnAction(e -> {
-            services.endSession();
-            request.accept(LOGIN);
+            var logout = services.prepareLogout(); // capture ownership before queuing
+            long ticket = screenGeneration;
+            out.setDisable(true);
+            change.setDisable(true);
+            worker.execute(() -> {
+                try { logout.run(); } finally {
+                    Platform.runLater(() -> logout.deliver(() -> { if (!disposed && ticket == screenGeneration) request.accept(LOGIN); }));
+                }
+            });
         });
         change.setOnAction(e -> {
+            if (change.isDisabled()) return;
             confirm.setError(null);
             next.setError(null);
             if (!next.input().getText().equals(confirm.input().getText())) {
                 confirm.setError("Passwords do not match.");
                 return;
             }
-            char[] a = current.input().getText().toCharArray();
-            char[] b = next.input().getText().toCharArray();
-            try {
-                services.changeOwnPassword(changing.id(), a, b);
-                current.input().clear();
-                next.input().clear();
-                confirm.input().clear();
-                onPasswordChanged.run();
-            } catch (IllegalArgumentException ex) {
-                next.setError(ex.getMessage());
-            } finally {
-                java.util.Arrays.fill(a, '\0');
-                java.util.Arrays.fill(b, '\0');
-            }
+            char[] a = pendingCurrent = current.input().getText().toCharArray();
+            char[] b = pendingNext = next.input().getText().toCharArray();
+            var operation = services.preparePasswordChange(changing.id(), a, b);
+            long ticket = screenGeneration;
+            current.input().clear(); next.input().clear(); confirm.input().clear();
+            change.setLoading(true);
+            out.setDisable(true);
+            worker.execute(() -> {
+                String failure = null;
+                try { operation.run(); }
+                catch (RuntimeException ex) { failure = ex instanceof IllegalArgumentException ? ex.getMessage() : "Could not change the password. Check the local service and retry."; }
+                finally { java.util.Arrays.fill(a, '\0'); java.util.Arrays.fill(b, '\0'); }
+                String error = failure;
+                Platform.runLater(() -> operation.deliver(() -> {
+                    if (disposed || ticket != screenGeneration) return;
+                    change.setLoading(false); out.setDisable(false);
+                    if (error == null) onPasswordChanged.run();
+                    else next.setError(error);
+                }));
+            });
         });
         VBox fields = new VBox(12, current, next, confirm);
         layout.show("Change password", List.of(
@@ -402,6 +420,10 @@ public final class AuthScreens {
     }
 
     public void dispose() {
+        disposed = true;
+        screenGeneration++;
+        if (pendingCurrent != null) java.util.Arrays.fill(pendingCurrent, '\0');
+        if (pendingNext != null) java.util.Arrays.fill(pendingNext, '\0');
         stopCountdown();
         login.dispose();
         worker.shutdownNow();

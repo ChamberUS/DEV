@@ -186,23 +186,12 @@ public final class AuthFlowQa {
 
         private void plan() {
             plan.add(() -> {
-                check(AuthScreens.SETUP.equals(router.route()), "first run opens the setup route: " + router.route());
-                shot("auth-setup-1440x900", 1440, 900);
-                type("Username", "qa-admin");
-                type("Email", "qa@example.invalid");
-                type("Phone (optional)", "+5511999991234");
-                type("Password", "short");
-                type("Confirm password", "short");
-                button("Create administrator").fire();
-                check(AuthScreens.SETUP.equals(router.route()) && ctx.auth.firstRun(), "policy violation creates nothing");
-                type("Password", "auth-qa-pass-1");
-                type("Confirm password", "auth-qa-pass-1");
-                button("Create administrator").fire();
-                next(600);
-            });
-            plan.add(() -> {
-                check(AuthScreens.LOGIN.equals(router.route()) && !ctx.auth.firstRun(), "admin created, login route");
-                check(hasText("Administrator created. Sign in to continue."), "real notice on the login screen");
+                check(AuthScreens.LOGIN.equals(router.route()) && !ctx.auth.firstRun(), "frozen Service client opens login, not local administrator setup");
+                router.request(AuthScreens.SETUP);
+                check(AuthScreens.LOGIN.equals(router.route()), "unavailable setup cannot bypass the entry gate");
+                panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "auth-qa-pass-1", panel.security.Role.ADMIN, false);
+                check(ctx.sessions.user().isEmpty(), "seeding the isolated authority grants no UI session");
+                shot("auth-login-default-1440x900", 1440, 900);
                 signIn("qa-admin", "wrong-password-1");
                 check(screens().loginController().state() == LoginController.State.LOADING, "loading while the service runs");
                 next(900);
@@ -228,7 +217,7 @@ public final class AuthFlowQa {
             });
             plan.add(this::rateLimitLoop);
             plan.add(() -> {
-                check(screens().loginController().state() == LoginController.State.RATE_LIMITED, "rate limited on the 6th attempt");
+                check(screens().loginController().state() == LoginController.State.RATE_LIMITED, "rate limited by the synthetic authority");
                 Button countdown = root().lookupAll(".byx-btn").stream().map(n -> (Button) n)
                         .filter(b -> b.getText().startsWith("Try again in")).findFirst().orElseThrow();
                 check(countdown.isDisabled(), "countdown button disabled: " + countdown.getText());
@@ -239,7 +228,7 @@ public final class AuthFlowQa {
                 router.request("t-desk");
                 check(AuthScreens.LOGIN.equals(router.route()), "app routes are denied without a session");
                 lines.add("INFO rate-limit retryAfter=" + screens().loginController().retryAfter());
-                next(61_500); // espera o bloqueio real (60 s) terminar
+                next(screens().loginController().retryAfter().toMillis() + 1500); // wait for the authority-reported countdown
             });
             plan.add(() -> {
                 check(screens().loginController().state() == LoginController.State.DEFAULT, "lockout ends after the real retryAfter");
@@ -331,12 +320,14 @@ public final class AuthFlowQa {
 
         private int attempts;
 
-        /** Cinco falhas armam o bloqueio; a sexta tentativa recebe RATE_LIMITED (o bloqueio é por identificador). */
+        /** The fixture blocks globally after four failures; the next request is refused. */
         private void rateLimitLoop() throws Exception {
-            if (attempts == 6) {
+            if (screens().loginController().state() == LoginController.State.RATE_LIMITED) {
+                check(attempts == 4, "fixture lockout follows four global failures including the initial wrong password");
                 run();
                 return;
             }
+            if (attempts >= 6) throw new AssertionError("authority did not enforce its lockout");
             if (screens().loginController().state() != LoginController.State.LOADING) {
                 screens().loginController().reset(); // Esc entre tentativas (limpa só o erro)
                 signIn("nobody", "wrong-password-" + attempts);

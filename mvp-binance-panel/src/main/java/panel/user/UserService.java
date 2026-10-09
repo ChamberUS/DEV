@@ -57,6 +57,15 @@ public class UserService {
 
     /** O próprio usuário troca a senha pelo serviço. Mensagens equivalentes às do fluxo anterior. */
     public void changeOwnPassword(long id, char[] current, char[] next) {
+        changeOwnPassword(auth.captureSession(), id, current, next);
+    }
+
+    public void changeOwnPassword(AuthService.SessionScope scope, long id, char[] current, char[] next) {
+        if (!scope.isCurrent() || sessions.user().filter(s -> s.user().id() == id).isEmpty()) {
+            java.util.Arrays.fill(current, '\0');
+            java.util.Arrays.fill(next, '\0');
+            throw new AccessDeniedException("Session changed");
+        }
         String username = sessions.user().map(s -> s.user().username()).orElse(null);
         String policy = PasswordPolicy.check(next, username);
         if (policy != null) {
@@ -64,17 +73,19 @@ public class UserService {
             java.util.Arrays.fill(next, '\0');
             throw new IllegalArgumentException(policy);
         }
-        AuthorityGateway.Reply r = gateway.changePassword(current, next);
+        AuthorityGateway.Reply r;
+        try { r = scope.call(g -> g.changePassword(current, next)); }
+        finally { java.util.Arrays.fill(current, '\0'); java.util.Arrays.fill(next, '\0'); }
         switch (r.code()) {
             case "OK" -> {
-                auth.refreshUser();
-                onCredentialsChanged.accept(id);
+                auth.refreshUser(scope);
+                if (!scope.present(() -> onCredentialsChanged.accept(id))) throw new AccessDeniedException("Session changed");
             }
             case "INVALID_CREDENTIALS" -> throw new IllegalArgumentException("Current password is incorrect.");
             case "WEAK_PASSWORD" -> throw new IllegalArgumentException("New password must differ from the current one and meet the password policy.");
             case "RATE_LIMITED" -> throw new IllegalArgumentException("Wait before retrying current password.");
             case "FROZEN" -> throw new AccessDeniedException("Password changes are temporarily unavailable until the security cutover validation is finished.");
-            case "AUTH_REQUIRED" -> throw new AccessDeniedException("Session changed");
+            case "AUTH_REQUIRED", "STALE_AUTH_OPERATION" -> throw new AccessDeniedException("Session changed");
             default -> throw new IllegalStateException("Authority unavailable.");
         }
     }

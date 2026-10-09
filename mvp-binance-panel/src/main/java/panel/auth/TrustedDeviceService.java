@@ -17,20 +17,22 @@ public final class TrustedDeviceService {
         public String status(Instant now) { return !now.isBefore(expiresAt) ? "EXPIRED" : revokedAt != null ? "REVOKED" : "ACTIVE"; }
     }
 
-    private final AuthorityGateway gateway;
+    private final AuthService auth;
     private final Clock clock;
     /** Chamado depois de uma mudança no serviço (o acesso administrativo relê o estado). */
-    Runnable onChanged = () -> { };
+    java.util.function.Consumer<AuthService.SessionScope> onChanged = scope -> { };
 
-    public TrustedDeviceService(AuthorityGateway gateway, Clock clock) {
-        this.gateway = gateway;
+    public TrustedDeviceService(AuthService auth, Clock clock) {
+        this.auth = auth;
         this.clock = clock;
     }
 
-    public void trustCurrent() {
-        AuthorityGateway.Reply r = gateway.enrollTrustedDevice();
+    public void trustCurrent() { trustCurrent(auth.captureSession()); }
+
+    public void trustCurrent(AuthService.SessionScope scope) {
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::enrollTrustedDevice);
         if (r.ok()) {
-            onChanged.run();
+            onChanged.accept(scope);
             return;
         }
         switch (r.code()) {
@@ -40,8 +42,10 @@ public final class TrustedDeviceService {
         }
     }
 
-    public List<Device> list() {
-        AuthorityGateway.Reply r = gateway.listTrustedDevices();
+    public List<Device> list() { return list(auth.captureSession()); }
+
+    public List<Device> list(AuthService.SessionScope scope) {
+        AuthorityGateway.Reply r = scope.call(AuthorityGateway::listTrustedDevices);
         if (!r.ok()) {
             throw new AccessDeniedException("AdminSession required");
         }
@@ -60,17 +64,19 @@ public final class TrustedDeviceService {
         return List.copyOf(out);
     }
 
-    public void revoke(String id) {
-        AuthorityGateway.Reply r = gateway.revokeTrustedDevice(id);
+    public void revoke(String id) { revoke(auth.captureSession(), id); }
+
+    public void revoke(AuthService.SessionScope scope, String id) {
+        AuthorityGateway.Reply r = scope.call(g -> g.revokeTrustedDevice(id));
         if (!r.ok()) {
             throw new AccessDeniedException("AdminSession required");
         }
-        onChanged.run();
+        onChanged.accept(scope);
     }
 
     /** Mudança de contato/credencial: o serviço já revoga os dispositivos da conta; nada local a fazer. */
     public void revokeAllForCurrentUser() {
-        onChanged.run();
+        onChanged.accept(auth.captureSession());
     }
 
     Clock clock() {

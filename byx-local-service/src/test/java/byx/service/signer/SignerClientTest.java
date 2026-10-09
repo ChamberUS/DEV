@@ -52,7 +52,7 @@ class SignerClientTest {
     @AfterAll static void cleanup() throws Exception {
         if (dir != null) { Files.deleteIfExists(binary); Files.deleteIfExists(production); Files.deleteIfExists(dir.resolve("alias")); Files.deleteIfExists(dir); }
     }
-    private SignerClient client(String mode) { return new SignerClient(binary, sha, pub, List.of("-test.run=^TestProcessHarness$", "--", mode), Duration.ofSeconds(2)); }
+    private LegacyStdioSignerFixture client(String mode) { return new LegacyStdioSignerFixture(binary, sha, pub, List.of("-test.run=^TestProcessHarness$", "--", mode), Duration.ofSeconds(2)); }
     private TxSignRequest request() { return SignerRequestFixture.confirmed(vector).request(); }
 
     @Test void realProcessSyntheticSigningMatchesGoldenBytesAndNeverBroadcasts() throws Exception {
@@ -73,7 +73,7 @@ class SignerClientTest {
     @ParameterizedTest @ValueSource(strings = {"exit", "partial", "oversized", "malformed", "wrong-id", "bad-signature", "bad-hash", "bad-intent", "bad-raw", "wrong-key", "replay", "trailing", "unknown-field", "missing-field", "duplicate-field", "wrong-version", "null-field"})
     void corruptedOrCrashingHelpersFailClosed(String mode) { assertThrows(TxSignerException.class, () -> client(mode).sign(request())); }
     @Test void timeoutIsBoundedAndChildDoesNotKeepServiceBlocked() {
-        var c = new SignerClient(binary, sha, pub, List.of("-test.run=^TestProcessHarness$", "--", "hang"), Duration.ofMillis(250));
+        var c = new LegacyStdioSignerFixture(binary, sha, pub, List.of("-test.run=^TestProcessHarness$", "--", "hang"), Duration.ofMillis(250));
         assertTimeoutPreemptively(Duration.ofSeconds(1), () -> assertThrows(TxSignerException.class, () -> c.sign(request())));
         assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
             while (ProcessHandle.current().children().anyMatch(p -> p.isAlive() && p.info().command().orElse("").equals(binary.toString()))) Thread.sleep(10);
@@ -84,34 +84,38 @@ class SignerClientTest {
         assertThrows(TxSignerException.class, () -> c.sign(r));
     }
     @Test void changedBinaryHashAndSymlinkFailClosed() throws Exception {
-        var wrong = new SignerClient(binary, "0".repeat(64), pub, List.of(), Duration.ofSeconds(1));
+        var wrong = new LegacyStdioSignerFixture(binary, "0".repeat(64), pub, List.of(), Duration.ofSeconds(1));
         assertThrows(TxSignerException.class, () -> wrong.sign(request()));
         Path alias = dir.resolve("alias"); Files.createSymbolicLink(alias, binary);
-        var linked = new SignerClient(alias, sha, pub, List.of(), Duration.ofSeconds(1));
+        var linked = new LegacyStdioSignerFixture(alias, sha, pub, List.of(), Duration.ofSeconds(1));
         assertThrows(TxSignerException.class, () -> linked.sign(request()));
     }
     @Test void wrongPublicMetadataFailsBeforeSigning() {
         byte[] altered = pub.clone(); altered[0] = 3;
-        var wrong = new SignerClient(binary, sha, altered, List.of("-test.run=^TestProcessHarness$", "--", "synthetic"), Duration.ofSeconds(1));
+        var wrong = new LegacyStdioSignerFixture(binary, sha, altered, List.of("-test.run=^TestProcessHarness$", "--", "synthetic"), Duration.ofSeconds(1));
         assertThrows(TxSignerException.class, () -> wrong.sign(request()));
     }
     @Test void productionHelperAndServiceRemainUnavailable() {
-        assertFalse(SignerClient.UNAVAILABLE.available()); assertFalse(TxSigner.UNAVAILABLE.available()); assertFalse(TxGate.TX_MUTATIONS_ALLOWED);
-        assertThrows(TxSignerException.class, () -> SignerClient.UNAVAILABLE.sign(request()));
-        var c = new SignerClient(production, CosmosBankSend.hash(readProduction()), pub, List.of(), Duration.ofSeconds(1));
+        assertFalse(LegacyStdioSignerFixture.UNAVAILABLE.available()); assertFalse(TxSigner.UNAVAILABLE.available()); assertFalse(TxGate.TX_MUTATIONS_ALLOWED);
+        assertThrows(TxSignerException.class, () -> LegacyStdioSignerFixture.UNAVAILABLE.sign(request()));
+        var c = new LegacyStdioSignerFixture(production, CosmosBankSend.hash(readProduction()), pub, List.of(), Duration.ofSeconds(1));
         assertThrows(TxSignerException.class, () -> c.sign(request()));
     }
     private byte[] readProduction() { try { return Files.readAllBytes(production); } catch (java.io.IOException e) { throw new AssertionError(e); } }
     @Test void noGenericOrShellOrExternalEnablementSurface() throws Exception {
-        String main = Files.readString(Path.of("src/main/java/byx/service/signer/SignerClient.java"));
+        String main = Files.readString(Path.of("src/test/java/byx/service/signer/LegacyStdioSignerFixture.java"));
         for (String prohibited : List.of("System.getenv", "System.getProperty", "sh -c", "bash -c", "zsh -c", "signHash(", "signBytes(", "sessionToken", "mfaToken")) assertFalse(main.contains(prohibited));
         assertTrue(main.contains("builder.environment().clear()")); assertTrue(main.contains("binary.isAbsolute()"));
         assertTrue(main.contains("public SignedTx sign(TxSignRequest request)"));
         try (var sources = Files.walk(Path.of("src/main/java"))) {
             for (Path p : sources.filter(x -> x.toString().endsWith(".java")).toList()) {
-                if (!p.getFileName().toString().equals("SignerClient.java")) assertFalse(Files.readString(p).contains("new SignerClient("), p.toString());
+                assertFalse(Files.readString(p).contains("LegacyStdioSignerFixture"), p.toString());
+                assertFalse(Files.readString(p).contains("UnixSystem"), p.toString());
             }
         }
+        assertFalse(Files.exists(Path.of("src/main/java/byx/service/signer/SignerClient.java")));
+        String verifier = Files.readString(Path.of("src/main/java/byx/service/signer/SignedResponseVerifier.java"));
+        for (String prohibited : List.of("ProcessBuilder", "CodeIdentity", "Keychain", "UnixSystem", "System.getenv", "System.getProperty")) assertFalse(verifier.contains(prohibited));
         String go = Files.readString(Path.of("signer-helper/cmd/byx-signer-helper/main.go"));
         assertTrue(go.contains("UnavailableProvider{}")); assertFalse(go.contains("SyntheticKeyProvider"));
     }

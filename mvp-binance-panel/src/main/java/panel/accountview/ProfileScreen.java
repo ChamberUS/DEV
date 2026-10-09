@@ -49,6 +49,7 @@ public final class ProfileScreen implements View {
     private ByxButton save;
     private boolean editing;
     private boolean saving;
+    private long generation;
     private String originalEmail = "";
     private String originalPhone = "";
     private final HBox actions = new HBox(10);
@@ -122,7 +123,7 @@ public final class ProfileScreen implements View {
 
     void startEdit() {
         User u = data.user().orElse(null);
-        if (u == null || editing) {
+        if (u == null || editing || saving) {
             return;
         }
         editing = true;
@@ -162,8 +163,8 @@ public final class ProfileScreen implements View {
         if (!editing) {
             return;
         }
+        generation++;
         editing = false;
-        saving = false;
         password.input().clear();
         editor.getChildren().clear();
         editor.setVisible(false);
@@ -197,6 +198,7 @@ public final class ProfileScreen implements View {
         String e = email.input().getText().trim();
         String p = phone.input().getText().trim();
         saving = true;
+        long ticket = generation;
         save.setLoading(true);
         Thread t = new Thread(() -> {
             String failure = null;
@@ -208,7 +210,10 @@ public final class ProfileScreen implements View {
                 Arrays.fill(pw, '\0');
             }
             String f = failure;
-            Platform.runLater(() -> done(f));
+            Platform.runLater(() -> {
+                saving = false;
+                if (ticket == generation) done(f);
+            });
         }, "contact-update");
         t.setDaemon(true);
         t.start();
@@ -276,6 +281,13 @@ public final class ProfileScreen implements View {
         if (!editing) {
             render();
         }
+    }
+
+    @Override public void onHide() { generation++; }
+
+    @Override public void dispose() {
+        generation++;
+        discardChanges();
     }
 
     @Override

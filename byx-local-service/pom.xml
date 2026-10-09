@@ -51,6 +51,17 @@
       </resource>
     </resources>
     <plugins>
+      <!-- Prevent retired transport bytecode from an incremental target directory entering any runtime artifact. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.1</version>
+        <configuration><excludes>
+          <exclude>byx/service/signer/SignerClient*.class</exclude>
+          <exclude>byx/service/auth/AuthQaMain*.class</exclude>
+          <exclude>byx/service/migration/MigrateQaMain*.class</exclude>
+          <exclude>byx/service/migration/LegacyPanelHash*.class</exclude>
+          <exclude>byx/service/secrets/SecretCanary*.class</exclude>
+        </excludes></configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

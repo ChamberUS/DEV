@@ -7,6 +7,7 @@ package custody
 
 /*
 #cgo LDFLAGS: -framework Security -framework CoreFoundation
+#include "install_policy.h"
 #include <Security/Security.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/socket.h>
@@ -655,4 +656,13 @@ func Wipe(b []byte) {
 	if len(b) > 0 {
 		C.qa_wipe(unsafe.Pointer(&b[0]), C.int(len(b)))
 	}
+}
+
+// SafeInstallPath rejects foreign writers and unsafe ACLs before any Keychain operation.
+func SafeInstallPath(path string, bundle string) bool {
+	p := C.CString(path)
+	b := C.CString(bundle)
+	defer C.free(unsafe.Pointer(p))
+	defer C.free(unsafe.Pointer(b))
+	return C.install_path_ok(p, b) == 1
 }

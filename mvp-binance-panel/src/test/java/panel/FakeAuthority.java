@@ -43,6 +43,10 @@ public final class FakeAuthority implements AuthorityGateway {
     public volatile Runnable beforeElevation;
     /** Só teste: roda no início de sessionStatus, na thread chamadora (o check de dispositivo roda em "trusted-device-check"). */
     public volatile Runnable beforeStatus;
+    /** Synthetic concurrency hooks; no corresponding production switches exist. */
+    public volatile java.util.function.Consumer<String> beforeLogin;
+    public volatile Runnable beforeBegin;
+    public volatile Runnable beforeLogout;
     private String emailCode;
     private String smsCode;
     private String challenge;
@@ -156,6 +160,7 @@ public final class FakeAuthority implements AuthorityGateway {
 
     @Override
     public Reply login(String identifier, char[] password) {
+        if (beforeLogin != null) beforeLogin.accept(identifier);
         calls.add("login");
         String pw = new String(password);
         java.util.Arrays.fill(password, '\0');
@@ -197,6 +202,7 @@ public final class FakeAuthority implements AuthorityGateway {
 
     @Override
     public Reply beginSecondFactor() {
+        if (beforeBegin != null) beforeBegin.run();
         calls.add("begin");
         Acct a = live();
         if (a == null) {
@@ -372,6 +378,7 @@ public final class FakeAuthority implements AuthorityGateway {
 
     @Override
     public Reply logout() {
+        if (beforeLogout != null) beforeLogout.run();
         calls.add("logout");
         boolean had = token != null;
         restartService();

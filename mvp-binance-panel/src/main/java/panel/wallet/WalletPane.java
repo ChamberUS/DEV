@@ -5,7 +5,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import java.util.concurrent.Executors;
 import java.util.function.BooleanSupplier;
@@ -26,14 +26,18 @@ public final class WalletPane extends VBox {
     private final Button create = new Button("Create synthetic QA");
     private final Button delete = new Button("Delete synthetic QA");
     private final Button sign = new Button("Synthetic sign QA");
-    private final HBox actions = new HBox(10, create, sign, delete);
+    private final FlowPane actions = new FlowPane(10, 10, create, sign, delete);
+    private boolean shown;
+    private long generation;
+    private Alert confirmation;
     private final BooleanSupplier admin;
     private final WalletController controller;
     public WalletPane(WalletGateway gateway, BooleanSupplier admin) {
         this.admin = admin;
         controller = new WalletController(gateway, WORKER, Platform::runLater, this::render);
         setSpacing(12); setId("wallet-lifecycle-card");
-        for (Label label : java.util.List.of(status, address, identity, message, warning, operation)) { label.setWrapText(true); label.setMaxWidth(Double.MAX_VALUE); }
+        for (Label label : java.util.List.of(status, address, identity, message, warning, operation)) { label.setWrapText(true); label.setMinWidth(0); label.setMaxWidth(Double.MAX_VALUE); }
+        status.setMaxWidth(USE_PREF_SIZE);
         warning.getStyleClass().add("byx-body"); warning.setStyle("-fx-text-fill: -byx-warning;");
         for (Button button : java.util.List.of(refresh, create, delete, sign)) button.getStyleClass().add("byx-btn");
         refresh.getStyleClass().add("secondary"); sign.getStyleClass().add("secondary"); delete.getStyleClass().add("danger-outline");
@@ -56,10 +60,19 @@ public final class WalletPane extends VBox {
         } catch (java.io.IOException e) { return false; }
     }
     private boolean confirm(String title, String content) {
+        if (!shown || confirmation != null || getScene() == null) return false;
+        long ticket = generation;
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, content, ButtonType.CANCEL, ButtonType.OK);
+        confirmation = alert;
+        panel.design.ByxTheme.apply(alert.getDialogPane());
+        Button cancel = (Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancel.setDefaultButton(true);
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.OK)).setDefaultButton(false);
+        alert.setOnShown(e -> cancel.requestFocus());
         alert.setTitle(title); alert.setHeaderText(title);
         if (getScene() != null) alert.initOwner(getScene().getWindow());
-        return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+        try { return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK && shown && ticket == generation; }
+        finally { if (confirmation == alert) confirmation = null; }
     }
     private void render(WalletController.State state) {
         if (!Platform.isFxApplicationThread()) throw new IllegalStateException("FX_THREAD_REQUIRED");
@@ -79,7 +92,7 @@ public final class WalletPane extends VBox {
             String result = last.action().equals("SIGN") && last.state().equals("COMPLETE") ? "Synthetic signature: SUCCESS" : last.action() + " · " + last.state();
             operation.setText(result + "\nOperation: " + last.operationId() + (last.publicHash() == null ? "" : "\nPublic hash: " + last.publicHash()));
         } else operation.setText("");
-        warning.setVisible(qa && !view.wallets().isEmpty()); warning.setManaged(warning.isVisible());
+        warning.setVisible(qa && view.wallets().stream().anyMatch(w -> !w.lifecycleState().equals("DELETED"))); warning.setManaged(warning.isVisible());
         WalletView.Wallet wallet = view == null ? null : view.wallets().stream().filter(w -> !w.lifecycleState().equals("DELETED")).findFirst().orElse(null);
         if (state.status().equals("NEEDS_ATTENTION") && state.message().isEmpty()) {
             message.setText(wallet != null && !wallet.healthState().equals("HEALTHY") ? "Needs attention · " + wallet.healthState().replace('_', ' ')
@@ -94,6 +107,6 @@ public final class WalletPane extends VBox {
         refresh.setDisable(state.busy());
     }
     public void refresh() { controller.refresh(); }
-    public void onShow() { controller.show(); }
-    public void onHide() { controller.hide(); }
+    public void onShow() { shown = true; controller.show(); }
+    public void onHide() { shown = false; generation++; if (confirmation != null) { confirmation.setResult(ButtonType.CANCEL); confirmation.close(); } controller.hide(); }
 }

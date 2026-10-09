@@ -24,6 +24,7 @@ import panel.v2.Kit;
  * não existem. Sem registros: EMPTY real; leitura que falha: UNAVAILABLE. Nada de histórico fictício nem guardado na UI.
  */
 public final class ActivityScreen implements View {
+    private final AccountRead read = new AccountRead();
     private final AccountData data;
     private final Clock clock;
     private final ScrollPane scroll;
@@ -38,7 +39,7 @@ public final class ActivityScreen implements View {
         VBox page = Kit.page(14);
         page.getChildren().addAll(Kit.header("Activity", "Your account and security history. Only security events are recorded in this build."), panel);
         scroll = Kit.scroll(page);
-        render();
+        state.setText("NOT LOADED");
     }
 
     String stateText() {
@@ -46,15 +47,21 @@ public final class ActivityScreen implements View {
     }
 
     private void render() {
-        body.getChildren().clear();
-        List<SecurityAuditService.Entry> entries;
-        try {
-            entries = data.user().isPresent() ? data.activity(50) : List.of();
-        } catch (RuntimeException e) {
-            state.setText("UNAVAILABLE");
-            body.getChildren().add(Kit.muted("The local audit log could not be read."));
-            return;
-        }
+        body.getChildren().setAll(Kit.muted("Loading security activity…"));
+        state.setText("LOADING");
+        boolean signedIn = data.user().isPresent();
+        read.load(() -> signedIn ? data.activity(50) : List.<SecurityAuditService.Entry>of(), (entries, error) -> {
+            body.getChildren().clear();
+            if (error != null) {
+                state.setText("UNAVAILABLE");
+                body.getChildren().add(Kit.muted("The local audit log could not be read."));
+                return;
+            }
+            display(entries);
+        });
+    }
+
+    private void display(List<SecurityAuditService.Entry> entries) {
         state.setText(entries.isEmpty() ? "EMPTY" : "SECURITY · " + entries.size());
         if (entries.isEmpty()) {
             body.getChildren().add(Kit.muted("No activity recorded yet."));
@@ -89,8 +96,7 @@ public final class ActivityScreen implements View {
     public void onSnapshot(Snapshot ignored) {
     }
 
-    @Override
-    public void onShow() {
-        render();
-    }
+    @Override public void onShow() { render(); }
+    @Override public void onHide() { read.cancel(); }
+    @Override public void dispose() { read.close(); }
 }

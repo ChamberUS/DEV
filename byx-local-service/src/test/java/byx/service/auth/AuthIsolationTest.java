@@ -113,7 +113,7 @@ class AuthIsolationTest {
             assertEquals(Set.of("auth/AuthProfile.java"), filesContaining("SecretId." + testId), testId + " appears only in the QA profile");
         }
         assertEquals(Set.of("auth/AuthProfile.java"), filesContaining("SecretStores.production()"), "only the production profile asks for the production store");
-        String qa = Files.readString(MAIN.resolve("byx/service/auth/AuthQaMain.java"));
+        String qa = Files.readString(Path.of("src/test/java/byx/service/auth/AuthQaMain.java"));
         assertFalse(qa.contains("production(") || qa.contains("PRODUCTION"), "the QA main has no way to select the production profile");
         assertTrue(qa.contains("qa refuses to run on the real service home"), "and it refuses the real service home");
         String main = Files.readString(MAIN.resolve("byx/service/ServiceMain.java"));
@@ -123,7 +123,8 @@ class AuthIsolationTest {
 
     @Test
     void qaMainIsReferencedByNothingElse() throws IOException {
-        assertEquals(Set.of("auth/AuthQaMain.java"), filesContaining("AuthQaMain"));
+        assertEquals(Set.of(), filesContaining("AuthQaMain"));
+        assertFalse(Files.exists(MAIN.resolve("byx/service/auth/AuthQaMain.java")), "QA entrypoint absent from production sources");
     }
 
     // ---- segundo fator, rede, flags ----------------------------------------------------------------------------------------------------
@@ -138,11 +139,11 @@ class AuthIsolationTest {
                 }
             }
         }
-        assertEquals(Set.of("auth/NotConfiguredSecondFactor.java", "auth/RealSecondFactor.java", "auth/AuthQaMain.java"), impl, "no development OTP provider in the product artifact");
+        assertEquals(Set.of("auth/NotConfiguredSecondFactor.java", "auth/RealSecondFactor.java"), impl, "no development OTP provider in the product artifact");
         assertEquals(Set.of("auth/RealSecondFactor.java"), filesContaining("https://api.resend.com"), "the Resend endpoint is only in the real adapter");
         assertEquals(Set.of(), filesContaining("api.twilio.com"));
         assertEquals(Set.of("auth/HttpTransport.java", "auth/RealSecondFactor.java"), filesContaining("verify.twilio.com"), "the Twilio endpoint: the adapter and the transport allowlist");
-        assertTrue(Files.readString(MAIN.resolve("byx/service/auth/AuthQaMain.java")).contains("FileSecondFactor"), "the file-based test provider lives only in the QA main");
+        assertTrue(Files.readString(Path.of("src/test/java/byx/service/auth/AuthQaMain.java")).contains("FileSecondFactor"), "the file-based test provider lives only in the QA main");
     }
 
     @Test

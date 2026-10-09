@@ -4,41 +4,56 @@ import java.time.Instant;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import javafx.application.Platform;
 import panel.adapter.CaptureProcessProbe;
 import panel.model.CaptureSnapshot;
 import panel.security.AccessDeniedException;
 
-/** One background reader; all authorization checks and publications run on FX. */
+/** One background reader: Service authorization and metadata I/O on the worker, fenced publication on FX. */
 public final class CaptureMonitorService implements AutoCloseable {
     private final CaptureProcessProbe probe;
-    private final Runnable gate;
+    private final Supplier<Runnable> authorization;
+    private final BooleanSupplier canObserve;
     private final ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "capture-monitor"); t.setDaemon(true); return t;
     });
     private final AtomicBoolean queued = new AtomicBoolean();
     private ScheduledFuture<?> task;
-    private long generation;
-    private Consumer<CaptureSnapshot> listener;
-    public CaptureMonitorService(CaptureProcessProbe probe, Runnable gate) { this.probe = probe; this.gate = gate; }
+    private volatile long generation;
+    private volatile Consumer<CaptureSnapshot> listener;
+    public CaptureMonitorService(CaptureProcessProbe probe, Supplier<Runnable> authorization, BooleanSupplier canObserve) {
+        this.probe = probe; this.authorization = authorization; this.canObserve = canObserve;
+    }
+    private void presentationGate() {
+        if (!canObserve.getAsBoolean()) throw new AccessDeniedException("Administrator session required");
+    }
     public void start(Consumer<CaptureSnapshot> listener) {
-        gate.run(); stop(); this.listener = listener; long token = generation;
-        task = worker.scheduleWithFixedDelay(() -> poll(token), 0, 5, TimeUnit.SECONDS);
+        presentationGate(); stop(); this.listener = listener; long token = generation;
+        Runnable gate = authorization.get(); // capture the initiating session before queuing
+        task = worker.scheduleWithFixedDelay(() -> poll(token, gate), 0, 5, TimeUnit.SECONDS);
     }
     public void refresh() {
-        gate.run(); long token = generation;
+        presentationGate(); long token = generation;
+        Runnable gate = authorization.get();
         if (listener != null && queued.compareAndSet(false, true)) worker.execute(() -> {
-            try { poll(token); } finally { queued.set(false); }
+            try { poll(token, gate); } finally { queued.set(false); }
         });
     }
-    private void poll(long token) {
+    private void poll(long token, Runnable gate) {
+        if (token != generation || listener == null) return;
         CaptureSnapshot result;
-        try { result = probe.read(); }
+        try {
+            gate.run(); // verified Service state, off FX
+            if (token != generation || listener == null) return;
+            result = probe.read();
+        }
         catch (Exception e) { result = CaptureSnapshot.unknown(Instant.now(), "Capture observation unavailable: " + e.getClass().getSimpleName()); }
         CaptureSnapshot snapshot = result;
         Platform.runLater(() -> {
             if (token != generation || listener == null) return;
-            try { gate.run(); listener.accept(snapshot); }
+            try { presentationGate(); listener.accept(snapshot); }
             catch (AccessDeniedException e) { stop(); }
         });
     }

@@ -2,12 +2,16 @@ package byx.service;
 
 import java.nio.file.Path;
 
-/** Ponto de entrada. Sem argumentos: o diretório vem de BYX_LOCAL_SERVICE_HOME ou de ~/.byx-local-service (nunca de argv). */
+/** Ponto de entrada. --diagnostics somente inspeciona o runtime selado, sem autoridade, Keychain ou rede. O diretório normal nunca vem de argv. */
 public final class ServiceMain {
     private ServiceMain() {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 1 && args[0].equals("--diagnostics")) {
+            RuntimeDiagnostics.print();
+            return;
+        }
         if (args.length != 0) {
             System.err.println("byx-local-service takes no arguments");
             System.exit(2);

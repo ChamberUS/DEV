@@ -67,10 +67,16 @@ public class UsersView implements View {
             }
         }, "Password reset. The user must change it at next sign in."));
 
+        create.setDisable(true);
+        toggle.setDisable(true);
+        role.setDisable(true);
+        reset.setDisable(true);
+        table.setPlaceholder(Ui.label(panel.user.UserService.UNAVAILABLE, "muted"));
+        msg.setText("UNAVAILABLE");
         HBox bar = new HBox(8, create, toggle, role, reset, Ui.spacer(), msg);
         bar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         root.setPadding(new Insets(24, 28, 24, 28));
-        root.getChildren().addAll(Ui.pageHeader("Users", "Accounts and roles. Public sign-up does not exist; users are created here."), bar, table);
+        root.getChildren().addAll(Ui.pageHeader("Users", panel.user.UserService.UNAVAILABLE), bar, table);
         VBox.setVgrow(table, Priority.ALWAYS);
     }
 

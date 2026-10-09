@@ -69,6 +69,20 @@ class WalletControllerTest {
         c.show();worker.run(0);ui.run(0);c.create();c.hide();worker.run(0);ui.run(0);c.show();worker.run(0);ui.run(0);
         assertEquals("UNKNOWN_RESULT",c.state().status());c.create();assertTrue(worker.tasks.isEmpty());
     }
+    @Test void olderServiceRevisionEndsLoadingAndPreservesLatestViewWithoutEnablingMutation() {
+        Queue worker=new Queue(),ui=new Queue();AtomicInteger calls=new AtomicInteger();
+        var c=new WalletController(new WalletGateway(gateway(()->ok(view(calls.getAndIncrement()==0?10:9,"NO_WALLET")),()->null)),worker,ui,s->{});
+        c.show();worker.run(0);ui.run(0);c.refresh();worker.run(0);ui.run(0);
+        assertEquals("STALE_RESPONSE",c.state().status());assertEquals(10,c.state().view().revision());assertFalse(c.state().busy());
+        c.create();assertTrue(worker.tasks.isEmpty());
+    }
+    @Test void olderMutationRevisionRemainsUnknownAndCannotRepeat() {
+        Queue worker=new Queue(),ui=new Queue();
+        var c=new WalletController(new WalletGateway(gateway(()->ok(view(10,"NO_WALLET")),()->ok(view(9,"READY")))),worker,ui,s->{});
+        c.show();worker.run(0);ui.run(0);c.create();worker.run(0);ui.run(0);
+        assertEquals("UNKNOWN_RESULT",c.state().status());assertEquals(10,c.state().view().revision());
+        c.create();assertTrue(worker.tasks.isEmpty());
+    }
     @Test void publicContractCopiesMatchWithoutServiceDependency() throws Exception {
         String panel=java.nio.file.Files.readString(java.nio.file.Path.of("src/main/java/panel/wallet/WalletView.java"));
         String service=java.nio.file.Files.readString(java.nio.file.Path.of("../byx-local-service/src/main/java/byx/service/wallet/WalletView.java"));

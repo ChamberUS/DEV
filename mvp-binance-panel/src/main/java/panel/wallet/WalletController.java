@@ -66,7 +66,14 @@ public final class WalletController {
                         unknown ? "Result unknown / reconciliation required. Refresh only; do not repeat the operation." : code.replace('_', ' '));
             } else {
                 WalletView prior = state.view();
-                if (prior != null && prior.serviceGeneration().equals(view.serviceGeneration()) && view.revision() < prior.revision()) return;
+                if (prior != null && prior.serviceGeneration().equals(view.serviceGeneration()) && view.revision() < prior.revision()) {
+                    if (mutating) unknown = true;
+                    state = new State(unknown ? "UNKNOWN_RESULT" : "STALE_RESPONSE", prior, false,
+                            unknown ? "Result unknown / reconciliation required. Refresh only; do not repeat the operation."
+                                    : "Service returned an older revision. Refresh to obtain current state.");
+                    render.accept(state);
+                    return;
+                }
                 if (unknown) {
                     boolean completed = pendingKey != null && view.operations().stream()
                             .anyMatch(o -> pendingKey.equals(o.requestId()) && o.state().equals("COMPLETE"));

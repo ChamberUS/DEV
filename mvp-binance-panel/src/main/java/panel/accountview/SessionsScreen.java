@@ -30,6 +30,10 @@ import panel.v2.Kit;
  * revogar sempre pergunta e a linha só muda depois que o serviço confirma.
  */
 public final class SessionsScreen implements View {
+    private final AccountRead read = new AccountRead();
+    private boolean shown;
+    private boolean revoking;
+    private long generation;
     private final AccountData data;
     private final MotionService motion;
     private final Clock clock;
@@ -60,6 +64,8 @@ public final class SessionsScreen implements View {
     }
 
     private void render() {
+        read.cancel();
+        generation++;
         if (region != null) {
             region.dispose();
             region = null;
@@ -94,18 +100,24 @@ public final class SessionsScreen implements View {
     private void renderDevices() {
         VBox panel = Kit.panel("Trusted devices");
         panel.setId("sessions-devices");
-        List<TrustedDeviceService.Device> devices;
-        try {
-            devices = data.trustedDevices();
-        } catch (RuntimeException unavailable) {
-            region = new ByxRegion("Trusted devices", EnumSet.of(RegionState.UNAVAILABLE), motion);
-            region.setState(RegionState.UNAVAILABLE, ByxRegion.Detail.of("Trusted devices unavailable",
-                    "Trusted devices are managed in an admin session."));
-            region.setMinHeight(160);
-            panel.getChildren().add(region);
-            body.getChildren().add(panel);
-            return;
-        }
+        panel.getChildren().add(Kit.muted("Loading trusted devices…"));
+        body.getChildren().add(panel);
+        if (!shown) return;
+        read.load(data::trustedDevices, (devices, failure) -> {
+            panel.getChildren().removeIf(n -> n instanceof Label l && "Loading trusted devices…".equals(l.getText()));
+            if (failure != null) {
+                region = new ByxRegion("Trusted devices", EnumSet.of(RegionState.UNAVAILABLE), motion);
+                region.setState(RegionState.UNAVAILABLE, ByxRegion.Detail.of("Trusted devices unavailable",
+                        "Trusted devices require an admin session and an available local service."));
+                region.setMinHeight(160);
+                panel.getChildren().add(region);
+                return;
+            }
+            displayDevices(panel, devices);
+        });
+    }
+
+    private void displayDevices(VBox panel, List<TrustedDeviceService.Device> devices) {
         if (devices.isEmpty()) {
             panel.getChildren().add(Kit.muted("No trusted devices. Trusting a Mac during admin verification adds it here."));
         }
@@ -123,22 +135,32 @@ public final class SessionsScreen implements View {
             row.getStyleClass().add("byx-desk-row");
             panel.getChildren().add(row);
         }
-        body.getChildren().add(panel);
     }
 
     private void confirmRevoke(TrustedDeviceService.Device d) {
         ByxOverlayHost host = overlay.get();
-        if (host == null) {
+        if (host == null || revoking || host.openDialogs() > 0) {
             return;
         }
         host.confirm("Revoke trusted device", "This Mac will ask for a verification code again and your admin session ends.", "Revoke", true, () -> {
-            try {
-                data.revokeDevice(d.id());
-            } catch (RuntimeException ex) {
-                host.toast(ByxOverlayHost.ToastKind.ERROR, "Could not revoke the device.");
-                return;
-            }
-            render(); // depois da confirmação do serviço, não antes
+            if (revoking) return;
+            revoking = true;
+            long ticket = generation;
+            body.setDisable(true);
+            Thread worker = new Thread(() -> {
+                boolean failed = false;
+                try { data.revokeDevice(d.id()); } catch (RuntimeException ex) { failed = true; }
+                boolean failure = failed;
+                javafx.application.Platform.runLater(() -> {
+                    revoking = false;
+                    body.setDisable(false);
+                    if (!shown || ticket != generation) return;
+                    if (failure) host.toast(ByxOverlayHost.ToastKind.ERROR, "Could not revoke the device. Refresh to check its status.");
+                    render(); // read-back only after the service replied; never optimistic removal
+                });
+            }, "trusted-device-revoke");
+            worker.setDaemon(true);
+            worker.start();
         });
     }
 
@@ -153,11 +175,15 @@ public final class SessionsScreen implements View {
 
     @Override
     public void onShow() {
+        shown = true;
         render();
     }
 
     @Override
     public void onHide() {
+        shown = false;
+        generation++;
+        read.cancel();
         if (region != null) {
             region.dispose();
             region = null;
@@ -166,5 +192,6 @@ public final class SessionsScreen implements View {
 
     public void dispose() {
         onHide();
+        read.close();
     }
 }

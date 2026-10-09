@@ -19,6 +19,8 @@ public final class CustodyQaFixture {
 
     public static Captured confirmed(String keyRef, String senderAddress, String recipient, String amountUbyx, String memo) {
         var fx = new TxFx();
+        // Packaged lifecycle probes use the wall clock; each confirmed quote must be fresh.
+        fx.clock.now = java.time.Instant.now();
         fx.chain.chainId = "byx";
         fx.transport.chainId = "byx";
         fx.transport.accountNumber = "7";

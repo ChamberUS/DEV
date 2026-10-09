@@ -69,7 +69,7 @@ public class AppContext {
     public final panel.localservice.AuthorityGateway authority = injected != null && injected.gateway() != null ? injected.gateway()
             : StartupTrace.time("AuthorityClient", () -> new panel.localservice.AuthorityClient(new panel.localservice.LocalServiceClient(panel.localservice.LocalServiceClient.defaultHome())));
     public final AuthService auth = new AuthService(authority, sessions, clock);
-    public final panel.auth.TrustedDeviceService trustedDevices = new panel.auth.TrustedDeviceService(authority, clock);
+    public final panel.auth.TrustedDeviceService trustedDevices = new panel.auth.TrustedDeviceService(auth, clock);
     public final AdminAccessService adminAccess = new AdminAccessService(sessions, authority, auth, trustedDevices, clock);
     public final UserService userService = new UserService(authority, auth, sessions);
     public final panel.service.ByxNetworkService byx = StartupTrace.time("byx", () -> new panel.service.ByxNetworkService(
@@ -127,7 +127,10 @@ public class AppContext {
     public AppContext(panel.adapter.CaptureProcessProbe captureProbe) {
         captureMonitor = new panel.service.CaptureMonitorService(captureProbe != null ? captureProbe :
                 new panel.adapter.LocalCaptureProcessProbe(Path.of(System.getProperty("user.home"), ".mvp-binance-capture"),
-                        settings.project().resolve("data/microstructure"), Path.of(settings.cliPath)), adminAccess::requireAdmin);
+                        settings.project().resolve("data/microstructure"), Path.of(settings.cliPath)), () -> {
+                    var scope = auth.captureSession();
+                    return () -> adminAccess.requireAdmin(scope);
+                }, adminAccess::hasValidAdminSession);
         scientificCapture = new panel.service.ScientificCaptureService(
                 panel.adapter.ScientificCaptureResolver.forLocal(Path.of(System.getProperty("user.home"), ".mvp-binance-capture"),
                         settings.project().resolve("data/microstructure"), Path.of(settings.cliPath))::observe, clock);
@@ -144,6 +147,8 @@ public class AppContext {
 
     private final panel.motion.SystemMotionProbe systemMotion = panel.motion.SystemMotionProbe.macOs();
     private volatile boolean systemReduced;
+    private final java.util.concurrent.atomic.AtomicLong systemMotionGeneration = new java.util.concurrent.atomic.AtomicLong();
+    private volatile boolean presentationClosed;
 
     /** Preferência do app (Settings), sem o ajuste do sistema. */
     public MotionPreference appMotion() {
@@ -161,19 +166,32 @@ public class AppContext {
 
     /** Relê a configuração do macOS fora da thread FX e reaplica só se mudou. Chamar com o app aberto e ao ganhar o foco. */
     public void refreshSystemMotion() {
+        if (presentationClosed) return;
+        long ticket = systemMotionGeneration.incrementAndGet();
         Thread t = new Thread(() -> {
             boolean now = systemMotion.reduced();
-            if (now != systemReduced) {
-                systemReduced = now;
-                try {
-                    javafx.application.Platform.runLater(this::applyMotionSettings);
-                } catch (IllegalStateException noToolkit) {
-                    // sem toolkit (testes): o próximo applyMotionSettings já usa o valor novo
-                }
+            try {
+                javafx.application.Platform.runLater(() -> {
+                    if (presentationClosed || ticket != systemMotionGeneration.get()) return;
+                    if (now != systemReduced) {
+                        systemReduced = now;
+                        applyMotionSettings();
+                    }
+                });
+            } catch (IllegalStateException noToolkit) {
+                // No FX state is touched when the toolkit is unavailable.
             }
         }, "system-motion");
         t.setDaemon(true);
         t.start();
+    }
+
+    public void closePresentation() {
+        presentationClosed = true;
+        systemMotionGeneration.incrementAndGet();
+        onMarketData = () -> { };
+        onLocalService = status -> { };
+        navigate = id -> { };
     }
 
     public void applyMotionSettings() {

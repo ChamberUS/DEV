@@ -112,6 +112,8 @@ public final class WalletScreen implements View {
             circle.getStyleClass().add("on");
         }
         VBox copy = new VBox(2, Fx.label(title, "byx-section-title-sm"), Kit.muted(text));
+        copy.setMinWidth(0);
+        badge.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         HBox row = new HBox(16, circle, copy, Fx.spacer(), badge);
         HBox.setHgrow(copy, Priority.ALWAYS);
         row.setAlignment(Pos.CENTER_LEFT);

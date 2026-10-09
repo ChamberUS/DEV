@@ -111,17 +111,40 @@ public final class WalletPanelQaMain {
                 var pane = new panel.byxview.WalletScreen(new panel.motion.MotionService(), java.time.Clock.systemUTC(), data, route -> { }); var stage = new Stage();
                 var scene = new Scene(new javafx.scene.layout.StackPane(pane.node()),1920,1080); panel.design.ByxTheme.apply(scene); scene.getRoot().getStyleClass().add("byx-shell");
                 stage.setScene(scene); stage.setTitle("BYX synthetic wallet QA"); stage.show(); pane.onShow();
-                var timer = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
-                timer.setOnFinished(e -> {
+                var lifecycleField = panel.byxview.WalletScreen.class.getDeclaredField("lifecycle"); lifecycleField.setAccessible(true);
+                var lifecycle = (WalletPane) lifecycleField.get(pane);
+                var controllerField = WalletPane.class.getDeclaredField("controller"); controllerField.setAccessible(true);
+                var controller = (WalletController) controllerField.get(lifecycle);
+                var timer = new javafx.animation.Timeline();
+                timer.getKeyFrames().add(new javafx.animation.KeyFrame(javafx.util.Duration.millis(100), e -> {
+                    if (controller.state().status().equals("LOADING")) return; // cached presentation only; no Service call on FX
+                    timer.stop();
                     try {
-                        scene.getRoot().applyCss(); scene.getRoot().layout();
-                        var image=scene.snapshot(null); var pixels=image.getPixelReader();
+                        require(controller.state().status().equals(admin ? "READY" : "NO_WALLET") && controller.state().view() != null, "VISUAL_SERVICE_STATE_REQUIRED");
+                        if (!admin) require(controller.state().view().wallets().isEmpty() && controller.state().view().operations().isEmpty()
+                                && !controller.state().view().allowedActions().canCreate() && !controller.state().view().allowedActions().canDelete()
+                                && !controller.state().view().allowedActions().canSyntheticSign(), "VISUAL_USER_OWNER_FILTER");
+                        int diagnosticButtons = 0;
+                        for (var node : lifecycle.lookupAll(".button")) if (node instanceof javafx.scene.control.Button button
+                                && button.getText().toLowerCase(java.util.Locale.ROOT).contains("synthetic")) {
+                            diagnosticButtons++;
+                            require(button.getParent().isVisible() == admin, "VISUAL_ROLE_BOUNDARY");
+                            if (!admin) require(button.isDisabled(), "USER_DIAGNOSTIC_ACTION_ENABLED");
+                        }
+                        require(diagnosticButtons == 3, "VISUAL_DIAGNOSTIC_BUTTONS_REQUIRED");
+                        var rootNode = scene.getRoot(); scene.setRoot(new javafx.scene.layout.Pane());
+                        var offscreen = new Scene(rootNode, 1920, 1080); offscreen.getStylesheets().setAll(scene.getStylesheets());
+                        rootNode.applyCss(); rootNode.layout();
+                        var image=offscreen.snapshot(null); var pixels=image.getPixelReader();
+                        require(image.getWidth() == 1920 && image.getHeight() == 1080, "VISUAL_EXACT_RESOLUTION");
                         var out=new java.awt.image.BufferedImage((int)image.getWidth(),(int)image.getHeight(),java.awt.image.BufferedImage.TYPE_INT_ARGB);
                         for(int y=0;y<out.getHeight();y++)for(int x=0;x<out.getWidth();x++)out.setRGB(x,y,pixels.getArgb(x,y));
                         javax.imageio.ImageIO.write(out,"png",root.resolve(admin ? "wallet-1920x1080.png" : "wallet-user-1920x1080.png").toFile());
-                        pane.onHide();stage.close();
-                    } catch(Throwable error) { failure.set(error); } finally { done.countDown(); }
-                }); timer.play();
+                        emit("visualState", controller.state().status()); emit("visualRole", admin ? "ADMIN" : "USER");
+                        offscreen.setRoot(new javafx.scene.layout.Pane()); scene.setRoot(rootNode);
+                    } catch(Throwable error) { failure.set(error); }
+                    finally { pane.onHide(); stage.close(); done.countDown(); }
+                })); timer.setCycleCount(javafx.animation.Timeline.INDEFINITE); timer.play();
             } catch(Throwable error) { failure.set(error); done.countDown(); }
         });
         require(done.await(15,TimeUnit.SECONDS),"FX_TIMEOUT"); Platform.exit(); if(failure.get()!=null)throw new IllegalStateException("VISUAL_FAILED",failure.get());emit("visual","PASS");

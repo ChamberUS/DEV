@@ -24,13 +24,15 @@ public final class SecretCanaryHolder {
             }
             System.out.println("holder.ready=OK");
             System.out.flush();
-            long end = System.currentTimeMillis() + 90_000;
-            while (System.currentTimeMillis() < end && System.in.available() >= 0) {
-                if (System.in.available() > 0 && System.in.read() < 0) {
-                    break;
-                }
-                Thread.sleep(100);
-            }
+            // available() cannot distinguish EOF from an idle pipe. Read on a daemon
+            // thread so EOF ends the hold immediately, retaining the 90-second bound.
+            Thread input = new Thread(() -> {
+                try { while (System.in.read() >= 0) { } }
+                catch (IOException ignored) { /* closing input also ends the hold */ }
+            }, "test-canary-input");
+            input.setDaemon(true);
+            input.start();
+            input.join(90_000);
         } catch (SecretStoreException e) {
             System.out.println("holder.ready=" + e.status() + (e.osStatus() == 0 ? "" : " (os=" + e.osStatus() + ")"));
         } finally {

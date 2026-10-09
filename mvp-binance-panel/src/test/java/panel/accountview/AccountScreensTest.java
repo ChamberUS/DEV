@@ -11,6 +11,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -70,6 +72,7 @@ class AccountScreensTest {
         }
         @Override public Prefs prefs() { return prefs; }
         @Override public String effectiveMotion() { return prefs.motion(); }
+        @Override public boolean preferencesEditable() { return true; }
         @Override public void savePrefs(Prefs p) {
             if (saveFails) {
                 throw new IllegalStateException("disk");
@@ -177,42 +180,56 @@ class AccountScreensTest {
         });
     }
 
+    private static void await(BooleanSupplier condition) throws Exception {
+        long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (System.nanoTime() < end) {
+            boolean[] ready = new boolean[1];
+            DeskHarness.fx(() -> ready[0] = condition.getAsBoolean());
+            if (ready[0]) return;
+            Thread.sleep(20);
+        }
+        org.junit.jupiter.api.Assertions.fail("account read did not finish");
+    }
+
     @Test
     void sessionsNeverListFictionalDevices() throws Exception {
+        Stub data = new Stub();
+        SessionsScreen[] holder = new SessionsScreen[1];
         DeskHarness.fx(() -> {
-            Stub data = new Stub();
-            SessionsScreen s = new SessionsScreen(new MotionService(), CLOCK, data, () -> null);
-            show(s.node());
-            String t = texts(s.node());
-            assertTrue(t.contains("CURRENT") && t.contains("Other sessions unavailable"));
-            assertFalse(t.contains("Sign out other"));
-            s.tabs().select("Trusted devices");
-            s.onShow();
-            assertTrue(texts(s.node()).contains("No trusted devices") || texts(s.node()).contains("Trusted devices"));
-            data.devicesAvailable = false;
-            s.tabs().select("Sessions");
-            s.tabs().select("Trusted devices");
-            s.onShow();
-            assertTrue(texts(s.node()).contains("Trusted devices unavailable"));
-            s.dispose();
+            SessionsScreen screen = holder[0] = new SessionsScreen(new MotionService(), CLOCK, data, () -> null);
+            show(screen.node());
+            assertTrue(texts(screen.node()).contains("CURRENT") && texts(screen.node()).contains("Other sessions unavailable"));
+            assertFalse(texts(screen.node()).contains("Sign out other"));
+            screen.tabs().select("Trusted devices");
+            screen.onShow();
+            assertTrue(texts(screen.node()).contains("Loading trusted devices"));
         });
+        await(() -> texts(holder[0].node()).contains("No trusted devices"));
+        data.devicesAvailable = false;
+        DeskHarness.fx(() -> holder[0].onShow());
+        await(() -> texts(holder[0].node()).contains("Trusted devices unavailable"));
+        DeskHarness.fx(() -> holder[0].dispose());
     }
 
     @Test
     void activityShowsOnlyTheRealAuditLog() throws Exception {
+        Stub data = new Stub();
+        ActivityScreen[] holder = new ActivityScreen[1];
         DeskHarness.fx(() -> {
-            Stub data = new Stub();
-            ActivityScreen a = new ActivityScreen(CLOCK, data);
-            show(a.node());
-            assertEquals("EMPTY", a.stateText());
-            data.audit = List.of(new SecurityAuditService.Entry(NOW.toString(), "LOGIN_FAILED", "alex", "x"));
-            a.onShow();
-            String t = texts(a.node());
-            assertTrue(t.contains("Login failed") && t.contains("FAILED") && t.contains("Today"));
-            data.auditFails = true;
-            a.onShow();
-            assertEquals("UNAVAILABLE", a.stateText());
+            holder[0] = new ActivityScreen(CLOCK, data);
+            show(holder[0].node());
+            holder[0].onShow();
+            assertEquals("LOADING", holder[0].stateText());
         });
+        await(() -> "EMPTY".equals(holder[0].stateText()));
+        data.audit = List.of(new SecurityAuditService.Entry(NOW.toString(), "LOGIN_FAILED", "alex", "x"));
+        DeskHarness.fx(() -> holder[0].onShow());
+        await(() -> texts(holder[0].node()).contains("Login failed") && texts(holder[0].node()).contains("FAILED")
+                && texts(holder[0].node()).contains("Today"));
+        data.auditFails = true;
+        DeskHarness.fx(() -> holder[0].onShow());
+        await(() -> "UNAVAILABLE".equals(holder[0].stateText()));
+        DeskHarness.fx(() -> holder[0].dispose());
     }
 
     @Test

@@ -46,7 +46,7 @@ class AuthFixture {
     final FakeAuthority authority = new FakeAuthority(clock);
     final FakeAuthority otpProvider = authority;
     final AuthService auth = new AuthService(authority, sessions, clock);
-    final panel.auth.TrustedDeviceService devices = new panel.auth.TrustedDeviceService(authority, clock);
+    final panel.auth.TrustedDeviceService devices = new panel.auth.TrustedDeviceService(auth, clock);
     final AdminAccessService access = new AdminAccessService(sessions, authority, auth, devices, clock);
     final UserService userService = new UserService(authority, auth, sessions);
 

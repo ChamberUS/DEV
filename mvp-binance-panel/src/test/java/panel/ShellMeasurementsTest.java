@@ -1,6 +1,7 @@
 package panel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,6 +21,35 @@ import panel.shell.ShellRouter;
  * Larguras guiadas por texto têm tolerância de 4 px: o protótipo foi medido sem as fontes empacotadas.
  */
 class ShellMeasurementsTest {
+    @Test void accountHeaderKeepsWorkspaceAndPrivilegeLabelsReadableAt1100() throws Exception {
+        FxSupport.fx(() -> {
+            ShellRouter router = new ShellRouter(new Navigator(), (t, k) -> ShellRouter.Decision.ALLOW, id -> { });
+            ByxShell shell = new ByxShell(router, new MotionService(), new LegacyHost());
+            Scene scene = new Scene(shell, 1100, 700);
+            ByxTheme.apply(scene);
+            router.request("t-settings");
+            shell.topBar().setAdminSession(true);
+            for (int i = 0; i < 3; i++) { shell.applyCss(); shell.layout(); }
+            for (var context : java.util.List.of(panel.shell.ShellContext.TRADING, panel.shell.ShellContext.RESEARCH,
+                    panel.shell.ShellContext.BYX)) {
+                var button = shell.switcher().button(context);
+                assertEquals(context.label, ((javafx.scene.text.Text) button.lookup(".text")).getText());
+            }
+            for (var selector : java.util.List.of(".byx-context-chip", ".byx-admin-badge")) {
+                var label = (javafx.scene.control.Label) shell.topBar().lookup(selector);
+                assertEquals(label.getText(), ((javafx.scene.text.Text) label.lookup(".text")).getText());
+            }
+            Bounds switcher = shell.switcher().localToScene(shell.switcher().getLayoutBounds());
+            var context = shell.topBar().lookup(".byx-context-chip");
+            Bounds chip = context.localToScene(context.getLayoutBounds());
+            Bounds search = shell.topBar().search().localToScene(shell.topBar().search().getLayoutBounds());
+            assertTrue(switcher.getMaxX() <= chip.getMinX());
+            assertTrue(chip.getMaxX() <= search.getMinX());
+            shell.dispose();
+            return null;
+        });
+    }
+
     private static final Map<String, double[]> P24 = new LinkedHashMap<>();
 
     static {

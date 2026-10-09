@@ -322,7 +322,7 @@ public final class WalletLifecycle {
         try {
             if(!"SIGNED".equals(reply.status()) || reply.response()==null) throw new byx.service.tx.TxPorts.TxSignerException();
             byte[] pub=HexFormat.of().parseHex(publicKey);
-            return SignerClient.verifySigned(reply.response(),sign,CosmosBankSend.material(sign,pub),pub);
+            return SignedResponseVerifier.verifySigned(reply.response(),sign,CosmosBankSend.material(sign,pub),pub);
         } catch(java.io.IOException | RuntimeException e) { throw new byx.service.tx.TxPorts.TxSignerException(); }
     }
     private void uncertain(Operation op,Failure failure) {

@@ -46,5 +46,8 @@ public interface AccountData {
     /** Motion em vigor (app + sistema), ex.: "REDUCED (system setting)". */
     String effectiveMotion();
 
+    /** UI capability only; never grants permission to persist preferences. */
+    default boolean preferencesEditable() { return false; }
+
     void savePrefs(Prefs prefs);
 }

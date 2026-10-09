@@ -11,9 +11,13 @@ import panel.user.User;
 /** Liga as telas Account V2 aos serviços reais. Nada de sessões remotas, notificações ou histórico fictício. */
 final class AccountDataAdapter implements AccountData {
     private final AppContext ctx;
+    private final panel.auth.AuthService.SessionScope scope;
+    private final User owner;
 
     AccountDataAdapter(AppContext ctx) {
         this.ctx = ctx;
+        this.scope = ctx.auth.captureSession();
+        this.owner = ctx.sessions.user().orElseThrow().user();
     }
 
     @Override public Optional<User> user() { return ctx.sessions.user().map(s -> s.user()); }
@@ -24,7 +28,7 @@ final class AccountDataAdapter implements AccountData {
 
     @Override
     public void changePassword(char[] current, char[] next) {
-        ctx.userService.changeOwnPassword(ctx.sessions.user().orElseThrow().user().id(), current, next);
+        ctx.userService.changeOwnPassword(scope, owner.id(), current, next);
     }
 
     @Override
@@ -32,9 +36,9 @@ final class AccountDataAdapter implements AccountData {
         ctx.userService.changeOwnContact(ctx.sessions.user().orElseThrow().user().id(), password, email, phone);
     }
 
-    @Override public List<TrustedDeviceService.Device> trustedDevices() { return ctx.trustedDevices.list(); }
+    @Override public List<TrustedDeviceService.Device> trustedDevices() { return ctx.trustedDevices.list(scope); }
 
-    @Override public void revokeDevice(String id) { ctx.trustedDevices.revoke(id); }
+    @Override public void revokeDevice(String id) { ctx.trustedDevices.revoke(scope, id); }
 
     @Override
     public List<ProviderLine> providers() {
@@ -44,7 +48,7 @@ final class AccountDataAdapter implements AccountData {
 
     @Override
     public List<SecurityAuditService.Entry> activity(int limit) {
-        return ctx.audit.recentFor(ctx.sessions.user().orElseThrow().user().username(), limit);
+        return ctx.audit.recentFor(owner.username(), limit);
     }
 
     @Override public Prefs prefs() { return new Prefs(ctx.settings.motion, ctx.settings.density, ctx.settings.animatedIcons, ctx.settings.primaryWorkspace,

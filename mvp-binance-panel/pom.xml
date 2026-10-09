@@ -9,6 +9,7 @@
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <byx.panel.sources>build-default</byx.panel.sources>
     <byx.wallet.capability>DISABLED</byx.wallet.capability>
   </properties>
   <dependencies>
@@ -58,16 +59,30 @@
     </resources>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId><artifactId>build-helper-maven-plugin</artifactId><version>3.6.0</version>
+        <executions><execution><id>panel-build-profile</id><phase>generate-sources</phase><goals><goal>add-source</goal></goals>
+          <configuration><sources><source>src/${byx.panel.sources}/java</source></sources></configuration>
+        </execution></executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.1</version>
+        <configuration><excludes><exclude>panel/txview/**</exclude></excludes></configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
-        <configuration><excludes><exclude>**/QaApp.java</exclude><exclude>panel/app/*Probe.java</exclude></excludes></configuration>
+        <configuration>
+          <excludes><exclude>**/QaApp.java</exclude><exclude>panel/app/*Probe.java</exclude><exclude>panel/txview/**</exclude></excludes>
+          <testExcludes><testExclude>panel/txview/**</testExclude></testExcludes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
+          <excludes><exclude>**/txview/**</exclude></excludes>
           <!-- só os testes da identidade do peer leem o fd do socket; o lançador empacotado do app define os mesmos flags -->
           <argLine>--add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</argLine>
         </configuration>
@@ -84,5 +99,16 @@
   </build>
   <profiles>
     <profile><id>wallet-qa</id><properties><byx.wallet.capability>SYNTHETIC_QA</byx.wallet.capability></properties></profile>
+    <profile>
+      <id>local-qa</id><activation><property><name>byx.chain.profile</name><value>LOCAL_QA</value></property></activation>
+      <properties><byx.panel.sources>build-local-qa</byx.panel.sources></properties>
+      <build><plugins>
+        <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId>
+          <configuration><excludes combine.self="override"><exclude>**/QaApp.java</exclude><exclude>panel/app/*Probe.java</exclude></excludes><testExcludes combine.self="override"/></configuration>
+        </plugin>
+        <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><configuration><excludes combine.self="override"/></configuration></plugin>
+        <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><configuration><excludes combine.self="override"/></configuration></plugin>
+      </plugins></build>
+    </profile>
   </profiles>
 </project>

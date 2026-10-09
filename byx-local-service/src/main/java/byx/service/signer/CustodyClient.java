@@ -48,7 +48,7 @@ public final class CustodyClient {
     /** Compiled namespace; the helper refuses anything else. */
     public static final String NAMESPACE = "byx.signer.qa.synthetic.v1";
     private static final int MAX_FRAME = 8192;
-    private static final long CALL_TIMEOUT_MS = 12_000;
+    static final long CALL_TIMEOUT_MS = 12_000;
     private static final List<String> BANNED_ENV = List.of("JAVA_TOOL_OPTIONS=", "_JAVA_OPTIONS=", "JDK_JAVA_OPTIONS=", "CLASSPATH=", "DYLD_", "LD_", "JAVA_OPTIONS=", "HOME=", "PATH=", "TMPDIR=");
     private static final ObjectMapper JSON = new ObjectMapper().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
             .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
@@ -112,7 +112,18 @@ public final class CustodyClient {
         requestProbe=request;afterFlushProbe=afterFlush;replyProbe=reply;
     }
 
-    CustodyAuthority authority() throws CustodyException { return CustodyAuthority.current(identity, trustedOrigin); }
+    CustodyAuthority authority() throws CustodyException { return authority(CustodyAuthority.Deadline.operation()); }
+
+    private CustodyAuthority authority(CustodyAuthority.Deadline deadline) throws CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.authority")) {
+        verifyServiceOrigin(deadline);
+        deadline.require();
+        return CustodyAuthority.current(identity, trustedOrigin, deadline);
+
+
+
+        }
+    }
 
     /** Production-shaped constructor: launches the signer at the fixed sibling origin only. */
     public CustodyClient() throws CustodyException {
@@ -131,6 +142,7 @@ public final class CustodyClient {
 
     /** {@code <this helper bundle>/../byx-signer-helper-qa.app}, derived from the sealed jar this class was loaded from. Never PATH, never configuration. */
     public static Path defaultHelper() throws CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.defaultHelper")) {
         try {
             Path jar = Path.of(CustodyClient.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toRealPath();
             Path app = jar.getParent() == null ? null : jar.getParent().getParent() == null ? null : jar.getParent().getParent().getParent();
@@ -141,6 +153,10 @@ public final class CustodyClient {
             return app.getParent().resolve(HELPER_APP);
         } catch (java.net.URISyntaxException | IOException | RuntimeException e) {
             throw new CustodyException("SIGNER_UNTRUSTED", "NOT_RUNNING_FROM_A_BUNDLE");
+        }
+
+
+
         }
     }
 
@@ -153,8 +169,9 @@ public final class CustodyClient {
             Reply r = exchange("sign", request.key().keyId(), null, outer);
             if (!"SIGNED".equals(r.status()) || r.response() == null) {
                 throw new TxSignerException();
-            }
-            return SignerClient.verifySigned(r.response(), request, material, publicKey);
+
+    }
+            return SignedResponseVerifier.verifySigned(r.response(), request, material, publicKey);
         } catch (CustodyException | IOException | RuntimeException e) {
             throw new TxSignerException();
         }
@@ -170,24 +187,39 @@ public final class CustodyClient {
     }
 
     private Reply exchange(String op, String keyRef, String namespace, Map<String, Object> extra) throws CustodyException, IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.exchange")) {
+        CustodyAuthority.Deadline deadline = CustodyAuthority.Deadline.operation();
         verifyHelperOnDisk();
+        deadline.require();
         if (!identity.selfSatisfies(CodeIdentity.requirement("com.buynnex.byx.service", identity.selfTeamId()))) {
             return new Reply("CALLER_UNTRUSTED", 0, null, null, 0, null);
-        }
-        CustodyAuthority authority = authority();
+
+    }
+        CustodyAuthority authority = authority(deadline);
         synchronized (authority) {
-            return fencedExchange(authority, op, keyRef, namespace, extra);
+            deadline.require();
+            return fencedExchange(authority, op, keyRef, namespace, extra, deadline);
+        }
+
+
         }
     }
 
-    private Reply fencedExchange(CustodyAuthority authority, String op, String keyRef, String namespace, Map<String, Object> extra) throws CustodyException, IOException {
+    private Reply fencedExchange(CustodyAuthority authority, String op, String keyRef, String namespace, Map<String, Object> extra, CustodyAuthority.Deadline deadline) throws CustodyException, IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.fencedExchange")) {
+        deadline.exchangeWait();
         CustodyAuthority.Binding binding = authority.begin();
         Path exe = launchApp.resolve("Contents").resolve("MacOS").resolve(HELPER_EXE);
         String invocation = binding.operationId;
         var builder = new ProcessBuilder(exe.toString());
         builder.environment().clear();
         builder.redirectError(ProcessBuilder.Redirect.DISCARD);
-        Process child = builder.start();
+        CustodyAuthority.Deadline bootstrapDeadline = deadline.bootstrap();
+        var readyObserved = new java.util.concurrent.CompletableFuture<Void>();
+        Process child;
+        try (var launchTiming = byx.service.identity.FencingTiming.phase("client.subprocessLaunch")) {
+            child = builder.start();
+        }
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
         Future<Reply> work = null;
         boolean interrupted = false;
@@ -196,8 +228,20 @@ public final class CustodyClient {
         try {
             authority.attach(child.pid());
             childObserver.accept(child.pid());
-            work = pool.submit(() -> converse(child, invocation, op, keyRef, namespace, extra, authority, binding, dispatched));
-            Reply result = work.get(CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            deadline.exchangeWait();
+            work = pool.submit(() -> {
+                try { return converse(child, invocation, op, keyRef, namespace, extra, authority, binding, dispatched, deadline, readyObserved); }
+                catch (Exception | Error e) { readyObserved.completeExceptionally(e); throw e; }
+            });
+            try (var readyTiming = byx.service.identity.FencingTiming.phase("client.bootstrapWait")) {
+                long readyBudget = bootstrapDeadline.remaining();
+                if (readyBudget == 0) { throw new java.util.concurrent.TimeoutException(); }
+                readyObserved.get(readyBudget, TimeUnit.NANOSECONDS);
+            }
+            Reply result;
+            try (var waitTiming = byx.service.identity.FencingTiming.phase("client.exchangeWait")) {
+                result = work.get(deadline.exchangeWait(), TimeUnit.NANOSECONDS);
+            }
             resultKnown = true;
             return result;
         } catch (java.util.concurrent.ExecutionException e) {
@@ -215,20 +259,27 @@ public final class CustodyClient {
             pool.shutdownNow();
             // Cancellation must not skip verification because the caller thread is interrupted.
             interrupted |= Thread.interrupted();
-            try { authority.finish(!resultKnown); }
+            try { authority.finish(!resultKnown, deadline); }
             finally { if (interrupted) { Thread.currentThread().interrupt(); } }
+        }
+
+
+
         }
     }
 
     private Reply converse(Process child, String invocation, String op, String keyRef, String namespace, Map<String, Object> extra,
-            CustodyAuthority authority, CustodyAuthority.Binding binding, java.util.concurrent.atomic.AtomicBoolean dispatched) throws Exception {
+            CustodyAuthority authority, CustodyAuthority.Binding binding, java.util.concurrent.atomic.AtomicBoolean dispatched, CustodyAuthority.Deadline deadline, java.util.concurrent.CompletableFuture<Void> readyObserved) throws Exception {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.converse")) {
         // 1. hand over the (public, non-secret) invocation id and read the READY frame
         try (var stdin = child.getOutputStream()) {
             stdin.write((invocation + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
         JsonNode ready;
         try (var stdout = new DataInputStream(child.getInputStream())) {
-            ready = readFrame(stdout);
+            try (var phase = byx.service.identity.FencingTiming.phase("client.readReadyFrame")) {
+                ready = readFrame(stdout);
+            }
             if (!ready.path("ready").asBoolean(false)) {
                 throw new CustodyException("SIGNING_FAILED", "NOT_READY");
             }
@@ -248,6 +299,7 @@ public final class CustodyClient {
                     throw new CustodyException("SIGNER_UNTRUSTED", "HELPER_ENVIRONMENT");
                 }
             }
+            readyObserved.complete(null);
             Path socket = Path.of(ready.path("path").asText(""));
             checkPrivateEndpoint(socket);
             try (SocketChannel ch = SocketChannel.open(StandardProtocolFamily.UNIX)) {
@@ -302,6 +354,9 @@ public final class CustodyClient {
                 if (bytes.length == 0 || bytes.length > MAX_FRAME) {
                     throw new CustodyException("SIGNING_FAILED", "REQUEST_SIZE");
                 }
+                // No request may be dispatched after its budget or cancellation boundary.
+                deadline.exchangeWait();
+                if (Thread.currentThread().isInterrupted()) { throw CustodyAuthority.failure(); }
                 dispatched.set(true);
                 out.writeInt(bytes.length);
                 out.write(bytes);
@@ -320,11 +375,17 @@ public final class CustodyClient {
                 }
                 binding.accept(response.path("generation").asText(), response.path("operationId").asText(), digest, response.path("requestDigest").asText());
                 Reply reply = parseReply(response);
-                if (!child.waitFor(3, TimeUnit.SECONDS)) {
+                long exitWait = Math.min(CustodyAuthority.Deadline.EXIT_PROOF_NANOS, deadline.remaining());
+                if (exitWait == 0 || !child.waitFor(exitWait, TimeUnit.NANOSECONDS)) {
                     throw new CustodyException("SIGNING_FAILED", "HELPER_DID_NOT_EXIT");
                 }
                 return reply;
-            }
+
+    }
+        }
+
+
+
         }
     }
 
@@ -382,6 +443,7 @@ public final class CustodyClient {
     }
 
     private void verifyHelperOnDisk() throws CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.verifyHelperOnDisk")) {
         try {
             if (!launchApp.isAbsolute() || !launchApp.getFileName().toString().equals(HELPER_APP)) {
                 throw new CustodyException("SIGNER_UNTRUSTED", "HELPER_PATH");
@@ -397,6 +459,9 @@ public final class CustodyClient {
         } catch (IOException e) {
             throw new CustodyException("SIGNER_UNTRUSTED", "HELPER_MISSING");
         }
+        Path executable = launchApp.resolve("Contents/MacOS").resolve(HELPER_EXE);
+        if (!Files.isRegularFile(executable, LinkOption.NOFOLLOW_LINKS) || Files.isSymbolicLink(executable) || Files.isSymbolicLink(executable.getParent()))
+            throw new CustodyException("SIGNER_UNTRUSTED", "HELPER_EXECUTABLE");
         String team = identity.selfTeamId();
         if (team == null) {
             throw new CustodyException("SIGNER_UNTRUSTED", "NO_TEAM");
@@ -405,10 +470,100 @@ public final class CustodyClient {
         if (v != CodeIdentity.Verdict.OK) {
             throw new CustodyException("SIGNER_UNTRUSTED", "HELPER_BUNDLE_" + v);
         }
+
+
+        }
+    }
+
+    /** Bind the loaded JAR to this exact live signed Service, its sealed parent app and approved install metadata. */
+    private void verifyServiceOrigin(CustodyAuthority.Deadline deadline) throws CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.verifyServiceOrigin")) {
+        try {
+            Path source = Path.of(CustodyClient.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            Path ownApp = source.getParent().getParent().getParent();
+            Path helpers = ownApp.getParent();
+            Path parent = helpers.getParent().getParent();
+            if (!source.getFileName().toString().equals("byx-local-service-0.1.0.jar")
+                    || !source.getParent().getFileName().toString().equals("app")
+                    || !source.getParent().getParent().getFileName().toString().equals("Contents")
+                    || !helpers.getFileName().toString().equals("Helpers")
+                    || !helpers.getParent().getFileName().toString().equals("Contents")
+                    || !parent.getFileName().toString().endsWith(".app")) throw new IOException();
+            requireInstallPath(source, identity.effectiveUid());
+            requireInstallPath(launchApp.resolve("Contents/MacOS").resolve(HELPER_EXE), identity.effectiveUid());
+            var self = identity.instance(ProcessHandle.current().pid());
+            String team = identity.selfTeamId();
+            if (self == null || !verifyBoth(
+                    () -> {
+                        try (var phase = byx.service.identity.FencingTiming.phase("client.liveServiceIdentityAndSeal")) {
+                            return identity.checkInstance(self, CodeIdentity.requirement("com.buynnex.byx.service", team), ownApp.toString()) == CodeIdentity.Verdict.OK;
+                        }
+                    },
+                    () -> {
+                        try (var phase = byx.service.identity.FencingTiming.phase("client.parentIdentityAndNestedSeal")) {
+                            return identity.checkBundle(parent.toString(), CodeIdentity.requirement("com.buynnex.byx", team)) == CodeIdentity.Verdict.OK;
+                        }
+                    }, deadline)) throw new IOException();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw CustodyAuthority.failure();
+        } catch (java.util.concurrent.TimeoutException e) {
+            throw CustodyAuthority.failure();
+        } catch (java.net.URISyntaxException | IOException | java.util.concurrent.ExecutionException | RuntimeException e) {
+            throw new CustodyException("SIGNER_UNTRUSTED", "SERVICE_ORIGIN_OR_INSTALL");
+        }
+
+
+
+        }
+    }
+
+    /** Independent fresh checks; neither result authorizes anything until BOTH finish successfully. */
+    static boolean verifyBoth(java.util.concurrent.Callable<Boolean> liveIdentity,
+            java.util.concurrent.Callable<Boolean> enclosingSeal, CustodyAuthority.Deadline deadline)
+            throws InterruptedException, java.util.concurrent.ExecutionException,
+            java.util.concurrent.TimeoutException, CustodyException {
+        deadline.require();
+        try (var checks = Executors.newVirtualThreadPerTaskExecutor()) {
+            Future<Boolean> live = checks.submit(liveIdentity);
+            Future<Boolean> parent = checks.submit(enclosingSeal);
+            try {
+                long liveBudget = deadline.remaining();
+                if (liveBudget == 0) { throw CustodyAuthority.failure(); }
+                boolean callerOk = Boolean.TRUE.equals(live.get(liveBudget, TimeUnit.NANOSECONDS));
+                deadline.require();
+                long parentBudget = deadline.remaining();
+                if (parentBudget == 0) { throw CustodyAuthority.failure(); }
+                boolean parentOk = Boolean.TRUE.equals(parent.get(parentBudget, TimeUnit.NANOSECONDS));
+                deadline.require();
+                return callerOk && parentOk;
+            } finally {
+                live.cancel(true);
+                parent.cancel(true);
+            }
+        }
+    }
+
+    /** No symlink components, foreign owners, group/other writable ancestry, or executable substitution. Root-owned sticky temp ancestry is allowed. */
+    static void requireInstallPath(Path file, int uid) throws IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.requireInstallPath")) {
+        if (!file.isAbsolute() || !file.normalize().equals(file) || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) throw new IOException();
+        for (Path p = file; p != null; p = p.getParent()) {
+            if (Files.isSymbolicLink(p)) throw new IOException();
+            long owner = ((Number) Files.getAttribute(p, "unix:uid", LinkOption.NOFOLLOW_LINKS)).longValue();
+            int mode = ((Number) Files.getAttribute(p, "unix:mode", LinkOption.NOFOLLOW_LINKS)).intValue();
+            boolean systemSticky = Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS) && owner == 0 && (mode & 01000) != 0;
+            if (owner != 0 && owner != uid || (mode & 0022) != 0 && !systemSticky) throw new IOException();
+        }
+
+
+
+        }
     }
 
     /** The helper's endpoint directory must be ours, private (0700) and not a symlink; the kernel token check is what actually authenticates the peer. */
     private static void checkPrivateEndpoint(Path socket) throws CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("client.checkPrivateEndpoint")) {
         try {
             Path dir = socket.getParent();
             if (dir == null || Files.isSymbolicLink(dir) || !Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)
@@ -422,6 +577,9 @@ public final class CustodyClient {
             }
         } catch (IOException e) {
             throw new CustodyException("SIGNER_UNTRUSTED", "ENDPOINT_DIR");
+        }
+
+
         }
     }
 

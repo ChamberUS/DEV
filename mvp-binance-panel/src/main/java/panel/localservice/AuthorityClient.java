@@ -34,7 +34,7 @@ public final class AuthorityClient implements AuthorityGateway, AutoCloseable {
     private SocketChannel channel;
     private InputStream in;
     private OutputStream out;
-    private String token; // só memória
+    private volatile String token; // só memória
     private int seq;
 
     public AuthorityClient(LocalServiceClient client) {

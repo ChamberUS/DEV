@@ -46,6 +46,7 @@ public final class WorkspaceSwitcher extends StackPane {
         segments.setAlignment(Pos.CENTER_LEFT);
         for (ShellContext c : ORDER) {
             Button b = new Button(c.label);
+            b.setMinWidth(Region.USE_PREF_SIZE);
             b.getStyleClass().add("byx-switch-seg");
             b.setContentDisplay(ContentDisplay.RIGHT);
             b.setOnAction(e -> onPick.accept(c));
@@ -71,6 +72,7 @@ public final class WorkspaceSwitcher extends StackPane {
         layer.setPickOnBounds(false);
         getChildren().addAll(segments, layer);
         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        setMinWidth(Region.USE_PREF_SIZE);
     }
 
     private ShellContext neighbour(ShellContext from, int step) {

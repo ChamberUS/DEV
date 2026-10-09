@@ -5,19 +5,19 @@
 # AUTHORITY_TEST_ANCHOR, removido ao fim). Sem argumentos de senha/token em argv: comandos por stdin.
 set -uo pipefail
 HERE="${0:A:h}"; APP="${1:-$HERE/build-canary/BYX-MVP.app}"
-export JAVA_HOME="${JAVA_HOME:-$HOME/dev/tools/jdk-21.0.12.1+1/Contents/Home}"; export PATH="$JAVA_HOME/bin:$PATH"
+QA_JAVA_HOME="${JAVA_HOME:-$HOME/dev/tools/jdk-21.0.12.1+1/Contents/Home}"; export PATH="$QA_JAVA_HOME/bin:$PATH"
 SVC="$APP/Contents/Helpers/byx-auth-qa.app/Contents/MacOS/byx-auth-qa"; CLI="$APP/Contents/MacOS/byx-auth-client"
-QA="$(mktemp -d /tmp/byx-authqa.XXXXXX)"; chmod 700 "$QA"; AUTH="$QA/qa-authority"; CRED="$AUTH/qa-credentials.json"
+QA="$(mktemp -d /private/tmp/byx-authqa.XXXXXX)"; chmod 700 "$QA"; AUTH="$QA/qa-authority"; CRED="$AUTH/qa-credentials.json"
 PASS=0; FAIL=0; SVC_PID=""
 ok()   { PASS=$((PASS+1)); echo "PASS  $1"; }
 bad()  { FAIL=$((FAIL+1)); echo "FAIL  $1  [$2]"; }
 expect() { if [[ "$2" == *"$3"* ]]; then ok "$1"; else bad "$1" "esperado '$3' em: ${2:0:200}"; fi; }
 refute() { if [[ "$2" != *"$3"* ]]; then ok "$1"; else bad "$1" "NÃO deveria conter '$3'"; fi; }
-start_svc() { BYX_LOCAL_SERVICE_HOME="$QA" "$SVC" >> "$QA/svc.log" 2>&1 & SVC_PID=$!
+start_svc() { env -i HOME="$HOME" PATH=/usr/bin:/bin BYX_LOCAL_SERVICE_HOME="$QA" "$SVC" >> "$QA/svc.log" 2>&1 & SVC_PID=$!
   for i in {1..120}; do [[ -S "$QA/run/service.sock" ]] && { sleep 0.3; return 0; }; sleep 0.25; done; echo "serviço não subiu"; return 1; }
 stop_svc() { [[ -n "$SVC_PID" ]] && kill "$SVC_PID" 2>/dev/null; wait "$SVC_PID" 2>/dev/null; SVC_PID=""; sleep 0.5; }
 cli() { BYX_LOCAL_SERVICE_HOME="$QA" "$CLI" 2>&1; }   # comandos em stdin
-cleanup() { stop_svc; touch "$AUTH/qa-wipe"; BYX_LOCAL_SERVICE_HOME="$QA" "$SVC" >/dev/null 2>&1; rm -rf "${QA:?}"; }
+cleanup() { stop_svc; touch "$AUTH/qa-wipe"; env -i HOME="$HOME" PATH=/usr/bin:/bin BYX_LOCAL_SERVICE_HOME="$QA" "$SVC" >/dev/null 2>&1; rm -rf "${QA:?}"; }
 trap cleanup EXIT
 mkdir -p "$AUTH"; chmod 700 "$AUTH"; : > "$QA/svc.log"
 touch "$AUTH/qa-reset" # recomeça do zero os itens de TESTE (um QA anterior interrompido pode ter deixado âncora/chave de teste no keychain)
@@ -158,13 +158,13 @@ EVIL_MARKER="$QA/marker.control" java -Xbootclasspath/a:"$EV/evil.jar" -cp "$CP"
 [[ -f "$QA/marker.control" ]] && ok "controle positivo: o jar hostil É eficaz num java genérico" || bad "controle positivo" "marcador ausente"
 EVIL_MARKER="$QA/marker.helper" JAVA_TOOL_OPTIONS="-Xbootclasspath/a:$EV/evil.jar" _JAVA_OPTIONS="-Xbootclasspath/a:$EV/evil.jar" JDK_JAVA_OPTIONS="-Xbootclasspath/a:$EV/evil.jar" \
   BYX_LOCAL_SERVICE_HOME="$QA" "$SVC" >> "$QA/svc.log" 2>&1 & SVC_PID=$!
-for i in {1..60}; do [[ -S "$QA/run/service.sock" ]] && break; sleep 0.25; done; sleep 0.5
+wait "$SVC_PID"; INJECTION_RC=$?; SVC_PID=""
 [[ ! -f "$QA/marker.helper" ]] && ok "helper endurecido: código injetado por JAVA_TOOL_OPTIONS/_JAVA_OPTIONS/JDK_JAVA_OPTIONS NÃO executou" || bad "injeção" "marcador criado"
-[[ -S "$QA/run/service.sock" ]] && ok "e o serviço sobe normalmente com esse ambiente hostil" || bad "serviço com ambiente hostil" "sem socket"
+[[ $INJECTION_RC -eq 74 && ! -S "$QA/run/service.sock" ]] && ok "serviço de QA recusa ambiente hostil antes da JVM (exit 74), sem socket" || bad "serviço com ambiente hostil" "exit=$INJECTION_RC"
 stop_svc
 
 echo "== 8. bundle adulterado não inicia"
-T="$(mktemp -d /tmp/byx-authqa-tamper.XXXXXX)"; cp -cR "$APP" "$T/BYX-MVP.app"
+T="$(mktemp -d /private/tmp/byx-authqa-tamper.XXXXXX)"; cp -cR "$APP" "$T/BYX-MVP.app"
 J=$(ls "$T"/BYX-MVP.app/Contents/Helpers/byx-auth-qa.app/Contents/app/byx-local-service-*.jar | head -1); printf 'x' >> "$J"
 BYX_LOCAL_SERVICE_HOME="$QA" "$T/BYX-MVP.app/Contents/Helpers/byx-auth-qa.app/Contents/MacOS/byx-auth-qa" > "$T/out" 2>&1; RC=$?
 [[ $RC -eq 71 ]] && ok "jar do serviço alterado → lançador recusa (exit 71)" || bad "bundle adulterado" "exit=$RC $(cat "$T/out")"
@@ -212,7 +212,7 @@ EVIL_MARKER="$QA/marker.dyld.control" DYLD_INSERT_LIBRARIES="$QA/evil.dylib" "$Q
 EVIL_MARKER="$QA/marker.dyld.panel" DYLD_INSERT_LIBRARIES="$QA/evil.dylib" BYX_LOCAL_SERVICE_HOME="$QA" "$PANEL" --probe-service >/dev/null 2>&1
 [[ ! -f "$QA/marker.dyld.panel" ]] && ok "painel endurecido: DYLD_INSERT_LIBRARIES não carregou a biblioteca hostil" || bad "DYLD no painel" "marcador criado"
 stop_svc
-T="$(mktemp -d /tmp/byx-authqa-tamper.XXXXXX)"; cp -cR "$APP" "$T/BYX-MVP.app"
+T="$(mktemp -d /private/tmp/byx-authqa-tamper.XXXXXX)"; cp -cR "$APP" "$T/BYX-MVP.app"
 J=$(ls "$T"/BYX-MVP.app/Contents/app/mvp-binance-panel-*.jar | head -1); printf 'x' >> "$J"
 "$T/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service > "$T/out" 2>&1; RC=$?
 [[ $RC -eq 71 ]] && ok "painel com jar alterado → lançador recusa (exit 71)" || bad "painel adulterado (jar)" "exit=$RC"
@@ -222,7 +222,7 @@ echo "java-options=-Dtampered=1" >> "$T/BYX-MVP.app/Contents/app/BYX-MVP.cfg"
 [[ $RC -eq 71 ]] && ok "painel com .cfg alterado → lançador recusa (exit 71)" || bad "painel adulterado (cfg)" "exit=$RC"
 expect "mensagem fixa, sem caminhos" "$(cat "$T/out2")" "bundle seal invalid"
 rm -rf "${T:?}"
-T2="$(mktemp -d /tmp/byx-authqa-clean.XXXXXX)"; cp -cR "$APP" "$T2/BYX-MVP.app"; start_svc
+T2="$(mktemp -d /private/tmp/byx-authqa-clean.XXXXXX)"; cp -cR "$APP" "$T2/BYX-MVP.app"; start_svc
 [[ -S "$QA/run/service.sock" ]] && OUT=$(BYX_LOCAL_SERVICE_HOME="$QA" "$T2/BYX-MVP.app/Contents/MacOS/BYX-MVP" --probe-service 2>&1)
 expect "cópia LIMPA do bundle (restaurado) inicia e conecta normalmente" "$OUT" "probe.state=CONNECTED"
 stop_svc; rm -rf "${T2:?}"

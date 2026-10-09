@@ -13,6 +13,8 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.LongSupplier;
 
 /** QA-only authority: OS-held exclusion, external restart quiescence and one exact child at a time. */
 final class CustodyAuthority {
@@ -27,17 +29,61 @@ final class CustodyAuthority {
     private boolean previousResultUnknown;
     private Binding pending;
 
+    /** One monotonic operation deadline; nested work never renews the caller's budget. */
+    static final class Deadline {
+        static final long EXIT_PROOF_NANOS = TimeUnit.SECONDS.toNanos(3);
+        private final LongSupplier clock;
+        private final long end;
+
+        private Deadline(LongSupplier clock, long end) { this.clock = clock; this.end = end; }
+        static Deadline operation() { return after(System::nanoTime, TimeUnit.MILLISECONDS.toNanos(CustodyClient.CALL_TIMEOUT_MS)); }
+        static Deadline after(LongSupplier clock, long nanos) {
+            if (nanos <= 0) { throw new IllegalArgumentException("INVALID_DEADLINE"); }
+            return new Deadline(clock, clock.getAsLong() + nanos);
+        }
+        long remaining() { return Math.max(0, end - clock.getAsLong()); }
+        void require() throws CustodyClient.CustodyException { if (remaining() == 0) { throw CustodyAuthority.failure(); } }
+        long exchangeWait() throws CustodyClient.CustodyException {
+            long available = remaining() - EXIT_PROOF_NANOS;
+            if (available <= 0) { throw CustodyAuthority.failure(); }
+            return available;
+        }
+        Deadline bootstrap() throws CustodyClient.CustodyException {
+            long available = exchangeWait();
+            long now = clock.getAsLong();
+            long remainingForRequest = Math.max(0, end - now - EXIT_PROOF_NANOS);
+            long slice = Math.min(TimeUnit.MILLISECONDS.toNanos(CustodyClient.CALL_TIMEOUT_MS / 2), Math.min(available, remainingForRequest));
+            if (slice == 0) { throw CustodyAuthority.failure(); }
+            return new Deadline(clock, now + slice);
+        }
+        Deadline exitProof() throws CustodyClient.CustodyException {
+            require();
+            long now = clock.getAsLong();
+            return new Deadline(clock, now + Math.min(EXIT_PROOF_NANOS, Math.max(0, end - now)));
+        }
+    }
+
     interface ProcessControl {
         List<Object> discover() throws Exception;
         Object identify(long pid) throws Exception;
         boolean trusted(Object instance) throws Exception;
         boolean gone(Object instance) throws Exception;
         boolean terminate(Object instance) throws Exception;
+        default boolean terminate(Object instance, Deadline deadline) throws Exception {
+            deadline.require();
+            return terminate(instance);
+        }
         long pid(Object instance);
         long version(Object instance);
     }
 
-    static synchronized CustodyAuthority current(CodeIdentity identity, Path origin) throws CustodyClient.CustodyException {
+    static CustodyAuthority current(CodeIdentity identity, Path origin) throws CustodyClient.CustodyException {
+        return current(identity, origin, Deadline.operation());
+    }
+
+    static synchronized CustodyAuthority current(CodeIdentity identity, Path origin, Deadline deadline) throws CustodyClient.CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.current")) {
+        deadline.require();
         if (!identity.selfSatisfies(CodeIdentity.requirement("com.buynnex.byx.service", identity.selfTeamId()))) {
             throw new CustodyClient.CustodyException("CALLER_UNTRUSTED", "CALLER_UNTRUSTED");
         }
@@ -45,6 +91,7 @@ final class CustodyAuthority {
             Path real = origin.toRealPath();
             if (singleton != null) {
                 if (!singleton.origin.equals(real)) { throw new IOException("AUTHORITY_ORIGIN_MISMATCH"); }
+                deadline.require();
                 return singleton;
             }
             Path base = Path.of(identity.custodyTempRoot()).toRealPath();
@@ -52,7 +99,7 @@ final class CustodyAuthority {
             Lease lease = Lease.acquire(base.resolve("byx-custody-qa-authority"));
             try {
                 var authority = new CustodyAuthority(new NativeControl(identity, real), real, lease);
-                authority.startup();
+                authority.startup(deadline);
                 singleton = authority;
                 Runtime.getRuntime().addShutdownHook(new Thread(authority::shutdown, "custody-quiescence"));
                 return authority;
@@ -63,6 +110,15 @@ final class CustodyAuthority {
         } catch (Exception e) {
             throw failure();
         }
+
+
+
+
+
+
+
+
+        }
     }
 
     CustodyAuthority(ProcessControl control, Path origin, Lease lease) {
@@ -71,23 +127,38 @@ final class CustodyAuthority {
         this.lease = lease;
     }
 
-    synchronized void startup() throws CustodyClient.CustodyException {
+    synchronized void startup() throws CustodyClient.CustodyException { startup(Deadline.operation()); }
+
+    synchronized void startup(Deadline deadline) throws CustodyClient.CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.startup")) {
         try {
+            deadline.require();
             if (lease != null) { previousResultUnknown = lease.readUnknown(); }
-            for (Object instance : control.discover()) {
+            deadline.require();
+            var discovered = control.discover();
+            deadline.require();
+            for (Object instance : discovered) {
+                deadline.require();
                 if (!control.gone(instance)) {
                     previousResultUnknown = true;
-                    fence(instance);
+                    fence(instance, deadline);
                 }
             }
+            deadline.require();
             if (lease != null) { lease.record("QUIESCENT", generation, "", previousResultUnknown); }
+            deadline.require();
         } catch (Exception e) {
             blocked = true;
             throw failure();
         }
+
+
+
+        }
     }
 
     synchronized Binding begin() throws CustodyClient.CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.begin")) {
         if (blocked || active != null) { throw failure(); }
         try {
             if (lease != null) { lease.verify(); }
@@ -100,9 +171,14 @@ final class CustodyAuthority {
             if (lease != null) { lease.record("IN_FLIGHT", generation, pending.operationId, true); }
         } catch (IOException e) { blocked = true; throw failure(); }
         return pending;
+
+
+
+        }
     }
 
     synchronized void attach(long pid) throws CustodyClient.CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.attach")) {
         if (blocked || active != null) { throw failure(); }
         try {
             active = control.identify(pid);
@@ -111,6 +187,10 @@ final class CustodyAuthority {
             // Never forget an unidentified spawned instance or permit another child.
             blocked = true;
             throw failure();
+        }
+
+
+
         }
     }
 
@@ -123,38 +203,63 @@ final class CustodyAuthority {
 
     synchronized void finish() throws CustodyClient.CustodyException {
         finish(true);
+
     }
 
     synchronized void finish(boolean uncertain) throws CustodyClient.CustodyException {
+        finish(uncertain, Deadline.operation());
+    }
+
+    synchronized void finish(boolean uncertain, Deadline deadline) throws CustodyClient.CustodyException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.finish")) {
         if (active == null) {
             if (blocked) { throw failure(); }
             return;
         }
         try {
-            fence(active);
-            active = null;
+            fence(active, deadline);
             previousResultUnknown |= uncertain;
             if (lease != null) { lease.record("QUIESCENT", generation, pending == null ? "" : pending.operationId, previousResultUnknown); }
+            deadline.require();
+            active = null;
         } catch (Exception e) {
             blocked = true;
             throw failure();
         }
+
+
+
+        }
     }
 
-    private void fence(Object instance) throws Exception {
-        if (control.gone(instance)) { return; }
-        if (!control.trusted(instance) || !control.terminate(instance) || !control.gone(instance)) {
-            throw failure();
+    private void fence(Object instance, Deadline operationDeadline) throws Exception {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.fence")) {
+            Deadline deadline = operationDeadline.exitProof();
+            deadline.require();
+            boolean absent = control.gone(instance);
+            deadline.require();
+            if (absent) { return; }
+            if (!control.trusted(instance)) { throw failure(); }
+            deadline.require();
+            if (!control.terminate(instance, deadline)) { throw failure(); }
+            deadline.require();
+            if (!control.gone(instance)) { throw failure(); }
+            deadline.require();
         }
     }
 
     private synchronized void shutdown() {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.shutdown")) {
         try {
             finish();
             lease.close();
         } catch (Exception e) {
             // Keep the OS-held lock until actual process death; restart must re-establish quiescence.
             blocked = true;
+        }
+
+
+
         }
     }
 
@@ -194,6 +299,7 @@ final class CustodyAuthority {
         }
 
         static Lease acquire(Path directory) throws IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.acquire")) {
             if (!Files.exists(directory, LinkOption.NOFOLLOW_LINKS)) {
                 try { Files.createDirectory(directory, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------"))); }
                 catch (java.nio.file.FileAlreadyExistsException e) { /* competing startup: verify below */ }
@@ -217,16 +323,26 @@ final class CustodyAuthority {
                 channel.close();
                 throw new IOException("AUTHORITY_LOCK_UNPROVEN", e);
             }
+
+
+
         }
+    }
 
         void verify() throws IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.verify")) {
             requirePrivate(path.getParent(), true);
             requirePrivate(path, false);
             Object now = Files.readAttributes(path, java.nio.file.attribute.BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).fileKey();
             if (!lock.isValid() || fileKey == null || !fileKey.equals(now)) { throw new IOException("LOCK_INODE_CHANGED"); }
+
+
+
         }
+    }
 
         boolean readUnknown() throws IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.readUnknown")) {
             if (channel.size() == 0) { return false; }
             if (channel.size() > 1024) { throw new IOException("INVALID_CUSTODY_CHECKPOINT"); }
             java.nio.ByteBuffer b = java.nio.ByteBuffer.allocate((int) channel.size());
@@ -242,9 +358,14 @@ final class CustodyAuthority {
                 throw new IOException("INVALID_CUSTODY_CHECKPOINT");
             }
             return n.path("unknownResult").asBoolean() || "IN_FLIGHT".equals(n.path("status").asText());
+
+
+
         }
+    }
 
         void record(String status, String generation, String operationId, boolean unknown) throws IOException {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.record")) {
             verify();
             byte[] b = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(java.util.Map.of(
                     "version", 1, "status", status, "generation", generation, "operationId", operationId, "unknownResult", unknown));
@@ -253,7 +374,11 @@ final class CustodyAuthority {
             while (buffer.hasRemaining()) { channel.write(buffer); }
             channel.truncate(b.length);
             channel.force(true);
+
+
+
         }
+    }
 
         public void close() throws IOException { lock.release(); channel.close(); }
     }
@@ -281,6 +406,7 @@ final class CustodyAuthority {
         }
 
         public List<Object> discover() throws Exception {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.discover")) {
             var found = new java.util.ArrayList<Object>();
             for (int pid : identity.processIds()) {
                 if (pid <= 0) { continue; }
@@ -305,24 +431,46 @@ final class CustodyAuthority {
                 found.add(instance);
             }
             return found;
-        }
 
-        public Object identify(long pid) { return identity.instance(pid); }
+
+        }
+    }
+
+        public Object identify(long pid) {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.identify")) { return identity.instance(pid);
+
+        }
+    }
         public boolean trusted(Object instance) {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.trusted")) {
             var i = (CodeIdentity.Instance) instance;
             return executable.equals(identity.instancePath(i))
                     && identity.checkInstance(i, requirement, bundle.toString()) == CodeIdentity.Verdict.OK;
+
+
         }
-        public boolean gone(Object instance) { return identity.instancePath((CodeIdentity.Instance) instance) == null; }
+    }
+        public boolean gone(Object instance) {
+        try (var timing = byx.service.identity.FencingTiming.phase("authority.gone")) { return identity.instancePath((CodeIdentity.Instance) instance) == null;
+
+        }
+    }
         public boolean terminate(Object instance) throws InterruptedException {
-            int rc = identity.signalInstance((CodeIdentity.Instance) instance, 9);
-            if (rc != 0 && rc != 3) { return false; }
-            long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(3);
-            do {
-                if (gone(instance)) { return true; }
-                Thread.sleep(10);
-            } while (System.nanoTime() < deadline);
-            return false;
+            return terminate(instance, Deadline.operation());
+        }
+        public boolean terminate(Object instance, Deadline deadline) throws InterruptedException {
+            try (var timing = byx.service.identity.FencingTiming.phase("authority.terminate")) {
+                if (deadline.remaining() == 0) { return false; }
+                int rc = identity.signalInstance((CodeIdentity.Instance) instance, 9);
+                if (rc != 0 && rc != 3) { return false; }
+                while (deadline.remaining() > 0) {
+                    if (gone(instance)) { return deadline.remaining() > 0; }
+                    long remaining = deadline.remaining();
+                    if (remaining == 0) { break; }
+                    TimeUnit.NANOSECONDS.sleep(Math.min(TimeUnit.MILLISECONDS.toNanos(10), remaining));
+                }
+                return false;
+            }
         }
         public long pid(Object instance) { return ((CodeIdentity.Instance) instance).pid(); }
         public long version(Object instance) { return ((CodeIdentity.Instance) instance).pidVersion(); }

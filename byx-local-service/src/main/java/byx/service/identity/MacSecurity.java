@@ -118,7 +118,7 @@ final class MacSecurity {
     }
 
     static MacSecurity load() {
-        return new MacSecurity();
+        try (var timing = FencingTiming.phase("native.libraryBindingsInitialization")) { return new MacSecurity(); }
     }
 
     byte[] processToken(int pid) {
@@ -197,6 +197,7 @@ final class MacSecurity {
 
     /** Team ID da assinatura do próprio processo (null se não assinado por um time: ad-hoc, JDK de outro time não conta como "nosso"). */
     String selfTeamId() {
+        try (var timing = FencingTiming.phase("native.selfTeamId")) {
         PointerByReference self = new PointerByReference();
         if (sec.SecCodeCopySelf(0, self) != 0) {
             return null;
@@ -212,9 +213,14 @@ final class MacSecurity {
             release(info.getValue());
             release(self.getValue());
         }
+
+
+
+        }
     }
 
     boolean selfSatisfies(String requirement) {
+        try (var timing = FencingTiming.phase("native.selfSatisfies")) {
         PointerByReference self = new PointerByReference();
         if (sec.SecCodeCopySelf(0, self) != 0) {
             return false;
@@ -225,6 +231,10 @@ final class MacSecurity {
         } finally {
             release(req);
             release(self.getValue());
+        }
+
+
+
         }
     }
 
@@ -253,10 +263,12 @@ final class MacSecurity {
 
     Check checkPeer(byte[] token, String requirement, boolean sealedBundle) {
         return checkPeer(token, requirement, sealedBundle, null);
+
     }
 
     /** Igual a {@link #checkPeer(byte[], String, boolean)}; se {@code pathOut} != null recebe o caminho do código do guest (bundle) quando a checagem passa. */
     Check checkPeer(byte[] token, String requirement, boolean sealedBundle, String[] pathOut) {
+        try (var timing = FencingTiming.phase("native.checkPeer")) {
         Pointer data = cf.CFDataCreate(null, token, token.length);
         Pointer attrs = cf.CFDictionaryCreate(null, new Pointer[] {auditKey}, new Pointer[] {data}, 1, keyCallbacks, valueCallbacks);
         PointerByReference guest = new PointerByReference();
@@ -276,7 +288,7 @@ final class MacSecurity {
             if (sealedBundle) {
                 // selo dos recursos (jars, .cfg, bibliotecas): detecta bundle adulterado em disco; estrito e com código aninhado
                 if (sec.SecCodeCopyStaticCode(guest.getValue(), 0, staticCode) != 0
-                        || sec.SecStaticCodeCheckValidityWithErrors(staticCode.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, req, null) != 0) {
+                        || staticValidity(staticCode.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, req) != 0) {
                     return Check.BUNDLE_MODIFIED;
                 }
             }
@@ -296,6 +308,10 @@ final class MacSecurity {
             release(guest.getValue());
             release(attrs);
             release(data);
+        }
+
+
+
         }
     }
 
@@ -322,6 +338,7 @@ final class MacSecurity {
 
     /** Valida o código ESTÁTICO em um caminho (bundle) contra um requisito, com selo estrito e código aninhado. Antes de executar qualquer coisa. */
     Check checkStaticPath(String path, String requirement) {
+        try (var timing = FencingTiming.phase("native.checkStaticPath")) {
         Pointer ps = cf.CFStringCreateWithCString(null, path, CF_UTF8);
         Pointer url = ps == null ? null : cf.CFURLCreateWithFileSystemPath(null, ps, 0, (byte) 1);
         PointerByReference sc = new PointerByReference();
@@ -334,20 +351,22 @@ final class MacSecurity {
             if (req == null) {
                 return Check.BAD_REQUIREMENT;
             }
-            // two steps, so each defect has its own verdict: (1) is there a valid, sealed signature at all (strict, nested)? (2) does it satisfy the requirement?
-            int seal = sec.SecStaticCodeCheckValidityWithErrors(sc.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, null, null);
-            if (seal == ERR_SEC_CS_UNSIGNED) {
-                return Check.NO_GUEST; // unsigned
-            }
-            if (seal != 0) {
-                return Check.BUNDLE_MODIFIED; // broken seal / modified resources / invalid signature
-            }
-            return sec.SecStaticCodeCheckValidityWithErrors(sc.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, req, null) == 0 ? Check.OK : Check.REQUIREMENT_FAILED;
+            // One strict nested validation includes the same Apple/Team/identifier requirement.
+            // On failure only, repeat the seal-only check to retain the precise closed verdict.
+            int combined = staticValidity(sc.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, req);
+            if (combined == 0) { return Check.OK; }
+            int seal = staticValidity(sc.getValue(), SEC_CS_CHECK_NESTED_CODE | SEC_CS_STRICT_VALIDATE, null);
+            if (seal == ERR_SEC_CS_UNSIGNED) { return Check.NO_GUEST; }
+            return seal == 0 ? Check.REQUIREMENT_FAILED : Check.BUNDLE_MODIFIED;
         } finally {
             release(sc.getValue());
             release(req);
             release(url);
             release(ps);
+        }
+
+
+
         }
     }
 
@@ -395,6 +414,7 @@ final class MacSecurity {
     // ---- CoreFoundation ---------------------------------------------------------------------------------------------------------------
 
     private Pointer requirement(String text) {
+        try (var timing = FencingTiming.phase("native.requirement")) {
         Pointer s = cf.CFStringCreateWithCString(null, text, CF_UTF8);
         if (s == null) {
             return null;
@@ -404,6 +424,10 @@ final class MacSecurity {
             return sec.SecRequirementCreateWithString(s, 0, req) == 0 ? req.getValue() : null;
         } finally {
             release(s);
+        }
+
+
+
         }
     }
 
@@ -417,6 +441,12 @@ final class MacSecurity {
             n++;
         }
         return new String(buf, 0, n, StandardCharsets.UTF_8);
+    }
+
+    private int staticValidity(Pointer code, int flags, Pointer requirement) {
+        try (var timing = FencingTiming.phase("security.strictNestedSealAndRequirement")) {
+            return sec.SecStaticCodeCheckValidityWithErrors(code, flags, requirement, null);
+        }
     }
 
     private void release(Pointer p) {

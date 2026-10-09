@@ -18,32 +18,25 @@ import panel.user.User;
 public final class LoginController {
     public enum State { DEFAULT, LOADING, INVALID, DISABLED, UNAVAILABLE, RATE_LIMITED, SUCCESS }
 
-    /** Serviço real de credenciais (AuthService.login). */
-    @FunctionalInterface
-    public interface Authenticator {
-        User login(String identifier, char[] password);
-    }
-
-    private final Authenticator auth;
+    private final java.util.function.Supplier<? extends panel.auth.AuthenticationRequest> requests;
+    private panel.auth.AuthenticationRequest request;
     private final Executor worker;
     private final Executor fx;
     private final Consumer<User> onSuccess;
-    private final Runnable endStaleSession;
     private final ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<>(this, "state", State.DEFAULT);
     private Duration retryAfter = Duration.ZERO;
     private long attempt;
     private boolean disposed;
+    private boolean handedOff;
+    private char[] pendingPassword;
 
-    /**
-     * onSuccess: quem decide a rota depois do login (o roteador); endStaleSession: encerra uma sessão aberta
-     * por uma tentativa que já não vale.
-     */
-    public LoginController(Authenticator auth, Executor worker, Executor fx, Consumer<User> onSuccess, Runnable endStaleSession) {
-        this.auth = auth;
+    /** Request ownership is reserved synchronously at submit, before any authentication worker starts. */
+    public LoginController(java.util.function.Supplier<? extends panel.auth.AuthenticationRequest> requests,
+            Executor worker, Executor fx, Consumer<User> onSuccess) {
+        this.requests = requests;
         this.worker = worker;
         this.fx = fx;
         this.onSuccess = onSuccess;
-        this.endStaleSession = endStaleSession;
     }
 
     public ReadOnlyObjectProperty<State> stateProperty() {
@@ -66,13 +59,22 @@ public final class LoginController {
             return;
         }
         long mine = ++attempt;
+        panel.auth.AuthenticationRequest owned;
+        try { owned = requests.get(); }
+        catch (RuntimeException unavailable) {
+            Arrays.fill(password, '\0');
+            state.set(State.UNAVAILABLE);
+            return;
+        }
+        request = owned;
+        pendingPassword = password;
         state.set(State.LOADING);
-        worker.execute(() -> {
+        try { worker.execute(() -> {
             User user = null;
             State failed = null;
             Duration wait = Duration.ZERO;
             try {
-                user = auth.login(identifier, password);
+                user = owned.authenticate(identifier, password);
             } catch (AuthService.LoginException e) {
                 failed = switch (e.failure) {
                     case INVALID_CREDENTIALS -> State.INVALID;
@@ -88,22 +90,22 @@ public final class LoginController {
             User u = user;
             State f = failed;
             Duration w = wait;
-            fx.execute(() -> {
-                if (disposed || mine != attempt) {
-                    if (u != null) {
-                        endStaleSession.run(); // tentativa descartada não deixa sessão aberta
-                    }
-                    return;
-                }
+            fx.execute(() -> owned.deliver(() -> {
+                if (disposed || mine != attempt || !owned.isCurrent()) return;
                 if (u != null) {
+                    handedOff = true;
                     state.set(State.SUCCESS);
                     onSuccess.accept(u); // o roteador abre o workspace; nenhuma animação decide
                 } else {
                     retryAfter = w;
                     state.set(f);
                 }
-            });
-        });
+            }));
+        }); } catch (java.util.concurrent.RejectedExecutionException stopped) {
+            owned.cancel();
+            Arrays.fill(password, '\0');
+            state.set(State.UNAVAILABLE);
+        }
     }
 
     /** Esc: limpa um erro (inválido, desativado, indisponível). Não fura o bloqueio nem interrompe o envio. */
@@ -126,5 +128,7 @@ public final class LoginController {
     public void dispose() {
         disposed = true;
         attempt++;
+        if (pendingPassword != null) Arrays.fill(pendingPassword, '\0');
+        if (request != null && !handedOff) request.cancel();
     }
 }

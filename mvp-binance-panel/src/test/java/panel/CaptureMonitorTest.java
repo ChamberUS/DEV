@@ -135,7 +135,7 @@ class CaptureMonitorTest {
         var service = new CaptureMonitorService(() -> {
             assertFalse(Platform.isFxApplicationThread()); calls.incrementAndGet(); entered.countDown();
             assertTrue(release.await(5, TimeUnit.SECONDS)); return probe().read();
-        }, () -> {});
+        }, () -> () -> {}, () -> true);
         try {
             FxSupport.fx(() -> service.start(s -> { assertTrue(Platform.isFxApplicationThread()); published.countDown(); }));
             assertTrue(entered.await(5, TimeUnit.SECONDS));
@@ -144,10 +144,28 @@ class CaptureMonitorTest {
             FxSupport.fx(service::stop); assertTrue(calls.get() <= 2);
         } finally { release.countDown(); FxSupport.fx(service::close); }
     }
+    @Test void blockedAuthorizationRunsOffFxAndStoppedGenerationNeverReadsMetadata() throws Exception {
+        FxSupport.start(); var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
+        var finished = new CountDownLatch(1); var reads = new AtomicInteger(); var publishes = new AtomicInteger();
+        var service = new CaptureMonitorService(() -> { reads.incrementAndGet(); return probe().read(); },
+                () -> () -> {
+                    assertFalse(Platform.isFxApplicationThread()); entered.countDown();
+                    try { assertTrue(release.await(5, TimeUnit.SECONDS)); }
+                    catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new IllegalStateException(e); }
+                    finally { finished.countDown(); }
+                }, () -> true);
+        try {
+            FxSupport.fx(() -> service.start(s -> publishes.incrementAndGet()));
+            assertTrue(entered.await(5, TimeUnit.SECONDS));
+            FxSupport.fx(service::stop); // a pulse and lifecycle change complete while Service authorization is blocked
+            assertEquals(0, reads.get()); release.countDown(); assertTrue(finished.await(5, TimeUnit.SECONDS));
+            FxSupport.fx(() -> {}); assertEquals(0, reads.get()); assertEquals(0, publishes.get());
+        } finally { release.countDown(); FxSupport.fx(service::close); }
+    }
     @Test void userAndAdminWithoutAdminSessionCannotReadMonitor() throws Exception {
         FxSupport.start(); var f = AuthFixture.ready(); f.seedUser();
         var calls = new AtomicInteger();
-        var service = new CaptureMonitorService(() -> { calls.incrementAndGet(); return probe().read(); }, f.access::requireAdmin);
+        var service = new CaptureMonitorService(() -> { calls.incrementAndGet(); return probe().read(); }, () -> { var scope = f.auth.captureSession(); return () -> f.access.requireAdmin(scope); }, f.access::hasValidAdminSession);
         try {
             f.auth.login("alice", "temporary-pass-1".toCharArray());
             FxSupport.fx(() -> assertThrows(AccessDeniedException.class, () -> service.start(s -> {})));

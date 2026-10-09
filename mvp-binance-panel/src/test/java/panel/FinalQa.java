@@ -271,10 +271,10 @@ public final class FinalQa {
             Properties[] before = new Properties[1];
             String[] traded = new String[1];
             plan.add(() -> {
-                check("auth:welcome".equals(router.route()), "first install opens the Welcome route: " + router.route());
-                check(texts(((panel.authview.AuthScreens) field("authScreens")).node()).contains("Create the administrator account"), "Welcome offers the administrator account");
+                check("auth:login".equals(router.route()), "frozen Service client enters at login: " + router.route());
+                check(!ctx.auth.firstRun(), "Panel cannot infer or create the Service administrator");
                 show("auth:setup");
-                check("auth:setup".equals(router.route()), "Welcome leads to the first-administrator setup");
+                check("auth:login".equals(router.route()), "unavailable administrator setup cannot open from the frozen entry");
                 panel.QaContext.dev().add("qa-admin", "qa@example.invalid", "+5511999991234", "final-qa-pass-1", panel.security.Role.ADMIN, false);
                 invoke("showEntry", String.class, "Administrator created. Sign in to continue.");
                 check("auth:login".equals(router.route()), "after setup the login opens");
@@ -301,7 +301,7 @@ public final class FinalQa {
             });
             plan.add(() -> {
                 check(shell().overlay().openDialogs() == 0, "Skip closes the dialog");
-                check(ctx.settings.onboardingCompleted && "TRADING".equals(ctx.settings.primaryWorkspace), "Skip records completion and keeps the primary workspace");
+                check(!ctx.settings.onboardingCompleted && "TRADING".equals(ctx.settings.primaryWorkspace), "read-only Skip leaves completion and workspace unchanged");
                 check("t-desk".equals(router.route()), "Skip keeps the route: " + router.route());
                 show("sys-onboarding");
                 next(400);
@@ -320,35 +320,19 @@ public final class FinalQa {
             });
             plan.add(() -> {
                 check(shell().overlay().openDialogs() == 0, "Finish closes the dialog");
-                check("BYX".equals(ctx.settings.primaryWorkspace), "Finish stores the primary workspace");
+                check(!ctx.settings.onboardingCompleted && "TRADING".equals(ctx.settings.primaryWorkspace), "read-only Finish cannot publish an unpersisted workspace or completion");
                 check("t-desk".equals(router.route()), "a replay never navigates (only the first onboarding opens the chosen workspace): " + router.route());
                 Snapshot s = ctx.research.snapshot.get();
                 check("LOCKED".equals(s.validationStatus) && "SEALED".equals(s.finalHoldout), "gates after onboarding: LOCKED / SEALED");
                 check(traded[0].equals(ctx.trading.snapshot.get().trading) && "DISABLED".equals(ctx.trading.snapshot.get().trading), "trading untouched (DISABLED)");
-                boolean noWallet;
-                try {
-                    noWallet = ctx.byxWallets.wallets().isEmpty();
-                } catch (IllegalStateException unavailable) {
-                    noWallet = true; // LOCALNET não configurada: nada para vincular
+                boolean walletDenied = false;
+                try { ctx.byxWallets.wallets(); }
+                catch (panel.security.AccessDeniedException denied) {
+                    walletDenied = denied.getMessage().contains(panel.security.ServerAuthorization.REQUIRED);
                 }
-                check(noWallet, "no wallet linked by onboarding");
+                check(walletDenied, "onboarding cannot bypass the frozen wallet identity boundary");
                 check("UNKNOWN".equals(ctx.byx.snapshot().connection()), "BYX node untouched (no DEVNET, no node start)");
-                Properties after = props();
-                Properties diff = new Properties();
-                Properties defaults = new Properties();
-                // Settings.save() materializa os padrões de chaves que o arquivo mínimo não tinha: valor igual ao padrão não é mudança
-                defaults.setProperty("reportsPath", "reports/research");
-                defaults.setProperty("animatedIcons", "true");
-                defaults.setProperty("researchPollSeconds", "20");
-                defaults.setProperty("followSystemMotion", "true");
-                for (String k : after.stringPropertyNames()) {
-                    String old = before[0].containsKey(k) ? before[0].getProperty(k) : defaults.getProperty(k);
-                    if (!java.util.Objects.equals(after.getProperty(k), old)) {
-                        diff.setProperty(k, after.getProperty(k));
-                    }
-                }
-                check(diff.stringPropertyNames().equals(java.util.Set.of("onboardingCompleted", "primaryWorkspace")),
-                        "only the two onboarding preferences changed value on disk: " + diff.stringPropertyNames());
+                check(props().equals(before[0]), "read-only onboarding leaves every persisted preference unchanged");
                 next(100);
             });
         }
@@ -356,58 +340,26 @@ public final class FinalQa {
         // ---- 11. alterações não salvas ---------------------------------------------------------------------------------
 
         private void unsaved() {
+            Properties[] before = new Properties[1];
             plan.add(() -> {
-                login();
-                next(1200);
+                login(); next(1200);
             });
             plan.add(() -> {
+                before[0] = props();
                 show("t-settings");
                 View settings = views.get("t-settings");
                 check("t-settings".equals(router.route()), "Settings opens");
-                ToggleButton appearance = (ToggleButton) settings.node().lookupAll(".byx-desk-seg-btn").stream().filter(n -> n instanceof ToggleButton b && "Appearance".equals(b.getText())).findFirst().orElseThrow();
+                ToggleButton appearance = (ToggleButton) settings.node().lookupAll(".byx-desk-seg-btn").stream()
+                        .filter(n -> n instanceof ToggleButton b && "Appearance".equals(b.getText())).findFirst().orElseThrow();
                 appearance.setSelected(true);
-                ToggleButton reduced = (ToggleButton) settings.node().lookupAll(".byx-desk-seg-btn").stream().filter(n -> n instanceof ToggleButton b && "REDUCED".equals(b.getText())).findFirst().orElseThrow();
-                reduced.setSelected(true);
-                check(settings.hasUnsavedChanges(), "Settings is dirty");
-                check(shell().overlay().saveBarVisible(), "the save bar appears on a change");
+                ToggleButton reduced = (ToggleButton) settings.node().lookupAll(".byx-desk-seg-btn").stream()
+                        .filter(n -> n instanceof ToggleButton b && "REDUCED".equals(b.getText())).findFirst().orElseThrow();
+                check(reduced.isDisabled(), "frozen preference mutation is visibly disabled");
+                reduced.fire();
+                check(!settings.hasUnsavedChanges() && !shell().overlay().saveBarVisible(), "read-only Settings creates no draft or false save affordance");
+                check(props().equals(before[0]), "disabled preference action leaves persistence unchanged");
                 show("t-desk");
-                next(400);
-            });
-            plan.add(() -> {
-                check("t-settings".equals(router.route()), "leaving a dirty Settings keeps the route until confirmed: " + router.route());
-                check(shell().overlay().openDialogs() == 1 && texts(dialogLayer()).contains("Discard changes?"), "confirmation dialog is open");
-                Button cancel = button(dialogLayer(), "Cancel");
-                check(cancel != null && shell().getScene().getFocusOwner() == cancel, "destructive dialog focuses Cancel");
-                cancel.fire();
-                next(400);
-            });
-            plan.add(() -> {
-                check("t-settings".equals(router.route()) && router.pending() == null, "Cancel stays and clears the pending request");
-                check(views.get("t-settings").hasUnsavedChanges(), "Cancel preserves the draft");
-                check("FULL".equals(ctx.settings.motion), "nothing was saved");
-                show("t-desk");
-                next(400);
-            });
-            plan.add(() -> {
-                button(dialogLayer(), "Discard").fire();
-                next(500);
-            });
-            plan.add(() -> {
-                check("t-desk".equals(router.route()), "Discard leaves: " + router.route());
-                check(!views.get("t-settings").hasUnsavedChanges() && "FULL".equals(ctx.settings.motion), "Discard removed the draft and saved nothing");
-                check(!shell().overlay().saveBarVisible(), "save bar gone after Discard");
-                show("t-settings");
-                View settings = views.get("t-settings");
-                ToggleButton reduced = (ToggleButton) settings.node().lookupAll(".byx-desk-seg-btn").stream().filter(n -> n instanceof ToggleButton b && "REDUCED".equals(b.getText())).findFirst().orElseThrow();
-                reduced.setSelected(true);
-                check(settings.hasUnsavedChanges() && "FULL".equals(props().getProperty("motion")), "draft is not on disk yet");
-                button(shell().overlay().layer(OverlayLayer.SAVEBAR), "Save changes").fire();
-                next(500);
-            });
-            plan.add(() -> {
-                check("REDUCED".equals(props().getProperty("motion")) && "REDUCED".equals(ctx.settings.motion), "Save persisted the preference on disk (real persistence)");
-                check(ctx.motion.preference.get() == panel.motion.MotionPreference.REDUCED, "the real motion system applied it");
-                check(!views.get("t-settings").hasUnsavedChanges(), "clean after Save");
+                check("t-desk".equals(router.route()) && shell().overlay().openDialogs() == 0, "read-only Settings leaves without a spurious discard dialog");
                 // Profile
                 show("t-profile");
                 View profile = views.get("t-profile");

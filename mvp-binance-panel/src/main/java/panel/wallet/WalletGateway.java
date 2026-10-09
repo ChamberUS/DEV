@@ -15,15 +15,17 @@ public final class WalletGateway {
             .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES,
                     DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS).build();
-    private final AuthorityGateway authority;
-    public WalletGateway(AuthorityGateway authority) { this.authority = authority; }
-    public WalletView read() { return decode(authority.walletList()); }
-    public WalletView create(String key) { return decode(authority.walletCreate(key, true)); }
+    private final java.util.function.Function<java.util.function.Function<AuthorityGateway, AuthorityGateway.Reply>, AuthorityGateway.Reply> call;
+    /** Native isolated QA fixtures use their own authority; production binds the initiating session below. */
+    public WalletGateway(AuthorityGateway authority) { this.call = operation -> operation.apply(authority); }
+    public WalletGateway(panel.auth.AuthService.SessionScope scope) { this.call = scope::call; }
+    public WalletView read() { return decode(call.apply(AuthorityGateway::walletList)); }
+    public WalletView create(String key) { return decode(call.apply(authority -> authority.walletCreate(key, true))); }
     public WalletView delete(WalletView.Wallet wallet, String key) {
-        return decode(authority.walletDelete(wallet.walletId(), wallet.version(), key, true));
+        return decode(call.apply(authority -> authority.walletDelete(wallet.walletId(), wallet.version(), key, true)));
     }
     public WalletView sign(WalletView.Wallet wallet, String key) {
-        return decode(authority.walletSyntheticSign(wallet.walletId(), wallet.version(), key, true));
+        return decode(call.apply(authority -> authority.walletSyntheticSign(wallet.walletId(), wallet.version(), key, true)));
     }
     public static WalletView decode(AuthorityGateway.Reply reply) {
         if (!reply.ok()) {

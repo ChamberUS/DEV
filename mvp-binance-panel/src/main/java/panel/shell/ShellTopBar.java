@@ -36,6 +36,7 @@ public final class ShellTopBar extends HBox {
         setMaxHeight(56);
 
         contextChip.getStyleClass().add("byx-context-chip");
+        contextChip.setMinWidth(Region.USE_PREF_SIZE);
         contextChip.setVisible(false);
         contextChip.setManaged(false);
         crumb.getStyleClass().add("byx-crumb");
@@ -43,7 +44,6 @@ public final class ShellTopBar extends HBox {
         HBox breadcrumb = new HBox(8, contextChip, crumb);
         breadcrumb.getStyleClass().add("byx-breadcrumb");
         breadcrumb.setAlignment(Pos.CENTER_LEFT);
-        breadcrumb.setMinWidth(0);
         HBox.setHgrow(breadcrumb, Priority.SOMETIMES);
 
         Region spacer = new Region();
@@ -82,6 +82,7 @@ public final class ShellTopBar extends HBox {
         setUnread(0);
 
         adminBadge.getStyleClass().add("byx-admin-badge");
+        adminBadge.setMinWidth(Region.USE_PREF_SIZE);
         setAdminSession(false);
         mockBadge.setText("MOCK DATA");
         mockBadge.setVisible(false);

@@ -46,6 +46,10 @@ public final class SecurityScreen implements View {
     private final VBox rows = new VBox(0);
     private final VBox activity = new VBox(0);
     private final Label providersNote = Kit.dim("Checking verification providers…");
+    private final AccountRead read = new AccountRead();
+    private int deviceCount = -1;
+    private List<SecurityAuditService.Entry> auditEntries;
+    private boolean auditUnavailable;
     private long generation;
 
     public SecurityScreen(MotionService motion, Clock clock, AccountData data, Consumer<String> navigate, Supplier<ByxOverlayHost> overlay) {
@@ -96,17 +100,12 @@ public final class SecurityScreen implements View {
         summary.getChildren().clear();
         rows.getChildren().clear();
         boolean admin = u != null && u.admin();
-        int devices = -1;
-        try {
-            devices = admin ? (int) data.trustedDevices().stream().filter(d -> "ACTIVE".equals(d.status(clock.instant()))).count() : -1;
-        } catch (RuntimeException unavailable) {
-            devices = -1;
-        }
+        int devices = deviceCount;
         summary.getChildren().addAll(
                 tile("Admin verification", admin ? "ON" : "N/A", admin ? "Email or SMS code" : "Not applicable to this role", ByxBadge.Tone.NEUTRAL),
                 tile("Authenticator app", "N/A", "Not configured", ByxBadge.Tone.NEUTRAL),
                 tile("Active sessions", u == null ? "—" : "1", "This device only", ByxBadge.Tone.NEUTRAL),
-                tile("Trusted devices", devices < 0 ? "—" : Integer.toString(devices), devices < 0 ? "Unavailable without admin access" : "Skip codes on trusted Macs", ByxBadge.Tone.NEUTRAL),
+                tile("Trusted devices", devices < 0 ? "—" : Integer.toString(devices), devices < 0 ? "Unavailable without admin access" : "Managed by the local service", ByxBadge.Tone.NEUTRAL),
                 tile("Recovery", "N/A", "Not configured", ByxBadge.Tone.NEUTRAL));
         ByxButton change = new ByxButton("Change password", ByxButton.Variant.SECONDARY, motion);
         change.setOnAction(e -> openPasswordDialog());
@@ -121,13 +120,21 @@ public final class SecurityScreen implements View {
                 ByxBadge.availability(ByxBadge.Availability.NOT_CONFIGURED)));
         rows.getChildren().add(row("Recovery options", "Backup methods to regain access to your account.",
                 ByxBadge.availability(ByxBadge.Availability.NOT_CONFIGURED)));
-        rows.getChildren().add(row("Sessions and devices", "Where you are signed in and which devices skip codes.", link("Review", "t-sessions")));
+        rows.getChildren().add(row("Sessions and devices", "Where you are signed in and your trusted devices.", link("Review", "t-sessions")));
         renderActivity(u);
     }
 
     private void renderActivity(User u) {
         activity.getChildren().clear();
-        List<SecurityAuditService.Entry> entries = u == null ? List.of() : safeActivity(u);
+        if (auditUnavailable) {
+            activity.getChildren().add(Kit.muted("Security activity unavailable. The audit log could not be read."));
+            return;
+        }
+        if (u != null && auditEntries == null) {
+            activity.getChildren().add(Kit.muted("Loading security activity…"));
+            return;
+        }
+        List<SecurityAuditService.Entry> entries = u == null ? List.of() : auditEntries;
         if (entries.isEmpty()) {
             activity.getChildren().add(Kit.muted("No security events recorded yet."));
             return;
@@ -149,42 +156,47 @@ public final class SecurityScreen implements View {
         return "Failed".equals(result) ? ByxBadge.Tone.NEGATIVE : "Success".equals(result) ? ByxBadge.Tone.POSITIVE : ByxBadge.Tone.NEUTRAL;
     }
 
-    private List<SecurityAuditService.Entry> safeActivity(User u) {
-        try {
-            return data.activity(6);
-        } catch (RuntimeException e) {
-            return List.of();
-        }
-    }
+    private record Status(int devices, List<SecurityAuditService.Entry> activity, boolean activityUnavailable,
+                          List<AccountData.ProviderLine> providers) { }
 
     private void loadProviders() {
-        long g = ++generation;
-        Thread t = new Thread(() -> {
-            List<AccountData.ProviderLine> lines;
-            try {
-                lines = data.providers();
-            } catch (RuntimeException e) {
-                lines = List.of();
+        boolean admin = data.user().map(User::admin).orElse(false);
+        boolean signedIn = data.user().isPresent();
+        read.load(() -> {
+            int devices = -1;
+            List<AccountData.ProviderLine> lines = List.of();
+            if (admin) {
+                try { devices = (int) data.trustedDevices().stream().filter(d -> "ACTIVE".equals(d.status(clock.instant()))).count(); }
+                catch (RuntimeException unavailable) { /* explicit unavailable */ }
+                try { lines = data.providers(); } catch (RuntimeException unavailable) { /* explicit unavailable */ }
             }
-            List<AccountData.ProviderLine> result = lines;
-            Platform.runLater(() -> {
-                if (g != generation) {
-                    return; // escondida ou descartada
-                }
-                providersNote.setText(result.isEmpty() ? "Provider status unavailable."
-                        : String.join(" · ", result.stream().map(l -> l.name() + " " + l.state()).toList()));
-            });
-        }, "security-providers");
-        t.setDaemon(true);
-        t.start();
+            List<SecurityAuditService.Entry> entries = List.of();
+            boolean failure = false;
+            try { if (signedIn) entries = data.activity(6); } catch (RuntimeException unavailable) { failure = true; }
+            return new Status(devices, entries, failure, lines);
+        }, (result, failure) -> {
+            if (failure != null) {
+                deviceCount = -1;
+                auditUnavailable = true;
+                providersNote.setText("Provider status unavailable.");
+            } else {
+                deviceCount = result.devices();
+                auditEntries = result.activity();
+                auditUnavailable = result.activityUnavailable();
+                providersNote.setText(!admin ? "" : result.providers().isEmpty() ? "Provider status unavailable."
+                        : String.join(" · ", result.providers().stream().map(l -> l.name() + " " + l.state()).toList()));
+            }
+            render();
+        });
     }
 
     /** Diálogo de troca de senha (camada 70). Senhas não ficam no modelo depois do envio. */
     void openPasswordDialog() {
         ByxOverlayHost host = overlay.get();
-        if (host == null) {
+        if (host == null || host.openDialogs() > 0) {
             return;
         }
+        long ticket = generation;
         ByxField current = ByxField.password("Current password");
         ByxField next = ByxField.password("New password");
         ByxField confirm = ByxField.password("Confirm new password");
@@ -232,6 +244,7 @@ public final class SecurityScreen implements View {
                 }
                 String f = failure;
                 Platform.runLater(() -> {
+                    if (ticket != generation || overlay.get() != host) return;
                     busy[0] = false;
                     save.setLoading(false);
                     if (f == null) {
@@ -259,20 +272,23 @@ public final class SecurityScreen implements View {
 
     @Override
     public void onShow() {
+        generation++;
+        auditEntries = null;
+        auditUnavailable = false;
+        deviceCount = -1;
+        providersNote.setText("Checking verification providers…");
         render();
-        if (data.user().map(User::admin).orElse(false)) {
-            loadProviders();
-        } else {
-            providersNote.setText("");
-        }
+        loadProviders();
     }
 
     @Override
     public void onHide() {
         generation++;
+        read.cancel();
     }
 
     public void dispose() {
         onHide();
+        read.close();
     }
 }
