@@ -303,8 +303,21 @@ public final class ServiceInstance implements AutoCloseable {
         }
     }
 
+    /** Frames validates the byte bound before this decoder; malformed text follows the existing bad_request path. */
+    static String decodeUtf8(byte[] frame) throws JsonProcessingException {
+        try {
+            return StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                    .decode(java.nio.ByteBuffer.wrap(frame)).toString();
+        } catch (java.nio.charset.CharacterCodingException e) {
+            throw com.fasterxml.jackson.databind.JsonMappingException.from(
+                    (com.fasterxml.jackson.core.JsonParser) null, "malformed_utf8");
+        }
+    }
+
     private <T> T parse(byte[] frame, Class<T> type) throws JsonProcessingException {
-        T value = mapper.readValue(new String(frame, StandardCharsets.UTF_8), type);
+        T value = mapper.readValue(decodeUtf8(frame), type);
         if (value == null) { // o literal JSON null não é um pedido
             throw new com.fasterxml.jackson.databind.JsonMappingException(null, "null body");
         }
@@ -392,7 +405,7 @@ public final class ServiceInstance implements AutoCloseable {
                 Protocol.Request req;
                 com.fasterxml.jackson.databind.JsonNode tree;
                 try {
-                    tree = mapper.readTree(new String(frame, StandardCharsets.UTF_8));
+                    tree = mapper.readTree(decodeUtf8(frame));
                     if (tree == null || !tree.isObject() || !tree.path("op").isTextual()) {
                         throw new com.fasterxml.jackson.databind.JsonMappingException(null, "not a request");
                     }
