@@ -43,6 +43,7 @@ final class FakeMarketService implements AutoCloseable {
     volatile Consumer<String> push = s -> { };
 
     FakeMarketService(Path home, Mode mode) throws IOException {
+        IpcTestFiles.requirePosixPairing(home);
         this.home = home;
         this.mode = mode;
         Path run = home.resolve("run");

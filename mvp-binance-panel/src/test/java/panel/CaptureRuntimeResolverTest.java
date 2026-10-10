@@ -65,9 +65,9 @@ class CaptureRuntimeResolverTest {
     void running(long supervisor, long collector, Path checkout, Path runtime) {
         resolver.observations = List.of(
             new Process(supervisor, 1L, NOW.minusSeconds(600), "/bin/bash",
-                    List.of(checkout.resolve("scripts/continuous_capture.sh").toString())),
+                    List.of(checkout.resolve("scripts/continuous_capture.sh").toString().replace('\\', '/'))),
             new Process(collector, supervisor, NOW.minusSeconds(599), "/usr/bin/python3", List.of(
-                    runtime.resolve("bin/adaptive-trader").toString(), "market", "microstructure", "campaign-record",
+                    runtime.resolve("bin/adaptive-trader").toString().replace('\\', '/'), "market", "microstructure", "campaign-record",
                     "--campaign-id", CAMPAIGN, "--market", "futures", "--symbol", "ETHUSDT", "--output-dir", root.toString())));
     }
     @Test void staleLegacyPidDoesNotHideRegisteredRuntime() throws Exception {

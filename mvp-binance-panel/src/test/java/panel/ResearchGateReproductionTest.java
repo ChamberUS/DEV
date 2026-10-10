@@ -41,7 +41,7 @@ class ResearchGateReproductionTest {
         FxSupport.start();
         oldHome = System.getProperty("user.home");
         home = Files.createTempDirectory("byx-gate-home-");
-        Path settings = Files.createDirectories(home.resolve(".mvp-binance-panel"));
+        Path settings = SecureTempDirFactory.directory(home.resolve(".mvp-binance-panel"));
         Files.writeString(settings.resolve("security.properties"), "security.dev.mode=true\n");
         Files.writeString(settings.resolve("settings.properties"), "dataSource=REAL\nprojectPath=" + home.resolve("empty-project")
                 + "\ncliPath=/usr/bin/false\nmotion=OFF\ndensity=COMPACT\nonboardingCompleted=true\n");

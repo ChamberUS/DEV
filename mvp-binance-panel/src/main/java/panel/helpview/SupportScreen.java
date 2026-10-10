@@ -8,6 +8,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import panel.design.ByxBadge;
 import panel.design.ByxButton;
@@ -64,12 +65,14 @@ public final class SupportScreen implements View {
 
     private static Node option(MotionService motion, String title, String text, String action, Runnable run, Node badge) {
         VBox copy = new VBox(2, Fx.label(title, "byx-section-title-sm"), Kit.muted(text));
+        copy.setMinWidth(0);
         HBox.setHgrow(copy, Priority.ALWAYS);
         HBox row = new HBox(12, copy);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         row.getStyleClass().add("byx-desk-row");
         if (action != null) {
             ByxButton b = new ByxButton(action, ByxButton.Variant.SECONDARY, motion);
+            b.setMinWidth(Region.USE_PREF_SIZE);
             b.setOnAction(e -> run.run());
             row.getChildren().add(b);
         }

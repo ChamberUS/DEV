@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -49,6 +50,7 @@ public final class AuthLayout extends HBox {
     private final HBox top;
     private final VBox topControls;
     private final VBox formHost = new VBox();
+    private final ScrollPane formScroll = new ScrollPane();
     private final HBox footer;
     private Breakpoint breakpoint;
     private ParallelTransition swap;
@@ -80,6 +82,8 @@ public final class AuthLayout extends HBox {
         formHost.getStyleClass().add("byx-auth-form");
         formHost.setFillWidth(true);
         formHost.setMaxHeight(Region.USE_PREF_SIZE);
+        formHost.setMinHeight(Region.USE_PREF_SIZE);
+        formHost.setMinWidth(0);
 
         footer = new HBox(18);
         for (String[] l : new String[][] {{"About", "h-about"}, {"FAQ", "h-faq"}, {"Help", "h-help"}, {"Terms", "h-terms"}, {"Privacy", "h-privacy"}}) {
@@ -97,12 +101,33 @@ public final class AuthLayout extends HBox {
         footer.setMaxHeight(Region.USE_PREF_SIZE);
         StackPane.setAlignment(topControls, Pos.TOP_LEFT);
         StackPane.setAlignment(footer, Pos.BOTTOM_LEFT);
-        StackPane.setAlignment(formHost, Pos.CENTER_LEFT);
-        pane.getChildren().addAll(formHost, topControls, footer);
+        // Reserve the real top/footer heights; long forms scroll instead of passing underneath them.
+        StackPane formContent = new StackPane(formHost);
+        formContent.setAlignment(Pos.CENTER_LEFT);
+        formContent.setMinWidth(0);
+        formScroll.setContent(formContent);
+        formScroll.getStyleClass().add("byx-auth-scroll");
+        formScroll.setFitToWidth(true);
+        formScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        formScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        formScroll.setMinSize(0, 0);
+        formScroll.setFocusTraversable(false);
+        formContent.minHeightProperty().bind(javafx.beans.binding.Bindings.createDoubleBinding(
+                () -> formScroll.getViewportBounds().getHeight(), formScroll.viewportBoundsProperty()));
+        topControls.layoutBoundsProperty().addListener((o, a, b) -> reserveFormSpace());
+        footer.layoutBoundsProperty().addListener((o, a, b) -> reserveFormSpace());
+        pane.getChildren().addAll(formScroll, topControls, footer);
         pane.getStyleClass().add("byx-auth-pane");
         getChildren().addAll(brand, pane);
         widthProperty().addListener((o, a, w) -> apply(Breakpoint.of(w.doubleValue())));
         apply(Breakpoint.COMPACT);
+    }
+
+    private void reserveFormSpace() {
+        // Insets are relative to the existing 56px pane padding; keep the approved 24/22px outer edges.
+        Insets margin = new Insets(Math.max(0, 24 + topControls.getHeight() + 16 - 56), 0,
+                Math.max(0, 22 + footer.getHeight() + 16 - 56), 0);
+        if (!margin.equals(StackPane.getMargin(formScroll))) StackPane.setMargin(formScroll, margin);
     }
 
     private static Button link(String text) {

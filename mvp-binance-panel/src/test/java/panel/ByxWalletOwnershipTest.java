@@ -165,7 +165,7 @@ class ByxWalletOwnershipTest {
         identity.verify(valid());assertTrue(benefits.refresh(keys.address()).get().benefitsEnabled());
         auth.auth.logout();assertThrows(AccessDeniedException.class,()->benefits.snapshot(keys.address()));
     }
-    @Test void databasePersistsOnlyPermittedPublicColumns(@TempDir Path dir) throws Exception {
+    @Test void databasePersistsOnlyPermittedPublicColumns(@TempDir(factory = SecureTempDirFactory.class) Path dir) throws Exception {
         var file=dir.resolve("wallets.db");var proof=valid();var w=identity.verify(proof);
         try(var db=Database.openRuntime(file)){new ByxWalletRepository(db).save(w);}
         try(var db=Database.openRuntime(file)){

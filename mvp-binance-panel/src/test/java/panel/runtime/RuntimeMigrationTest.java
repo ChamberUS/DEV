@@ -17,7 +17,7 @@ import panel.security.Database;
 
 /** Migração SINTÉTICA dos dados não-auth: fonte imutável, lista fechada, FK para users removida, relatório redigido. Nunca usa o panel.db real. */
 class RuntimeMigrationTest {
-    @TempDir Path dir;
+    @TempDir(factory = panel.SecureTempDirFactory.class) Path dir;
 
     private static String sha(Path f) throws Exception {
         return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(f)));

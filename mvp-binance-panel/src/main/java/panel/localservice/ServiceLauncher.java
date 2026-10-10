@@ -30,6 +30,7 @@ public final class ServiceLauncher {
 
     /** Helper do próprio bundle ou null (não empacotado ou fora do formato esperado). */
     static Path helperOf(Path ownExecutable) {
+        if (System.getProperty("os.name", "").startsWith("Windows")) return null;
         if (ownExecutable == null) {
             return null;
         }

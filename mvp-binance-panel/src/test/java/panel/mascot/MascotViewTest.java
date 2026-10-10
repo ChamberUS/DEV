@@ -15,12 +15,19 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import panel.motion.MotionPreference;
 import panel.motion.MotionService;
 import panel.tradeview.DeskHarness;
 
 /** V2.1P: o MascotView real com os assets reais: FULL/REDUCED/OFF, one-shots, mudanças rápidas, falhas de asset, dispose e vazamento. Nunca exceção global. */
 class MascotViewTest {
+    private final List<MascotView> mounted = new ArrayList<>();
+
+    @AfterEach
+    void releaseViewsEvenWhenAnAssertionFails() throws Exception {
+        fx(() -> { mounted.forEach(MascotView::dispose); mounted.clear(); return null; });
+    }
     private static <T> T fx(Supplier<T> s) throws Exception {
         return DeskHarness.fx(s);
     }
@@ -36,10 +43,11 @@ class MascotViewTest {
         throw new AssertionError("timeout: " + what);
     }
 
-    private static MascotView mount(MotionService motion, MascotAssets assets, double size) throws Exception {
+    private MascotView mount(MotionService motion, MascotAssets assets, double size) throws Exception {
         return fx(() -> {
             MascotView v = new MascotView(motion, size, assets, Platform::runLater, () -> 1.0, MascotStage.ACCENT_BYX);
             Scene sc = new Scene(new StackPane(v), 300, 300);
+            mounted.add(v);
             return v;
         });
     }

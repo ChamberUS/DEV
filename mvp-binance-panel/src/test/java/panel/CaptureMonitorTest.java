@@ -22,7 +22,7 @@ import panel.service.CaptureMonitorService;
 import panel.researchview.CapturePanel;
 
 class CaptureMonitorTest {
-    static final Path STATE = Path.of("/test/state");
+    static final Path STATE = Path.of("/test/state").toAbsolutePath().normalize();
     static final Path SCRIPT = STATE.resolve("continuous_capture.sh");
     static final Instant START = Instant.parse("2026-10-02T06:00:00Z");
     static final class FakeClock extends Clock {
@@ -121,6 +121,7 @@ class CaptureMonitorTest {
         clock.now = clock.now.plusSeconds(1); probe.read(); assertEquals(2, source.scans);
         assertThrows(UnsupportedOperationException.class, () -> first.warnings().add("mutation"));
     }
+    @org.junit.jupiter.api.condition.DisabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
     @Test void nioStorageUsesMetadataAndDoesNotFollowSymlinks(@TempDir Path temp) throws Exception {
         Files.writeString(temp.resolve("chunk"), "data");
         Path elsewhere = Files.createDirectory(temp.resolve("FINAL_HOLDOUT"));

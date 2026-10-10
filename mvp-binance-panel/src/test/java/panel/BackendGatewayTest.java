@@ -69,9 +69,9 @@ class BackendGatewayTest {
 
     @Test void processTimeoutAndExitFailureAreBounded() throws Exception {
         var runner = new ProcessRunner();
-        assertThrows(IOException.class, () -> runner.capture(List.of("/bin/sh", "-c", "exec sleep 10"), Path.of("."), 1));
-        assertThrows(IOException.class, () -> runner.capture(List.of("/bin/sh", "-c", "exit 7"), Path.of("."), 2));
-        assertEquals("{}", runner.capture(List.of("/bin/sh", "-c", "printf '{}'"), Path.of("."), 2));
+        assertThrows(IOException.class, () -> runner.capture(ProcessTestChild.command("sleep"), Path.of("."), 1));
+        assertThrows(IOException.class, () -> runner.capture(ProcessTestChild.command("fail"), Path.of("."), 2));
+        assertEquals("{}", runner.capture(ProcessTestChild.command("json"), Path.of("."), 2));
     }
 
     @Test void pollingKeepsFxResponsiveCoalescesAndReconnects() throws Exception {

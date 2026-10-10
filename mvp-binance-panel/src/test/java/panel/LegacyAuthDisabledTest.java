@@ -22,7 +22,7 @@ class LegacyAuthDisabledTest {
         try (Stream<Path> s = Files.walk(MAIN)) {
             for (Path f : s.filter(x -> x.toString().endsWith(".java")).toList()) {
                 if (p.matcher(Files.readString(f)).find()) {
-                    out.add(MAIN.resolve("panel").relativize(f).toString());
+                    out.add(MAIN.resolve("panel").relativize(f).toString().replace('\\', '/'));
                 }
             }
         }

@@ -204,7 +204,7 @@ class ServerAuthorizationBoundaryTest {
         var impl = java.util.regex.Pattern.compile("(implements|extends)\\s+[^{]*\\bServerAuthorizer\\b|new\\s+ServerAuthorizer\\s*\\(|ServerAuthorizer\\s+\\w+\\s*=\\s*(?!ServerAuthorization\\.DENY_ALL)|\\(\\s*ServerAuthorizer\\s*\\)");
         try (Stream<Path> s = Files.walk(MAIN_JAVA)) {
             for (Path f : s.filter(x -> x.toString().endsWith(".java")).toList()) {
-                String rel = MAIN_JAVA.resolve("panel").relativize(f).toString();
+                String rel = MAIN_JAVA.resolve("panel").relativize(f).toString().replace('\\', '/');
                 String text = Files.readString(f);
                 if (text.contains("ServerAuthorizer")) awareFound.add(rel);
                 if (rel.equals("security/ServerAuthorizer.java")) continue;
@@ -292,7 +292,7 @@ class ServerAuthorizationBoundaryTest {
     private static Set<String> classFiles(Path root) throws IOException {
         Set<String> out = new TreeSet<>();
         try (Stream<Path> s = Files.walk(root)) {
-            for (Path p : s.filter(x -> x.toString().endsWith(".class")).toList()) out.add(root.relativize(p).toString());
+            for (Path p : s.filter(x -> x.toString().endsWith(".class")).toList()) out.add(root.relativize(p).toString().replace('\\', '/'));
         }
         return out;
     }

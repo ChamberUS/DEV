@@ -28,12 +28,13 @@ class LocalServiceClientTest {
 
     @BeforeEach
     void up() throws Exception {
-        home = Files.createTempDirectory(Path.of("/tmp"), "pc");
+        home = IpcTestFiles.home("pc");
     }
 
     @AfterEach
     void down() throws Exception {
         fakes.forEach(FakeService::close);
+        if (home == null) return;
         try (var walk = Files.walk(home)) {
             walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> p.toFile().delete());
         }
@@ -130,7 +131,16 @@ class LocalServiceClientTest {
         long t0 = System.nanoTime();
         LocalServiceStatus none = new LocalServiceClient(home).probe(false);
         assertEquals(State.UNAVAILABLE, none.state());
-        assertEquals("not_started", none.code());
+        boolean windows = System.getProperty("os.name", "").startsWith("Windows");
+        assertEquals(windows ? "native_service_unsupported" : "not_started", none.code());
+        if (windows) {
+            LocalServiceStatus unavailable = new LocalServiceClient(home).probe(true);
+            assertEquals(State.UNAVAILABLE, unavailable.state());
+            assertEquals("native_service_unsupported", unavailable.code());
+            assertTrue(unavailable.everConnected(), "previous connectivity never becomes current connectivity");
+            assertTrue((System.nanoTime() - t0) / 1_000_000 < 4_000, "unsupported IPC is bounded");
+            return;
+        }
         // socket velho sem ninguém escutando (serviço morreu)
         FakeService f = fake(FakeService.Mode.GOOD);
         f.close();

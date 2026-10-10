@@ -13,7 +13,7 @@ import panel.user.User;
 class PackageC3AppIsolationTest {
     private static String oldHome;
     private ResearchGateReproductionTest.App app;
-    @BeforeAll static void isolate()throws Exception{FxSupport.start();oldHome=System.getProperty("user.home");var h=Files.createTempDirectory("byx-c3-isolation-");var s=Files.createDirectories(h.resolve(".mvp-binance-panel"));Files.writeString(s.resolve("settings.properties"),"projectPath="+h.resolve("empty")+"\ncliPath=/usr/bin/false\nmotion=OFF\nonboardingCompleted=true\n");System.setProperty("user.home",h.toString());}
+    @BeforeAll static void isolate()throws Exception{FxSupport.start();oldHome=System.getProperty("user.home");var h=Files.createTempDirectory("byx-c3-isolation-");var s=SecureTempDirFactory.directory(h.resolve(".mvp-binance-panel"));Files.writeString(s.resolve("settings.properties"),"projectPath="+h.resolve("empty")+"\ncliPath=/usr/bin/false\nmotion=OFF\nonboardingCompleted=true\n");System.setProperty("user.home",h.toString());}
     @AfterAll static void restore(){System.setProperty("user.home",oldHome);}
     @AfterEach void close()throws Exception{if(app!=null)FxSupport.fx(()->{app.stop();((Stage)app.field("stage")).close();});}
     NotificationCenter center(){return app.field("notifications");}

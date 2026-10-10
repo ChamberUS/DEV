@@ -33,7 +33,7 @@ class FinalSafetyTest {
         Set<String> out = new TreeSet<>();
         for (Path f : sources()) {
             if (p.matcher(Files.readString(f)).find()) {
-                out.add(MAIN.resolve("panel").relativize(f).toString());
+                out.add(MAIN.resolve("panel").relativize(f).toString().replace('\\', '/'));
             }
         }
         return out;

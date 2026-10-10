@@ -11,7 +11,7 @@ import panel.user.User;
 
 class PackageC1AuthorityTest {
     static String oldHome;ResearchGateReproductionTest.App app;
-    @BeforeAll static void isolate() throws Exception {FxSupport.start();oldHome=System.getProperty("user.home");Path home=Files.createTempDirectory("byx-c1-authority-");Path settings=Files.createDirectories(home.resolve(".mvp-binance-panel"));Files.writeString(settings.resolve("settings.properties"),"projectPath="+home.resolve("empty")+"\ncliPath=/usr/bin/false\nmotion=OFF\nonboardingCompleted=true\n");System.setProperty("user.home",home.toString());}
+    @BeforeAll static void isolate() throws Exception {FxSupport.start();oldHome=System.getProperty("user.home");Path home=Files.createTempDirectory("byx-c1-authority-");Path settings=SecureTempDirFactory.directory(home.resolve(".mvp-binance-panel"));Files.writeString(settings.resolve("settings.properties"),"projectPath="+home.resolve("empty")+"\ncliPath=/usr/bin/false\nmotion=OFF\nonboardingCompleted=true\n");System.setProperty("user.home",home.toString());}
     @AfterAll static void restore(){System.setProperty("user.home",oldHome);}
     @AfterEach void close() throws Exception {FxSupport.fx(()->{if(app!=null){app.stop();((Stage)app.field("stage")).close();}Strings.resetSession();});}
     void login(Role role)throws Exception{app=FxSupport.fx(ResearchGateReproductionTest.App::new);app.init();FxSupport.fx(()->{app.start(new Stage());app.authority.add("c1-test","user@example.invalid","+5511999991234","synthetic-c1-pass-1",role,false);User user=app.ctx().auth.login("c1-test","synthetic-c1-pass-1".toCharArray());app.invoke("afterLogin",User.class,user);});}

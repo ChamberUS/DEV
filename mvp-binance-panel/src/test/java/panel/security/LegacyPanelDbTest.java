@@ -15,7 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 /** O banco legado (panel.db, rollback-only) só é lido: modo do motor SQLite somente leitura/imutável, sem criar nada, sem recriar tabela, sem fallback. */
 class LegacyPanelDbTest {
-    @TempDir Path dir;
+    @TempDir(factory = panel.SecureTempDirFactory.class) Path dir;
 
     private static String sha(Path f) throws Exception {
         return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(f)));
@@ -93,10 +93,6 @@ class LegacyPanelDbTest {
     void anAbsentSymlinkedOrCorruptedLegacyFileIsUnavailableAndNeverCreated() throws Exception {
         assertTrue(LegacyPanelDb.openReadOnly(dir.resolve("panel.db")).isEmpty());
         assertFalse(Files.exists(dir.resolve("panel.db")), "an absent legacy database is not created");
-        Path real = legacy();
-        Path link = dir.resolve("link.db");
-        Files.createSymbolicLink(link, real);
-        assertTrue(LegacyPanelDb.openReadOnly(link).isEmpty(), "symlinks are refused");
         Path junk = dir.resolve("junk.db");
         Files.writeString(junk, "this is not a sqlite database at all, just text padding".repeat(20));
         var db = LegacyPanelDb.openReadOnly(junk);
@@ -104,6 +100,14 @@ class LegacyPanelDbTest {
         db.ifPresent(LegacyPanelDb::close);
         assertEquals("this is not a sqlite database at all, just text padding".repeat(20), Files.readString(junk), "corrupted file untouched");
         assertTrue(LegacyPanelDb.openReadOnly(dir).isEmpty(), "a directory is not a database");
+    }
+
+    @Test
+    @org.junit.jupiter.api.condition.DisabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    void aSymlinkedLegacyFileIsUnavailable() throws Exception {
+        Path real = legacy(); Path link = dir.resolve("link.db");
+        Files.createSymbolicLink(link, real);
+        assertTrue(LegacyPanelDb.openReadOnly(link).isEmpty(), "symlinks are refused");
     }
 
     @Test

@@ -71,7 +71,7 @@ class ChainOwnershipGuardTest {
             for (Path f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
                 String src = Files.readString(f);
                 if (src.contains("java.net.http") || src.contains("HttpClient")) {
-                    httpUsers.add(MAIN.relativize(f).toString());
+                    httpUsers.add(MAIN.relativize(f).toString().replace('\\', '/'));
                 }
             }
         }

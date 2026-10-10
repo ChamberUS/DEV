@@ -24,12 +24,13 @@ class ChainStatusClientTest {
 
     @BeforeEach
     void up() throws Exception {
-        home = Files.createTempDirectory(Path.of("/tmp"), "cs");
+        home = IpcTestFiles.home("cs");
     }
 
     @AfterEach
     void down() throws Exception {
         fakes.forEach(FakeService::close);
+        if (home == null) return;
         try (var walk = Files.walk(home)) {
             walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> p.toFile().delete());
         }
@@ -76,7 +77,7 @@ class ChainStatusClientTest {
         assertEquals("ERROR", new ChainStatusClient(new LocalServiceClient(home)).read().state(), "no service running");
         assertEquals("SERVICE_UNAVAILABLE", new ChainStatusClient(new LocalServiceClient(home)).read().reason());
         for (FakeService.Mode mode : List.of(FakeService.Mode.IMPOSTOR, FakeService.Mode.GARBAGE, FakeService.Mode.REJECTS_CLIENT, FakeService.Mode.OVERSIZE)) {
-            Path h = Files.createTempDirectory(Path.of("/tmp"), "cs");
+            Path h = IpcTestFiles.home("cs");
             try {
                 FakeService f = new FakeService(h, mode);
                 try {

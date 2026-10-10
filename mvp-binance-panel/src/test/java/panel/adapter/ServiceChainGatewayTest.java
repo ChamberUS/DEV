@@ -74,7 +74,7 @@ class ServiceChainGatewayTest {
 
     @Test
     void theNetworkServiceReadsThroughTheServiceWithoutAnyPanelConfigurationAndNeverThrows() throws Exception {
-        Path home = Files.createTempDirectory(Path.of("/tmp"), "sg");
+        Path home = Files.createTempDirectory("sg");
         try (ByxNetworkService network = new ByxNetworkService(new ServiceChainGateway(new ChainStatusClient(new LocalServiceClient(home)), Clock.fixed(NOW, ZoneOffset.UTC)), () -> null,
                 Clock.fixed(NOW, ZoneOffset.UTC))) {
             ByxSnapshot s = network.refresh().get();

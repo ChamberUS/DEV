@@ -194,6 +194,7 @@ public class PanelApp extends Application {
         ctx.adminAccess.close();
         ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close();
         ctx.scientificCapture.close(); ctx.byx.close(); ctx.byxBenefits.close();
+        ctx.closeRuntimeStorage();
     }
 
     private void applyDensity() {

@@ -20,6 +20,7 @@ public class Database implements AutoCloseable {
     static final String LEGACY_FILE_NAME = "panel.db";
 
     private final Connection connection;
+    private WindowsStorage.Lease storage;
 
     private Database(Connection c) {
         this.connection = c;
@@ -31,14 +32,24 @@ public class Database implements AutoCloseable {
         if (LEGACY_FILE_NAME.equals(abs.getFileName().toString())) {
             throw new IllegalArgumentException("legacy_database_refused");
         }
+        WindowsStorage.Lease lease = null;
         try {
-            PrivateFiles.prepareDirectory(abs.getParent()); // 0700 novo; falha fechada se fora da política
-            PrivateFiles.prepareFile(abs); // 0600 novo (antes do SQLite); existente não é alterado
-            return init(DriverManager.getConnection("jdbc:sqlite:" + abs));
+            if (WindowsStorage.supported()) {
+                lease = WindowsStorage.database(abs);
+            } else {
+                PrivateFiles.prepareDirectory(abs.getParent()); // 0700 novo; falha fechada se fora da política
+                PrivateFiles.prepareFile(abs); // 0600 novo (antes do SQLite); existente não é alterado
+            }
+            Database database = init(DriverManager.getConnection("jdbc:sqlite:" + abs));
+            database.storage = lease;
+            lease = null; // the database now owns the pinned paths
+            return database;
         } catch (IllegalStateException e) {
             throw e; // política de arquivo (InsecureStorageException) ou esquema novo demais: não continua em silêncio e não vira "banco indisponível"
         } catch (Exception e) {
             throw new IllegalStateException("Could not open local database", e);
+        } finally {
+            if (lease != null) lease.close();
         }
     }
 
@@ -69,8 +80,11 @@ public class Database implements AutoCloseable {
 
     public synchronized <T> T with(SqlFunction<Connection, T> f) {
         try {
-            return f.apply(connection);
-        } catch (SQLException e) {
+            if (storage != null) storage.check();
+            T value = f.apply(connection);
+            if (storage != null) storage.check();
+            return value;
+        } catch (SQLException | java.io.IOException e) {
             throw new IllegalStateException("Database error: " + e.getMessage(), e);
         }
     }
@@ -81,11 +95,13 @@ public class Database implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         try {
             connection.close();
         } catch (SQLException ignored) {
             // encerrando
+        } finally {
+            if (storage != null) { storage.close(); storage = null; }
         }
     }
 }

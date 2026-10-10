@@ -1,0 +1,204 @@
+{
+    "Focused":  {
+                    "Pass":  249,
+                    "Errors":  0,
+                    "Tests":  250,
+                    "Failures":  0,
+                    "Exit":  0,
+                    "Skipped":  1,
+                    "TimeSeconds":  38.462
+                },
+    "Full":  {
+                 "Tests":  1034,
+                 "Failures":  0,
+                 "Errors":  23,
+                 "Skipped":  3,
+                 "Suites":  136,
+                 "Pass":  1008
+             },
+    "FullExit":  1,
+    "Cases":  [
+                  {
+                      "Class":  "panel.CaptureLiveObservationTest",
+                      "Method":  "actualRuntimePublishesToJavafxPanel",
+                      "Outcome":  "skipped",
+                      "Type":  "",
+                      "Message":  "System property [capture.live] does not exist"
+                  },
+                  {
+                      "Class":  "panel.CaptureMonitorTest",
+                      "Method":  "nioStorageUsesMetadataAndDoesNotFollowSymlinks(Path)",
+                      "Outcome":  "skipped",
+                      "Type":  "",
+                      "Message":  "Disabled on operating system: Windows 11"
+                  },
+                  {
+                      "Class":  "panel.localservice.ChainStatusClientTest",
+                      "Method":  "notConfiguredIsTheProductionAnswerAndCarriesNothingAboutAChain",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.ChainStatusClientTest",
+                      "Method":  "aValidStatusIsReadOverTheTypedChannelWithNoArguments",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.ChainStatusClientTest",
+                      "Method":  "anAbsentHostileOrBrokenServiceIsAnErrorNeverHealthy",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "packagedClientRefusesAServiceWhoseCodeIdentityIsNotVerifiedEvenWithTheRightSecret",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "restartIsReadFreshAndNeverReusesTheOldPairing",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "oversizedGarbageAndOutOfContractResponsesAreRejected",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "unsafeOrInvalidPairingFilesAreRefusedWithoutConnecting",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "pairedServiceIsReadAndPrivateCapabilitiesAreNeverTrusted",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "aServiceThatRejectsOurProofIsAuthFailedNotConnected",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "anImpostorThatDoesNotKnowTheSecretIsRejectedBeforeAnyProofIsSent",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "statusTextNeverCarriesPathsOrSecrets",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "aServerProofReplayedFromAnEarlierConversationIsRejected",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.LocalServiceClientTest",
+                      "Method":  "silentServiceTimesOutAndIsNotRetriedForever",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "aServiceWithoutTheMarketCapabilityIsUnsupportedNotLive",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "anEventAfterStopNeverChangesTheState",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "reconnectsWithBackoffAndNeverHoldsTwoSessions",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "stopCancelsTheSubscriptionClearsDataAndIsIdempotent",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "everyContractViolationDropsTheSessionAndNeverBecomesData",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "subscribeCarriesNoArgumentsAndNothingElseIsEverRequested",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "anOversizedDeclaredEventIsRefusedBeforeAllocating",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "streamsRealShapedEventsIntoTypedData",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "silentServiceIsDetectedAndTheLinkIsDropped",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.localservice.MarketFeedClientTest",
+                      "Method":  "lostLinkKeepsLastDataAndNeverClaimsLive",
+                      "Outcome":  "error",
+                      "Type":  "java.io.IOException",
+                      "Message":  "native_ipc_fixture_unqualified: POSIX pairing and native peer identity required; no Windows substitute"
+                  },
+                  {
+                      "Class":  "panel.security.LegacyPanelDbTest",
+                      "Method":  "aSymlinkedLegacyFileIsUnavailable",
+                      "Outcome":  "skipped",
+                      "Type":  "",
+                      "Message":  "Disabled on operating system: Windows 11"
+                  }
+              ]
+}

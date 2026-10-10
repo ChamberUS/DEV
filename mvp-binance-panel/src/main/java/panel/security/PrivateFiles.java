@@ -48,6 +48,7 @@ public final class PrivateFiles {
 
     /** Prepara o diretório do banco: cria 0700 se faltar; se existir, só aceita o que passa na política. */
     public static void prepareDirectory(Path dir) throws IOException {
+        if (WindowsStorage.supported()) { WindowsStorage.prepareDirectory(dir); return; }
         Path parent = dir.toAbsolutePath();
         if (!Files.exists(parent, LinkOption.NOFOLLOW_LINKS)) {
             if (!posix(parent.getParent())) {
@@ -75,6 +76,7 @@ public final class PrivateFiles {
 
     /** Arquivo novo nasce 0600 (antes do SQLite tocar nele); existente deve ser arquivo regular do próprio usuário e NÃO é alterado. */
     public static void prepareFile(Path file) throws IOException {
+        if (WindowsStorage.supported()) { WindowsStorage.prepareFile(file); return; }
         if (!Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
             Files.createFile(file, PosixFilePermissions.asFileAttribute(FILE_0600));
             Files.setPosixFilePermissions(file, FILE_0600);
@@ -94,12 +96,16 @@ public final class PrivateFiles {
      * não-regular e arquivo de outro dono. Não toca nenhum outro arquivo.
      */
     public static void tighten(Path file) throws IOException {
+        if (WindowsStorage.supported()) {
+            throw new InsecureStorageException("windows_explicit_acl_migration_required");
+        }
         prepareFile(file);
         Files.setPosixFilePermissions(file, FILE_0600);
     }
 
     /** Leitura somente de metadados: o que está fora da política (nada é alterado). Cada item é um código fixo. */
     public static List<String> audit(Path dir, Path db) {
+        if (WindowsStorage.supported()) return WindowsStorage.audit(dir, db);
         List<String> findings = new ArrayList<>();
         try {
             PosixFileAttributes d = Files.readAttributes(dir, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);

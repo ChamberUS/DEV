@@ -16,7 +16,8 @@ public final class ServiceNotificationObserver {
     public void observe(NotificationCenter.Scope scope, LocalServiceStatus status) {
         if (!center.accepts(scope)) return;
         boolean definite = status.state() == LocalServiceStatus.State.UNAVAILABLE
-                && ("not_started".equals(status.code()) || "refused".equals(status.code()));
+                && ("not_started".equals(status.code()) || "refused".equals(status.code())
+                    || "native_service_unsupported".equals(status.code()));
         SourceState state = switch (status.state()) {
             case UNKNOWN -> SourceState.UNKNOWN;
             case CONNECTED -> SourceState.CONNECTED;

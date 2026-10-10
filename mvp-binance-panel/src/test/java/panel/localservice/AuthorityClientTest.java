@@ -34,7 +34,8 @@ class AuthorityClientTest {
         AuthorityClient c = new AuthorityClient(Path.of("/nonexistent-home"));
         var r = c.login("x", "password-123456".toCharArray());
         assertFalse(r.ok());
-        assertEquals("not_started", r.code());
+        assertEquals(System.getProperty("os.name", "").startsWith("Windows")
+                ? "native_service_unsupported" : "not_started", r.code());
         assertFalse(c.hasSession());
     }
 

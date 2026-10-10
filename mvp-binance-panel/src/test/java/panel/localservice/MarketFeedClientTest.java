@@ -27,7 +27,7 @@ class MarketFeedClientTest {
 
     @BeforeEach
     void up() throws Exception {
-        home = Files.createTempDirectory(Path.of("/tmp"), "mc");
+        home = IpcTestFiles.home("mc");
     }
 
     @AfterEach
@@ -38,6 +38,7 @@ class MarketFeedClientTest {
         if (service != null) {
             service.close();
         }
+        if (home == null) return;
         try (var walk = Files.walk(home)) {
             walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> p.toFile().delete());
         }

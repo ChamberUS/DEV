@@ -21,7 +21,7 @@ class PackageANavigationBoundaryTest {
     private ResearchGateReproductionTest.App app;
     @BeforeAll static void sandbox() throws Exception {
         FxSupport.start();originalHome=System.getProperty("user.home");var home=Files.createTempDirectory("byx-package-a-nav-");
-        var settings=Files.createDirectories(home.resolve(".mvp-binance-panel"));
+        var settings=SecureTempDirFactory.directory(home.resolve(".mvp-binance-panel"));
         Files.writeString(settings.resolve("settings.properties"),"dataSource=REAL\nprojectPath="+home.resolve("empty")+"\ncliPath=/usr/bin/false\nmotion=OFF\ndensity=COMPACT\nonboardingCompleted=true\n");
         System.setProperty("user.home",home.toString());
     }
@@ -29,6 +29,9 @@ class PackageANavigationBoundaryTest {
     @AfterEach void close() throws Exception {if(app!=null)FxSupport.fx(()->{app.stop();((Stage)app.field("stage")).close();});}
     private void open() throws Exception {
         app=FxSupport.fx(ResearchGateReproductionTest.App::new);app.init();
+        // Settings.FILE is cached by an earlier suite. This fixture is explicitly post-onboarding;
+        // set its non-authority UX state directly instead of relying on a later user.home change.
+        app.ctx().settings.onboardingCompleted = true;
         FxSupport.fx(()->{app.start(new Stage());app.authority.add("package-a-user","user@example.invalid",null,"synthetic-pass-1",Role.USER,false);
             User user=app.ctx().auth.login("package-a-user","synthetic-pass-1".toCharArray());app.invoke("afterLogin",User.class,user);});
     }

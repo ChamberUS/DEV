@@ -26,7 +26,7 @@ import panel.security.Role;
  * runtime é independente e o login não precisa de nenhuma tabela de auth do legado. Home TEMPORÁRIO e dados sintéticos; o panel.db real nunca é aberto.
  */
 class LegacyIsolationProductTest {
-    @TempDir Path home;
+    @TempDir(factory = panel.SecureTempDirFactory.class) Path home;
     private String oldHome;
     private Path appHome;
     private AppContext ctx;
@@ -42,7 +42,7 @@ class LegacyIsolationProductTest {
     @AfterEach
     void restore() {
         if (ctx != null) {
-            try { ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); } catch (RuntimeException ignored) { }
+            try { ctx.market.stop(); ctx.localService.stop(); ctx.research.close(); ctx.captureMonitor.close(); ctx.byx.close(); ctx.byxBenefits.close(); ctx.closeRuntimeStorage(); } catch (RuntimeException ignored) { }
         }
         System.setProperty("user.home", oldHome);
     }
@@ -96,7 +96,11 @@ class LegacyIsolationProductTest {
                 var r = c.createStatement().executeQuery("PRAGMA user_version")) {
             assertEquals(panel.security.Database.RUNTIME_SCHEMA_VERSION, r.getInt(1));
         }
-        assertEquals("rw-------", java.nio.file.attribute.PosixFilePermissions.toString(Files.getPosixFilePermissions(appHome.resolve("runtime.db"))));
+        if (System.getProperty("os.name", "").startsWith("Windows")) {
+            assertEquals(List.of(), panel.security.PrivateFiles.audit(appHome, appHome.resolve("runtime.db")));
+        } else {
+            assertEquals("rw-------", java.nio.file.attribute.PosixFilePermissions.toString(Files.getPosixFilePermissions(appHome.resolve("runtime.db"))));
+        }
     }
 
     @Test
@@ -149,7 +153,7 @@ class LegacyIsolationProductTest {
     }
 
     private static String rel(Path p) {
-        return MAIN.resolve("panel").relativize(p).toString();
+        return MAIN.resolve("panel").relativize(p).toString().replace('\\', '/');
     }
 
     @Test

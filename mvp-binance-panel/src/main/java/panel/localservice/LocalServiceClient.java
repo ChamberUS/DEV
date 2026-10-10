@@ -335,6 +335,10 @@ public final class LocalServiceClient {
     // ---- arquivos de pareamento (política: privados, do usuário atual, sem symlink) ----------------------------------
 
     private byte[] loadSecret(Path socket) throws IOException, Fail {
+        // Windows native pairing/peer identity has not been qualified. Do not read a token or open IPC.
+        if (System.getProperty("os.name", "").startsWith("Windows")) {
+            throw new Fail(LocalServiceStatus.State.UNAVAILABLE, "native_service_unsupported");
+        }
         UserPrincipal me = java.nio.file.FileSystems.getDefault().getUserPrincipalLookupService().lookupPrincipalByName(System.getProperty("user.name"));
         Path home = run.getParent();
         if (!Files.exists(run, LinkOption.NOFOLLOW_LINKS)) {

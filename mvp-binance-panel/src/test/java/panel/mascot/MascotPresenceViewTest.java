@@ -16,12 +16,20 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import panel.motion.MotionPreference;
 import panel.motion.MotionService;
 import panel.tradeview.DeskHarness;
 
 /** V2.1P-1: o IDLE vivo na prática (rig, olhar, foco, visibilidade, modos, prioridades, bolha, falhas, dispose). Janela e assets reais; relógio do motor controlado por tickAt. */
 class MascotPresenceViewTest {
+    private final List<Mounted> mounted = new ArrayList<>();
+
+    @AfterEach
+    void releaseViewsEvenWhenAnAssertionFails() throws Exception {
+        for (Mounted view : mounted) close(view);
+        mounted.clear();
+    }
     private static <T> T fx(Supplier<T> s) throws Exception {
         return DeskHarness.fx(s);
     }
@@ -57,11 +65,11 @@ class MascotPresenceViewTest {
         }
     }
 
-    private static Mounted mount(MotionService m, double size, MascotAssets assets) throws Exception {
+    private Mounted mount(MotionService m, double size, MascotAssets assets) throws Exception {
         return mount(m, size, assets, false);
     }
 
-    private static Mounted mount(MotionService m, double size, MascotAssets assets, boolean controlledClock) throws Exception {
+    private Mounted mount(MotionService m, double size, MascotAssets assets, boolean controlledClock) throws Exception {
         return fx(() -> {
             MascotView v = new MascotView(m, size, assets, Platform::runLater, () -> 1.0, null);
             // Establish the manual clock before Scene/window attachment can schedule a real-time tick.
@@ -71,7 +79,9 @@ class MascotPresenceViewTest {
             st.setScene(new Scene(root, 420, 320));
             st.show();
             v.setFocusOverride(Boolean.TRUE); // o foco real depende do desktop; o teste de foco usa FALSE/TRUE explicitamente
-            return new Mounted(v, st, root);
+            Mounted result = new Mounted(v, st, root);
+            mounted.add(result);
+            return result;
         });
     }
 
@@ -85,7 +95,7 @@ class MascotPresenceViewTest {
 
     @Test
     void idleFullRunsTheRigWithAliveBlinkingBreathingAndAnEyeThatFollowsTheCursorWithinLimits() throws Exception {
-        Mounted m = mount(motion(MotionPreference.FULL), 96, MascotAssets.shared());
+        Mounted m = mount(motion(MotionPreference.FULL), 96, MascotAssets.shared(), true);
         fx(() -> { m.view.setState(MascotState.IDLE); return null; });
         until("rig on screen", () -> m.view.showing() == MascotView.Showing.RIG);
         until("life running", m.view::lifeRunning);
@@ -96,10 +106,8 @@ class MascotPresenceViewTest {
             long t = 100_000;
             m.view.tickAt(t);
             m.view.pointerAtScene(5_000, 160);
-            return null;
-        });
-        fx(() -> {
-            long t = 100_000;
+            // Pointer input and controlled ticks form one FX transaction: no native exit event
+            // or scheduled pulse can clear the synthetic pointer between these assertions.
             for (int i = 0; i < 80; i++) {
                 t += 20;
                 m.view.tickAt(t);

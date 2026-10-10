@@ -69,8 +69,8 @@ class ScientificCaptureResolverTest {
 
     void running() {
         resolver.observations = List.of(
-                new Process(5179, 1L, NOW.minusSeconds(3600), "/bin/bash", List.of(checkout.resolve("scripts/continuous_capture.sh").toString())),
-                new Process(5186, 5179L, NOW.minusSeconds(3599), "/usr/bin/python3", List.of(runtime.resolve("bin/adaptive-trader").toString(),
+                new Process(5179, 1L, NOW.minusSeconds(3600), "/bin/bash", List.of(checkout.resolve("scripts/continuous_capture.sh").toString().replace('\\', '/'))),
+                new Process(5186, 5179L, NOW.minusSeconds(3599), "/usr/bin/python3", List.of(runtime.resolve("bin/adaptive-trader").toString().replace('\\', '/'),
                         "market", "microstructure", "campaign-record", "--campaign-id", CAMPAIGN, "--market", "futures", "--symbol", "ETHUSDT",
                         "--output-dir", root.toString())));
     }
@@ -109,7 +109,7 @@ class ScientificCaptureResolverTest {
         assertEquals(Status.STOPPED, sci.observe(NOW).status());
         // supervisor registrado ainda vivo, mas sem coletor verificado (respawn): evidência insuficiente => UNKNOWN, nunca STOPPED
         resolver.observations = List.of(new Process(5179, 1L, NOW.minusSeconds(3600), "/bin/bash",
-                List.of(checkout.resolve("scripts/continuous_capture.sh").toString())));
+                List.of(checkout.resolve("scripts/continuous_capture.sh").toString().replace('\\', '/'))));
         ScientificCapture c = sci.observe(NOW);
         assertEquals(Status.UNKNOWN, c.status());
     }

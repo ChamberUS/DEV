@@ -306,11 +306,12 @@ class ShellComponentsTest {
     void shortcutsRequestRailItemsButNotBehindADialog() throws Exception {
         Object[] r = FxSupport.fx(() -> {
             Fixture f = new Fixture(MotionPreference.OFF, 1440, 900);
-            Event.fireEvent(f.shell, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT3, false, false, false, true));
+            boolean mac = panel.shell.ByxShell.isMac();
+            Event.fireEvent(f.shell, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT3, false, !mac, false, mac));
             String afterCmd3 = f.router.route();
             f.shell.overlay().openDialog(new Label("Session expired"), true, null, null);
-            Event.fireEvent(f.shell, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT1, false, false, false, true));
-            Event.fireEvent(f.shell, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.COMMA, false, false, false, true));
+            Event.fireEvent(f.shell, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT1, false, !mac, false, mac));
+            Event.fireEvent(f.shell, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.COMMA, false, !mac, false, mac));
             String behindDialog = f.router.route();
             f.close();
             return new Object[] {afterCmd3, behindDialog};

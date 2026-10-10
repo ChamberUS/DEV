@@ -13,6 +13,8 @@
 .byx-auth-pane { -fx-background-color: -byx-bg0; }
 .byx-auth-step { -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary; }
 .byx-auth-form { -fx-spacing: 16; }
+.byx-auth-scroll { -fx-background-color: -byx-bg0; -fx-background: -byx-bg0; -fx-padding: 0; -fx-border-width: 0; -fx-background-insets: 0; }
+.byx-auth-scroll > .viewport { -fx-background-color: -byx-bg0; }
 .byx-auth-footer-link {
     -fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand;
     -fx-font-family: "Schibsted Grotesk"; -fx-font-size: 13px; -fx-text-fill: -byx-text-tertiary;

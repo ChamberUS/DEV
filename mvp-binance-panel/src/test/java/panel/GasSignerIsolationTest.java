@@ -74,11 +74,11 @@ class GasSignerIsolationTest {
     @Test
     void aDevelopmentFlagFileChangesNothingInTheGatewayChoice() throws Exception {
         // composição REAL com um perfil que tem security.dev.mode=true: o gateway continua sendo o de produção, exatamente
-        Path home = Files.createTempDirectory(Path.of("/tmp"), "gs");
+        Path home = Files.createTempDirectory("gs");
         String oldHome = System.getProperty("user.home");
         try {
-            Path cfg = Files.createDirectories(home.resolve(".mvp-binance-panel"), java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
-                    java.nio.file.attribute.PosixFilePermissions.fromString("rwx------")));
+            Path cfg = home.resolve(".mvp-binance-panel");
+            panel.security.PrivateFiles.prepareDirectory(cfg);
             Files.writeString(cfg.resolve("security.properties"), "security.dev.mode=true\n");
             System.setProperty("user.home", home.toString());
             // as constantes de caminho são estáticas: uma JVM nova seria necessária para o home inteiro; aqui provamos a escolha do gateway

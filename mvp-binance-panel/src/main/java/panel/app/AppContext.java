@@ -30,14 +30,16 @@ import panel.user.UserService;
 public class AppContext {
     /** Resolvido na CONSTRUÇÃO (não na carga da classe): testes com home temporário nunca tocam o home real. */
     private static Path appHome() {
-        return Path.of(System.getProperty("user.home"), ".mvp-binance-panel");
+        // Existing injected QA compositions keep their isolated temporary home.
+        // DEFAULT has no property/env switch: Windows uses the real account's known folder.
+        return INJECTED.get() != null ? panel.security.RuntimeStorage.legacyDirectory() : panel.security.RuntimeStorage.directory();
     }
 
     public final Settings settings = StartupTrace.time("Settings.load", Settings::load);
     private final Clock clock = Clock.systemUTC();
     private final Database db = StartupTrace.time("Database.openRuntime (SQLite)", () -> Database.openRuntime(appHome().resolve(Database.RUNTIME_FILE_NAME)));
     /** Legado (panel.db, rollback-only): SÓ leitura imutável do histórico de auditoria; nunca read-write, nunca DDL, nunca recriado. */
-    private final panel.security.LegacyAuditHistory legacyHistory = StartupTrace.time("LegacyPanelDb.openReadOnly", () -> panel.security.LegacyPanelDb.openReadOnly(appHome().resolve("panel.db")).map(h -> (panel.security.LegacyAuditHistory) h)
+    private final panel.security.LegacyAuditHistory legacyHistory = StartupTrace.time("LegacyPanelDb.openReadOnly", () -> panel.security.LegacyPanelDb.openReadOnly(panel.security.RuntimeStorage.legacyDirectory().resolve("panel.db")).map(h -> (panel.security.LegacyAuditHistory) h)
             .orElse(panel.security.LegacyAuditHistory.UNAVAILABLE));
     public final SecurityAuditService audit = new SecurityAuditService(legacyHistory, clock);
     public final SessionManager sessions = new SessionManager();
@@ -192,6 +194,12 @@ public class AppContext {
         onMarketData = () -> { };
         onLocalService = status -> { };
         navigate = id -> { };
+    }
+
+    /** Release runtime storage only after its workers have stopped. */
+    public void closeRuntimeStorage() {
+        if (legacyHistory instanceof panel.security.LegacyPanelDb legacy) legacy.close();
+        db.close();
     }
 
     public void applyMotionSettings() {

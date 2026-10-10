@@ -36,6 +36,7 @@ final class FakeService implements AutoCloseable {
     private volatile boolean closed;
 
     FakeService(Path home, Mode mode) throws IOException {
+        IpcTestFiles.requirePosixPairing(home);
         this.home = home;
         this.mode = mode;
         Path run = home.resolve("run");
