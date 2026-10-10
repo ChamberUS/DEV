@@ -57,7 +57,8 @@ public final class LocalServiceClient {
     static final Set<String> MODULE_OPERATIONS = Set.of("byx.lojas.getMerchant", "byx.lojas.listMerchants", "byx.payments.getPayment", "byx.payments.listByStore", "byx.payments.params",
             "byx.certificados.getCertificate", "byx.certificados.listByMerchant", "byx.bank.balance", "byx.feesplit.params", "byx.moduleHealth");
     private static final java.util.concurrent.atomic.AtomicInteger MODULE_SEQ = new java.util.concurrent.atomic.AtomicInteger();
-    private static final JsonMapper JSON = new JsonMapper();
+    private static final JsonMapper JSON = JsonMapper.builder()
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS).build();
     private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "local-service-timeout");
         t.setDaemon(true);
@@ -422,12 +423,16 @@ public final class LocalServiceClient {
             throw new EOFException("truncated");
         }
         try {
-            JsonNode n = JSON.readTree(new String(body, StandardCharsets.UTF_8));
+            String text = StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                    .decode(java.nio.ByteBuffer.wrap(body)).toString();
+            JsonNode n = JSON.readTree(text);
             if (n == null || !n.isObject()) {
                 throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "contract_violation");
             }
             return n;
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (com.fasterxml.jackson.core.JsonProcessingException | java.nio.charset.CharacterCodingException e) {
             throw new Fail(LocalServiceStatus.State.INCOMPATIBLE, "contract_violation");
         }
     }

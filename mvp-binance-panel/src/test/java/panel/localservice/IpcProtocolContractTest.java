@@ -13,10 +13,71 @@ import org.junit.jupiter.api.Test;
 class IpcProtocolContractTest {
     private static final JsonMapper JSON = new JsonMapper();
     private static ByteArrayInputStream frame(String body) throws Exception {
-        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        return frame(body.getBytes(StandardCharsets.UTF_8));
+    }
+    private static ByteArrayInputStream frame(byte[] bytes) throws Exception {
         var out = new ByteArrayOutputStream();
         try (var data = new DataOutputStream(out)) { data.writeInt(bytes.length); data.write(bytes); }
         return new ByteArrayInputStream(out.toByteArray());
+    }
+    @Test void minimumObjectAndExactMaximumFrameRemainCompatible() throws Exception {
+        assertTrue(LocalServiceClient.read(frame("{}"), LocalServiceClient.MAX_FRAME).isObject());
+        String maximum = "{\"x\":\"" + "a".repeat(LocalServiceClient.MAX_FRAME - 8) + "\"}";
+        assertEquals(LocalServiceClient.MAX_FRAME, maximum.getBytes(StandardCharsets.UTF_8).length);
+        assertEquals(LocalServiceClient.MAX_FRAME - 8,
+                LocalServiceClient.read(frame(maximum), LocalServiceClient.MAX_FRAME).path("x").asText().length());
+    }
+    @Test void trailingJsonOrGarbageInsideOneFrameIsRejected() throws Exception {
+        for (String body : List.of("{} {}", "{} []", "{} true", "{} garbage")) {
+            var refusal = assertThrows(LocalServiceClient.Fail.class,
+                    () -> LocalServiceClient.read(frame(body), LocalServiceClient.MAX_FRAME));
+            assertEquals("contract_violation", refusal.code);
+        }
+    }
+    @Test void malformedUtf8IsRejectedWithoutReplacingBytes() throws Exception {
+        for (byte[] invalid : List.of(new byte[]{(byte)0xc3,0x28}, new byte[]{(byte)0x80},
+                new byte[]{(byte)0xc0,(byte)0xaf}, new byte[]{(byte)0xed,(byte)0xa0,(byte)0x80})) {
+            var body = new ByteArrayOutputStream(); body.write("{\"x\":\"".getBytes(StandardCharsets.UTF_8));
+            body.write(invalid); body.write("\"}".getBytes(StandardCharsets.UTF_8));
+            var refusal = assertThrows(LocalServiceClient.Fail.class,
+                    () -> LocalServiceClient.read(frame(body.toByteArray()), LocalServiceClient.MAX_FRAME));
+            assertEquals("contract_violation", refusal.code);
+        }
+    }
+    @Test void validUnicodeWhitespaceAndSuccessiveFramesRemainReadable() throws Exception {
+        var wire = new ByteArrayOutputStream();
+        wire.write(frame(" {\"x\":\"ação 🐾\"} \r\n").readAllBytes());
+        wire.write(frame("{\"v\":1}").readAllBytes());
+        var input = new ByteArrayInputStream(wire.toByteArray());
+        assertEquals("ação 🐾", LocalServiceClient.read(input, LocalServiceClient.MAX_FRAME).path("x").asText());
+        assertEquals(1, LocalServiceClient.read(input, LocalServiceClient.MAX_FRAME).path("v").asInt());
+        assertEquals(0, input.available());
+    }
+    @Test void prematureTerminationAndEveryIncompleteHeaderAreRejected() {
+        for (int length = 0; length < 4; length++) {
+            byte[] header = new byte[length];
+            assertThrows(java.io.EOFException.class,
+                    () -> LocalServiceClient.read(new ByteArrayInputStream(header), LocalServiceClient.MAX_FRAME));
+        }
+    }
+    @Test void protocolVersionIsASeparateCompatibilityGateNotTransportAuthentication() throws Exception {
+        for (int version : new int[]{-1,0,1,2,Integer.MAX_VALUE}) {
+            var message = LocalServiceClient.read(frame("{\"v\":" + version + "}"), LocalServiceClient.MAX_FRAME);
+            assertEquals(version == LocalServiceClient.SUPPORTED_PROTOCOL,
+                    panel.ipc.contracts.MessageTransport.supportsProtocolVersion(message.path("v").intValue()));
+        }
+        // The production frame reader parses objects, while the handshake/application checks version.
+        // A framed object or a supported version is not evidence of an authorized endpoint/session.
+    }
+    @Test void invalidOrdinaryLengthLeavesUntrustedBodyUnread() throws Exception {
+        for (int size : new int[]{0,-1,LocalServiceClient.MAX_FRAME+1,Integer.MAX_VALUE,Integer.MIN_VALUE}) {
+            var out = new ByteArrayOutputStream();
+            var header = new DataOutputStream(out); header.writeInt(size); header.writeByte(42);
+            var input = new ByteArrayInputStream(out.toByteArray());
+            var refusal = assertThrows(LocalServiceClient.Fail.class,
+                    () -> LocalServiceClient.read(input, LocalServiceClient.MAX_FRAME));
+            assertEquals("frame_size", refusal.code); assertEquals(1,input.available());
+        }
     }
     @Test void invalidDeclaredFrameSizeIsRefusedBeforeReadingOrAllocatingItsBody() throws Exception {
         for (int size : new int[]{0, -1, MarketFeedClient.MAX_EVENT_FRAME + 1, Integer.MAX_VALUE}) {
