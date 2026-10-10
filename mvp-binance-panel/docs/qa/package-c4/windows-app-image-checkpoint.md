@@ -2,6 +2,8 @@
 
 2026-10-09. **C4_WINDOWS_APP_IMAGE_CHECKPOINT_BLOCKED** for complete reproducible-script qualification: ordinary PowerShell script execution was denied before the rebuild began. A reviewed local source checkpoint is still authorized and useful; it does not qualify the unexecuted script as tested.
 
+Historical status above is superseded by the subsequent owner rebuild and public runtime UAT. See [final closeout](C4_WINDOWS_APP_IMAGE_FINAL_UAT.md): build logs and image/source hashes independently inspected; runtime confirmed by owner. No historical evidence erased; no Windows IPC security gate is implied.
+
 ## Preserved baseline and UAT
 
 Git root `C:\src\DEV`, branch `feature/byx-windows-readiness-v1`, parent `a8e1eaab044777215e24425c5688ec9ac1765a1d`. No tracked/index changes at audit start; 592 untracked files: 495 other QA evidence, 23 isolated IPC evidence, 72 private checkpoint evidence, and 2 app-image documentation/pointer files. All were inventoried locally, not indiscriminately staged. Private evidence, local pointers and generated artifacts remain outside the commit.
