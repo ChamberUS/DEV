@@ -1,0 +1,92 @@
+[
+    {
+        "File":  "bcprov-jdk18on-1.78.1.jar",
+        "Bytes":  8324412,
+        "SHA256":  "ADD5915E6ACFC6AB5836E1FD8A5E21C6488536A8C1F21F386EEB3BF280B702D7"
+    },
+    {
+        "File":  "core-1.2.6.jar",
+        "Bytes":  179508,
+        "SHA256":  "0076DD68C5E91ADBA7005771F85281064079A13FE9C56A49ED44D64A34D365FA"
+    },
+    {
+        "File":  "fxplayer-1.2.6.jar",
+        "Bytes":  148901,
+        "SHA256":  "8501996A554751639E462460835685BE30623711FF745900A7B5A4C7F0072DAC"
+    },
+    {
+        "File":  "jackson-annotations-2.21.jar",
+        "Bytes":  82104,
+        "SHA256":  "53CA085F4A150F703F49E1AABD935BD03B43E1EA3D55D135438292AF22CEF56B"
+    },
+    {
+        "File":  "jackson-core-2.20.0.jar",
+        "Bytes":  593063,
+        "SHA256":  "BC0CF46075877201F8406EE7DE2741AE7DF6C066F5F0457BD80632A718C06E72"
+    },
+    {
+        "File":  "jackson-core-3.1.1.jar",
+        "Bytes":  600613,
+        "SHA256":  "4CD270BEE1A1AA34BE18DA78268F3879355B6EA09154BEFF496831785B6194C9"
+    },
+    {
+        "File":  "jackson-databind-2.20.0.jar",
+        "Bytes":  1688471,
+        "SHA256":  "A70E146A6BF2CBA4F9CD367169787F50ADCFBB57122BC2E9C8390CD0B397AC30"
+    },
+    {
+        "File":  "jackson-databind-3.1.1.jar",
+        "Bytes":  1939126,
+        "SHA256":  "A80302C80CB02803E33D7B3301A0D619146D3191D285E6BBD39FA17D3AA5F24A"
+    },
+    {
+        "File":  "javafx-base-21.0.5-win.jar",
+        "Bytes":  753974,
+        "SHA256":  "4E9DE66524A39FA59EE2CD4952270900BC9FE495B28477435EFA08144DE1D206"
+    },
+    {
+        "File":  "javafx-base-21.0.5.jar",
+        "Bytes":  302,
+        "SHA256":  "184DFC4542305FC57B06454807F36D6B71AC53018A69589DE7FDC77410989025"
+    },
+    {
+        "File":  "javafx-controls-21.0.5-win.jar",
+        "Bytes":  2585171,
+        "SHA256":  "C689DE189ABAA839EAF628D4B34AA176F6661E0D62CA918CB4AF7544172E6A60"
+    },
+    {
+        "File":  "javafx-controls-21.0.5.jar",
+        "Bytes":  306,
+        "SHA256":  "7E74FF934C0B07FD789D853AE808909FF5E546A508C6B0C5C358E41C503A77F4"
+    },
+    {
+        "File":  "javafx-graphics-21.0.5-win.jar",
+        "Bytes":  5942323,
+        "SHA256":  "0C5CE5A4F27BE1D0C898C29FAE86356F5CCF78401CC6BD243FC146F4A61DFF74"
+    },
+    {
+        "File":  "javafx-graphics-21.0.5.jar",
+        "Bytes":  306,
+        "SHA256":  "0A33D1D46D215215704882400C4A0EFD5CC6B47D58848ADCB048C6C818C01027"
+    },
+    {
+        "File":  "jna-5.17.0.jar",
+        "Bytes":  2002589,
+        "SHA256":  "B3A9408E7C51E08EF0E3BFCC08F443F6EC0F6191BA8CD7C18D53D2B22E5BDBC0"
+    },
+    {
+        "File":  "protobuf-java-4.33.5.jar",
+        "Bytes":  1886461,
+        "SHA256":  "CB9E00D6E3D4B1305F3FDC147490CE347BFE8C05DC821A433B23B2FF28749BB1"
+    },
+    {
+        "File":  "slf4j-api-2.0.17.jar",
+        "Bytes":  69908,
+        "SHA256":  "7B751D952061954D5ABFED7181C1F645D336091B679891591D63329C622EB832"
+    },
+    {
+        "File":  "sqlite-jdbc-3.46.1.0.jar",
+        "Bytes":  14123618,
+        "SHA256":  "6DC7464E3803648D3FF18A7359BAB6ADF079FCD8495B18991F6F5EDCB8AC6E3B"
+    }
+]
