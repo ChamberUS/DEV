@@ -131,6 +131,19 @@ function ChooseLanguage([string]$language){
  }
  $languageControls.Add([pscustomobject]@{requested=$language;accessibleLabel=$label;automationId=$combo.Current.AutomationId;method=$method});Start-Sleep -Milliseconds 600
 }
+function NavigateTrading([string]$name){
+ # The original rail changes to ACCOUNT in Settings. Its original workspace switcher restores the Trading rail.
+ $workspace=$null;$leaf=$null;$desk=$false
+ switch($name){
+  'Mesa de negociação'{$workspace='Negociação';$leaf='^(Livro de ofertas|Negociações recentes)$';$desk=$true}
+  'Mercados e portfólio'{$workspace='Negociação';$leaf='^Monitor de mercados$'}
+  'Trading Desk'{$workspace='Trading';$leaf='^(Order book|Recent trades)$';$desk=$true}
+  'Markets & Portfolio'{$workspace='Trading';$leaf='^Market watch$'}
+  default{throw ('Unsupported closed Trading navigation target: '+$name)}
+ }
+ InvokeName $workspace;InvokeName $name;WaitText $leaf
+ if($desk){ResetViewports $leaf}
+}
 function Credentials([string]$password,[bool]$english=$false){
  $pairs=if($english){@(@('EMAIL OR USERNAME','teste-byx'),@('PASSWORD',$password))}else{@(@('E-MAIL OU USUÁRIO','teste-byx'),@('SENHA',$password))}
  foreach($pair in $pairs){$field=@((Named $pair[0])|Where-Object {$_.Current.ControlType -eq [Windows.Automation.ControlType]::Edit})|Select-Object -First 1
@@ -185,16 +198,16 @@ try{
  Credentials 'byx123123';WaitText 'USER / DEMO';WaitText 'ETHUSDT';$scrollBefore=$scrollActions.Count;WaitText '^(Livro de ofertas|Negociações recentes)$';$checks.Add('NATIVE_EXE_PUBLIC_LOGIN_USER_DEMO');$checks.Add('NATIVE_EXE_DESK_SIMULATED_DATA')
  if($scrollActions.Count -gt $scrollBefore){Capture 'desk-details-DARK-PT-BR-scrolled';ResetViewports '^(Livro de ofertas|Negociações recentes)$'};Capture 'desk-DARK-PT-BR'
  $afterLogin=WindowRect;if($afterLogin.Size -ne $original.Size){throw 'Login changed native window geometry'};$checks.Add('NATIVE_EXE_LOGIN_PRESERVES_GEOMETRY')
- InvokeName 'Mercados e portfólio';WaitText 'Mercados|Saldo|Portfólio';$checks.Add('NATIVE_EXE_MARKETS_PT_BR');Capture 'markets-PT-BR'
+ NavigateTrading 'Mercados e portfólio';WaitText 'Mercados|Saldo|Portfólio';$checks.Add('NATIVE_EXE_MARKETS_PT_BR');Capture 'markets-PT-BR'
  InvokeName 'Configurações';WaitText 'Preferências visuais desta DEMO offline';$checks.Add('NATIVE_EXE_SETTINGS_PT_BR');Capture 'settings-PT-BR'
  InvokeName 'Seção das configurações: Aparência';InvokeName 'Claro'
  if(!((Named 'Claro'|Select-Object -First 1).GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected)){throw 'Light theme radio not selected'};$checks.Add('NATIVE_EXE_LIGHT_THEME')
- InvokeName 'Mesa de negociação';WaitText 'ETHUSDT';Capture 'desk-LIGHT-PT-BR'
+ NavigateTrading 'Mesa de negociação';WaitText 'ETHUSDT';Capture 'desk-LIGHT-PT-BR'
  InvokeName 'Configurações';InvokeName 'Seção das configurações: Aparência';InvokeName 'Escuro'
  if(!((Named 'Escuro'|Select-Object -First 1).GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected)){throw 'Dark theme radio not selected'};$checks.Add('NATIVE_EXE_DARK_THEME')
  InvokeName 'Compacta';InvokeName 'Salvar alterações';WaitText 'Preferências visuais salvas localmente|Configurações salvas';$checks.Add('NATIVE_EXE_DENSITY_SAVED')
  InvokeName 'REDUCED';InvokeName 'Salvar alterações';$checks.Add('NATIVE_EXE_MOTION_SAVED')
- InvokeName 'Mesa de negociação';WaitText 'ETHUSDT';$beforeResize=WindowRect
+ NavigateTrading 'Mesa de negociação';WaitText 'ETHUSDT';$beforeResize=WindowRect
  $resize=$null
  if($root.TryGetCurrentPattern([Windows.Automation.TransformPattern]::Pattern,[ref]$resize) -and $resize.Current.CanResize){$resize.Resize([Math]::Floor($beforeResize.Width*.84),[Math]::Floor($beforeResize.Height*.9));$resizeMethod='UIAutomation TransformPattern.Resize'}
  else{if(![DemoAlpha2QaWindow]::MoveWindow($owned.MainWindowHandle,$beforeResize.X,$beforeResize.Y,[Math]::Floor($beforeResize.Width*.84),[Math]::Floor($beforeResize.Height*.9),$true)){throw 'Native resize failed'};$resizeMethod='Win32 MoveWindow against owned resizable native window (TransformPattern unavailable)'}
@@ -204,14 +217,14 @@ try{
  if($moved.X -ne $small.X+5 -or $moved.Y -ne $small.Y+5){throw 'Native window movement failed'};$checks.Add('NATIVE_EXE_MOVE_WINDOW')
  WindowState ([Windows.Automation.WindowVisualState]::Maximized)
  if(![DemoAlpha2QaWindow]::IsZoomed($owned.MainWindowHandle)){throw 'Maximize failed'};$checks.Add('NATIVE_EXE_MAXIMIZE');Capture 'maximized-PT-BR'
- InvokeName 'Mercados e portfólio';if(![DemoAlpha2QaWindow]::IsZoomed($owned.MainWindowHandle)){throw 'Navigation changed maximized state'};$checks.Add('NATIVE_EXE_NAVIGATION_PRESERVES_MAXIMIZED_STATE')
+ NavigateTrading 'Mercados e portfólio';if(![DemoAlpha2QaWindow]::IsZoomed($owned.MainWindowHandle)){throw 'Navigation changed maximized state'};$checks.Add('NATIVE_EXE_NAVIGATION_PRESERVES_MAXIMIZED_STATE')
  WindowState ([Windows.Automation.WindowVisualState]::Normal);$restored=WindowRect
  if([DemoAlpha2QaWindow]::IsZoomed($owned.MainWindowHandle) -or [Math]::Abs($restored.Width-$small.Width) -gt 2 -or [Math]::Abs($restored.Height-$small.Height) -gt 2){throw 'Restore did not recover small size'};$checks.Add('NATIVE_EXE_RESTORE_SMALL_SIZE')
  WindowState ([Windows.Automation.WindowVisualState]::Minimized);if(![DemoAlpha2QaWindow]::IsIconic($owned.MainWindowHandle)){throw 'Minimize failed'};$checks.Add('NATIVE_EXE_MINIMIZE')
  WindowState ([Windows.Automation.WindowVisualState]::Normal);if([DemoAlpha2QaWindow]::IsIconic($owned.MainWindowHandle)){throw 'Unminimize failed'};$checks.Add('NATIVE_EXE_UNMINIMIZE')
  InvokeName 'Configurações';InvokeName 'Seção das configurações: Geral';ChooseLanguage 'English';WaitText 'Settings';$checks.Add('NATIVE_EXE_SETTINGS_LANGUAGE_EN')
- InvokeName 'Markets & Portfolio';WaitText 'Markets|Portfolio';$checks.Add('NATIVE_EXE_MARKETS_LANGUAGE_EN')
- InvokeName 'Trading Desk';$scrollBefore=$scrollActions.Count;WaitText '^(Order book|Recent trades)$';$checks.Add('NATIVE_EXE_DESK_LANGUAGE_EN')
+ NavigateTrading 'Markets & Portfolio';WaitText 'Markets|Portfolio';$checks.Add('NATIVE_EXE_MARKETS_LANGUAGE_EN')
+ NavigateTrading 'Trading Desk';$scrollBefore=$scrollActions.Count;WaitText '^(Order book|Recent trades)$';$checks.Add('NATIVE_EXE_DESK_LANGUAGE_EN')
  if($scrollActions.Count -gt $scrollBefore){Capture 'desk-details-EN-scrolled';ResetViewports '^(Order book|Recent trades)$'};Capture 'desk-EN'
  InvokeName 'Settings';InvokeName 'Settings section Appearance';InvokeName 'Light'
  InvokeName 'Sign out';WaitText '^EMAIL OR USERNAME$';$checks.Add('NATIVE_EXE_LOGOUT_PRESERVES_EN');$logoutRect=WindowRect

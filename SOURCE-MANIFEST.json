@@ -181,8 +181,8 @@
     },
     {
         "path":  "scripts/test-demo-native-ui.ps1",
-        "bytes":  24662,
-        "sha256":  "269946b5309e5ec6d380c8904e6dee4b9a358aa0f7a7e7d6e38c78a64e6da050"
+        "bytes":  25427,
+        "sha256":  "1a82029aa62cb420020665c6316148212ee7530d567e5a5ab37f2e1c94ac78ab"
     },
     {
         "path":  "scripts/test-demo-ui.ps1",
