@@ -2,7 +2,7 @@ param([string]$Project=(Split-Path $PSScriptRoot -Parent),[string]$Image,[Parame
 $Project=[IO.Path]::GetFullPath($Project);if($Image){$Image=[IO.Path]::GetFullPath($Image)}
 $ErrorActionPreference='Stop';Add-Type -AssemblyName System.IO.Compression.FileSystem
 $findings=[Collections.Generic.List[string]]::new()
-$files=Get-ChildItem -LiteralPath $Project -Recurse -File|Where-Object {$_.FullName -notmatch '\\(\.git|target|dist|\.tools)\\'}
+$files=Get-ChildItem -LiteralPath $Project -Recurse -File|Where-Object {$_.Name -ne '.git' -and $_.FullName -notmatch '\\(\.git|target|dist|\.tools)\\'}
 foreach($file in $files){
 $r=$file.FullName.Substring($Project.Length+1).Replace('\','/')
 if($r -match '(^|/)(\.DS_Store|\.env|id_rsa|id_ed25519)$' -or $file.Extension -match '^\.(db|sqlite|sqlite3|p12|pfx|pem|key|csv|parquet|exe|dll|zip|jar)$'){$findings.Add('Forbidden source artifact: '+$r)}

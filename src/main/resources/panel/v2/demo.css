@@ -1,0 +1,3 @@
+/* Only the DEMO notice is additional; all content palettes, fonts and layouts come from V2. */
+.byx-demo-notice { -fx-padding: 6 16; -fx-background-color: -byx-surface-header; -fx-border-color: -byx-line; -fx-border-width: 0 0 1 0; }
+.byx-demo-notice .label { -fx-font-size: 11px; }

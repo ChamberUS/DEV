@@ -183,7 +183,7 @@ public final class UserMenu {
         VBox who = new VBox(2, name, email);
         who.setMinWidth(0);
         HBox.setHgrow(who, Priority.ALWAYS);
-        Label role = ByxBadge.of(identity.role().toUpperCase(java.util.Locale.ROOT), ByxBadge.Tone.ACCENT);
+        Label role = LocaleView.literal(ByxBadge.of(identity.role().toUpperCase(java.util.Locale.ROOT), ByxBadge.Tone.ACCENT));
         role.setMinWidth(Region.USE_PREF_SIZE); // o papel nunca é cortado; nome e e-mail reticenciam
         HBox header = new HBox(10, initials, who, role);
         header.setAlignment(Pos.CENTER_LEFT);

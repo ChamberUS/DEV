@@ -11,8 +11,8 @@
     },
     {
         "path":  ".github/workflows/demo-windows.yml",
-        "bytes":  3609,
-        "sha256":  "3644c7abde8ecb1bf4563d3ffcb7ce0849d7733ad301dcdeb4f3196c305158bb"
+        "bytes":  3579,
+        "sha256":  "a6492036048c6bf71150d8852b698611bfd137c06903b282bf593e6379c35500"
     },
     {
         "path":  ".gitignore",
@@ -25,14 +25,34 @@
         "sha256":  "b492f56782e6ac4e797cf00f74f279ef7b1e9e9f0330888570b1512e3f6db757"
     },
     {
+        "path":  "docs/ALPHA2-QA.md",
+        "bytes":  3510,
+        "sha256":  "eb9605c87c2e64a71c54d764bd3d94a986358fb0417137f36f936aafdcdf7d42"
+    },
+    {
+        "path":  "docs/ALPHA2-RELEASE-NOTES.md",
+        "bytes":  3194,
+        "sha256":  "918fba89b247cff523278eb80f4fa2f2e24ac2abc150f7eb6402b99e19621dc0"
+    },
+    {
+        "path":  "docs/ALPHA2-REUSED-VIEW-SOURCES.json",
+        "bytes":  2228,
+        "sha256":  "462c362b98369d19ef15ba2a29e2990596a25acb328de079eb54d421449e813b"
+    },
+    {
+        "path":  "docs/ALPHA2-VISUAL-COMPARISON.md",
+        "bytes":  9069,
+        "sha256":  "21ee7b6337df1c57bad8ea870a7425e172bb1221bfb018f050ab4a149737a137"
+    },
+    {
         "path":  "docs/BUILD-RELEASE.md",
-        "bytes":  4014,
-        "sha256":  "ae14f8a0dff6924925340fb144690e38bca42385b8f2d029830819b1518733e0"
+        "bytes":  4040,
+        "sha256":  "51e61730e87c6fa1dfbd0d67607bb11c5478aff0fe965300fb66dabc942e4377"
     },
     {
         "path":  "docs/SECURITY-ARCHITECTURE.md",
-        "bytes":  2460,
-        "sha256":  "07fff75ba5f1c222fd124a1efc79b8372d5c45b8c0fe582faeb0a7972599ab8e"
+        "bytes":  2671,
+        "sha256":  "50fa6e9e42933cc27c64b9cff19f3255355b0e65fc388551823ba3f734a5d02d"
     },
     {
         "path":  "licenses/fonts/Inter-OFL.txt",
@@ -141,13 +161,13 @@
     },
     {
         "path":  "README.md",
-        "bytes":  4865,
-        "sha256":  "e22cafe0457996bba1c891a6e2288110012b63e20549faf0ec9214e03bfa45a7"
+        "bytes":  4774,
+        "sha256":  "318e67e25cf0d961bad8ecddcc4636a51a2180f51cac9f8d99ccadbcb47592fe"
     },
     {
         "path":  "scripts/audit-demo.ps1",
-        "bytes":  4148,
-        "sha256":  "0917a4193b3a7685ef7e230fd3987f3cb9ab362d7b261c8bd2c9f2ccf714c904"
+        "bytes":  4172,
+        "sha256":  "70a7866dd6b87010d7aab56e671722e319ce64042b1b866a2ea9dd9410d8d83b"
     },
     {
         "path":  "scripts/build-demo-windows.ps1",
@@ -161,8 +181,8 @@
     },
     {
         "path":  "scripts/test-demo-native-ui.ps1",
-        "bytes":  5587,
-        "sha256":  "19703005970d20348b93b2f8df96e2deaa271d40e2a5fd0c6a6e8e6e70ccd50d"
+        "bytes":  17765,
+        "sha256":  "96765b83ebe6d79f20685670888cded4430e65955005a2cae3d20095de289700"
     },
     {
         "path":  "scripts/test-demo-ui.ps1",
@@ -171,13 +191,13 @@
     },
     {
         "path":  "SOURCE-PROVENANCE.json",
-        "bytes":  72238,
-        "sha256":  "84284b2392df039339828a8e18cb03399d1c879fac559ca5601a01929f571fe6"
+        "bytes":  75130,
+        "sha256":  "4b59d91e5e95c3fa221111e65bda0fc6e03cd650ae89a60bf07b3161eca6d9b1"
     },
     {
         "path":  "src/main/java/byx/demo/DemoApp.java",
-        "bytes":  8237,
-        "sha256":  "80d178e938c112f0c9baabf955f47f5d19827f48481e5896a27dd2ea725f016f"
+        "bytes":  17033,
+        "sha256":  "ddbc5516e3c1572712143b50231e74f8e08ce8485710d2989b6e1888620c2975"
     },
     {
         "path":  "src/main/java/byx/demo/DemoAuthProvider.java",
@@ -195,19 +215,34 @@
         "sha256":  "60ddf35d1d4f9a547ddd9099e25c2c929806ad5c6524b7dbe0b7b4090f139005"
     },
     {
+        "path":  "src/main/java/byx/demo/DemoPreferencesStore.java",
+        "bytes":  4931,
+        "sha256":  "b2f8c7b4a89d5aeda7193375d2e5ffc9611a878132e6d5564a7db9feadc29041"
+    },
+    {
+        "path":  "src/main/java/byx/demo/DemoViewFactory.java",
+        "bytes":  14321,
+        "sha256":  "140db3f23db6c60baf27a6501285728f5f0ffedb3473d7e48e299ac424463fee"
+    },
+    {
+        "path":  "src/main/java/byx/demo/WindowPolicy.java",
+        "bytes":  2475,
+        "sha256":  "b5c2e8adee91cbb03c4d3b70a1a97020b2640824f0cc7e2d6dbbe12fb636cb4b"
+    },
+    {
         "path":  "src/main/java/panel/accountview/AccountData.java",
         "bytes":  392,
         "sha256":  "ca3eccac174af1fef07bbc1765186eb8870cde4e4b032332d268913f3b581b84"
     },
     {
         "path":  "src/main/java/panel/accountview/SettingsScreen.java",
-        "bytes":  18791,
-        "sha256":  "3b40c6e39052fefa926e02d5f43ce746bd2c4af60995648b6f089c526488cf46"
+        "bytes":  18666,
+        "sha256":  "8367cf1c0fb7735daf0d2633e85e56ce0a2940de3cdeef7cacc0d9818c8be2f1"
     },
     {
         "path":  "src/main/java/panel/app/AppInfo.java",
-        "bytes":  1080,
-        "sha256":  "cc4759d046e1bbd1d0223a7d2b3f7594c05a6e79d119f3d57350aea67b8bfbe1"
+        "bytes":  1088,
+        "sha256":  "e76e5c6f1277d6fb331d5a58350866281159fc259ba0158e70f5e4cbb19cb7a2"
     },
     {
         "path":  "src/main/java/panel/authview/AuthLayout.java",
@@ -340,9 +375,49 @@
         "sha256":  "74d24a7105690d495c10f5f057b68cd7f9f6b4bd170bc4d8aa94e1d5c406a890"
     },
     {
+        "path":  "src/main/java/panel/helpview/FaqScreen.java",
+        "bytes":  8724,
+        "sha256":  "85d6c6755caacec987cbe5949ab7710860d2facf072dd078705f5710158994c5"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/HelpContent.java",
+        "bytes":  4257,
+        "sha256":  "b419f04f337d4deb76ff23b0e2326ac7dcc0530aba069b330cfd5df41345eb47"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/Highlight.java",
+        "bytes":  2689,
+        "sha256":  "8c9436409dcd91bd3768647f2ba62a9b89bf7da6a6a049c0b1f2ff800b974a12"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/LegalScreen.java",
+        "bytes":  3622,
+        "sha256":  "98dd11e58fd2da57f4c7bd59ffeb39a34f2aacf55766d2ac05ade95eec450e35"
+    },
+    {
         "path":  "src/main/java/panel/helpview/ShortcutsScreen.java",
         "bytes":  2020,
         "sha256":  "6fdbee0f229610d54078d37ef55709e6acd4e77a99e25db93b1d63c395ccad90"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/SupportScreen.java",
+        "bytes":  4842,
+        "sha256":  "7c9f13358b41786651aaf06b29b243263f297f0db1f814537bcefa0ff74582f4"
+    },
+    {
+        "path":  "src/main/java/panel/homeview/HomeMarkets.java",
+        "bytes":  6599,
+        "sha256":  "9e82e3183412cf7e6b6aee5015c13180520f7a03544ada024bc62dc82ea1718a"
+    },
+    {
+        "path":  "src/main/java/panel/homeview/HomeScreen.java",
+        "bytes":  29640,
+        "sha256":  "392f768a1b88a255b6dc69a2213856189a82da50ce6d641f81aced912a894c95"
+    },
+    {
+        "path":  "src/main/java/panel/homeview/ServiceCards.java",
+        "bytes":  3310,
+        "sha256":  "fb9fcad14efcc1c0771c1d95095c9a86afa1816449acfa384c3dc8a7fb4a8e3c"
     },
     {
         "path":  "src/main/java/panel/i18n/DisplayFormats.java",
@@ -366,13 +441,13 @@
     },
     {
         "path":  "src/main/java/panel/i18n/Presentation.java",
-        "bytes":  5854,
-        "sha256":  "463956594cc47634cb2c3f7618a7e2cd271fd87e7079729f716b98c6f6cf57cd"
+        "bytes":  6133,
+        "sha256":  "32e5ccf3b56fdde35918d1950dcf5f0ca30bd742db8fee6b9d12c15b0321e21a"
     },
     {
         "path":  "src/main/java/panel/i18n/Strings.java",
-        "bytes":  3822,
-        "sha256":  "4b690a5740ef15a245e55cd849287812b1e4e5574a0782a9267d63e5f9b661ba"
+        "bytes":  3831,
+        "sha256":  "4ab778e4859f23807516f787637755cc3843e38f4ca83c6665bf454d01d176d8"
     },
     {
         "path":  "src/main/java/panel/mascot/Gaze.java",
@@ -721,8 +796,8 @@
     },
     {
         "path":  "src/main/java/panel/shell/UserMenu.java",
-        "bytes":  10960,
-        "sha256":  "f323948164547629dd8fa52e5450603b056e2f951720738fb00d930634a9e487"
+        "bytes":  10980,
+        "sha256":  "cc3774a45496dde0fa64b480090ac6c531c3389354313acae97c87e8e12490ed"
     },
     {
         "path":  "src/main/java/panel/shell/WalletStatus.java",
@@ -851,8 +926,8 @@
     },
     {
         "path":  "src/main/java/panel/v2/Kit.java",
-        "bytes":  8655,
-        "sha256":  "94f4531b5659d06cf57ebc6944ace385b7d36189aee88920389aa4d79b04158e"
+        "bytes":  8763,
+        "sha256":  "1bf83c849741afe7f766cd73118ce6c035ccf7820caa25f8504feacb3237afe0"
     },
     {
         "path":  "src/main/resources/animations/original/check-pop.json",
@@ -991,13 +1066,23 @@
     },
     {
         "path":  "src/main/resources/panel/i18n/appearance_en.properties",
-        "bytes":  1013,
-        "sha256":  "a4bf54269ec5aae5904ebba7f206230b3bd3a3dd45ce8560a11220f191691799"
+        "bytes":  1025,
+        "sha256":  "522c11389ea2fd10d03ecafa41d840f74db00556eb91ca8dbc5fcb231839d478"
     },
     {
         "path":  "src/main/resources/panel/i18n/appearance_pt-BR.properties",
-        "bytes":  1085,
-        "sha256":  "324c29dbbde99efd7eb0c6e8d469d0345c45af7c23541a4ca579a29e9aae7dd5"
+        "bytes":  1065,
+        "sha256":  "90ce292acd180daa36098be7a830e2258ef2700bc0a1199f0e90f75562cfc28a"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/demo_en.properties",
+        "bytes":  5553,
+        "sha256":  "7eb98e4468a86366413de2d6114731e0c485a503e420988c74526f1a7d1e0725"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/demo_pt-BR.properties",
+        "bytes":  5992,
+        "sha256":  "b005ac5c792af23302f2737645fe50bd220cb31aa58d662efb718f4e72a6ac3e"
     },
     {
         "path":  "src/main/resources/panel/i18n/notifications_en.properties",
@@ -1150,6 +1235,11 @@
         "sha256":  "93a51151fc2d2761c75c3158dc3682934776a38b73371c725ddfef106d12491f"
     },
     {
+        "path":  "src/main/resources/panel/v2/demo.css",
+        "bytes":  283,
+        "sha256":  "2296013676db1b7d1c3d9f1297dea6f384c7d337b31d8864ca97668eade96aca"
+    },
+    {
         "path":  "src/main/resources/panel/v2/research.css",
         "bytes":  4601,
         "sha256":  "f966dd000fc258aa1a6b478d38869a7504b1efda0a5e0c926b3b7f2efe2c4c5f"
@@ -1195,9 +1285,24 @@
         "sha256":  "0d9d8035494bdf430ef880475a7a7dc54907708094dec4ee5c94de8e335bb3ab"
     },
     {
+        "path":  "src/test/java/byx/demo/DemoI18nTest.java",
+        "bytes":  4570,
+        "sha256":  "d4aae4d762e78cb5ac4950426894db5de2e281b5364d97b92a5477273376878d"
+    },
+    {
         "path":  "src/test/java/byx/demo/DemoPackagedUiProbe.java",
-        "bytes":  4934,
-        "sha256":  "271c2a61d6cb9e747a5e3e261d225a0bb01cc80d89cb01227071fd256ac10374"
+        "bytes":  18444,
+        "sha256":  "a54d47e330654148e92e648daf14120a3ea0e3ca46f6c431722bb443ff88d9fe"
+    },
+    {
+        "path":  "src/test/java/byx/demo/DemoPreferencesStoreTest.java",
+        "bytes":  4827,
+        "sha256":  "ab9bbbaf065cc4b9f8269d14a2334fb8922049464a7fafaf498834b3dd2d5eec"
+    },
+    {
+        "path":  "src/test/java/byx/demo/WindowPolicyTest.java",
+        "bytes":  2702,
+        "sha256":  "6ff74520f90470132c18cba32f9361c42c4e04c6ba1e387c4073256fe2dbbab1"
     },
     {
         "path":  "THIRD-PARTY-NOTICES.md",

@@ -1,7 +1,7 @@
 name: BYX-MVP DEMO Windows Build
 on:
   push:
-    branches: [feature/byx-mvp-demo-windows-x64]
+    branches: [feature/byx-mvp-demo-windows-alpha2]
 permissions:
   contents: read
 jobs:
@@ -29,8 +29,7 @@ jobs:
       - name: Packaged EXE startup, bundled runtime, close and reopen
         run: |
           ./scripts/test-demo-launcher.ps1 -Zip "$env:RUNNER_TEMP/byx-demo-build/BYX-MVP-Demo-Windows-x64-Portable.zip" -Destination "$env:RUNNER_TEMP/QA BYX spaces [alpha]" -Report "$env:RUNNER_TEMP/byx-demo-build/launcher-qa.json"
-      - name: Native EXE login and navigation automation (desktop dependent)
-        continue-on-error: true
+      - name: Native EXE window, localization, preferences and navigation gates
         shell: powershell
         run: |
           ./scripts/test-demo-native-ui.ps1 -Executable "$env:RUNNER_TEMP/QA BYX spaces [alpha]/BYX-MVP.exe" -Report "$env:RUNNER_TEMP/byx-demo-build/native-ui-qa.json"
@@ -61,7 +60,7 @@ jobs:
             ${{ runner.temp }}/byx-demo-build/build.log
             ${{ runner.temp }}/byx-demo-build/audit.json
             ${{ runner.temp }}/byx-demo-build/launcher*.json*
-            ${{ runner.temp }}/byx-demo-build/native-ui-qa.json
+            ${{ runner.temp }}/byx-demo-build/native-ui-qa*
             ${{ runner.temp }}/byx-demo-build/runner.json
             ${{ runner.temp }}/byx-demo-build/ui/
             target/surefire-reports/

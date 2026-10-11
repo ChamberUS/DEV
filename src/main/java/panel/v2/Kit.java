@@ -66,6 +66,8 @@ public final class Kit {
             sub.setWrapText(true);
             titles.getChildren().add(sub);
         }
+        titles.setMinWidth(0);
+        HBox.setHgrow(titles, Priority.ALWAYS);
         HBox h = new HBox(16, titles, Fx.spacer());
         h.getChildren().addAll(trailing);
         h.setAlignment(Pos.CENTER_LEFT);
@@ -75,6 +77,7 @@ public final class Kit {
 
     public static VBox panel(String title, Node... body) {
         VBox p = new VBox(10);
+        p.setMinWidth(0);
         p.getStyleClass().add("byx-panel");
         if (title != null) {
             p.getChildren().add(Fx.label(title, "byx-section-title-sm"));

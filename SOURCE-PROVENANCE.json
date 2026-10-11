@@ -9,13 +9,13 @@
         "path":  "src/main/java/panel/accountview/SettingsScreen.java",
         "original":  "mvp-binance-panel/src/main/java/panel/accountview/SettingsScreen.java",
         "originalSha256":  "aa4aa11b55a8ef56a935b952be995bf5e1078336a33e3d95882d211f83b27840",
-        "snapshotSha256":  "3b40c6e39052fefa926e02d5f43ce746bd2c4af60995648b6f089c526488cf46"
+        "snapshotSha256":  "8367cf1c0fb7735daf0d2633e85e56ce0a2940de3cdeef7cacc0d9818c8be2f1"
     },
     {
         "path":  "src/main/java/panel/app/AppInfo.java",
         "original":  "mvp-binance-panel/src/main/java/panel/app/AppInfo.java",
         "originalSha256":  "fe0ecb4fe43dc214d7458adb142e80b5ac38a63f8d18ea0ca955368b9ab994e7",
-        "snapshotSha256":  "cc4759d046e1bbd1d0223a7d2b3f7594c05a6e79d119f3d57350aea67b8bfbe1"
+        "snapshotSha256":  "e76e5c6f1277d6fb331d5a58350866281159fc259ba0158e70f5e4cbb19cb7a2"
     },
     {
         "path":  "src/main/java/panel/authview/AuthLayout.java",
@@ -174,10 +174,58 @@
         "snapshotSha256":  "74d24a7105690d495c10f5f057b68cd7f9f6b4bd170bc4d8aa94e1d5c406a890"
     },
     {
+        "path":  "src/main/java/panel/helpview/FaqScreen.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/helpview/FaqScreen.java",
+        "originalSha256":  "5218c360bd0c43d88e8654334c1ec8b0ae99604a4ebeb9504d4cb3c70c3ddf8e",
+        "snapshotSha256":  "85d6c6755caacec987cbe5949ab7710860d2facf072dd078705f5710158994c5"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/HelpContent.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/helpview/HelpContent.java",
+        "originalSha256":  "b419f04f337d4deb76ff23b0e2326ac7dcc0530aba069b330cfd5df41345eb47",
+        "snapshotSha256":  "b419f04f337d4deb76ff23b0e2326ac7dcc0530aba069b330cfd5df41345eb47"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/Highlight.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/helpview/Highlight.java",
+        "originalSha256":  "8c9436409dcd91bd3768647f2ba62a9b89bf7da6a6a049c0b1f2ff800b974a12",
+        "snapshotSha256":  "8c9436409dcd91bd3768647f2ba62a9b89bf7da6a6a049c0b1f2ff800b974a12"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/LegalScreen.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/helpview/LegalScreen.java",
+        "originalSha256":  "ea1e26a8d2e8fcc6dc96fbca6978a8291eb490407f0032a33fb2cc1181cab846",
+        "snapshotSha256":  "98dd11e58fd2da57f4c7bd59ffeb39a34f2aacf55766d2ac05ade95eec450e35"
+    },
+    {
         "path":  "src/main/java/panel/helpview/ShortcutsScreen.java",
         "original":  "mvp-binance-panel/src/main/java/panel/helpview/ShortcutsScreen.java",
         "originalSha256":  "6fdbee0f229610d54078d37ef55709e6acd4e77a99e25db93b1d63c395ccad90",
         "snapshotSha256":  "6fdbee0f229610d54078d37ef55709e6acd4e77a99e25db93b1d63c395ccad90"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/SupportScreen.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/helpview/SupportScreen.java",
+        "originalSha256":  "6b0f15cf2a82e8ee9a958da209ccc9e9c75ea2f5dcfafe7cbcecad162d435d37",
+        "snapshotSha256":  "7c9f13358b41786651aaf06b29b243263f297f0db1f814537bcefa0ff74582f4"
+    },
+    {
+        "path":  "src/main/java/panel/homeview/HomeMarkets.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/homeview/HomeMarkets.java",
+        "originalSha256":  "9e82e3183412cf7e6b6aee5015c13180520f7a03544ada024bc62dc82ea1718a",
+        "snapshotSha256":  "9e82e3183412cf7e6b6aee5015c13180520f7a03544ada024bc62dc82ea1718a"
+    },
+    {
+        "path":  "src/main/java/panel/homeview/HomeScreen.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/homeview/HomeScreen.java",
+        "originalSha256":  "6c570e76b280f09944e7d6052b48465c5fc384b23f156da8a71b080502af7875",
+        "snapshotSha256":  "392f768a1b88a255b6dc69a2213856189a82da50ce6d641f81aced912a894c95"
+    },
+    {
+        "path":  "src/main/java/panel/homeview/ServiceCards.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/homeview/ServiceCards.java",
+        "originalSha256":  "767d14152366d8f484aaa3e269c1655603f9a4980954b817d792a9ad63777032",
+        "snapshotSha256":  "fb9fcad14efcc1c0771c1d95095c9a86afa1816449acfa384c3dc8a7fb4a8e3c"
     },
     {
         "path":  "src/main/java/panel/i18n/DisplayFormats.java",
@@ -207,13 +255,13 @@
         "path":  "src/main/java/panel/i18n/Presentation.java",
         "original":  "mvp-binance-panel/src/main/java/panel/i18n/Presentation.java",
         "originalSha256":  "463956594cc47634cb2c3f7618a7e2cd271fd87e7079729f716b98c6f6cf57cd",
-        "snapshotSha256":  "463956594cc47634cb2c3f7618a7e2cd271fd87e7079729f716b98c6f6cf57cd"
+        "snapshotSha256":  "32e5ccf3b56fdde35918d1950dcf5f0ca30bd742db8fee6b9d12c15b0321e21a"
     },
     {
         "path":  "src/main/java/panel/i18n/Strings.java",
         "original":  "mvp-binance-panel/src/main/java/panel/i18n/Strings.java",
         "originalSha256":  "4b690a5740ef15a245e55cd849287812b1e4e5574a0782a9267d63e5f9b661ba",
-        "snapshotSha256":  "4b690a5740ef15a245e55cd849287812b1e4e5574a0782a9267d63e5f9b661ba"
+        "snapshotSha256":  "4ab778e4859f23807516f787637755cc3843e38f4ca83c6665bf454d01d176d8"
     },
     {
         "path":  "src/main/java/panel/mascot/Gaze.java",
@@ -414,48 +462,6 @@
         "snapshotSha256":  "92eff821fc93098a697acd4d2981c218fef4f19d626213f0b8cff91f9c20ba8b"
     },
     {
-        "path":  "src/main/java/panel/motion/MotionPolicy.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionPolicy.java",
-        "originalSha256":  "8d8fc8c5857f61bd978d96fa10fcab9cc32868c29852fba8483ffd993bd67ee4",
-        "snapshotSha256":  "8d8fc8c5857f61bd978d96fa10fcab9cc32868c29852fba8483ffd993bd67ee4"
-    },
-    {
-        "path":  "src/main/java/panel/motion/MotionPreference.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionPreference.java",
-        "originalSha256":  "97760cf2a19ebb55193834f73bec5cc8a8ef857a0593e7a5030d9b6063da31d7",
-        "snapshotSha256":  "97760cf2a19ebb55193834f73bec5cc8a8ef857a0593e7a5030d9b6063da31d7"
-    },
-    {
-        "path":  "src/main/java/panel/motion/MotionService.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionService.java",
-        "originalSha256":  "3939e3b93b8b5876a21530e7dd93584336a1dafa954cbeab49ac03ff42aece32",
-        "snapshotSha256":  "3939e3b93b8b5876a21530e7dd93584336a1dafa954cbeab49ac03ff42aece32"
-    },
-    {
-        "path":  "src/main/java/panel/motion/MotionSpec.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionSpec.java",
-        "originalSha256":  "4294003d670adb0542be3d9d712040c3039c6f70da83a7eb3c6bfa3cb6dd2da0",
-        "snapshotSha256":  "4294003d670adb0542be3d9d712040c3039c6f70da83a7eb3c6bfa3cb6dd2da0"
-    },
-    {
-        "path":  "src/main/java/panel/motion/MotionTokens.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionTokens.java",
-        "originalSha256":  "fc7b86a86f672642e6c9b67f6b8460668272eb15dc5431433cbf0bc6afdab479",
-        "snapshotSha256":  "fc7b86a86f672642e6c9b67f6b8460668272eb15dc5431433cbf0bc6afdab479"
-    },
-    {
-        "path":  "src/main/java/panel/motion/ReferenceMotion.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/ReferenceMotion.java",
-        "originalSha256":  "0fa7998431d7088d3f4461b4b602f3d8af950658504c0b71ca501f1beb5d11a0",
-        "snapshotSha256":  "0fa7998431d7088d3f4461b4b602f3d8af950658504c0b71ca501f1beb5d11a0"
-    },
-    {
-        "path":  "src/main/java/panel/motion/ViewTransitionService.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/motion/ViewTransitionService.java",
-        "originalSha256":  "cf4174adc45263d8639e9de488faa8ce1c6d0b9ee213657771c15fa534f28623",
-        "snapshotSha256":  "cf4174adc45263d8639e9de488faa8ce1c6d0b9ee213657771c15fa534f28623"
-    },
-    {
         "path":  "src/main/java/panel/motion/icon/AnimatedIcon.java",
         "original":  "mvp-binance-panel/src/main/java/panel/motion/icon/AnimatedIcon.java",
         "originalSha256":  "95a543620773bdc8072f8b5b504312d0f767817388aff8e3400921ad6b9e7e5c",
@@ -510,10 +516,88 @@
         "snapshotSha256":  "b6129210160197359c66242810195754422e67e9d4aa9fd4a87332958fb97893"
     },
     {
+        "path":  "src/main/java/panel/motion/MotionPolicy.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionPolicy.java",
+        "originalSha256":  "8d8fc8c5857f61bd978d96fa10fcab9cc32868c29852fba8483ffd993bd67ee4",
+        "snapshotSha256":  "8d8fc8c5857f61bd978d96fa10fcab9cc32868c29852fba8483ffd993bd67ee4"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionPreference.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionPreference.java",
+        "originalSha256":  "97760cf2a19ebb55193834f73bec5cc8a8ef857a0593e7a5030d9b6063da31d7",
+        "snapshotSha256":  "97760cf2a19ebb55193834f73bec5cc8a8ef857a0593e7a5030d9b6063da31d7"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionService.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionService.java",
+        "originalSha256":  "3939e3b93b8b5876a21530e7dd93584336a1dafa954cbeab49ac03ff42aece32",
+        "snapshotSha256":  "3939e3b93b8b5876a21530e7dd93584336a1dafa954cbeab49ac03ff42aece32"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionSpec.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionSpec.java",
+        "originalSha256":  "4294003d670adb0542be3d9d712040c3039c6f70da83a7eb3c6bfa3cb6dd2da0",
+        "snapshotSha256":  "4294003d670adb0542be3d9d712040c3039c6f70da83a7eb3c6bfa3cb6dd2da0"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionTokens.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/MotionTokens.java",
+        "originalSha256":  "fc7b86a86f672642e6c9b67f6b8460668272eb15dc5431433cbf0bc6afdab479",
+        "snapshotSha256":  "fc7b86a86f672642e6c9b67f6b8460668272eb15dc5431433cbf0bc6afdab479"
+    },
+    {
+        "path":  "src/main/java/panel/motion/ReferenceMotion.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/ReferenceMotion.java",
+        "originalSha256":  "0fa7998431d7088d3f4461b4b602f3d8af950658504c0b71ca501f1beb5d11a0",
+        "snapshotSha256":  "0fa7998431d7088d3f4461b4b602f3d8af950658504c0b71ca501f1beb5d11a0"
+    },
+    {
+        "path":  "src/main/java/panel/motion/ViewTransitionService.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/motion/ViewTransitionService.java",
+        "originalSha256":  "cf4174adc45263d8639e9de488faa8ce1c6d0b9ee213657771c15fa534f28623",
+        "snapshotSha256":  "cf4174adc45263d8639e9de488faa8ce1c6d0b9ee213657771c15fa534f28623"
+    },
+    {
         "path":  "src/main/java/panel/nav/Navigator.java",
         "original":  "mvp-binance-panel/src/main/java/panel/nav/Navigator.java",
         "originalSha256":  "bb8433e0cceb337454fdb394ad30cc7ec4eccc44f805319f94967d7cbeb0cf00",
         "snapshotSha256":  "bb8433e0cceb337454fdb394ad30cc7ec4eccc44f805319f94967d7cbeb0cf00"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/AvatarMotion.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/AvatarMotion.java",
+        "originalSha256":  "62172c7f8646d2eebe1a20c946532a07980783605da80569ed917632c758422b",
+        "snapshotSha256":  "62172c7f8646d2eebe1a20c946532a07980783605da80569ed917632c758422b"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/AvatarPaths.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/AvatarPaths.java",
+        "originalSha256":  "3f91627189f87760024ee1b366702ed2ae83df4ac320c80fe4f30fdc39fa5bed",
+        "snapshotSha256":  "3f91627189f87760024ee1b366702ed2ae83df4ac320c80fe4f30fdc39fa5bed"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/MascotAvatar.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/MascotAvatar.java",
+        "originalSha256":  "8eef22bd633fe9f0807a01cf976bcbeb15d378d65c08d20f219a7a91e3d08e12",
+        "snapshotSha256":  "8eef22bd633fe9f0807a01cf976bcbeb15d378d65c08d20f219a7a91e3d08e12"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/MascotTokens.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/MascotTokens.java",
+        "originalSha256":  "9fcb4696dff29551558d3fdee2e25e77367fae5a4927f51672c732219ef0fa15",
+        "snapshotSha256":  "9fcb4696dff29551558d3fdee2e25e77367fae5a4927f51672c732219ef0fa15"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/OperationRegistry.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/OperationRegistry.java",
+        "originalSha256":  "5ee276105afb65e7e2560684932f4463c1938340d95cb0dfa081a369f5394ceb",
+        "snapshotSha256":  "5ee276105afb65e7e2560684932f4463c1938340d95cb0dfa081a369f5394ceb"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/Operations.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/Operations.java",
+        "originalSha256":  "3bed5d60a7648230f48f5d35eb0cbded4b43c651d8b203c8f7fba6d54622c76d",
+        "snapshotSha256":  "3bed5d60a7648230f48f5d35eb0cbded4b43c651d8b203c8f7fba6d54622c76d"
     },
     {
         "path":  "src/main/java/panel/shell/ByxShell.java",
@@ -597,7 +681,7 @@
         "path":  "src/main/java/panel/shell/UserMenu.java",
         "original":  "mvp-binance-panel/src/main/java/panel/shell/UserMenu.java",
         "originalSha256":  "f323948164547629dd8fa52e5450603b056e2f951720738fb00d930634a9e487",
-        "snapshotSha256":  "f323948164547629dd8fa52e5450603b056e2f951720738fb00d930634a9e487"
+        "snapshotSha256":  "cc3774a45496dde0fa64b480090ac6c531c3389354313acae97c87e8e12490ed"
     },
     {
         "path":  "src/main/java/panel/shell/WalletStatus.java",
@@ -610,42 +694,6 @@
         "original":  "mvp-binance-panel/src/main/java/panel/shell/WorkspaceSwitcher.java",
         "originalSha256":  "e22b06dcd608c51255b1e90051912be15819141a55b18f16449cc42e8420689b",
         "snapshotSha256":  "e22b06dcd608c51255b1e90051912be15819141a55b18f16449cc42e8420689b"
-    },
-    {
-        "path":  "src/main/java/panel/shell/avatar/AvatarMotion.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/AvatarMotion.java",
-        "originalSha256":  "62172c7f8646d2eebe1a20c946532a07980783605da80569ed917632c758422b",
-        "snapshotSha256":  "62172c7f8646d2eebe1a20c946532a07980783605da80569ed917632c758422b"
-    },
-    {
-        "path":  "src/main/java/panel/shell/avatar/AvatarPaths.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/AvatarPaths.java",
-        "originalSha256":  "3f91627189f87760024ee1b366702ed2ae83df4ac320c80fe4f30fdc39fa5bed",
-        "snapshotSha256":  "3f91627189f87760024ee1b366702ed2ae83df4ac320c80fe4f30fdc39fa5bed"
-    },
-    {
-        "path":  "src/main/java/panel/shell/avatar/MascotAvatar.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/MascotAvatar.java",
-        "originalSha256":  "8eef22bd633fe9f0807a01cf976bcbeb15d378d65c08d20f219a7a91e3d08e12",
-        "snapshotSha256":  "8eef22bd633fe9f0807a01cf976bcbeb15d378d65c08d20f219a7a91e3d08e12"
-    },
-    {
-        "path":  "src/main/java/panel/shell/avatar/MascotTokens.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/MascotTokens.java",
-        "originalSha256":  "9fcb4696dff29551558d3fdee2e25e77367fae5a4927f51672c732219ef0fa15",
-        "snapshotSha256":  "9fcb4696dff29551558d3fdee2e25e77367fae5a4927f51672c732219ef0fa15"
-    },
-    {
-        "path":  "src/main/java/panel/shell/avatar/OperationRegistry.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/OperationRegistry.java",
-        "originalSha256":  "5ee276105afb65e7e2560684932f4463c1938340d95cb0dfa081a369f5394ceb",
-        "snapshotSha256":  "5ee276105afb65e7e2560684932f4463c1938340d95cb0dfa081a369f5394ceb"
-    },
-    {
-        "path":  "src/main/java/panel/shell/avatar/Operations.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/shell/avatar/Operations.java",
-        "originalSha256":  "3bed5d60a7648230f48f5d35eb0cbded4b43c651d8b203c8f7fba6d54622c76d",
-        "snapshotSha256":  "3bed5d60a7648230f48f5d35eb0cbded4b43c651d8b203c8f7fba6d54622c76d"
     },
     {
         "path":  "src/main/java/panel/tradeview/ActivityPanel.java",
@@ -750,18 +798,6 @@
         "snapshotSha256":  "d2d44a059b7f442f90622d9beaf2985b2b3b4e4bcefa1b27f9f18cc3303ead24"
     },
     {
-        "path":  "src/main/java/panel/ui/Ui.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/ui/Ui.java",
-        "originalSha256":  "115769f656f16aa883e5a6da109e2b1431126ccf793101959ef21841dd00af5a",
-        "snapshotSha256":  "115769f656f16aa883e5a6da109e2b1431126ccf793101959ef21841dd00af5a"
-    },
-    {
-        "path":  "src/main/java/panel/ui/View.java",
-        "original":  "mvp-binance-panel/src/main/java/panel/ui/View.java",
-        "originalSha256":  "14693f132c4d58132b3a742dc4ce9f1ada1f9b367274684625ceb30af3e0fb96",
-        "snapshotSha256":  "14693f132c4d58132b3a742dc4ce9f1ada1f9b367274684625ceb30af3e0fb96"
-    },
-    {
         "path":  "src/main/java/panel/ui/trader/CandleChart.java",
         "original":  "mvp-binance-panel/src/main/java/panel/ui/trader/CandleChart.java",
         "originalSha256":  "6bf640f6ff9bbe71ea46849608dda6712e4f561ba5131c8da18e1b874e16c157",
@@ -772,6 +808,18 @@
         "original":  "mvp-binance-panel/src/main/java/panel/ui/trader/TTable.java",
         "originalSha256":  "a4e1fc39006b04d301c94ac0fad2b4183149185e58186d7947422571f4f9a099",
         "snapshotSha256":  "a4e1fc39006b04d301c94ac0fad2b4183149185e58186d7947422571f4f9a099"
+    },
+    {
+        "path":  "src/main/java/panel/ui/Ui.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/ui/Ui.java",
+        "originalSha256":  "115769f656f16aa883e5a6da109e2b1431126ccf793101959ef21841dd00af5a",
+        "snapshotSha256":  "115769f656f16aa883e5a6da109e2b1431126ccf793101959ef21841dd00af5a"
+    },
+    {
+        "path":  "src/main/java/panel/ui/View.java",
+        "original":  "mvp-binance-panel/src/main/java/panel/ui/View.java",
+        "originalSha256":  "14693f132c4d58132b3a742dc4ce9f1ada1f9b367274684625ceb30af3e0fb96",
+        "snapshotSha256":  "14693f132c4d58132b3a742dc4ce9f1ada1f9b367274684625ceb30af3e0fb96"
     },
     {
         "path":  "src/main/java/panel/util/DenomFormat.java",
@@ -789,7 +837,7 @@
         "path":  "src/main/java/panel/v2/Kit.java",
         "original":  "mvp-binance-panel/src/main/java/panel/v2/Kit.java",
         "originalSha256":  "94f4531b5659d06cf57ebc6944ace385b7d36189aee88920389aa4d79b04158e",
-        "snapshotSha256":  "94f4531b5659d06cf57ebc6944ace385b7d36189aee88920389aa4d79b04158e"
+        "snapshotSha256":  "1bf83c849741afe7f766cd73118ce6c035ccf7820caa25f8504feacb3237afe0"
     },
     {
         "path":  "src/main/resources/animations/original/check-pop.json",
@@ -936,6 +984,12 @@
         "snapshotSha256":  "c17e0b87fab4a35c1ea82b022918c40cfce36d4ce4743fb8372d57264da23cbf"
     },
     {
+        "path":  "src/main/resources/panel/byx.css",
+        "original":  "mvp-binance-panel/src/main/resources/panel/byx.css",
+        "originalSha256":  "94ac2cb4748866bfe4cd12893026a9059933d66769e6808995455b22677e6e39",
+        "snapshotSha256":  "94ac2cb4748866bfe4cd12893026a9059933d66769e6808995455b22677e6e39"
+    },
+    {
         "path":  "src/main/resources/panel/byx-localnet-benefits.properties",
         "original":  "mvp-binance-panel/src/main/resources/panel/byx-localnet-benefits.properties",
         "originalSha256":  "fc48bc585d2ed3ccc3a799ec94c6756c7ad3897e38b103dbcc4baf8f450132a4",
@@ -948,28 +1002,16 @@
         "snapshotSha256":  "a2a8557dca3970c81c630a4820ba5cb8c87fbb3f51ea7eb45522bd18ce16b5f1"
     },
     {
-        "path":  "src/main/resources/panel/byx.css",
-        "original":  "mvp-binance-panel/src/main/resources/panel/byx.css",
-        "originalSha256":  "94ac2cb4748866bfe4cd12893026a9059933d66769e6808995455b22677e6e39",
-        "snapshotSha256":  "94ac2cb4748866bfe4cd12893026a9059933d66769e6808995455b22677e6e39"
-    },
-    {
-        "path":  "src/main/resources/panel/panel.css",
-        "original":  "mvp-binance-panel/src/main/resources/panel/panel.css",
-        "originalSha256":  "109d59ab920c266e3c1cfaef41bd3659574a060f74a434f692a2e836ca5a785c",
-        "snapshotSha256":  "109d59ab920c266e3c1cfaef41bd3659574a060f74a434f692a2e836ca5a785c"
-    },
-    {
         "path":  "src/main/resources/panel/i18n/appearance_en.properties",
         "original":  "mvp-binance-panel/src/main/resources/panel/i18n/appearance_en.properties",
         "originalSha256":  "a4bf54269ec5aae5904ebba7f206230b3bd3a3dd45ce8560a11220f191691799",
-        "snapshotSha256":  "a4bf54269ec5aae5904ebba7f206230b3bd3a3dd45ce8560a11220f191691799"
+        "snapshotSha256":  "522c11389ea2fd10d03ecafa41d840f74db00556eb91ca8dbc5fcb231839d478"
     },
     {
         "path":  "src/main/resources/panel/i18n/appearance_pt-BR.properties",
         "original":  "mvp-binance-panel/src/main/resources/panel/i18n/appearance_pt-BR.properties",
         "originalSha256":  "324c29dbbde99efd7eb0c6e8d469d0345c45af7c23541a4ca579a29e9aae7dd5",
-        "snapshotSha256":  "324c29dbbde99efd7eb0c6e8d469d0345c45af7c23541a4ca579a29e9aae7dd5"
+        "snapshotSha256":  "90ce292acd180daa36098be7a830e2258ef2700bc0a1199f0e90f75562cfc28a"
     },
     {
         "path":  "src/main/resources/panel/i18n/notifications_en.properties",
@@ -984,18 +1026,6 @@
         "snapshotSha256":  "3b0fa2b0ea5c8a7cae74bfb4e19a019b23ea3189fefde464b63320403cedd3f5"
     },
     {
-        "path":  "src/main/resources/panel/i18n/package-b-extra_en.properties",
-        "original":  "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_en.properties",
-        "originalSha256":  "b93eeece8ef5fc9a89005896c4282a4d83eb5caf25b62e8f783de4fa0a38a7a8",
-        "snapshotSha256":  "b93eeece8ef5fc9a89005896c4282a4d83eb5caf25b62e8f783de4fa0a38a7a8"
-    },
-    {
-        "path":  "src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
-        "original":  "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
-        "originalSha256":  "efe5841d92b2f0567e67f9d58b1b89aa02ed38322b9dfb48ed0e1eaa5cbbd6ee",
-        "snapshotSha256":  "efe5841d92b2f0567e67f9d58b1b89aa02ed38322b9dfb48ed0e1eaa5cbbd6ee"
-    },
-    {
         "path":  "src/main/resources/panel/i18n/package-b_en.properties",
         "original":  "mvp-binance-panel/src/main/resources/panel/i18n/package-b_en.properties",
         "originalSha256":  "da9f23f790aabdf72d43a898bcf9b8009512f4d69026771267c24c1d18c2f53d",
@@ -1006,6 +1036,18 @@
         "original":  "mvp-binance-panel/src/main/resources/panel/i18n/package-b_pt-BR.properties",
         "originalSha256":  "688c651bfdaa579001415d4cab5bca3283376a1de0cef86db804a553625f9f5e",
         "snapshotSha256":  "688c651bfdaa579001415d4cab5bca3283376a1de0cef86db804a553625f9f5e"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/package-b-extra_en.properties",
+        "original":  "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_en.properties",
+        "originalSha256":  "b93eeece8ef5fc9a89005896c4282a4d83eb5caf25b62e8f783de4fa0a38a7a8",
+        "snapshotSha256":  "b93eeece8ef5fc9a89005896c4282a4d83eb5caf25b62e8f783de4fa0a38a7a8"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
+        "original":  "mvp-binance-panel/src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
+        "originalSha256":  "efe5841d92b2f0567e67f9d58b1b89aa02ed38322b9dfb48ed0e1eaa5cbbd6ee",
+        "snapshotSha256":  "efe5841d92b2f0567e67f9d58b1b89aa02ed38322b9dfb48ed0e1eaa5cbbd6ee"
     },
     {
         "path":  "src/main/resources/panel/i18n/ui_en.properties",
@@ -1132,6 +1174,12 @@
         "original":  "mvp-binance-panel/src/main/resources/panel/mascot/states/transition.png",
         "originalSha256":  "c3e93ed4c0e88c49c16362d54ba2d2e7b07d37fcdab3d9fbec4441689c22273d",
         "snapshotSha256":  "c3e93ed4c0e88c49c16362d54ba2d2e7b07d37fcdab3d9fbec4441689c22273d"
+    },
+    {
+        "path":  "src/main/resources/panel/panel.css",
+        "original":  "mvp-binance-panel/src/main/resources/panel/panel.css",
+        "originalSha256":  "109d59ab920c266e3c1cfaef41bd3659574a060f74a434f692a2e836ca5a785c",
+        "snapshotSha256":  "109d59ab920c266e3c1cfaef41bd3659574a060f74a434f692a2e836ca5a785c"
     },
     {
         "path":  "src/main/resources/panel/v2/auth.css",

@@ -1,37 +1,37 @@
-# BYX-MVP DEMO — Windows Alpha
+# BYX-MVP DEMO — Windows Alpha 2
 
-Interface JavaFX do BYX-MVP para experimentar navegação, gráficos e preferências com dados inteiramente simulados. Nenhuma operação financeira real, conexão automática, conta real, carteira, pesquisa ETHUSDT, Service privilegiado ou servidor de autenticação faz parte desta composição.
+Port de apresentação JavaFX do BYX-MVP, com dados simulados e login exclusivamente local. A Alpha 2 corrige janela, PT-BR e composição visual da Alpha 1. Nenhuma conta real, servidor, Service, carteira, ordem, transação ou pesquisa executável integra o pacote.
 
-## Distribuição e execução
+## Baixar e abrir
 
-A publicação depende dos gates de build, auditoria e execução do launcher. A presença desta branch ou de artefatos de CI **não significa que exista uma release aprovada**. Consulte [GitHub Releases](https://github.com/ChamberUS/DEV/releases) e as evidências da versão específica. O primeiro candidato é **PORTABLE ONLY**; nenhum instalador é qualificado nesta recuperação.
+Use a [pré-release Alpha 2](https://github.com/ChamberUS/DEV/releases/tag/demo-windows-v0.1.0-alpha.2) e baixe `BYX-MVP-Demo-Windows-x64-Portable.zip` e `SHA256SUMS.txt` da mesma release. Confira `Get-FileHash -Algorithm SHA256`, extraia a pasta completa e abra `BYX-MVP.exe`. Mantenha `app/` e `runtime/` junto do launcher. Java já está incorporado; não há instalação de Java, servidor ou VPN. Esta entrega é **PORTABLE ONLY**, sem Setup.
 
-Quando houver uma pré-release aprovada, baixe `BYX-MVP-Demo-Windows-x64-Portable.zip` e `SHA256SUMS.txt` na mesma release. Confira o ZIP com `Get-FileHash -Algorithm SHA256`, extraia toda a pasta e abra `BYX-MVP.exe`. Preserve `app/` e `runtime/` ao lado do launcher. O EXE depende dessa pasta completa; não é um arquivo único autossuficiente. Não é preciso instalar Java, Maven ou Python, alterar PATH, configurar servidor ou usar VPN. Para remover o portátil, feche a DEMO e apague somente a pasta extraída.
+Alvo: Windows 11 x64 com desktop. O binário é **não assinado**. Se a política Windows impedir a abertura, reporte a mensagem; mantenha Smart App Control e Defender ativos. Prefira caminho ASCII: espaços e colchetes têm teste obrigatório; o caminho adicional com `Ω` segue não qualificado por falha do launcher ao carregar o runtime.
 
-Alvo: Windows 11 x64 com ambiente gráfico. A versão e o sistema efetivamente testados são registrados em `runner.json` e no relatório de QA. Não se presume qualificação de toda versão Windows ou máquina. Use uma pasta com nome ASCII. O teste com `Ω` no caminho falhou ao localizar/carregar o runtime, tanto localmente como no runner Windows; espaços e colchetes foram qualificados. Não se promete suporte a todos os caminhos Unicode. A janela abre em 1440 × 900; mínimo 1100 × 720, com componentes responsivos.
+**Login público:** `teste-byx` · **Senha pública:** `byx123123` · **Perfil:** `DEMO_USER / USER`.
 
-**Login público:** `teste-byx`
-**Senha pública:** `byx123123`
-**Perfil:** `DEMO_USER / USER`.
+Essas credenciais são públicas e criam uma simulação local, sem acesso ao backend. Nenhum preço é cotação ao vivo. Use **Sair** ou o menu do avatar para encerrar a sessão.
 
-Essas credenciais criam apenas uma simulação local; não são autenticação segura nem dão acesso ao backend real. Senha incorreta é rejeitada. Use Logout ou o avatar para encerrar a sessão.
+## Janela e idioma
 
-## O que explorar
+A janela inicia normal, centralizada, redimensionável e dentro da área útil do monitor primário. O dimensionamento usa pixels lógicos JavaFX, respeitando o scaling: aproximadamente 1200×760 quando cabe, com margem e mínimos adaptados. Login, navegação e logout preservam a geometria. Maximizar/restaurar e minimizar usam controles nativos Windows. Os painéis amplos mantêm conteúdo e oferecem rolagem em janelas menores.
 
-Trading Desk com watchlist ETHUSDT/BTCUSDT, candles, book e negociações fictícias; Markets & Portfolio com saldo e posições simuladas; Settings com DARK/LIGHT, FULL/REDUCED/OFF, densidade Compact/Comfortable, idioma e ícones; sidebar, busca/command palette e navegação. Trading permanece denso por design. Preferências ficam somente em memória e não alteram arquivos do proprietário. Posições, histórico e ajuda são demonstrativos; envio de ordens permanece indisponível. Nenhum preço é apresentado como cotação ao vivo.
+**Português (Brasil)** é o idioma inicial. O seletor original alterna PT-BR/English imediatamente no login e no shell; Settings também oferece o seletor. Idioma, DARK/LIGHT, densidade, FULL/REDUCED/OFF e ícones animados são lembrados localmente em `~/.byx-mvp-demo/presentation.properties`. Esse arquivo contém somente preferências visuais: nenhuma senha, token, perfil operacional ou endereço de servidor. Arquivos inválidos têm fallback seguro. Para remover a DEMO, feche-a, apague a pasta extraída e, opcionalmente, somente essa pasta de preferências.
 
-## Limitações e segurança
+## Interface original
 
-Este candidato é **NÃO ASSINADO**. Algumas políticas Windows podem bloquear programas não assinados; uma assinatura legítima também não garante aceitação em toda máquina. Não desative nem contorne proteções. Se houver bloqueio, reporte a mensagem e a versão Windows sem enviar dados privados.
+AuthLayout/BrandPanel, ByxShell, rail/topbar/status dock, avatar/menu, TradingDesk, MarketsPage, SettingsScreen, HomeScreen, componentes de ajuda, fontes, ícones, tokens, temas e motion vêm da apresentação original. A composição agora usa LocaleView e ViewTransitionService, cache de views e guarda de alterações não salvas. Busca e páginas mostram títulos de produto, sem IDs internos. Home, posições, histórico, ordens indisponíveis e ajuda usam componentes aprovados e fixtures locais.
 
-O proprietário aprovou a interface executada pelo JAR. Isso não constitui UAT do EXE. O workflow separa testes de contrato, execução nativa do portátil, runtime incorporado e automação de UI pelo JAR distribuído. A automação nativa adicional usa Windows UI Automation, com teclado somente no campo público de senha e verificação de foco; tem relatório próprio e depende de desktop acessível. UAT visual humana do EXE, desconexão física da Internet e instalação permanecem pendentes quando marcadas NOT_EXECUTED. A observação de ausência de endpoints é amostrada; a ausência de backend operacional também é garantida pela composição sem esses módulos.
+Veja a [comparação visual](docs/ALPHA2-VISUAL-COMPARISON.md). Referência de código: `828492af7b383083dbd6b749623876c188182db5`. Referência visual local disponível: snapshots reais de Scene JavaFX no Mac, aprovados no pacote C2 em 2026-10-09. Não se declara equivalência com uma versão Mac posterior não fornecida. A pré-release é para avaliação do proprietário; sua aprovação visual humana da Alpha 2 ainda está pendente.
 
-## Feedback
+## Qualificação e limitações
 
-Use [GitHub Issues](https://github.com/ChamberUS/DEV/issues/new) para Bug, Instalação, Visual, Navegação/UX, Sugestão ou Desempenho. Informe versão Windows, versão DEMO, descrição e passos; screenshot é opcional. Não envie senhas, tokens, dados de conta, arquivos pessoais ou logs sensíveis. Não há telemetria obrigatória. Templates nesta branch só se tornam formulários globais se o proprietário os integrar à branch padrão; `main` permanece inalterada.
+A publicação exige build, testes unitários, testes da UI pelo JAR distribuído, auditoria e testes do EXE com runtime incorporado, janela, navegação, idioma e persistência. Relatórios diferenciam screenshots **JAR** e **EXE**, testes automáticos e UAT humana. Os nove cenários de resolução/scaling em unit tests são modelos de geometria, não nove configurações físicas testadas. A matriz física completa, desconexão física da Internet e instalação de Setup não foram executadas. Ausência de endpoints é observação amostrada, complementada pela auditoria de composição sem backend.
 
-## Build e proveniência
+A [Alpha 1](https://github.com/ChamberUS/DEV/releases/tag/demo-windows-v0.1.0-alpha.1) permanece disponível para comparação. A branch Alpha 2 não altera `main` nem a release anterior.
 
-Veja [build e release](docs/BUILD-RELEASE.md), [isolamento](docs/SECURITY-ARCHITECTURE.md), [licenças](THIRD-PARTY-NOTICES.md), `DEPENDENCIES.json` e `SOURCE-PROVENANCE.json`.
+## Feedback e reprodução
 
-Fonte visual: `feature/byx-c4-2-a1-service-utf8`, commit `828492af7b383083dbd6b749623876c188182db5`. A árvore `mvp-binance-panel/src/main` coincide com `feature/byx-windows-readiness-v1` em `d3203f54126f73ea14e8b0d44a858c75ea4702ea`, de onde foram exportados somente arquivos tracked da apresentação. Este repositório DEMO tem história independente, sem bootstrap operacional ou objetos do histórico anterior. Nenhum conteúdo integral do repositório privado de autenticação é publicado.
+Reporte problemas em [GitHub Issues](https://github.com/ChamberUS/DEV/issues/new), com versão, resolução/scaling, idioma, passos e comportamento esperado. Não envie credenciais privadas ou arquivos pessoais. Não existe telemetria obrigatória.
+
+[Build/release](docs/BUILD-RELEASE.md) · [QA Alpha 2](docs/ALPHA2-QA.md) · [Isolamento](docs/SECURITY-ARCHITECTURE.md) · [Licenças](THIRD-PARTY-NOTICES.md). Dependências e fontes têm SHA-256 em `DEPENDENCIES.json`, `SOURCE-PROVENANCE.json` e `SOURCE-MANIFEST.json`.

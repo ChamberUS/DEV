@@ -97,7 +97,7 @@ public final class SettingsScreen implements View {
         HBox.setHgrow(content, Priority.ALWAYS);
         content.setMinWidth(0);
         VBox page = Kit.reading(14, 1240);
-        page.getChildren().addAll(Kit.header("Settings", "Preferences for this account. Settings never enable live trading or open research gates."), columns);
+        page.getChildren().addAll(Kit.header("Settings", Strings.get("demo.preferenceIntro")), columns);
         scroll = Kit.scroll(page);
         render();
     }
@@ -142,13 +142,13 @@ public final class SettingsScreen implements View {
         panel.setId("settings-" + section.toLowerCase(java.util.Locale.ROOT));
         switch (section) {
             case "General" -> {
-                panel.getChildren().add(setting("Language", "Changes immediately for this session. Resets to English when you sign out; not saved to the server.", new panel.i18n.LanguageSelector()));
+                panel.getChildren().add(setting("Language", Strings.get("demo.languageHelp"), new panel.i18n.LanguageSelector()));
                 panel.getChildren().add(setting("Primary workspace", "Where the app opens. This only sets the opening page; it changes nothing else.",
                         row("Primary workspace", new Kit.Segmented(List.of("Trading"), pretty2(draft.primaryWorkspace()),
                                 v -> edit(new AccountData.Prefs(draft.motion(), draft.density(), draft.animatedIcons(), v.toUpperCase(), draft.followSystemMotion()))),
                                 !draft.primaryWorkspace().equals(saved.primaryWorkspace()))));
-                panel.getChildren().add(setting("Onboarding tour", "Replay the short introduction. It never changes your account.", go("Replay onboarding", "sys-onboarding")));
-                panel.getChildren().add(setting("Time zone display", "Times are shown in your local time zone.", ByxBadge.of("LOCAL TIME", ByxBadge.Tone.NEUTRAL)));
+                panel.getChildren().add(setting("Onboarding tour", "Replay the short introduction. It never changes your account.", go("About the DEMO", "h-about")));
+                panel.getChildren().add(setting("Time zone display", Strings.get("demo.timezoneHelp"), ByxBadge.of("LOCAL TIME", ByxBadge.Tone.NEUTRAL)));
             }
             case "Appearance" -> {
                 panel.getChildren().add(setting("Theme", Strings.table(Strings.Lang.EN).getProperty("appearance.intro"), new ThemeSelector()));
@@ -214,7 +214,7 @@ public final class SettingsScreen implements View {
             default -> {
                 panel.getChildren().add(setting("Version", "Read from the build.", Fx.label(AppInfo.VERSION + " · " + AppInfo.build(), "byx-mono")));
                 panel.getChildren().add(setting("Environment", "Current environment.", ByxBadge.of(AppInfo.ENVIRONMENT, ByxBadge.Tone.WARNING)));
-                panel.getChildren().add(setting("More", "About BYX and what is new.", new HBox(8, go("About BYX", "h-about"), go("What's new", "h-whats-new"))));
+                panel.getChildren().add(setting("More", "About BYX and what is new.", new HBox(8, go("About BYX", "h-about"), go("What's new", "h-about"))));
             }
         }
         content.getChildren().addAll(title, panel);
@@ -254,7 +254,7 @@ public final class SettingsScreen implements View {
     }
 
     private Node row(String name, Node control, boolean changed) {
-        control.setDisable(!data.preferencesEditable());
+        control.setDisable(control.isDisable() || !data.preferencesEditable());
         HBox h = new HBox(8, control);
         h.setAlignment(Pos.CENTER_RIGHT);
         if (changed) {

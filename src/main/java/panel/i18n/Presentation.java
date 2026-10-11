@@ -50,7 +50,10 @@ public final class Presentation {
 
     public static String text(String source) {
         if (source == null || source.isEmpty()) return source;
-        if (Set.of("FULL", "REDUCED", "OFF", "ON", "TEST", "PAPER", "REAL", "LOCALNET").contains(source)) return source;
+        // Public DEMO credentials, authority codes and routes are values, never translatable copy.
+        if (Set.of("teste-byx", "byx123123", "DEMO_USER", "USER", "ADMIN",
+                "FULL", "REDUCED", "OFF", "ON", "TEST", "PAPER", "REAL", "LOCALNET").contains(source)
+                || source.matches("(?:t|h|sys)-[a-z0-9-]+") || source.matches("(?:ETH|BTC)USDT(?: DEMO)?")) return source;
         if (source.startsWith("@") || source.startsWith("/") || source.startsWith("http://") || source.startsWith("https://") || source.matches("[^ @]+@[^ @]+\\.[^ @]+")) return source;
         String number = DisplayFormats.sourceText(source);
         if (!number.equals(source)) return number;

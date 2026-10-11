@@ -1,0 +1,42 @@
+﻿[
+    {
+        "snapshotPath":  "src/main/java/panel/homeview/HomeScreen.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/homeview/HomeScreen.java",
+        "originalSha256":  "6c570e76b280f09944e7d6052b48465c5fc384b23f156da8a71b080502af7875"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/homeview/HomeMarkets.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/homeview/HomeMarkets.java",
+        "originalSha256":  "9e82e3183412cf7e6b6aee5015c13180520f7a03544ada024bc62dc82ea1718a"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/homeview/ServiceCards.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/homeview/ServiceCards.java",
+        "originalSha256":  "767d14152366d8f484aaa3e269c1655603f9a4980954b817d792a9ad63777032"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/helpview/FaqScreen.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/helpview/FaqScreen.java",
+        "originalSha256":  "5218c360bd0c43d88e8654334c1ec8b0ae99604a4ebeb9504d4cb3c70c3ddf8e"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/helpview/HelpContent.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/helpview/HelpContent.java",
+        "originalSha256":  "b419f04f337d4deb76ff23b0e2326ac7dcc0530aba069b330cfd5df41345eb47"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/helpview/Highlight.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/helpview/Highlight.java",
+        "originalSha256":  "8c9436409dcd91bd3768647f2ba62a9b89bf7da6a6a049c0b1f2ff800b974a12"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/helpview/SupportScreen.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/helpview/SupportScreen.java",
+        "originalSha256":  "6b0f15cf2a82e8ee9a958da209ccc9e9c75ea2f5dcfafe7cbcecad162d435d37"
+    },
+    {
+        "snapshotPath":  "src/main/java/panel/helpview/LegalScreen.java",
+        "originalPath":  "mvp-binance-panel/src/main/java/panel/helpview/LegalScreen.java",
+        "originalSha256":  "ea1e26a8d2e8fcc6dc96fbca6978a8291eb490407f0032a33fb2cc1181cab846"
+    }
+]
