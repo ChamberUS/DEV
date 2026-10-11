@@ -12,7 +12,7 @@ A causa era a ordem de descarte em `LocaleView.detach`: restaurar o texto canôn
 
 A correção ocorre em duas fases. Primeiro captura toda a subárvore e remove todos os seus observadores; depois restaura as fontes canônicas e libera as propriedades pertencentes aos nós capturados. Inputs, dados, handlers e traduções permanecem preservados. O teste mantém igualdade exata da contagem após um ciclo de estabilização e verifica que o encerramento libera todos os bindings da Scene.
 
-A validação da correção no novo pacote UI06 e no workflow do SHA final permanece pendente. O diagnóstico e a alteração de código ainda não constituem um resultado PASS de publicação.
+O novo JAR empacotado executado localmente no UI06 passou 79 verificações, com zero falhas. Após estabilizar CSS e layout, a contagem permaneceu exatamente em 4.509 bindings durante as dez trocas; nenhum binding de nó desconectado foi retido. O encerramento também confirmou a liberação completa dos bindings da Scene. A qualificação de publicação ainda depende da execução do workflow no SHA final; esse resultado local não substitui a validação de CI.
 
 ## Gates reproduzíveis
 
@@ -23,6 +23,10 @@ A validação da correção no novo pacote UI06 e no workflow do SHA final perma
 - Auditoria: credenciais privadas, artefatos locais, classes fora do allowlist, dependências SHA-256, proveniência de fontes, runtime/licenças e payload proibido.
 
 Resultados efetivamente executados ficam nos relatórios do workflow do SHA específico; contagens antigas não são evidência Alpha 2. Os scripts falham ao reprovar gates obrigatórios. O teste adicional de caminho `Ω` pode registrar a limitação do launcher separadamente.
+
+## Provider nativo e seletor de idioma
+
+O relatório UIA do EXE mostrou um ComboBox visível com `Name` vazio. O provider Windows do JavaFX 21 expõe o texto desses controles por `ValuePattern`; `Name` usa somente `LABELED_BY`. A automação identifica o seletor por seu valor acessível traduzido e continua exigindo que a tela mude efetivamente entre PT-BR e EN. Nenhum valor de campo de senha ou credencial é lido para esse diagnóstico. Referências primárias: [WinAccessible](https://raw.githubusercontent.com/openjdk/jfx/jfx21/modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinAccessible.java) e [ComboBox](https://raw.githubusercontent.com/openjdk/jfx/jfx21/modules/javafx.controls/src/main/java/javafx/scene/control/ComboBox.java).
 
 ## Evidência e escopo
 

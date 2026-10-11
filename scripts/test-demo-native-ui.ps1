@@ -21,7 +21,7 @@ public static class DemoAlpha2QaWindow {
 }
 "@
 $oldDpiContext=[DemoAlpha2QaWindow]::SetThreadDpiAwarenessContext([IntPtr]::new(-4))
-$checks=[Collections.Generic.List[string]]::new();$captures=[Collections.Generic.List[object]]::new()
+$checks=[Collections.Generic.List[string]]::new();$captures=[Collections.Generic.List[object]]::new();$languageControls=[Collections.Generic.List[object]]::new();$scrollActions=[Collections.Generic.List[object]]::new()
 $launcher=$null;$owned=$null;$failure=$null;$root=$null;$windowMethod=$null;$resizeMethod=$null
 $preference=[IO.Path]::Combine($env:USERPROFILE,'.byx-mvp-demo','presentation.properties')
 $preferenceExisted=Test-Path -LiteralPath $preference -PathType Leaf
@@ -32,19 +32,76 @@ function Nodes {
  $items=@($root.FindAll([Windows.Automation.TreeScope]::Descendants,[Windows.Automation.Condition]::TrueCondition))
  $condition=[Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ProcessIdProperty,[int]$owned.Id)
  $items+=@([Windows.Automation.AutomationElement]::RootElement.FindAll([Windows.Automation.TreeScope]::Descendants,$condition))
- return $items
+ $seen=[Collections.Generic.HashSet[string]]::new()
+ foreach($item in $items){if($item.Current.ProcessId -eq $owned.Id -and $seen.Add(($item.GetRuntimeId() -join ','))){$item}}
+}
+function NodeShown($node){
+ if($node.Current.IsOffscreen -or $node.Current.BoundingRectangle.IsEmpty){return $false}
+ $target=$node.Current.BoundingRectangle;$parent=$node
+ for($depth=0;$depth -lt 35;$depth++){
+  $parent=[Windows.Automation.TreeWalker]::RawViewWalker.GetParent($parent)
+  if(!$parent -or $parent.Current.ProcessId -ne $owned.Id){break}
+  $scroll=$null
+  if($parent.TryGetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern,[ref]$scroll) -and !$parent.Current.BoundingRectangle.Contains($target)){return $false}
+ }
+ return $true
+}
+function RevealNode($node){
+ if(NodeShown $node){return $true}
+ $item=$null
+ if($node.TryGetCurrentPattern([Windows.Automation.ScrollItemPattern]::Pattern,[ref]$item)){try{$item.ScrollIntoView();Start-Sleep -Milliseconds 250}catch{}}
+ $parent=$node
+ for($depth=0;$depth -lt 35;$depth++){
+  $parent=[Windows.Automation.TreeWalker]::RawViewWalker.GetParent($parent)
+  if(!$parent -or $parent.Current.ProcessId -ne $owned.Id){break}
+  $scroll=$null
+  if(!$parent.TryGetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern,[ref]$scroll)){continue}
+  for($attempt=0;$attempt -lt 16;$attempt++){
+   $target=$node.Current.BoundingRectangle;$viewport=$parent.Current.BoundingRectangle
+   $horizontal=[Windows.Automation.ScrollAmount]::NoAmount;$vertical=[Windows.Automation.ScrollAmount]::NoAmount
+   if($scroll.Current.HorizontallyScrollable){if($target.Right -gt $viewport.Right){$horizontal=[Windows.Automation.ScrollAmount]::SmallIncrement}elseif($target.Left -lt $viewport.Left){$horizontal=[Windows.Automation.ScrollAmount]::SmallDecrement}}
+   if($scroll.Current.VerticallyScrollable){if($target.Bottom -gt $viewport.Bottom){$vertical=[Windows.Automation.ScrollAmount]::SmallIncrement}elseif($target.Top -lt $viewport.Top){$vertical=[Windows.Automation.ScrollAmount]::SmallDecrement}}
+   if($horizontal -eq [Windows.Automation.ScrollAmount]::NoAmount -and $vertical -eq [Windows.Automation.ScrollAmount]::NoAmount){break}
+   $scroll.Scroll($horizontal,$vertical);$scrollActions.Add([pscustomobject]@{method='Owned ancestor UIAutomation ScrollPattern.Scroll';automationId=$parent.Current.AutomationId;horizontal=$horizontal.ToString();vertical=$vertical.ToString()});Start-Sleep -Milliseconds 150
+  }
+ }
+ return (NodeShown $node)
+}
+function ResetViewports([string]$pattern){
+ $node=@(Nodes|Where-Object {$_.Current.Name -match $pattern}|Where-Object {NodeShown $_})|Select-Object -First 1
+ if(!$node){throw ('Visible scroll reference absent: '+$pattern)}
+ $parent=$node
+ for($depth=0;$depth -lt 35;$depth++){
+  $parent=[Windows.Automation.TreeWalker]::RawViewWalker.GetParent($parent)
+  if(!$parent -or $parent.Current.ProcessId -ne $owned.Id){break}
+  $scroll=$null
+  if($parent.TryGetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern,[ref]$scroll)){
+   $horizontal=if($scroll.Current.HorizontallyScrollable){0}else{-1};$vertical=if($scroll.Current.VerticallyScrollable){0}else{-1}
+   if($horizontal -ne -1 -or $vertical -ne -1){$scroll.SetScrollPercent($horizontal,$vertical);$scrollActions.Add([pscustomobject]@{method='Owned ancestor UIAutomation ScrollPattern.SetScrollPercent restores view origin';automationId=$parent.Current.AutomationId;horizontal=$horizontal;vertical=$vertical})}
+  }
+ }
+ Start-Sleep -Milliseconds 300
+}
+function ComboValue($combo){
+ # JavaFX Windows leaves ComboBox.Name empty and exposes accessibleText through ValuePattern.
+ # Read values only from ComboBox controls; never inspect Edit/password field values.
+ if($combo.Current.ControlType -ne [Windows.Automation.ControlType]::ComboBox){return $null}
+ $value=$null;if($combo.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern,[ref]$value)){return $value.Current.Value}
+ return $null
+}
+function ControlDiagnostics {
+ Nodes|Where-Object {$_.Current.ControlType -ne [Windows.Automation.ControlType]::Text}|ForEach-Object {[pscustomobject]@{name=$_.Current.Name;controlType=$_.Current.ControlType.ProgrammaticName;automationId=$_.Current.AutomationId;offscreen=$_.Current.IsOffscreen;comboValue=(ComboValue $_)}}|ConvertTo-Json -Depth 3|Set-Content -LiteralPath ($Report+'.owned-controls.json') -Encoding UTF8
 }
 function Named([string]$name){return @(Nodes|Where-Object {$_.Current.Name -eq $name -and $_.Current.ControlType -ne [Windows.Automation.ControlType]::Text -and !$_.Current.IsOffscreen})}
-function WaitText([string]$pattern){$until=(Get-Date).AddSeconds(15);do{if(@(Nodes|Where-Object {$_.Current.Name -match $pattern -and !$_.Current.IsOffscreen}).Count){return};Start-Sleep -Milliseconds 200}while((Get-Date) -lt $until);throw ('UI text not observed: '+$pattern)}
+function WaitText([string]$pattern){
+ $until=(Get-Date).AddSeconds(15)
+ do{foreach($match in @(Nodes|Where-Object {$_.Current.Name -match $pattern})){if(NodeShown $match){return};if(RevealNode $match){return}};Start-Sleep -Milliseconds 200}while((Get-Date) -lt $until)
+ throw ('Visible UI text not observed: '+$pattern)
+}
 function InvokeName([string]$name){
  $candidates=@(Nodes|Where-Object {$_.Current.Name -eq $name -and $_.Current.ControlType -ne [Windows.Automation.ControlType]::Text -and $_.Current.IsEnabled})
  foreach($n in $candidates){
-  if($n.Current.IsOffscreen){
-   $scrollItem=$null
-   if($n.TryGetCurrentPattern([Windows.Automation.ScrollItemPattern]::Pattern,[ref]$scrollItem)){try{$scrollItem.ScrollIntoView();Start-Sleep -Milliseconds 300}catch{}}
-   if($n.Current.IsOffscreen -and $n.Current.IsKeyboardFocusable){try{$n.SetFocus();Start-Sleep -Milliseconds 400}catch{}}
-   if($n.Current.IsOffscreen){continue}
-  }
+  if(!(RevealNode $n)){continue}
   $pattern=$null;if($n.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern,[ref]$pattern)){$pattern.Invoke();Start-Sleep -Milliseconds 400;return};if($n.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$pattern)){$pattern.Toggle();Start-Sleep -Milliseconds 400;return};if($n.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$pattern)){$pattern.Select();Start-Sleep -Milliseconds 400;return}};throw ('UI actionable control absent: '+$name)}
 function FocusOwned {
  try{$root.SetFocus()}catch{}
@@ -53,20 +110,26 @@ function FocusOwned {
  if([DemoAlpha2QaWindow]::GetForegroundWindow() -ne $owned.MainWindowHandle){throw 'Owned DEMO window is not foreground; keyboard/capture stopped'}
 }
 function ChooseLanguage([string]$language){
- $languageNodes=@(Nodes)
- $combo=@($languageNodes|Where-Object {$_.Current.ControlType -ne [Windows.Automation.ControlType]::Text -and $_.Current.Name -match 'Interface language|Idioma da interface|^(English|Português \(Brasil\))$' -and !$_.Current.IsOffscreen})|Select-Object -First 1
- if(!$combo){$languageNodes|Where-Object {$_.Current.ControlType -ne [Windows.Automation.ControlType]::Text}|ForEach-Object {[pscustomobject]@{name=$_.Current.Name;controlType=$_.Current.ControlType.ProgrammaticName;automationId=$_.Current.AutomationId;offscreen=$_.Current.IsOffscreen}}|ConvertTo-Json -Depth 3|Set-Content -LiteralPath ($Report+'.owned-controls.json') -Encoding UTF8}
- if(!$combo){throw 'Original LanguageSelector control unavailable'}
- FocusOwned;$combo.SetFocus();$expand=$null
+ if($language -ne 'English' -and $language -ne 'Português (Brasil)'){throw 'Unsupported test language'}
+ $combo=$null
+ $candidates=@(Nodes|Where-Object {$_.Current.ControlType -eq [Windows.Automation.ControlType]::ComboBox -and $_.Current.IsEnabled}|Where-Object {(ComboValue $_) -match '^(Interface language|Idioma da interface)$'}|Sort-Object {$_.Current.BoundingRectangle.Top} -Descending)
+ # Settings has both the global selector and its original General-section selector; exercise the lower Settings control.
+ foreach($candidate in $candidates){if(RevealNode $candidate){$combo=$candidate;break}}
+ if(!$combo){ControlDiagnostics;throw 'Original LanguageSelector ComboBox ValuePattern unavailable'}
+ $label=ComboValue $combo;FocusOwned;$combo.SetFocus();$expand=$null;$method=$null
  if($combo.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)){
-  $expand.Expand();Start-Sleep -Milliseconds 250
+  $expand.Expand();Start-Sleep -Milliseconds 300
   InvokeName $language
   try{$expand.Collapse()}catch{}
+  $method='UIAutomation ComboBox.ValuePattern identification and ExpandCollapse/SelectionItem selection'
  }else{
+  if([DemoAlpha2QaWindow]::GetForegroundWindow() -ne $owned.MainWindowHandle -or ![Windows.Automation.AutomationElement]::Compare([Windows.Automation.AutomationElement]::FocusedElement,$combo)){throw 'Owned LanguageSelector is not focused; keyboard input stopped'}
   [Windows.Forms.SendKeys]::SendWait('%{DOWN}');Start-Sleep -Milliseconds 200
+  if([DemoAlpha2QaWindow]::GetForegroundWindow() -ne $owned.MainWindowHandle){throw 'DEMO lost foreground; language keyboard input stopped'}
   if($language -eq 'English'){[Windows.Forms.SendKeys]::SendWait('{HOME}{ENTER}')}else{[Windows.Forms.SendKeys]::SendWait('{END}{ENTER}')}
+  $method='UIAutomation ComboBox.ValuePattern identification and focused original ComboBox keyboard selection'
  }
- Start-Sleep -Milliseconds 600
+ $languageControls.Add([pscustomobject]@{requested=$language;accessibleLabel=$label;automationId=$combo.Current.AutomationId;method=$method});Start-Sleep -Milliseconds 600
 }
 function Credentials([string]$password,[bool]$english=$false){
  $pairs=if($english){@(@('EMAIL OR USERNAME','teste-byx'),@('PASSWORD',$password))}else{@(@('E-MAIL OU USUÁRIO','teste-byx'),@('SENHA',$password))}
@@ -119,7 +182,8 @@ try{
  ChooseLanguage 'English';WaitText '^EMAIL OR USERNAME$';$checks.Add('NATIVE_EXE_LOGIN_LANGUAGE_EN');Capture 'login-EN'
  ChooseLanguage 'Português (Brasil)';WaitText '^E-MAIL OU USUÁRIO$';$checks.Add('NATIVE_EXE_LOGIN_LANGUAGE_BACK_PT_BR')
  Credentials 'wrong';WaitText 'Falha ao entrar|Usuário ou senha incorretos';$checks.Add('NATIVE_EXE_WRONG_PASSWORD_REJECTED')
- Credentials 'byx123123';WaitText 'USER / DEMO';WaitText 'ETHUSDT';$checks.Add('NATIVE_EXE_PUBLIC_LOGIN_USER_DEMO');$checks.Add('NATIVE_EXE_DESK_SIMULATED_DATA');Capture 'desk-DARK-PT-BR'
+ Credentials 'byx123123';WaitText 'USER / DEMO';WaitText 'ETHUSDT';$scrollBefore=$scrollActions.Count;WaitText '^(Livro de ofertas|Negociações recentes)$';$checks.Add('NATIVE_EXE_PUBLIC_LOGIN_USER_DEMO');$checks.Add('NATIVE_EXE_DESK_SIMULATED_DATA')
+ if($scrollActions.Count -gt $scrollBefore){Capture 'desk-details-DARK-PT-BR-scrolled';ResetViewports '^(Livro de ofertas|Negociações recentes)$'};Capture 'desk-DARK-PT-BR'
  $afterLogin=WindowRect;if($afterLogin.Size -ne $original.Size){throw 'Login changed native window geometry'};$checks.Add('NATIVE_EXE_LOGIN_PRESERVES_GEOMETRY')
  InvokeName 'Mercados e portfólio';WaitText 'Mercados|Saldo|Portfólio';$checks.Add('NATIVE_EXE_MARKETS_PT_BR');Capture 'markets-PT-BR'
  InvokeName 'Configurações';WaitText 'Preferências visuais desta DEMO offline';$checks.Add('NATIVE_EXE_SETTINGS_PT_BR');Capture 'settings-PT-BR'
@@ -147,7 +211,8 @@ try{
  WindowState ([Windows.Automation.WindowVisualState]::Normal);if([DemoAlpha2QaWindow]::IsIconic($owned.MainWindowHandle)){throw 'Unminimize failed'};$checks.Add('NATIVE_EXE_UNMINIMIZE')
  InvokeName 'Configurações';InvokeName 'Seção das configurações: Geral';ChooseLanguage 'English';WaitText 'Settings';$checks.Add('NATIVE_EXE_SETTINGS_LANGUAGE_EN')
  InvokeName 'Markets & Portfolio';WaitText 'Markets|Portfolio';$checks.Add('NATIVE_EXE_MARKETS_LANGUAGE_EN')
- InvokeName 'Trading Desk';WaitText 'Order book|Recent trades';$checks.Add('NATIVE_EXE_DESK_LANGUAGE_EN');Capture 'desk-EN'
+ InvokeName 'Trading Desk';$scrollBefore=$scrollActions.Count;WaitText '^(Order book|Recent trades)$';$checks.Add('NATIVE_EXE_DESK_LANGUAGE_EN')
+ if($scrollActions.Count -gt $scrollBefore){Capture 'desk-details-EN-scrolled';ResetViewports '^(Order book|Recent trades)$'};Capture 'desk-EN'
  InvokeName 'Settings';InvokeName 'Settings section Appearance';InvokeName 'Light'
  InvokeName 'Sign out';WaitText '^EMAIL OR USERNAME$';$checks.Add('NATIVE_EXE_LOGOUT_PRESERVES_EN');$logoutRect=WindowRect
  if($logoutRect.Size -ne $restored.Size){throw 'Logout changed window size'};$checks.Add('NATIVE_EXE_LOGOUT_PRESERVES_WINDOW_SIZE')
@@ -158,12 +223,12 @@ try{
  Credentials 'byx123123' $true;InvokeName 'Settings';InvokeName 'Settings section Appearance'
  if(!((Named 'Light'|Select-Object -First 1).GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected)){throw 'Theme not restored'};$checks.Add('NATIVE_EXE_REOPEN_RESTORES_LIGHT_THEME');Capture 'restart-EN-LIGHT'
  CloseOwned
-}catch{$failure=$_.Exception.Message;$failureStack=$_.ScriptStackTrace}finally{
+}catch{$failure=$_.Exception.Message;$failureStack=$_.ScriptStackTrace;if($root -and $owned -and !$owned.HasExited){try{ControlDiagnostics}catch{}}}finally{
  if($owned -and !$owned.HasExited){$owned.CloseMainWindow()|Out-Null;if(!$owned.WaitForExit(5000)){Stop-Process -Id $owned.Id}}
  if($launcher -and !$launcher.HasExited){if(!$launcher.WaitForExit(5000)){Stop-Process -Id $launcher.Id}}
  try{if($preferenceExisted){[IO.File]::WriteAllBytes($preference,$priorPreferenceBytes)}elseif(Test-Path -LiteralPath $preference){Remove-Item -LiteralPath $preference};$preferencesRestored=$true}catch{if(!$failure){$failure='Could not restore original DEMO presentation preferences'}}
  if($oldDpiContext -ne [IntPtr]::Zero){[DemoAlpha2QaWindow]::SetThreadDpiAwarenessContext($oldDpiContext)|Out-Null}
- [pscustomobject]@{status=if($failure){'FAIL_OR_UNAVAILABLE'}else{'PASS'};pass=$checks.Count;checks=@($checks);failure=$failure;failureStack=$failureStack;exeSha256=(Get-FileHash -LiteralPath $Executable -Algorithm SHA256).Hash.ToLower();method='Windows UI Automation against actual packaged EXE; no test classes, runtime flags or launcher configuration changes';nativeWindowMethod=$windowMethod;nativeResizeMethod=$resizeMethod;screenshots=@($captures);originalDemoPresentationRestored=$preferencesRestored;physicalDisplayModes='Only the connected Windows display and its actual scaling; no system display settings changed';humanVisualUat='NOT_EXECUTED'}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath $Report -Encoding UTF8
+ [pscustomobject]@{status=if($failure){'FAIL_OR_UNAVAILABLE'}else{'PASS'};pass=$checks.Count;checks=@($checks);failure=$failure;failureStack=$failureStack;exeSha256=(Get-FileHash -LiteralPath $Executable -Algorithm SHA256).Hash.ToLower();method='Windows UI Automation against actual packaged EXE; no test classes, runtime flags or launcher configuration changes';nativeWindowMethod=$windowMethod;nativeResizeMethod=$resizeMethod;languageControls=@($languageControls);nativeScrollActions=@($scrollActions);screenshots=@($captures);originalDemoPresentationRestored=$preferencesRestored;physicalDisplayModes='Only the connected Windows display and its actual scaling; no system display settings changed';humanVisualUat='NOT_EXECUTED'}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath $Report -Encoding UTF8
 }
 if($failure){throw ('NATIVE_UI_GATE: '+$failure)}
 'NATIVE_EXE_UI_AUTOMATION_PASS'

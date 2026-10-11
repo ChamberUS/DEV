@@ -26,8 +26,8 @@
     },
     {
         "path":  "docs/ALPHA2-QA.md",
-        "bytes":  4998,
-        "sha256":  "37971f58e530dddc005d747c5641b616aee248c1684d164e7eb993d3fe9840fe"
+        "bytes":  6030,
+        "sha256":  "aae9e3c5fd5639583012c2ef0b7bd4fa056a2d4679a8e2d220848dbbe58af717"
     },
     {
         "path":  "docs/ALPHA2-RELEASE-NOTES.md",
@@ -181,8 +181,8 @@
     },
     {
         "path":  "scripts/test-demo-native-ui.ps1",
-        "bytes":  19201,
-        "sha256":  "d196aada4f5ca7ee2d5b61370027c370195f83725fcd1482d879596f1e229d62"
+        "bytes":  24662,
+        "sha256":  "269946b5309e5ec6d380c8904e6dee4b9a358aa0f7a7e7d6e38c78a64e6da050"
     },
     {
         "path":  "scripts/test-demo-ui.ps1",
