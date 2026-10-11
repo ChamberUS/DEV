@@ -11,8 +11,8 @@
     },
     {
         "path":  ".github/workflows/demo-windows.yml",
-        "bytes":  3579,
-        "sha256":  "a6492036048c6bf71150d8852b698611bfd137c06903b282bf593e6379c35500"
+        "bytes":  3611,
+        "sha256":  "25283dac905a3934a2635ce36d647f5123bcc2969bd92337f8c8e1c272dbac05"
     },
     {
         "path":  ".gitignore",
@@ -26,8 +26,8 @@
     },
     {
         "path":  "docs/ALPHA2-QA.md",
-        "bytes":  3510,
-        "sha256":  "eb9605c87c2e64a71c54d764bd3d94a986358fb0417137f36f936aafdcdf7d42"
+        "bytes":  4998,
+        "sha256":  "37971f58e530dddc005d747c5641b616aee248c1684d164e7eb993d3fe9840fe"
     },
     {
         "path":  "docs/ALPHA2-RELEASE-NOTES.md",
@@ -181,18 +181,18 @@
     },
     {
         "path":  "scripts/test-demo-native-ui.ps1",
-        "bytes":  17765,
-        "sha256":  "96765b83ebe6d79f20685670888cded4430e65955005a2cae3d20095de289700"
+        "bytes":  19201,
+        "sha256":  "d196aada4f5ca7ee2d5b61370027c370195f83725fcd1482d879596f1e229d62"
     },
     {
         "path":  "scripts/test-demo-ui.ps1",
-        "bytes":  964,
-        "sha256":  "fdbdd05a8cf9512479eaefb5bad57d9a31601abdb7dedbb92b33fa1564ff4c3e"
+        "bytes":  990,
+        "sha256":  "8dbc31f956107c4d71b42870734f6a3805d562cfbd16ea95a6a694aae3868ba2"
     },
     {
         "path":  "SOURCE-PROVENANCE.json",
         "bytes":  75130,
-        "sha256":  "4b59d91e5e95c3fa221111e65bda0fc6e03cd650ae89a60bf07b3161eca6d9b1"
+        "sha256":  "4bd37bac3788781fa040b87608373e374e1a1ba4598c923fa042feaed651ce9e"
     },
     {
         "path":  "src/main/java/byx/demo/DemoApp.java",
@@ -436,8 +436,8 @@
     },
     {
         "path":  "src/main/java/panel/i18n/LocaleView.java",
-        "bytes":  7537,
-        "sha256":  "ce05638649c3b0e545414093b32ebde4e89591bc6c39952f2e9c5fab038023e2"
+        "bytes":  8188,
+        "sha256":  "ff2dfc0820c95782a9d3de80d07ef51c22de374058c2b0e2649b0690a1c3978e"
     },
     {
         "path":  "src/main/java/panel/i18n/Presentation.java",
@@ -1291,8 +1291,8 @@
     },
     {
         "path":  "src/test/java/byx/demo/DemoPackagedUiProbe.java",
-        "bytes":  18444,
-        "sha256":  "a54d47e330654148e92e648daf14120a3ea0e3ca46f6c431722bb443ff88d9fe"
+        "bytes":  19178,
+        "sha256":  "2c793c84473ab74526861f985b43894294ebcec911a1ab29903be96e3ec48338"
     },
     {
         "path":  "src/test/java/byx/demo/DemoPreferencesStoreTest.java",

@@ -14,6 +14,7 @@ public static class DemoAlpha2QaWindow {
  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
  [DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr h,int index);
  [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr h);
+ [DllImport("dwmapi.dll")] public static extern int DwmGetWindowAttribute(IntPtr h,uint attribute,out RECT rect,uint size);
  [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
  [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr h,int x,int y,int width,int height,bool repaint);
  [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h,uint msg,IntPtr w,IntPtr l);
@@ -35,7 +36,16 @@ function Nodes {
 }
 function Named([string]$name){return @(Nodes|Where-Object {$_.Current.Name -eq $name -and $_.Current.ControlType -ne [Windows.Automation.ControlType]::Text -and !$_.Current.IsOffscreen})}
 function WaitText([string]$pattern){$until=(Get-Date).AddSeconds(15);do{if(@(Nodes|Where-Object {$_.Current.Name -match $pattern -and !$_.Current.IsOffscreen}).Count){return};Start-Sleep -Milliseconds 200}while((Get-Date) -lt $until);throw ('UI text not observed: '+$pattern)}
-function InvokeName([string]$name){foreach($n in (Named $name)){$pattern=$null;if($n.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern,[ref]$pattern)){$pattern.Invoke();Start-Sleep -Milliseconds 400;return};if($n.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$pattern)){$pattern.Toggle();Start-Sleep -Milliseconds 400;return};if($n.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$pattern)){$pattern.Select();Start-Sleep -Milliseconds 400;return}};throw ('UI actionable control absent: '+$name)}
+function InvokeName([string]$name){
+ $candidates=@(Nodes|Where-Object {$_.Current.Name -eq $name -and $_.Current.ControlType -ne [Windows.Automation.ControlType]::Text -and $_.Current.IsEnabled})
+ foreach($n in $candidates){
+  if($n.Current.IsOffscreen){
+   $scrollItem=$null
+   if($n.TryGetCurrentPattern([Windows.Automation.ScrollItemPattern]::Pattern,[ref]$scrollItem)){try{$scrollItem.ScrollIntoView();Start-Sleep -Milliseconds 300}catch{}}
+   if($n.Current.IsOffscreen -and $n.Current.IsKeyboardFocusable){try{$n.SetFocus();Start-Sleep -Milliseconds 400}catch{}}
+   if($n.Current.IsOffscreen){continue}
+  }
+  $pattern=$null;if($n.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern,[ref]$pattern)){$pattern.Invoke();Start-Sleep -Milliseconds 400;return};if($n.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$pattern)){$pattern.Toggle();Start-Sleep -Milliseconds 400;return};if($n.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$pattern)){$pattern.Select();Start-Sleep -Milliseconds 400;return}};throw ('UI actionable control absent: '+$name)}
 function FocusOwned {
  try{$root.SetFocus()}catch{}
  [DemoAlpha2QaWindow]::SetForegroundWindow($owned.MainWindowHandle)|Out-Null;Start-Sleep -Milliseconds 200
@@ -43,7 +53,9 @@ function FocusOwned {
  if([DemoAlpha2QaWindow]::GetForegroundWindow() -ne $owned.MainWindowHandle){throw 'Owned DEMO window is not foreground; keyboard/capture stopped'}
 }
 function ChooseLanguage([string]$language){
- $combo=@(Nodes|Where-Object {$_.Current.ControlType -eq [Windows.Automation.ControlType]::ComboBox -and $_.Current.Name -match 'Interface language|Idioma da interface' -and !$_.Current.IsOffscreen})|Select-Object -First 1
+ $languageNodes=@(Nodes)
+ $combo=@($languageNodes|Where-Object {$_.Current.ControlType -ne [Windows.Automation.ControlType]::Text -and $_.Current.Name -match 'Interface language|Idioma da interface|^(English|Português \(Brasil\))$' -and !$_.Current.IsOffscreen})|Select-Object -First 1
+ if(!$combo){$languageNodes|Where-Object {$_.Current.ControlType -ne [Windows.Automation.ControlType]::Text}|ForEach-Object {[pscustomobject]@{name=$_.Current.Name;controlType=$_.Current.ControlType.ProgrammaticName;automationId=$_.Current.AutomationId;offscreen=$_.Current.IsOffscreen}}|ConvertTo-Json -Depth 3|Set-Content -LiteralPath ($Report+'.owned-controls.json') -Encoding UTF8}
  if(!$combo){throw 'Original LanguageSelector control unavailable'}
  FocusOwned;$combo.SetFocus();$expand=$null
  if($combo.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)){
@@ -77,12 +89,12 @@ function WindowState([Windows.Automation.WindowVisualState]$state){
 function Capture([string]$name){
  FocusOwned;Start-Sleep -Milliseconds 1200
  if([DemoAlpha2QaWindow]::GetForegroundWindow() -ne $owned.MainWindowHandle){throw 'FOREGROUND_BUSY: owned EXE lost foreground before capture; no screenshot taken'}
- $rect=WindowRect;$screen=[Windows.Forms.Screen]::FromHandle($owned.MainWindowHandle)
+ $rect=WindowRect;$frame=[DemoAlpha2QaWindow+RECT]::new();if([DemoAlpha2QaWindow]::DwmGetWindowAttribute($owned.MainWindowHandle,9,[ref]$frame,16) -eq 0 -and $frame.Right -gt $frame.Left -and $frame.Bottom -gt $frame.Top){$rect=[Drawing.Rectangle]::new($frame.Left,$frame.Top,$frame.Right-$frame.Left,$frame.Bottom-$frame.Top)};$screen=[Windows.Forms.Screen]::FromHandle($owned.MainWindowHandle)
  $rect=[Drawing.Rectangle]::Intersect($rect,$screen.WorkingArea)
  if($rect.Width -lt 100 -or $rect.Height -lt 100){throw 'Owned application capture rect invalid'}
  $bitmap=[Drawing.Bitmap]::new($rect.Width,$rect.Height);$graphics=[Drawing.Graphics]::FromImage($bitmap)
  try{$graphics.CopyFromScreen($rect.X,$rect.Y,0,0,$rect.Size);$file=Join-Path $evidence ('EXE-'+$name+'.png');$bitmap.Save($file,[Drawing.Imaging.ImageFormat]::Png)}finally{$graphics.Dispose();$bitmap.Dispose()}
- $captures.Add([pscustomobject]@{file=[IO.Path]::GetFileName($file);method='Actual packaged EXE, foreground owned window rectangle clipped to monitor working area';width=$rect.Width;height=$rect.Height;dpi=[DemoAlpha2QaWindow]::GetDpiForWindow($owned.MainWindowHandle)})
+ $captures.Add([pscustomobject]@{file=[IO.Path]::GetFileName($file);method='Actual packaged EXE, foreground owned visible DWM frame clipped to monitor working area';width=$rect.Width;height=$rect.Height;dpi=[DemoAlpha2QaWindow]::GetDpiForWindow($owned.MainWindowHandle)})
 }
 function LaunchOwned {
  Set-Variable -Name launcher -Scope 1 -Value (Start-Process -FilePath $Executable -WorkingDirectory $env:TEMP -PassThru);Set-Variable -Name owned -Scope 1 -Value $launcher

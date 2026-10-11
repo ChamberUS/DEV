@@ -249,7 +249,7 @@
         "path":  "src/main/java/panel/i18n/LocaleView.java",
         "original":  "mvp-binance-panel/src/main/java/panel/i18n/LocaleView.java",
         "originalSha256":  "ce05638649c3b0e545414093b32ebde4e89591bc6c39952f2e9c5fab038023e2",
-        "snapshotSha256":  "ce05638649c3b0e545414093b32ebde4e89591bc6c39952f2e9c5fab038023e2"
+        "snapshotSha256":  "ff2dfc0820c95782a9d3de80d07ef51c22de374058c2b0e2649b0690a1c3978e"
     },
     {
         "path":  "src/main/java/panel/i18n/Presentation.java",

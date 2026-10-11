@@ -227,9 +227,17 @@ public final class DemoPackagedUiProbe extends Application {
             screenshot("palette-PT-BR"); app.palette.key(javafx.scene.input.KeyCode.ENTER);
             check(app.router.route().equals(selected.target()), "PALETTE_ENTER_NAVIGATES_SELECTED_ROUTE");
             app.router.request("t-desk");
+            int beforeLayout=app.localeView.bindingCount(); layout();
+            int afterLayout=app.localeView.bindingCount();
+            language(Strings.Lang.EN); language(Strings.Lang.PT_BR); layout();
             int bindings=app.localeView.bindingCount();
-            for(int i=0;i<10;i++){ language(i%2==0?Strings.Lang.EN:Strings.Lang.PT_BR); }
-            check(app.localeView.bindingCount()==bindings, "LANGUAGE_TEN_SWITCHES_KEEP_BINDING_COUNT");
+            StringBuilder bindingCounts=new StringBuilder("beforeLayout=").append(beforeLayout)
+                    .append(" afterLayout=").append(afterLayout).append(" afterWarmup=").append(bindings);
+            for(int i=0;i<10;i++){ language(i%2==0?Strings.Lang.EN:Strings.Lang.PT_BR);
+                bindingCounts.append(" cycle").append(i).append('=').append(app.localeView.bindingCount());
+            }
+            System.out.println("LOCALE_BINDING_COUNTS " + bindingCounts);
+            check(app.localeView.bindingCount()==bindings, "LANGUAGE_TEN_SWITCHES_KEEP_BINDING_COUNT ["+bindingCounts+"]");
             app.router.request("t-markets"); app.router.request("t-desk");
             cacheTransitionEntries=app.transitions.entries();
             app.router.request("t-markets"); app.router.request("t-desk");
@@ -274,7 +282,8 @@ public final class DemoPackagedUiProbe extends Application {
             check(Files.isRegularFile(preferenceFile), "PRESENTATION_ONLY_PREFERENCES_WRITTEN");
             String contents=Files.readString(preferenceFile);
             check(!contents.contains("teste-byx") && !contents.contains("byx123123") && !contents.contains("DEMO_USER"), "NO_CREDENTIAL_OR_IDENTITY_PERSISTENCE");
-            app.cleanup(); stage.close();
+            var previousLocale=app.localeView; app.cleanup();
+            check(previousLocale.bindingCount()==0, "CLEANUP_RELEASES_SCENE_LOCALE_BINDINGS"); stage.close();
             app=new DemoApp(preferenceFile); stage=new Stage(); app.start(stage);
         });
         steps.add(() -> {

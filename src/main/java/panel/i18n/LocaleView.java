@@ -34,7 +34,7 @@ public final class LocaleView implements AutoCloseable {
     private void bind(Node owner, Property<String> property) {
         if (property.isBound() || copies.containsKey(property)) return;
         Copy copy = new Copy(property); copies.put(property, copy);
-        copy.owner=owner; copy.release=() -> unbind(property); cleanup.get(owner).add(copy.release);
+        copy.owner = owner; // Property copies are released only after subtree observers have disconnected.
     }
     private void attach(Node node) {
         if (node == null || closed || cleanup.containsKey(node) || Boolean.TRUE.equals(node.getProperties().get(LITERAL_DATA))) return;
@@ -71,11 +71,30 @@ public final class LocaleView implements AutoCloseable {
     private void column(Node owner, TableColumn<?,?> column) { bind(owner,column.textProperty()); column.getColumns().forEach(c -> column(owner,c)); }
     private void menu(Node owner, ContextMenu menu) { for (MenuItem item : menu.getItems()) { bind(owner,item.textProperty()); if (item instanceof Menu nested) menuItems(owner,nested); } }
     private void menuItems(Node owner, Menu menu) { for (MenuItem item : menu.getItems()) { bind(owner,item.textProperty()); if (item instanceof Menu nested) menuItems(owner,nested); } }
-    private void unbind(Property<String> property) { Copy copy = copies.remove(property); if (copy != null) { List<Runnable> releases=cleanup.get(copy.owner); if(releases != null) releases.remove(copy.release); copy.close(); } }
+    private void unbind(Property<String> property) {
+        Copy copy = copies.remove(property);
+        if (copy != null) copy.close();
+    }
     private void detach(Node node) {
         if (node == null) return;
-        if (node instanceof Parent parent) List.copyOf(parent.getChildrenUnmodifiable()).forEach(this::detach);
-        List<Runnable> releases = cleanup.remove(node); if (releases != null) List.copyOf(releases).forEach(Runnable::run);
+        Set<Node> subtree = Collections.newSetFromMap(new IdentityHashMap<>());
+        snapshot(node, subtree);
+        // Restoring canonical label text can make a JavaFX skin replace its children immediately.
+        // Disconnect every subtree observer before restoring any property, so those detached skin
+        // children cannot acquire new copies after their original owner has been released.
+        for (Node removed : subtree) {
+            List<Runnable> releases = cleanup.remove(removed);
+            if (releases != null) List.copyOf(releases).forEach(Runnable::run);
+        }
+        for (Copy copy : List.copyOf(copies.values())) {
+            if (subtree.contains(copy.owner)) unbind(copy.property);
+        }
+    }
+    private static void snapshot(Node node, Set<Node> subtree) {
+        if (!subtree.add(node)) return;
+        if (node instanceof Parent parent) {
+            List.copyOf(parent.getChildrenUnmodifiable()).forEach(child -> snapshot(child, subtree));
+        }
     }
     public int bindingCount() { return copies.size(); }
     @Override public void close() {
@@ -89,7 +108,6 @@ public final class LocaleView implements AutoCloseable {
         private boolean writing;
         private boolean closed;
         private Node owner;
-        private Runnable release;
         private final ChangeListener<String> listener = (o,a,b) -> { if (!writing) { source=b; refresh(); } };
         Copy(Property<String> property) { this.property=property; source=property.getValue(); property.addListener(listener); refresh(); }
         void refresh() { if (closed) return; if (property.getBean() instanceof Labeled node && "text".equals(property.getName())) node.getProperties().put(TEXT_SOURCE,source); if (property.isBound()) return; String translated=Presentation.text(source); if (!Objects.equals(property.getValue(),translated)) { writing=true; try { property.setValue(translated); } finally { writing=false; } } }

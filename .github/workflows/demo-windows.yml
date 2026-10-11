@@ -38,6 +38,7 @@ jobs:
         run: |
           ./scripts/test-demo-launcher.ps1 -Zip "$env:RUNNER_TEMP/byx-demo-build/BYX-MVP-Demo-Windows-x64-Portable.zip" -Destination "$env:RUNNER_TEMP/QA espaço BYX Ω" -Report "$env:RUNNER_TEMP/byx-demo-build/launcher-unicode-qa.json"
       - name: Automated UI against distributed JARs (separate from EXE UAT)
+        if: ${{ !cancelled() }}
         run: |
           ./scripts/test-demo-ui.ps1 -Image "$env:RUNNER_TEMP/byx-demo-build/image/BYX-MVP" -Evidence "$env:RUNNER_TEMP/byx-demo-build/ui"
       - name: Runner identity and limitations
