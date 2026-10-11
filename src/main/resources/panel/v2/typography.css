@@ -1,0 +1,27 @@
+/*
+ * BYX-MVP V2 typography (BYX_DESIGN_TOKENS.json#typography).
+ * JavaFX has no line-height, letter-spacing or text-transform in CSS: line heights are applied as
+ * min-height on single-line text, uppercase via ByxFonts.upper(), letter spacing is a known deviation.
+ * JavaFX registers every static face as its own family, so weights are chosen by family name
+ * ("Schibsted Grotesk SemiBold") and -fx-font-weight is never used (it picks arbitrary faces).
+ */
+.byx-text, .byx-display, .byx-auth-title, .byx-page-title, .byx-section-title, .byx-section-title-sm,
+.byx-body, .byx-label, .byx-micro {
+    -fx-font-family: "Schibsted Grotesk";
+    -fx-text-fill: -byx-text-primary;
+}
+.byx-display { -fx-font-size: 32px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-min-height: 40px; }
+.byx-auth-title { -fx-font-size: 28px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-min-height: 34px; }
+.byx-page-title { -fx-font-size: 24px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-min-height: 30px; }
+.byx-section-title { -fx-font-size: 18px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-min-height: 24px; }
+.byx-section-title-sm { -fx-font-size: 15px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-min-height: 20px; }
+.byx-body { -fx-font-size: 14px; -fx-line-spacing: 3px; }
+.byx-label { -fx-font-size: 12px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-text-fill: -byx-text-tertiary; -fx-min-height: 16px; }
+.byx-micro { -fx-font-size: 11px; -fx-font-family: "Schibsted Grotesk SemiBold"; -fx-text-fill: -byx-text-tertiary; -fx-min-height: 12px; }
+
+/* data family: numbers, IDs, hashes, timestamps only */
+.byx-data { -fx-font-family: "JetBrains Mono Medium"; -fx-font-size: 15px; -fx-text-fill: -byx-text-primary; -fx-min-height: 20px; }
+.byx-data-lg { -fx-font-family: "JetBrains Mono SemiBold"; -fx-font-size: 30px; -fx-text-fill: -byx-text-primary; -fx-min-height: 36px; }
+
+.byx-secondary { -fx-text-fill: -byx-text-secondary; }
+.byx-tertiary { -fx-text-fill: -byx-text-tertiary; }

@@ -1,0 +1,43 @@
+{
+  "_label": "PLACEHOLDER_CONTENT",
+  "_note": "Copy for the 6-step onboarding. Wording is a placeholder until product copy is approved. Every step is read-only guidance.",
+  "persistence": {
+    "classification": "AVAILABLE_IF_EXISTING_API",
+    "reference": "The reference stores completion in sessionStorage key 'byx-onb'. The product stores it through the existing profile/preferences API if one exists, otherwise in a local preference file. Nothing else is persisted."
+  },
+  "guarantees": [
+    "Never enables live trading",
+    "Never connects a wallet",
+    "Never creates keys",
+    "Never activates DEVNET",
+    "Never changes research gates",
+    "Never sends orders or moves funds"
+  ],
+  "controls": ["Back", "Next", "Skip", "Finish"],
+  "workspaces": [
+    {"id": "trading", "label": "Trading", "text": "Desk, markets, portfolio and orders.", "accent": "#7C96FF"},
+    {"id": "research", "label": "Research", "text": "Pipeline, capture and validation stages.", "accent": "#B896FF"},
+    {"id": "byx", "label": "BYX", "text": "Network, wallet, benefits and treasury.", "accent": "#5ED6C4"},
+    {"id": "all", "label": "All", "text": "Start on the Trading workspace and keep every area one click away.", "accent": "#EEF1F8"}
+  ],
+  "environments": [
+    {"id": "LOCALNET", "text": "Your own local BYX test chain. Nothing here has market value."},
+    {"id": "TEST", "text": "Test assets on a test network. They are never real money."},
+    {"id": "PAPER", "text": "Simulated trading with no real orders."},
+    {"id": "REAL", "text": "Real funds. Always shown with the strongest warning styling. Locked in this build."}
+  ],
+  "tour": [
+    {"n": 1, "area": "Rail", "text": "Move between the pages of the current workspace."},
+    {"n": 2, "area": "Workspace switcher", "text": "Switch between Trading, Research and BYX."},
+    {"n": 3, "area": "Search", "text": "Press Ctrl or Cmd + K to jump to any page, setting or help topic."},
+    {"n": 4, "area": "Status dock", "text": "Shows system health, mode and environment. Click an item for details."}
+  ],
+  "steps": [
+    {"id": "welcome", "title": "Welcome to BYX-MVP", "body": "A desktop terminal for research-first trading and the BYX ecosystem. This short tour takes about a minute and changes nothing in your account.", "label": "PLACEHOLDER_CONTENT"},
+    {"id": "workspace", "title": "Choose your primary workspace", "body": "This only sets where the app opens. You can change it later in Settings.", "label": "PLACEHOLDER_CONTENT"},
+    {"id": "security", "title": "Protect your account", "body": "Two-factor authentication adds a second check when you sign in. Onboarding does not turn it on. You can set it up in Security whenever you are ready.", "label": "PLACEHOLDER_CONTENT"},
+    {"id": "environment", "title": "Know which environment you are in", "body": "The environment badge is always visible in the status dock. These are the four values you can see.", "label": "PLACEHOLDER_CONTENT"},
+    {"id": "tour", "title": "A quick look at the interface", "body": "Four areas are worth knowing.", "label": "PLACEHOLDER_CONTENT"},
+    {"id": "complete", "title": "You are ready", "body": "Your choices are saved. You can replay this tour from Help at any time.", "label": "PLACEHOLDER_CONTENT"}
+  ]
+}

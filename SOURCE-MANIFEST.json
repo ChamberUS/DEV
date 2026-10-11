@@ -1,0 +1,1202 @@
+﻿[
+    {
+        "path":  ".gitattributes",
+        "bytes":  151,
+        "sha256":  "ae9c386ef9f1c429bffca74c375976454421877752f9a1c99e2056ae75a12bcf"
+    },
+    {
+        "path":  ".github/ISSUE_TEMPLATE/demo-feedback.yml",
+        "bytes":  926,
+        "sha256":  "f1fb8295045b299368a6df34e6e6f07bfc0adecc40d6aa893dec9aff12b01170"
+    },
+    {
+        "path":  ".github/workflows/demo-windows.yml",
+        "bytes":  3224,
+        "sha256":  "9b077b5ab7a8e5b5730896810f20af0234c984b196be7ab25c0e17f73d38ee8d"
+    },
+    {
+        "path":  ".gitignore",
+        "bytes":  28,
+        "sha256":  "44d0ded5a1ac5382ef006e8e8e960aa6eb2e359ac26e1ca915fe7ec8c97badde"
+    },
+    {
+        "path":  "DEPENDENCIES.json",
+        "bytes":  3743,
+        "sha256":  "b492f56782e6ac4e797cf00f74f279ef7b1e9e9f0330888570b1512e3f6db757"
+    },
+    {
+        "path":  "docs/BUILD-RELEASE.md",
+        "bytes":  3585,
+        "sha256":  "d62d457e8c53139d5447a2dcb5cdde11c66f0092b510de4361f98e36d6858fae"
+    },
+    {
+        "path":  "docs/SECURITY-ARCHITECTURE.md",
+        "bytes":  2460,
+        "sha256":  "07fff75ba5f1c222fd124a1efc79b8372d5c45b8c0fe582faeb0a7972599ab8e"
+    },
+    {
+        "path":  "licenses/fonts/Inter-OFL.txt",
+        "bytes":  4380,
+        "sha256":  "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+    },
+    {
+        "path":  "licenses/fonts/JetBrainsMono-OFL.txt",
+        "bytes":  4398,
+        "sha256":  "60d55f23c6ce05a81099a762cb67ca2c9b6ea251c7912720998b4c89ebfd4faa"
+    },
+    {
+        "path":  "licenses/fonts/SchibstedGrotesk-OFL.txt",
+        "bytes":  4405,
+        "sha256":  "851b03806ddbd92890a59a8512a883ff231587f9bef037895efa544a0f250432"
+    },
+    {
+        "path":  "licenses/jackson-annotations-2.21-LICENSE",
+        "bytes":  11358,
+        "sha256":  "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+        "path":  "licenses/jackson-annotations-2.21-NOTICE",
+        "bytes":  738,
+        "sha256":  "612b14bc77c944ce229cbba0d14919162cfea8ed802cbf06a8e865e032d03201"
+    },
+    {
+        "path":  "licenses/jackson-core-2.20.0-LICENSE",
+        "bytes":  11358,
+        "sha256":  "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+        "path":  "licenses/jackson-core-2.20.0-NOTICE",
+        "bytes":  1227,
+        "sha256":  "0a0042db627fe915c6a1d9ef74927af5081446063e8888494be6718d692dd2b8"
+    },
+    {
+        "path":  "licenses/jackson-core-3.1.1-LICENSE",
+        "bytes":  11358,
+        "sha256":  "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+        "path":  "licenses/jackson-core-3.1.1-NOTICE",
+        "bytes":  1221,
+        "sha256":  "d055bebbe8c803db1062ccc5f14ad8c3928df820056107620badae987e8e4eb7"
+    },
+    {
+        "path":  "licenses/jackson-databind-2.20.0-LICENSE",
+        "bytes":  11358,
+        "sha256":  "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+        "path":  "licenses/jackson-databind-2.20.0-NOTICE",
+        "bytes":  738,
+        "sha256":  "612b14bc77c944ce229cbba0d14919162cfea8ed802cbf06a8e865e032d03201"
+    },
+    {
+        "path":  "licenses/jackson-databind-3.1.1-LICENSE",
+        "bytes":  11358,
+        "sha256":  "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+        "path":  "licenses/jackson-databind-3.1.1-NOTICE",
+        "bytes":  732,
+        "sha256":  "d3fa47349b4ba4a3763bf635b930f8877073aa3915a3f3e45fe4b1842fc60302"
+    },
+    {
+        "path":  "licenses/JavaFX-21-ADDITIONAL_LICENSE_INFO.txt",
+        "bytes":  2114,
+        "sha256":  "a69bce275ba7a3570af6579cb0f55682cd75fedfcd49e0e8e9022270c447c916"
+    },
+    {
+        "path":  "licenses/JavaFX-21-ASSEMBLY_EXCEPTION.txt",
+        "bytes":  1522,
+        "sha256":  "a44eb7b5caf5534c6ef536b21edb40b4d6babf91bf97d9d45596868618b2c6fb"
+    },
+    {
+        "path":  "licenses/JavaFX-21-LICENSE.txt",
+        "bytes":  19274,
+        "sha256":  "4b9abebc4338048a7c2dc184e9f800deb349366bdf28eb23c2677a77b4c87726"
+    },
+    {
+        "path":  "licenses/javafx-graphics-legal/jpeg_fx.md",
+        "bytes":  2158,
+        "sha256":  "a7bb58d9ed7f118480aaad20c318d1e5d4693ba6a4db5101903065ec5552c8b5"
+    },
+    {
+        "path":  "licenses/javafx-graphics-legal/mesa3d.md",
+        "bytes":  5732,
+        "sha256":  "63f4e6f75caebbccb95d903fb43e46ac7111b3624d0a34f146b276d7d9e7b152"
+    },
+    {
+        "path":  "licenses/Lottie4J-LICENSE.txt",
+        "bytes":  11357,
+        "sha256":  "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+        "path":  "licenses/slf4j-api-2.0.17-LICENSE.txt",
+        "bytes":  1178,
+        "sha256":  "4e7f90c86ab51278228bce153122f1d8df30149d13ce9ef524c8444a84c32dcc"
+    },
+    {
+        "path":  "pom.xml",
+        "bytes":  3522,
+        "sha256":  "9b7f5cafbaa8aa6d693b8e73bee014efc275c938ac985d80f8776780fd74e0ab"
+    },
+    {
+        "path":  "README.md",
+        "bytes":  4568,
+        "sha256":  "0da832b9cffebd3354db134e82cacef5c9f15251e89e52461d010205e9e3abb5"
+    },
+    {
+        "path":  "scripts/audit-demo.ps1",
+        "bytes":  4148,
+        "sha256":  "0917a4193b3a7685ef7e230fd3987f3cb9ab362d7b261c8bd2c9f2ccf714c904"
+    },
+    {
+        "path":  "scripts/build-demo-windows.ps1",
+        "bytes":  5063,
+        "sha256":  "1a01c01037c578b74a95cf4aa2b8051e191bcc2de86c6028568508b8f3c8f179"
+    },
+    {
+        "path":  "scripts/test-demo-launcher.ps1",
+        "bytes":  4256,
+        "sha256":  "9dc5a41dda4c156850738f69bde38251b06ab31d7d34add882b422c04f37f749"
+    },
+    {
+        "path":  "scripts/test-demo-ui.ps1",
+        "bytes":  964,
+        "sha256":  "fdbdd05a8cf9512479eaefb5bad57d9a31601abdb7dedbb92b33fa1564ff4c3e"
+    },
+    {
+        "path":  "SOURCE-PROVENANCE.json",
+        "bytes":  72238,
+        "sha256":  "84284b2392df039339828a8e18cb03399d1c879fac559ca5601a01929f571fe6"
+    },
+    {
+        "path":  "src/main/java/byx/demo/DemoApp.java",
+        "bytes":  8237,
+        "sha256":  "80d178e938c112f0c9baabf955f47f5d19827f48481e5896a27dd2ea725f016f"
+    },
+    {
+        "path":  "src/main/java/byx/demo/DemoAuthProvider.java",
+        "bytes":  682,
+        "sha256":  "d09b779e97e74a1fe61281f6a19abe5a76d19462685b1d8e1d5e05218aa82683"
+    },
+    {
+        "path":  "src/main/java/byx/demo/DemoFixtures.java",
+        "bytes":  1720,
+        "sha256":  "850f25c173594be84b4ed3d8c009d09e2c71d093b00d3af8d0d7864c9095152a"
+    },
+    {
+        "path":  "src/main/java/byx/demo/DemoMain.java",
+        "bytes":  321,
+        "sha256":  "60ddf35d1d4f9a547ddd9099e25c2c929806ad5c6524b7dbe0b7b4090f139005"
+    },
+    {
+        "path":  "src/main/java/panel/accountview/AccountData.java",
+        "bytes":  392,
+        "sha256":  "ca3eccac174af1fef07bbc1765186eb8870cde4e4b032332d268913f3b581b84"
+    },
+    {
+        "path":  "src/main/java/panel/accountview/SettingsScreen.java",
+        "bytes":  18791,
+        "sha256":  "3b40c6e39052fefa926e02d5f43ce746bd2c4af60995648b6f089c526488cf46"
+    },
+    {
+        "path":  "src/main/java/panel/app/AppInfo.java",
+        "bytes":  1080,
+        "sha256":  "cc4759d046e1bbd1d0223a7d2b3f7594c05a6e79d119f3d57350aea67b8bfbe1"
+    },
+    {
+        "path":  "src/main/java/panel/authview/AuthLayout.java",
+        "bytes":  8831,
+        "sha256":  "c7fb27479a82def0edd69a771baf0e9270fc5471b5d1e404366296acfb45e822"
+    },
+    {
+        "path":  "src/main/java/panel/authview/BrandFieldModel.java",
+        "bytes":  5295,
+        "sha256":  "2b14f2ab8f887078f3b850a4d730c1ccb50e66f3a4757e85cd4bb6a32b08cad2"
+    },
+    {
+        "path":  "src/main/java/panel/authview/BrandPanel.java",
+        "bytes":  22572,
+        "sha256":  "6ac53e54090ab90e167622dc7014315d49c0493394ff1b56d9a13b4339b0204d"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxBadge.java",
+        "bytes":  2552,
+        "sha256":  "8d2a8db3317c7d7f9c6e9eaa0498cc16a6b666c0d0d671b2710cc84feebee498"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxBanner.java",
+        "bytes":  1614,
+        "sha256":  "4b48415781c3b11fcedccc949bf2dece086d10837b05dc44bfa7ea3d3b0ef5f0"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxButton.java",
+        "bytes":  5131,
+        "sha256":  "016cf93f3690f3ed5cd03ad362614a3e93e02947c6e47cfa865856a548c5c403"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxField.java",
+        "bytes":  4958,
+        "sha256":  "2a437e67f01633402df013f066f7a12eaf118c29db9fc75ef1e37fadeb7955a6"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxFonts.java",
+        "bytes":  2546,
+        "sha256":  "110ba680bdfe9425353d469df93d7ec55dcbf27a91c645942d0ee9612029592f"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxIcon.java",
+        "bytes":  1505,
+        "sha256":  "12a103e02da03f273d1d2ea13ca039083b38dac66b76993316b92dc4a7e050a3"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxOtpInput.java",
+        "bytes":  6598,
+        "sha256":  "fb7d56d1278836640e3ccb9ff156faaa2ca5ee585bd2c93a2c00bc37267adfb5"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxOverlayHost.java",
+        "bytes":  27724,
+        "sha256":  "97bdf1a21970dacbe5a7a3726f3b105c1bbc2dd5db7dcc94d972597a000bb408"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxRegion.java",
+        "bytes":  15601,
+        "sha256":  "852cdc5290c957c1ee93924d6692611b26c8ba96ea1ff8e6b5d86e7498102a99"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxSpinner.java",
+        "bytes":  1877,
+        "sha256":  "2c517bbcfa35b36996b61a5432bbd685820e11ab2b9728ca01c92b12465ce671"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxStatusChip.java",
+        "bytes":  2956,
+        "sha256":  "4c044cd900d1c62af2582672e32ba3669264de35107483d0b6f0008791b45c81"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxStatusDot.java",
+        "bytes":  3151,
+        "sha256":  "abccde4952f2322d47bb515d72098af20b4f177fd9e9031a5541949eb5353fdf"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxTheme.java",
+        "bytes":  6017,
+        "sha256":  "d044fb63810406cdc6ce6b4e40bdbd2696d9aa79e88052423e6aa39094dd0992"
+    },
+    {
+        "path":  "src/main/java/panel/design/ByxToggle.java",
+        "bytes":  4276,
+        "sha256":  "2133297378b05eacdca7eeff7facbd9e416eb797bd207b02bfbf0cab581941a3"
+    },
+    {
+        "path":  "src/main/java/panel/design/ControlGallery.java",
+        "bytes":  19097,
+        "sha256":  "1211fd47480b795e22cf21a30b5427e012f11b299a3c83bd499b968258cfffa3"
+    },
+    {
+        "path":  "src/main/java/panel/design/DesignTokens.java",
+        "bytes":  2648,
+        "sha256":  "34c59df4079a3d442a176b8ce8ed2e0e7b056dfbc9a9af14cb399a74b2b8fd49"
+    },
+    {
+        "path":  "src/main/java/panel/design/OverlayLayer.java",
+        "bytes":  465,
+        "sha256":  "f701806534961da5eebd5be4f5b163c4ec4b80dd6cb4cc1fad596728669a117b"
+    },
+    {
+        "path":  "src/main/java/panel/design/RegionState.java",
+        "bytes":  448,
+        "sha256":  "ea3603c6700ec57ecd90eab6637b7bf38ce9be81737e81902210e9282bc54685"
+    },
+    {
+        "path":  "src/main/java/panel/design/StatusState.java",
+        "bytes":  697,
+        "sha256":  "f792e21f69fc5424ac91a2b5d88883124a90aef32899a5dd3d0ceb1d0bf2be4c"
+    },
+    {
+        "path":  "src/main/java/panel/design/ThemeMode.java",
+        "bytes":  153,
+        "sha256":  "3f6ad40885ad89e4e0e1cc591380d489e890d0c9cc24309cb72bbae0b264292b"
+    },
+    {
+        "path":  "src/main/java/panel/design/ThemePalette.java",
+        "bytes":  1968,
+        "sha256":  "beb566b6bb7a7fe960418e3a4eb8d4bf324891e541592a1c2929c7c3d4f19ae4"
+    },
+    {
+        "path":  "src/main/java/panel/design/ThemeSelector.java",
+        "bytes":  3710,
+        "sha256":  "8e47e4cb8f801b2ac5ae5746c227b881ed667d2fea9dfb1d89f3c61ef67f0c02"
+    },
+    {
+        "path":  "src/main/java/panel/design/ThemeToken.java",
+        "bytes":  5114,
+        "sha256":  "74d24a7105690d495c10f5f057b68cd7f9f6b4bd170bc4d8aa94e1d5c406a890"
+    },
+    {
+        "path":  "src/main/java/panel/helpview/ShortcutsScreen.java",
+        "bytes":  2020,
+        "sha256":  "6fdbee0f229610d54078d37ef55709e6acd4e77a99e25db93b1d63c395ccad90"
+    },
+    {
+        "path":  "src/main/java/panel/i18n/DisplayFormats.java",
+        "bytes":  2729,
+        "sha256":  "4064b8d1aae160cb1d331d22db74fdc2b54fefda7684cc1938ee89e8cae4ea31"
+    },
+    {
+        "path":  "src/main/java/panel/i18n/LanguageSelector.java",
+        "bytes":  2061,
+        "sha256":  "5bd4dc7af3becd7b3fc95c3430a5deb6ba018238b9e07315b5a4dc9ea027612a"
+    },
+    {
+        "path":  "src/main/java/panel/i18n/LocaleTooltip.java",
+        "bytes":  734,
+        "sha256":  "ba5c4f56243473e193f5e9a60836efb076107a856e31124beba5173bb80aa78f"
+    },
+    {
+        "path":  "src/main/java/panel/i18n/LocaleView.java",
+        "bytes":  7537,
+        "sha256":  "ce05638649c3b0e545414093b32ebde4e89591bc6c39952f2e9c5fab038023e2"
+    },
+    {
+        "path":  "src/main/java/panel/i18n/Presentation.java",
+        "bytes":  5854,
+        "sha256":  "463956594cc47634cb2c3f7618a7e2cd271fd87e7079729f716b98c6f6cf57cd"
+    },
+    {
+        "path":  "src/main/java/panel/i18n/Strings.java",
+        "bytes":  3822,
+        "sha256":  "4b690a5740ef15a245e55cd849287812b1e4e5574a0782a9267d63e5f9b661ba"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/Gaze.java",
+        "bytes":  3590,
+        "sha256":  "cca0948afa6aeefad1d929051d8ff62c3031081d5ca1aa0a54c5b4dc097d896b"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/IdleLife.java",
+        "bytes":  6236,
+        "sha256":  "8f6425bb71bbba2c039ba1f0a44cebd65b077198da4b035a1cd6e0cfef50f159"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotActivity.java",
+        "bytes":  4202,
+        "sha256":  "040e5928efb7e9770f37c7e87ff7a95990e6a41503bfa6bd2e745cd5a05bcccf"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotAnchor.java",
+        "bytes":  204,
+        "sha256":  "077b7859ede822bd9ebf701203ac5604d0b9ae27ee99f974d12a1e18fb7cd0c8"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotAssets.java",
+        "bytes":  6572,
+        "sha256":  "d01c909aef863b78c2c6a6cd7916625d05fc18ed122630c6116afb14f99dfe28"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotContext.java",
+        "bytes":  1772,
+        "sha256":  "f175122b7f51631b3fdf856e03b6f98762fb03e8e5b4eb16e52e8b5c507504d8"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotGallery.java",
+        "bytes":  13490,
+        "sha256":  "3c6e5fe406ed7a5f56be0a3369a5bd6f51f1af094ed54bf3637346b905b8add1"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotGuide.java",
+        "bytes":  2159,
+        "sha256":  "ff6c92a338f43c2a7a418d969db93c1340a111a47546a2b096b2b6304caed63c"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotGuideProvider.java",
+        "bytes":  321,
+        "sha256":  "a320ea1853381ad32d0281ad4cadb22ac7341dc974204dab417b88e5f14aa363"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotHint.java",
+        "bytes":  445,
+        "sha256":  "e32aebadc95f3a19dda5b146308e12ec337f818a13618c8e8a52c0406f1407f9"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotHintBubble.java",
+        "bytes":  4231,
+        "sha256":  "4e3d007be81ae2f0e3e45101a236ca0fa49e225acdf37aee1ec20c4ce7cd0982"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotManifest.java",
+        "bytes":  5859,
+        "sha256":  "605963427cf8fc77bb6807fdf77c3e79f90f0631a581d98f1661621500058f1e"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotPlacement.java",
+        "bytes":  1567,
+        "sha256":  "f574a06df8a72fd9c59cb862e2fc688ff456e6a86e3806228b387e0922703108"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotPriority.java",
+        "bytes":  1178,
+        "sha256":  "219d27fd3e1972a27a9e557abbf2c73745a6ce19e9c9cbd0285ad842c934f0cd"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotSize.java",
+        "bytes":  312,
+        "sha256":  "03b71f5ef1b4eda6f49bd99bbe59d3e829747419aba7ba1a273087cd8bee7fbe"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotStage.java",
+        "bytes":  3460,
+        "sha256":  "4d08dce1edf6e0323a19f3baf7dcba0d2e718ef8fa0fbcdcd0789cfc7f112ead"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotState.java",
+        "bytes":  702,
+        "sha256":  "701c93fc74e1c56b89d6c8a9d4653c64b082bd7e746820caaa856adb45a6236d"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotTransitionOverlay.java",
+        "bytes":  2466,
+        "sha256":  "bcc977857dd2ddb8fefafc550cd56345ea856058c0ab2101d851bf4a68a17bb3"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotUsage.java",
+        "bytes":  2797,
+        "sha256":  "435b6f1d309baad7774fd2198d4445335dc964dabd426c8aa7b7d6183f14dae4"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/MascotView.java",
+        "bytes":  36049,
+        "sha256":  "a1d0ee70eaab9b1d39f752aff77d048b6db9ff8603e5b3762793187e8f4980f8"
+    },
+    {
+        "path":  "src/main/java/panel/mascot/StaticMascotGuideProvider.java",
+        "bytes":  2756,
+        "sha256":  "ca0cf7efd8d8ff64a9662ea730fe77671b314b98e265a47599e976693ae85b0e"
+    },
+    {
+        "path":  "src/main/java/panel/model/ByxSnapshot.java",
+        "bytes":  2395,
+        "sha256":  "9774d522f2354cf1c96817dd90fc8404282fb6fbd08536f52e957dc6f9008e44"
+    },
+    {
+        "path":  "src/main/java/panel/model/CaptureInfo.java",
+        "bytes":  529,
+        "sha256":  "7dfc15fd79900e01ecd64459a8ef56aaead729c8effcb502ae1b1b2d27fef6cc"
+    },
+    {
+        "path":  "src/main/java/panel/model/ChainFacts.java",
+        "bytes":  535,
+        "sha256":  "1b839a36b7691f474531308d8749976b98b59047ab3f51145a974c012b24ea0d"
+    },
+    {
+        "path":  "src/main/java/panel/model/DataSource.java",
+        "bytes":  60,
+        "sha256":  "bfc7c3f67759e95e88c6086b8b5ebd797951897407b90f788b9833860b89ad64"
+    },
+    {
+        "path":  "src/main/java/panel/model/FeatureInfo.java",
+        "bytes":  222,
+        "sha256":  "e5cbfb7bde92fc20a495c741ee533a379be2db4ad7fa6310f187f879a7ede54d"
+    },
+    {
+        "path":  "src/main/java/panel/model/HorizonStat.java",
+        "bytes":  316,
+        "sha256":  "cae4c8c535d0538942e60d4bea60edc3922a97cbd136e8c6dfe122869cdfe22f"
+    },
+    {
+        "path":  "src/main/java/panel/model/HypothesisInfo.java",
+        "bytes":  348,
+        "sha256":  "e9b08dbb4e91e27c59933ceb7733b47839c09e3d1d867cc7a1f665891abc16bc"
+    },
+    {
+        "path":  "src/main/java/panel/model/ScientificCapture.java",
+        "bytes":  2556,
+        "sha256":  "c8196f4b17a2fb91a3bbb4bf3fd78b5ba56c3545faa4efd99f3b52449badc57b"
+    },
+    {
+        "path":  "src/main/java/panel/model/SessionInfo.java",
+        "bytes":  1177,
+        "sha256":  "30b8a31d2e497e903157f4bb68c6edaffee9a510231c95cfcbeb2fbf684edca2"
+    },
+    {
+        "path":  "src/main/java/panel/model/Snapshot.java",
+        "bytes":  4042,
+        "sha256":  "fdcb16651f3ea2ec267bcaffb6ca4c062c00d181158f3f6b493591fe6ee2e51f"
+    },
+    {
+        "path":  "src/main/java/panel/model/StageState.java",
+        "bytes":  430,
+        "sha256":  "18e13c38c30cd52c7705ee845e4b2167e669ca3876fb776fa16bf7ff3e5e5edb"
+    },
+    {
+        "path":  "src/main/java/panel/model/TraderSnapshot.java",
+        "bytes":  2982,
+        "sha256":  "92eff821fc93098a697acd4d2981c218fef4f19d626213f0b8cff91f9c20ba8b"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/AnimatedIcon.java",
+        "bytes":  442,
+        "sha256":  "95a543620773bdc8072f8b5b504312d0f767817388aff8e3400921ad6b9e7e5c"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/AnimatedSvgIcon.java",
+        "bytes":  2895,
+        "sha256":  "8b95720abbb3d23164dda2ed3d71d90f9ed16100b883606ce8465f9d5f5d4f0d"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/AnimationAsset.java",
+        "bytes":  207,
+        "sha256":  "77b0c222a1768d1412c51b63f9d9e2b785bb6642cd0f8d503c9da66495d59f02"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/AnimationController.java",
+        "bytes":  1250,
+        "sha256":  "4256e6a1e08704d901aa136f7edfdaa9e071c868d67ff01bf23f67c8efa96d36"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/AnimationRepository.java",
+        "bytes":  3614,
+        "sha256":  "d60f5a898f21daee15204c992719569ef759c028217caaf19c9914d4db417c9b"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/AnimationTrigger.java",
+        "bytes":  127,
+        "sha256":  "a2df6b85096b8e6562af63e953a0d46292c50ae0867e1f65224ffd4f3e727709"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/IconPaths.java",
+        "bytes":  3032,
+        "sha256":  "d005340a9303495f5ac4ed892824768d04bdde50f5d7aef3818f8950f5b4949f"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/LottieAnimatedIcon.java",
+        "bytes":  1837,
+        "sha256":  "742f480f865c8056dcfef73fe16cf6d265cb23a49972696287090e0bd843278e"
+    },
+    {
+        "path":  "src/main/java/panel/motion/icon/SvgIcon.java",
+        "bytes":  1214,
+        "sha256":  "b6129210160197359c66242810195754422e67e9d4aa9fd4a87332958fb97893"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionPolicy.java",
+        "bytes":  1062,
+        "sha256":  "8d8fc8c5857f61bd978d96fa10fcab9cc32868c29852fba8483ffd993bd67ee4"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionPreference.java",
+        "bytes":  200,
+        "sha256":  "97760cf2a19ebb55193834f73bec5cc8a8ef857a0593e7a5030d9b6063da31d7"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionService.java",
+        "bytes":  13236,
+        "sha256":  "3939e3b93b8b5876a21530e7dd93584336a1dafa954cbeab49ac03ff42aece32"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionSpec.java",
+        "bytes":  5752,
+        "sha256":  "4294003d670adb0542be3d9d712040c3039c6f70da83a7eb3c6bfa3cb6dd2da0"
+    },
+    {
+        "path":  "src/main/java/panel/motion/MotionTokens.java",
+        "bytes":  1505,
+        "sha256":  "fc7b86a86f672642e6c9b67f6b8460668272eb15dc5431433cbf0bc6afdab479"
+    },
+    {
+        "path":  "src/main/java/panel/motion/ReferenceMotion.java",
+        "bytes":  18613,
+        "sha256":  "0fa7998431d7088d3f4461b4b602f3d8af950658504c0b71ca501f1beb5d11a0"
+    },
+    {
+        "path":  "src/main/java/panel/motion/ViewTransitionService.java",
+        "bytes":  2427,
+        "sha256":  "cf4174adc45263d8639e9de488faa8ce1c6d0b9ee213657771c15fa534f28623"
+    },
+    {
+        "path":  "src/main/java/panel/nav/Navigator.java",
+        "bytes":  1636,
+        "sha256":  "bb8433e0cceb337454fdb394ad30cc7ec4eccc44f805319f94967d7cbeb0cf00"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/AvatarMotion.java",
+        "bytes":  11022,
+        "sha256":  "62172c7f8646d2eebe1a20c946532a07980783605da80569ed917632c758422b"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/AvatarPaths.java",
+        "bytes":  2046,
+        "sha256":  "3f91627189f87760024ee1b366702ed2ae83df4ac320c80fe4f30fdc39fa5bed"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/MascotAvatar.java",
+        "bytes":  20406,
+        "sha256":  "8eef22bd633fe9f0807a01cf976bcbeb15d378d65c08d20f219a7a91e3d08e12"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/MascotTokens.java",
+        "bytes":  4041,
+        "sha256":  "9fcb4696dff29551558d3fdee2e25e77367fae5a4927f51672c732219ef0fa15"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/OperationRegistry.java",
+        "bytes":  6135,
+        "sha256":  "5ee276105afb65e7e2560684932f4463c1938340d95cb0dfa081a369f5394ceb"
+    },
+    {
+        "path":  "src/main/java/panel/shell/avatar/Operations.java",
+        "bytes":  1057,
+        "sha256":  "3bed5d60a7648230f48f5d35eb0cbded4b43c651d8b203c8f7fba6d54622c76d"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ByxShell.java",
+        "bytes":  12737,
+        "sha256":  "496bb321d39c36be33fb202626d1e70de2b2970436629e0cf5becc28d963c8fd"
+    },
+    {
+        "path":  "src/main/java/panel/shell/DockModel.java",
+        "bytes":  5589,
+        "sha256":  "bcaab63caa512f36137317752e9fadd3e1ca985f8a5c87818f57239e701646b0"
+    },
+    {
+        "path":  "src/main/java/panel/shell/LegacyHost.java",
+        "bytes":  1879,
+        "sha256":  "f0354973b4227df33c09db18916b0570d8c044ca999187e2c378a23d53b9e455"
+    },
+    {
+        "path":  "src/main/java/panel/shell/NavigationGuard.java",
+        "bytes":  4942,
+        "sha256":  "55c136ba6597ed0609fa3a4033d6949d87a65c44030c86d62708a3ed7923d0e3"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellContext.java",
+        "bytes":  1101,
+        "sha256":  "99d7245d268209f2598d7e1f169d91e77a0cd8ffe5917c95a833ba1e27625801"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellIcons.java",
+        "bytes":  2504,
+        "sha256":  "4e2157dfb278b16e56d19baa108241bab0f2eb67162645013cdc1194c0d635bc"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellPalette.java",
+        "bytes":  9265,
+        "sha256":  "c077fb6a3f24d0a3630effed083dbb197a563ae1847df8ac8522365c3065bc26"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellRail.java",
+        "bytes":  10972,
+        "sha256":  "d9709bd4befc7021cdd708ecf52923ff65d9a190e0c4499179f01510b4740e46"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellRouter.java",
+        "bytes":  3950,
+        "sha256":  "138c0c0450ddf3834e818d87e510960525ff37ed6c94bfbd995048ee3926df71"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellRoutes.java",
+        "bytes":  8286,
+        "sha256":  "d7d8b31e4d31aa9e66637feaf7ec1c2c6d59bfd22d1fa5b1e73c344a51a913ed"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShellTopBar.java",
+        "bytes":  7627,
+        "sha256":  "3025d3d51302a8d78c86596dbc2d6d818f83d4b00ad6ae4afdc3685570b9dfbb"
+    },
+    {
+        "path":  "src/main/java/panel/shell/ShortcutRegistry.java",
+        "bytes":  2309,
+        "sha256":  "3e8091b7794712d9212aaaa18c8427918d974b722b8458316e0331622879df8f"
+    },
+    {
+        "path":  "src/main/java/panel/shell/StatusDock.java",
+        "bytes":  9944,
+        "sha256":  "715bb12ee00dabdad2d67c4165142c583e4eb34357edff46a205d0db19fdc66b"
+    },
+    {
+        "path":  "src/main/java/panel/shell/UserMenu.java",
+        "bytes":  10960,
+        "sha256":  "f323948164547629dd8fa52e5450603b056e2f951720738fb00d930634a9e487"
+    },
+    {
+        "path":  "src/main/java/panel/shell/WalletStatus.java",
+        "bytes":  1669,
+        "sha256":  "71ed67e4d6a943a168b474b17397ee463d98adbf835669151d1762fd25d3b8d2"
+    },
+    {
+        "path":  "src/main/java/panel/shell/WorkspaceSwitcher.java",
+        "bytes":  6532,
+        "sha256":  "e22b06dcd608c51255b1e90051912be15819141a55b18f16449cc42e8420689b"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/ActivityPanel.java",
+        "bytes":  3747,
+        "sha256":  "045e12f94d2b780673d94184256650cf1c5305d513198768033ca469353afaff"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/BlotterPanel.java",
+        "bytes":  16126,
+        "sha256":  "6cb95d6299485b5653975621cef2029e05c237a8fc3b079f44e1ee598071e6c2"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/BotPanel.java",
+        "bytes":  4290,
+        "sha256":  "efe1139046b8b66944efb0a8ed9d21da34b9b20b2f0b32261f6a9412aac634a3"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/ChartPanel.java",
+        "bytes":  11125,
+        "sha256":  "d15ed92a4763f9936d5f5a5d1fd145a93a36410ea14c5553e6ec13364ada3ace"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/DeskMode.java",
+        "bytes":  2585,
+        "sha256":  "c40c1ab458cb3921f4e26dc041555174771ae0cda0f91701fad6ef64c2a09675"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/DeskModel.java",
+        "bytes":  15777,
+        "sha256":  "600d28e5391bd718ab3c429c717596b1559ffa4ce572c896c90a8bfc0e054116"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/DeskSegment.java",
+        "bytes":  2294,
+        "sha256":  "5ad12363b2250d7ce4b6b889e6ce398161c07685613a061a3cf09597100e76fc"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/Fx.java",
+        "bytes":  2195,
+        "sha256":  "e44e6fa036d004e68610969ffe57015ef354fadbc27fda93dbe1e0e6d35ee205"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/GridRow.java",
+        "bytes":  3786,
+        "sha256":  "715dba02b2d5688e5321424051be435a94cac4b396305f071b8d93bfde2125f8"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/InfoPanel.java",
+        "bytes":  1043,
+        "sha256":  "07ab4318a8ad4bd133242a269c97bd0de83f2899a7883786f5c2027d2c150223"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/KvRow.java",
+        "bytes":  1226,
+        "sha256":  "15bcac10058c80fc0f47618fe56eb60de59eec58a81a592e6cfd6be668d50f86"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/MarketHeader.java",
+        "bytes":  6890,
+        "sha256":  "aef7a33ca51c83653e09bdb905697fe3015269595e01212790fef506551e6b7c"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/MarketsPage.java",
+        "bytes":  10844,
+        "sha256":  "b385caca96600d239daa0967bb614ca03deca2db10cc8e763b3942cbb07f3bc9"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/MetricsStrip.java",
+        "bytes":  2986,
+        "sha256":  "451bdbd85eb7d6d0911af2fdc06e9bcdc6a004b57dc21f384566264df3107af6"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/OrderBookPanel.java",
+        "bytes":  6307,
+        "sha256":  "22d9a7ae5d0a91fe00d09851f18841ae2dd941ae8d3960aa4e301dab4d1e0d47"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/RecentTradesPanel.java",
+        "bytes":  3502,
+        "sha256":  "0d643376f0d152c196436e3dee563eb05c8199c5e4fb284d800a6aa3b18f2a56"
+    },
+    {
+        "path":  "src/main/java/panel/tradeview/TradingDesk.java",
+        "bytes":  14886,
+        "sha256":  "d2d44a059b7f442f90622d9beaf2985b2b3b4e4bcefa1b27f9f18cc3303ead24"
+    },
+    {
+        "path":  "src/main/java/panel/ui/trader/CandleChart.java",
+        "bytes":  6337,
+        "sha256":  "6bf640f6ff9bbe71ea46849608dda6712e4f561ba5131c8da18e1b874e16c157"
+    },
+    {
+        "path":  "src/main/java/panel/ui/trader/TTable.java",
+        "bytes":  1830,
+        "sha256":  "a4e1fc39006b04d301c94ac0fad2b4183149185e58186d7947422571f4f9a099"
+    },
+    {
+        "path":  "src/main/java/panel/ui/Ui.java",
+        "bytes":  4719,
+        "sha256":  "115769f656f16aa883e5a6da109e2b1431126ccf793101959ef21841dd00af5a"
+    },
+    {
+        "path":  "src/main/java/panel/ui/View.java",
+        "bytes":  1533,
+        "sha256":  "14693f132c4d58132b3a742dc4ce9f1ada1f9b367274684625ceb30af3e0fb96"
+    },
+    {
+        "path":  "src/main/java/panel/util/DenomFormat.java",
+        "bytes":  831,
+        "sha256":  "d147426e1483467b246b5ef30b140422b6cc11c197e082fa2f9f7835fa8a9f2e"
+    },
+    {
+        "path":  "src/main/java/panel/util/Fmt.java",
+        "bytes":  2498,
+        "sha256":  "ad567ef6a5f25e502b9a4799fc6ac967659913be3b628a4bb4bf816886fa216a"
+    },
+    {
+        "path":  "src/main/java/panel/v2/Kit.java",
+        "bytes":  8655,
+        "sha256":  "94f4531b5659d06cf57ebc6944ace385b7d36189aee88920389aa4d79b04158e"
+    },
+    {
+        "path":  "src/main/resources/animations/original/check-pop.json",
+        "bytes":  840,
+        "sha256":  "600878b26db2db669bcb320368700b80b9e375c4a31f63e444d2d06375a4a8ee"
+    },
+    {
+        "path":  "src/main/resources/animations/original/pulse-ring.json",
+        "bytes":  930,
+        "sha256":  "985da99b0b1cc74e7ad3462c50e90eb95db830738a569c7b4491005560d8b3bc"
+    },
+    {
+        "path":  "src/main/resources/content/faq.json",
+        "bytes":  5609,
+        "sha256":  "f07181acdb57e72bb8c49a45d5c9e1ca60a0c51163657ea51771d47c5e4df446"
+    },
+    {
+        "path":  "src/main/resources/content/legal.json",
+        "bytes":  1738,
+        "sha256":  "3e3331f1cda9ddda415a034147abc983402ee150bd3a2199cb9fe176ac687b71"
+    },
+    {
+        "path":  "src/main/resources/content/onboarding.json",
+        "bytes":  3274,
+        "sha256":  "54d9d0b1a991f127b5fdf5ea9fe45e3dc00e112a5961508c40b2656ac2bb5333"
+    },
+    {
+        "path":  "src/main/resources/content/system-messages.json",
+        "bytes":  15716,
+        "sha256":  "6081d474f0ee3fcf97659d6d9ea624a9cf251d16d659ce72ec80460eee2603eb"
+    },
+    {
+        "path":  "src/main/resources/content/whats-new.json",
+        "bytes":  1877,
+        "sha256":  "d53029a27a1123fe3392f9e2e155f5419188e00a5c2b39d6155dc76e437005f8"
+    },
+    {
+        "path":  "src/main/resources/design/BYX_DESIGN_TOKENS.json",
+        "bytes":  16468,
+        "sha256":  "2a5ddbd3a6538feff7b7ad7eacf808a4382756487862a7c0cf16ed28054dc331"
+    },
+    {
+        "path":  "src/main/resources/design/BYX_MOTION_TOKENS.json",
+        "bytes":  24830,
+        "sha256":  "1b0ed3408ab43ff51fc55560c9b432450aa3d9da3204d7f834b5093369048ab2"
+    },
+    {
+        "path":  "src/main/resources/design/BYX_PACKAGE_B_TOKENS.json",
+        "bytes":  3368,
+        "sha256":  "80f97dda41b6511ce8a1198fb90c0adad9ca6aa40e07d8ae839ffa819b59584f"
+    },
+    {
+        "path":  "src/main/resources/design/BYX_PACKAGE_C2_TOKENS.json",
+        "bytes":  24908,
+        "sha256":  "44c4ff82d156806020425f5e23382aaeb7a8da5cdca96cdd919c1615339dec0c"
+    },
+    {
+        "path":  "src/main/resources/fonts/Inter-Bold.ttf",
+        "bytes":  415072,
+        "sha256":  "0cb1bc1335372d9e3a0cf6f5311c7cce87af90d2a777fdeec18be605a2a70bc1"
+    },
+    {
+        "path":  "src/main/resources/fonts/Inter-Medium.ttf",
+        "bytes":  411500,
+        "sha256":  "1bda81124d6ae26ed16a7201e2bd93766af5a3b14faf79eea14d191ebbd41146"
+    },
+    {
+        "path":  "src/main/resources/fonts/Inter-OFL.txt",
+        "bytes":  4380,
+        "sha256":  "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+    },
+    {
+        "path":  "src/main/resources/fonts/Inter-Regular.ttf",
+        "bytes":  407056,
+        "sha256":  "64f8be6e55c37e32ef03da99714bf3aa58b8f2099bfe4f759a7578e3b8291123"
+    },
+    {
+        "path":  "src/main/resources/fonts/Inter-SemiBold.ttf",
+        "bytes":  413976,
+        "sha256":  "0dc98e8aa59585394880f25ab89e6d915ad5134522e961b046ca51fad3a18255"
+    },
+    {
+        "path":  "src/main/resources/fonts/JetBrainsMono-Bold.ttf",
+        "bytes":  277828,
+        "sha256":  "5590990c82e097397517f275f430af4546e1c45cff408bde4255dad142479dcb"
+    },
+    {
+        "path":  "src/main/resources/fonts/JetBrainsMono-Medium.ttf",
+        "bytes":  273860,
+        "sha256":  "31c92d01a8a08528b718a43addf0ad3df0af2ca4b7b3290a452f70f358e14d3d"
+    },
+    {
+        "path":  "src/main/resources/fonts/JetBrainsMono-OFL.txt",
+        "bytes":  4398,
+        "sha256":  "60d55f23c6ce05a81099a762cb67ca2c9b6ea251c7912720998b4c89ebfd4faa"
+    },
+    {
+        "path":  "src/main/resources/fonts/JetBrainsMono-Regular.ttf",
+        "bytes":  273900,
+        "sha256":  "a0bf60ef0f83c5ed4d7a75d45838548b1f6873372dfac88f71804491898d138f"
+    },
+    {
+        "path":  "src/main/resources/fonts/JetBrainsMono-SemiBold.ttf",
+        "bytes":  277092,
+        "sha256":  "1b3bfa1ed5665a4ce3f9feb68d2d4e40e70bf8b4b7d9a3edd418f321b4e166a0"
+    },
+    {
+        "path":  "src/main/resources/fonts/SchibstedGrotesk-OFL.txt",
+        "bytes":  4405,
+        "sha256":  "851b03806ddbd92890a59a8512a883ff231587f9bef037895efa544a0f250432"
+    },
+    {
+        "path":  "src/main/resources/fonts/SchibstedGrotesk-Regular.ttf",
+        "bytes":  100692,
+        "sha256":  "6d66b7522c0381430eef45d9e521fd2246d45a08f39aec077cc8e69cfd7d465e"
+    },
+    {
+        "path":  "src/main/resources/fonts/SchibstedGrotesk-SemiBold.ttf",
+        "bytes":  101128,
+        "sha256":  "c17e0b87fab4a35c1ea82b022918c40cfce36d4ce4743fb8372d57264da23cbf"
+    },
+    {
+        "path":  "src/main/resources/panel/byx.css",
+        "bytes":  17004,
+        "sha256":  "94ac2cb4748866bfe4cd12893026a9059933d66769e6808995455b22677e6e39"
+    },
+    {
+        "path":  "src/main/resources/panel/byx-localnet-benefits.properties",
+        "bytes":  168,
+        "sha256":  "fc48bc585d2ed3ccc3a799ec94c6756c7ad3897e38b103dbcc4baf8f450132a4"
+    },
+    {
+        "path":  "src/main/resources/panel/byx-localnet-payment.properties",
+        "bytes":  206,
+        "sha256":  "a2a8557dca3970c81c630a4820ba5cb8c87fbb3f51ea7eb45522bd18ce16b5f1"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/appearance_en.properties",
+        "bytes":  1013,
+        "sha256":  "a4bf54269ec5aae5904ebba7f206230b3bd3a3dd45ce8560a11220f191691799"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/appearance_pt-BR.properties",
+        "bytes":  1085,
+        "sha256":  "324c29dbbde99efd7eb0c6e8d469d0345c45af7c23541a4ca579a29e9aae7dd5"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/notifications_en.properties",
+        "bytes":  2693,
+        "sha256":  "9cb88f406ef90f36b15564beee1b618f9181d0b444b436f468c7239e383ce1d1"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/notifications_pt-BR.properties",
+        "bytes":  2962,
+        "sha256":  "3b0fa2b0ea5c8a7cae74bfb4e19a019b23ea3189fefde464b63320403cedd3f5"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/package-b_en.properties",
+        "bytes":  13891,
+        "sha256":  "da9f23f790aabdf72d43a898bcf9b8009512f4d69026771267c24c1d18c2f53d"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/package-b_pt-BR.properties",
+        "bytes":  15003,
+        "sha256":  "688c651bfdaa579001415d4cab5bca3283376a1de0cef86db804a553625f9f5e"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/package-b-extra_en.properties",
+        "bytes":  3033,
+        "sha256":  "b93eeece8ef5fc9a89005896c4282a4d83eb5caf25b62e8f783de4fa0a38a7a8"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/package-b-extra_pt-BR.properties",
+        "bytes":  3193,
+        "sha256":  "efe5841d92b2f0567e67f9d58b1b89aa02ed38322b9dfb48ed0e1eaa5cbbd6ee"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/ui_en.properties",
+        "bytes":  110732,
+        "sha256":  "befd148c14053d87f73f84466b603f5843bfe27a7ebd5c2b4c6004a6c408df48"
+    },
+    {
+        "path":  "src/main/resources/panel/i18n/ui_pt-BR.properties",
+        "bytes":  119644,
+        "sha256":  "9b8acbfbd3030bda34bc1449bcc9fe8e2107e1f3bbca8f1eceacbde586e002fe"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/mascot-manifest.json",
+        "bytes":  6540,
+        "sha256":  "ddcf8bbb34ea27f4ff790803d1c7e284ff11ec4e3ced50be964fd1d5cc7718fd"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/attention.png",
+        "bytes":  3819,
+        "sha256":  "87a17804d36795315957afe5ee671c4bac5d973cb0cc62b071b41b6d63e6460f"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/idle.png",
+        "bytes":  10142,
+        "sha256":  "be809b2f65da0abdebdf396f337819c9e807a38b960f077defd16fb3537a5376"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/notification.png",
+        "bytes":  12230,
+        "sha256":  "8b8fb0220dcbb2bfb3db277b3e2ee2b08ab276ef25f82e0633012c839f563a11"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/processing.png",
+        "bytes":  72008,
+        "sha256":  "e66573c49c7228d70a320fe5fc11c949b28d6ed7a1c713204e0cc69e1046ef0f"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/syncing.png",
+        "bytes":  14840,
+        "sha256":  "6de67bfc78c29fa4a78f689a41338c9c43e45fbdf7f3299a1ec46d7436bd6d91"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/thinking.png",
+        "bytes":  4714,
+        "sha256":  "82d4f6aacc314ff599dfa61bc4da3b75f344d908f0be10d9ef1768f924bc478c"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/posters/transition.png",
+        "bytes":  9814,
+        "sha256":  "5ad3311322f6728141db4fcc0f68dd30e20cb3d499202c19e45d56473c2bd865"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/rig/idle-body.png",
+        "bytes":  6991,
+        "sha256":  "55b41d6145a840abf6163007d02c185ee46d1abb73839f0f4cadbe5a2a58355c"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/rig/idle-eye-l.png",
+        "bytes":  1236,
+        "sha256":  "6f23b9e61e702edee080bf813efd1420a3aa48da39b48b41ed5dc6808a6fb95a"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/rig/idle-eye-r.png",
+        "bytes":  1241,
+        "sha256":  "36cc8e33d239f64ab8e98ed149a1225edfcada0cf5310d74fc4e7ecfd31919a4"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/rig/idle-halo.png",
+        "bytes":  4818,
+        "sha256":  "1bbba75f0fac9bd361fa35aac372ab16b1a52aba8c27412454246f4ce830f3ca"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/attention.png",
+        "bytes":  127305,
+        "sha256":  "80f86e0cb1882af702c4fec30fa1338baaea13da63491582d70860c380cc689c"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/idle.png",
+        "bytes":  207916,
+        "sha256":  "9277577b11bccab8ada91a136bba6fa091c0e01bbb1b1323e8fc08b0d2b0c1b6"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/notification.png",
+        "bytes":  382028,
+        "sha256":  "ae783e1ec5861b0382d29b1380e58c8c5c82b126a42948ca076893051ca02f54"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/processing.png",
+        "bytes":  2760121,
+        "sha256":  "00e422f9e5587f2174e575d85532d2e45d280f45fa063d181f4b9ebb92de4924"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/syncing.png",
+        "bytes":  295424,
+        "sha256":  "f2f3f20e1f038a78b22eca69142592f78f2dea861a548a2fe5fc4749d6be826a"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/thinking.png",
+        "bytes":  94798,
+        "sha256":  "880c7df93abbd822ed0e1dc9fbfda0896ecbaca56477277d658b3a68ec9bb7f0"
+    },
+    {
+        "path":  "src/main/resources/panel/mascot/states/transition.png",
+        "bytes":  191661,
+        "sha256":  "c3e93ed4c0e88c49c16362d54ba2d2e7b07d37fcdab3d9fbec4441689c22273d"
+    },
+    {
+        "path":  "src/main/resources/panel/panel.css",
+        "bytes":  20908,
+        "sha256":  "109d59ab920c266e3c1cfaef41bd3659574a060f74a434f692a2e836ca5a785c"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/auth.css",
+        "bytes":  4067,
+        "sha256":  "8692b263a8e6d70fbc624f2ddd6b2472f473f049dfb47119474e2edb4dfa3449"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/controls.css",
+        "bytes":  14991,
+        "sha256":  "93a51151fc2d2761c75c3158dc3682934776a38b73371c725ddfef106d12491f"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/research.css",
+        "bytes":  4601,
+        "sha256":  "f966dd000fc258aa1a6b478d38869a7504b1efda0a5e0c926b3b7f2efe2c4c5f"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/screens.css",
+        "bytes":  7683,
+        "sha256":  "c7ee071691251d50db579e0c4ef17ca71d47107183cb0b026064a17804412cfb"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/shell.css",
+        "bytes":  11531,
+        "sha256":  "4ad4ef9eca8975e99f81d2ad992a785850c1db319696604cf423db94f1dfd76d"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/theme-controls.css",
+        "bytes":  19545,
+        "sha256":  "813ce88b1f5b93eab95bb7035be52bc25854894834a6d3268014aea7a3811f9c"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/theme-palette.css",
+        "bytes":  10849,
+        "sha256":  "9c0049da679152b810cc8e7694c0d2dae6594ab3b10d116c50f9f8aa6e39c112"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/tokens.css",
+        "bytes":  2444,
+        "sha256":  "13881d8ad6479c48a11b4324f19629b684625ff8939ef712b7a52f5ce2934b48"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/trading.css",
+        "bytes":  12856,
+        "sha256":  "541478b61688209a28a44e04592fb4e1704193eca00fe359c0d1ebd65e6b05a0"
+    },
+    {
+        "path":  "src/main/resources/panel/v2/typography.css",
+        "bytes":  2014,
+        "sha256":  "015dc7a75396a49fe7f307f27535711d0b05d433acc7fdee0f10ca8611d4855e"
+    },
+    {
+        "path":  "src/test/java/byx/demo/DemoContractTest.java",
+        "bytes":  2298,
+        "sha256":  "0d9d8035494bdf430ef880475a7a7dc54907708094dec4ee5c94de8e335bb3ab"
+    },
+    {
+        "path":  "src/test/java/byx/demo/DemoPackagedUiProbe.java",
+        "bytes":  4934,
+        "sha256":  "271c2a61d6cb9e747a5e3e261d225a0bb01cc80d89cb01227071fd256ac10374"
+    },
+    {
+        "path":  "THIRD-PARTY-NOTICES.md",
+        "bytes":  2043,
+        "sha256":  "728a368e4e8a7cd2fa866cd2befe418534e520cdfdcb8e8aebe426e708ed7434"
+    }
+]

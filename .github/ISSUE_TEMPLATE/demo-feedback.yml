@@ -1,0 +1,32 @@
+name: Feedback DEMO Windows
+description: Bug, instalação, visual, UX, sugestão ou desempenho; sem dados pessoais.
+title: "[DEMO Windows] "
+body:
+  - type: markdown
+    attributes:
+      value: "Não envie senhas, tokens, dados de conta, arquivos pessoais ou logs sensíveis. Screenshot é opcional e deve ser revisado por você."
+  - type: dropdown
+    id: category
+    attributes:
+      label: Categoria
+      options: [Bug, Instalação, Visual, Navegação e UX, Sugestão, Desempenho]
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Versão Windows
+  - type: input
+    id: demo
+    attributes:
+      label: Versão DEMO
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição e passos para reproduzir
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot opcional sem dados privados

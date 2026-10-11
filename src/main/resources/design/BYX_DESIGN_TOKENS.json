@@ -1,0 +1,729 @@
+{
+  "version": "3.0.0-final",
+  "note": "Final consolidated design tokens for BYX-MVP V2 (Phases 1 to 3). Concrete values mirrored from css/tokens.css and the published canvas. No duplicated groups: layer order lives here only; motion durations live in BYX_MOTION_TOKENS.json only.",
+  "fontFamilies": {
+    "ui": "Schibsted Grotesk",
+    "data": "JetBrains Mono",
+    "dataUse": "numbers, IDs, hashes, session ids, timestamps and values that need tabular alignment only. Never for ordinary words.",
+    "fallbackUi": "system-ui, sans-serif",
+    "fallbackData": "monospace"
+  },
+  "colors": {
+    "surface": {
+      "bg0": "#0B0E16",
+      "bg1": "#121723",
+      "bg2": "#1A2030",
+      "bg3": "#232A3D",
+      "hover": "#2C3550",
+      "line": "#2A3144",
+      "scrim": "#05070B",
+      "scrimOpacity": 0.82
+    },
+    "text": {
+      "primary": "#EEF1F8",
+      "secondary": "#AAB3C7",
+      "tertiary": "#8791A8",
+      "onAccent": "#0A0C14"
+    },
+    "accent": {
+      "trading": "#7C96FF",
+      "research": "#B896FF",
+      "byx": "#5ED6C4"
+    },
+    "semantic": {
+      "positive": "#42D79B",
+      "negative": "#FF7A7A",
+      "warning": "#E9B44C",
+      "info": "#5CC8FF",
+      "disabled": "#566079"
+    },
+    "semanticTint": {
+      "alpha": "12% (hex 1F) for badges, 9% (hex 18) for banners"
+    },
+    "bannerText": {
+      "error": "#FFB0B0",
+      "warning": "#F2CB7A",
+      "success": "#7FE6B8",
+      "info": "#8ED8FF"
+    }
+  },
+  "surfaceLevels": {
+    "background": "bg0",
+    "surface1": "bg1 (panels, rail, dock)",
+    "surface2": "bg2 (inputs, nested blocks)",
+    "elevated": "bg3 (selected, menus, toasts)",
+    "interactive": "hover (#2C3550)"
+  },
+  "typography": {
+    "display": {
+      "size": 32,
+      "line": 40,
+      "weight": 600
+    },
+    "authTitle": {
+      "size": 28,
+      "line": 34,
+      "weight": 600
+    },
+    "pageTitle": {
+      "size": 24,
+      "line": 30,
+      "weight": 600
+    },
+    "sectionTitle": {
+      "size": 18,
+      "line": 24,
+      "weight": 600
+    },
+    "sectionTitleSmall": {
+      "size": 15,
+      "line": 20,
+      "weight": 600
+    },
+    "body": {
+      "size": 14,
+      "line": 20,
+      "weight": 400
+    },
+    "data": {
+      "size": 15,
+      "line": 20,
+      "weight": 500,
+      "family": "data"
+    },
+    "dataLarge": {
+      "size": 30,
+      "line": 36,
+      "weight": 600,
+      "family": "data"
+    },
+    "label": {
+      "size": 12,
+      "line": 16,
+      "weight": 600,
+      "letterSpacingEm": 0.06,
+      "case": "upper"
+    },
+    "micro": {
+      "size": 11,
+      "line": 12,
+      "weight": 600,
+      "use": "rail labels and dock group headers only (dock letterSpacingEm 0.1)"
+    },
+    "authTagline": {
+      "compact": {
+        "size": 40,
+        "line": 46
+      },
+      "expanded": {
+        "size": 52,
+        "line": 58
+      }
+    },
+    "weights": [
+      400,
+      500,
+      600
+    ]
+  },
+  "radii": {
+    "xs": 4,
+    "sm": 6,
+    "md": 9,
+    "input": 10,
+    "lg": 12,
+    "card": 14,
+    "pill": 999
+  },
+  "spacing": [
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    24,
+    28,
+    32,
+    40,
+    56,
+    64,
+    96
+  ],
+  "shadows": {
+    "panelInset": "inset 0 1px 0 rgba(255,255,255,.04)",
+    "panelDrop": "0 1px 2px rgba(0,0,0,.4)",
+    "overlay": "0 24px 60px rgba(0,0,0,.6)",
+    "menu": "0 12px 32px rgba(0,0,0,.6)",
+    "tooltip": "0 8px 24px rgba(0,0,0,.55)",
+    "focusRing": "0 0 0 3px rgba(124,150,255,.13)",
+    "errorRing": "0 0 0 3px rgba(255,122,122,.10)"
+  },
+  "opacity": {
+    "disabled": 0.55,
+    "hatch": 0.04,
+    "loopMin": 0.45
+  },
+  "iconSizes": {
+    "rail": 22,
+    "default": 20,
+    "inline": 14,
+    "banner": 18,
+    "statusDot": 9,
+    "stroke": 1.7
+  },
+  "layout": {
+    "rail": {
+      "width": 68,
+      "item": {
+        "width": 60,
+        "height": 58
+      },
+      "icon": 22,
+      "label": 11,
+      "indicator": {
+        "width": 3,
+        "inset": 12
+      }
+    },
+    "topbar": {
+      "height": 56,
+      "search": {
+        "width": 320,
+        "height": 36
+      },
+      "notificationButton": {
+        "size": 38,
+        "badge": {
+          "size": 18
+        }
+      },
+      "avatar": {
+        "size": 36
+      }
+    },
+    "dock": {
+      "height": 38,
+      "text": 13,
+      "dot": 9,
+      "groupLabel": 11,
+      "groupGap": 16,
+      "separatorMargin": 22
+    },
+    "main": {
+      "padding": {
+        "top": 14,
+        "x": 20,
+        "bottom": 16
+      },
+      "gap": 14
+    },
+    "card": {
+      "radius": 14,
+      "padding": 16
+    },
+    "statusDockGroups": [
+      "SYSTEM HEALTH",
+      "MODE",
+      "ENVIRONMENT"
+    ]
+  },
+  "form": {
+    "inputHeight": 46,
+    "inputPadding": "13 14",
+    "inputFont": 15,
+    "otpBox": {
+      "width": 40,
+      "height": 50,
+      "gap": 8,
+      "font": 20
+    },
+    "buttonHeight": 48,
+    "fieldGap": 16,
+    "labelGap": 6
+  },
+  "breakpoints": {
+    "compact": {
+      "name": "COMPACT",
+      "width": 1440,
+      "height": 900,
+      "rightColumn": 330,
+      "orderBookLevels": 3,
+      "tradesRows": 3,
+      "blotterHeight": 214,
+      "blotterColumns": 7,
+      "authPane": 520,
+      "authPaddingX": 64,
+      "authFormWidth": 392
+    },
+    "standard": {
+      "name": "STANDARD",
+      "width": 1600,
+      "height": 1000,
+      "rightColumn": 350,
+      "orderBookLevels": 6,
+      "tradesRows": 4,
+      "blotterHeight": 240,
+      "blotterColumns": 8,
+      "authPane": 560,
+      "authPaddingX": 64,
+      "authFormWidth": 432
+    },
+    "expanded": {
+      "name": "EXPANDED",
+      "width": 1920,
+      "height": 1080,
+      "rightColumns": [
+        330,
+        350
+      ],
+      "orderBookLevels": 10,
+      "tradesRows": 9,
+      "blotterHeight": 300,
+      "blotterColumns": 10,
+      "authPane": 640,
+      "authPaddingX": 96,
+      "authFormWidth": 448,
+      "authBrandPadding": 96
+    },
+    "minimum": {
+      "width": 1280,
+      "height": 760
+    }
+  },
+  "passwordPolicy": {
+    "status": "DEMO_POLICY",
+    "rules": [
+      "12+ characters",
+      "upper and lower case",
+      "a number",
+      "a special character"
+    ],
+    "note": "Prototype only. The real policy must come from the backend."
+  },
+  "contexts": {
+    "trading": {
+      "accent": "#7C96FF",
+      "workspace": true
+    },
+    "research": {
+      "accent": "#B896FF",
+      "workspace": true
+    },
+    "byx": {
+      "accent": "#5ED6C4",
+      "workspace": true
+    },
+    "account": {
+      "accent": "#7C96FF",
+      "workspace": false,
+      "chip": "ACCOUNT",
+      "rail": [
+        "Profile",
+        "Security",
+        "Sessions",
+        "Notifications",
+        "Activity"
+      ],
+      "note": "workspace switcher shows no selection; breadcrumb shows the context chip"
+    },
+    "help": {
+      "accent": "#7C96FF",
+      "workspace": false,
+      "chip": "HELP",
+      "rail": [
+        "FAQ",
+        "Support",
+        "Diagnostics",
+        "About",
+        "Overview",
+        "What's new"
+      ]
+    },
+    "public": {
+      "query": "?public=1",
+      "shows": [
+        "About",
+        "FAQ",
+        "Terms",
+        "Privacy",
+        "Help"
+      ],
+      "hides": [
+        "rail",
+        "workspace switcher",
+        "search/palette",
+        "notifications",
+        "user menu",
+        "dock"
+      ],
+      "note": "pre-auth access to help content only"
+    }
+  },
+  "contentWidth": {
+    "dataPages": "fill the main area at every breakpoint (Profile, Security, Sessions, Notifications, Activity, FAQ, Help, Diagnostics, Product overview)",
+    "readingPages": {
+      "maxWidth": 1240,
+      "align": "centre",
+      "pages": [
+        "Settings",
+        "About",
+        "Terms",
+        "Privacy",
+        "Keyboard shortcuts",
+        "What's new"
+      ]
+    },
+    "mainPadding": {
+      "compact": "22 28 28",
+      "standard": "24 32 32",
+      "expanded": "26 40 36"
+    },
+    "breakpointHelpers": ".only16 / .only19 hide below the breakpoint and never force a display value"
+  },
+  "components": {
+    "userMenu": {
+      "width": 300,
+      "padding": 6,
+      "item": {
+        "height": 38,
+        "padding": "9 10",
+        "radius": 8,
+        "icon": 18
+      },
+      "header": "initials avatar + name + email + role badge",
+      "order": [
+        "Profile",
+        "Security",
+        "Notifications",
+        "Settings",
+        "Keyboard shortcuts",
+        "Help",
+        "About BYX",
+        "Sign out"
+      ],
+      "selected": "aria-current=page: tint #7C96FF14 + 6px dot",
+      "height": 416
+    },
+    "notificationItem": {
+      "grid": "32px 1fr auto",
+      "padding": "11 10",
+      "radius": 10,
+      "unread": {
+        "titleWeight": 600,
+        "background": "#ffffff06",
+        "dot": 8
+      },
+      "read": {
+        "titleWeight": 400,
+        "titleColor": "text.secondary"
+      },
+      "selected": "inset 1px accent ring",
+      "severities": [
+        "info",
+        "success",
+        "warning",
+        "error"
+      ],
+      "important": "flag + IMPORTANT label (text, not color only)"
+    },
+    "notificationPanel": {
+      "width": 420,
+      "maxItems": "scroll",
+      "filters": [
+        "All",
+        "Unread"
+      ],
+      "actions": [
+        "Mark all as read",
+        "Open notification center"
+      ],
+      "maxHeight": 640
+    },
+    "accordion": {
+      "headerPadding": "15 8",
+      "font": "600 15/20",
+      "answerMaxWidth": 760,
+      "chevron": 18
+    },
+    "settingsRow": {
+      "grid": "1fr auto",
+      "gap": 24,
+      "padding": "15 0",
+      "label": "600 14",
+      "description": "13/18 tertiary",
+      "changedMarker": "UNSAVED label after the label"
+    },
+    "toggle": {
+      "width": 44,
+      "height": 26,
+      "thumb": 20,
+      "on": "accent track, dark thumb",
+      "disabled": 0.5
+    },
+    "saveBar": {
+      "position": "sticky bottom",
+      "radius": 12,
+      "padding": "12 16",
+      "content": [
+        "n unsaved changes",
+        "Discard",
+        "Save changes"
+      ]
+    },
+    "palette": {
+      "width": 640,
+      "top": 96,
+      "rowPadding": "9 10",
+      "groups": [
+        "NAVIGATION",
+        "COMMAND",
+        "HELP"
+      ],
+      "gated": "aria-disabled row + reason in footer, never navigates",
+      "maxHeight": "calc(100% - 160px)"
+    },
+    "dialog": {
+      "width": 440,
+      "padding": 24,
+      "radius": 14
+    },
+    "toast": {
+      "width": 360,
+      "radius": 12,
+      "maxVisible": 3,
+      "position": "bottom-left"
+    },
+    "availabilityBadges": {
+      "LOCKED": "negative + lock icon",
+      "NOT_CONFIGURED": "neutral + dot",
+      "UNAVAILABLE": "warning + triangle",
+      "PERMISSION_REQUIRED": "info + shield",
+      "COMING_SOON": "info + clock",
+      "rule": "always icon + text"
+    },
+    "dataBadges": {
+      "DEMO_DATA": "warning",
+      "PLACEHOLDER_CONTENT": "warning",
+      "LEGAL_PLACEHOLDER": "warning banner",
+      "DEMO_ONLY \u00b7 NOTHING IS SENT": "warning"
+    },
+    "statusRow": {
+      "columns": "component 1.1fr | state 150 | reason 2fr | last update 150 | data age 130 | action 96",
+      "gap": 16,
+      "paddingY": 13,
+      "height": 67
+    },
+    "summaryCard": {
+      "columns": 4,
+      "height": 78,
+      "padding": "14 16",
+      "number": "JetBrains Mono 24/30"
+    },
+    "recoveryCard": {
+      "columns": 2,
+      "padding": 18,
+      "height": 231,
+      "actions": [
+        "Simulate drop (DEMO_ONLY)",
+        "Retry now"
+      ]
+    },
+    "globalBar": {
+      "height": 36,
+      "placement": "under the top bar, above page content",
+      "fill": "neg tint or wrn tint",
+      "dismiss": "none while the condition lasts"
+    },
+    "warningBanner": {
+      "padding": "12 14",
+      "radius": 10,
+      "icon": 18
+    },
+    "onboardingCard": {
+      "width": 680,
+      "height": 460,
+      "bodyMinHeight": 318,
+      "footerHeight": 72,
+      "progress": "6 segments, 4 high",
+      "options": "2 columns, radius 12"
+    },
+    "sessionDialog": {
+      "width": 440,
+      "height": 196,
+      "role": "alertdialog",
+      "persistent": true
+    },
+    "dockItem": {
+      "height": 26,
+      "paddingX": 8,
+      "radius": 6,
+      "hover": "bg2",
+      "note": "dock height stays 38"
+    },
+    "errorCard": {
+      "columns": 3,
+      "gap": 16
+    }
+  },
+  "layers": {
+    "savebar": 30,
+    "popover": 40,
+    "commandPalette": 60,
+    "dialog": 70,
+    "toasts": 80,
+    "note": "Esc closes the topmost layer only: dialog > palette > popover. Opening a layer closes any popover. Persistent dialogs (session expired, onboarding) do not close on backdrop click."
+  },
+  "accessibility": {
+    "highContrast": {
+      "class": ".hc",
+      "text.secondary": "#C3CADB",
+      "text.tertiary": "#A3ACC2",
+      "line": "#3A4460"
+    },
+    "focusAll": {
+      "class": ".focusall",
+      "rule": "2px outline text color, offset 2, on every focus (not only keyboard)"
+    },
+    "reducedMotion": "follows OS prefers-reduced-motion unless the user chose a mode",
+    "contrastMeasured": {
+      "minimumTextRatio": 5.14,
+      "note": "Every text pair in screens/system/accessibility.html passes AA (4.5:1). Lowest: Text tertiary on Surface 2 = 5.14."
+    }
+  },
+  "shortcuts": {
+    "implemented": [
+      "Cmd/Ctrl+K",
+      "?",
+      "Cmd/Ctrl+,",
+      "Cmd/Ctrl+1..6 (rail items of the current context)",
+      "Esc",
+      "Arrow keys / Home / End in lists, menus, FAQ",
+      "Enter",
+      "Space",
+      "Tab / Shift+Tab"
+    ],
+    "browserNote": "In a web browser Cmd/Ctrl+1..6 and Cmd+, may be taken by the browser. They are native in the desktop app.",
+    "withdrawn": {
+      "Cmd+R": "shown in the Phase 1 palette mock; not implemented because it collides with reload. Use the palette."
+    }
+  },
+  "responsiveBehaviour": {
+    "activityColumns": {
+      "compact": 5,
+      "standard": 6,
+      "expanded": 7
+    },
+    "sessionsColumns": {
+      "compact": 5,
+      "standard": 6,
+      "expanded": 7
+    },
+    "profileColumns": {
+      "compact": 2,
+      "standard": 2,
+      "expanded": 3
+    },
+    "notifications": "category sidebar (240) at EXPANDED; filter chips below. Detail pane at all sizes",
+    "faq": "category sidebar (240) + 'Still need help' column at EXPANDED; chips below"
+  },
+  "statusStates": {
+    "states": [
+      "OPERATIONAL",
+      "CONNECTING",
+      "RECONNECTING",
+      "DEGRADED",
+      "UNAVAILABLE",
+      "UNKNOWN"
+    ],
+    "chip": {
+      "height": 28,
+      "paddingX": 10,
+      "radius": 6,
+      "font": "12/600 caps .06em",
+      "dot": 8
+    },
+    "colors": {
+      "OPERATIONAL": {
+        "text": "#7FE6B8",
+        "fill": "#42D79B1A"
+      },
+      "CONNECTING": {
+        "text": "#8ED8FF",
+        "fill": "#5CC8FF1A"
+      },
+      "RECONNECTING": {
+        "text": "#F2CB7A",
+        "fill": "#E9B44C1F"
+      },
+      "DEGRADED": {
+        "text": "#F2CB7A",
+        "fill": "#E9B44C1F"
+      },
+      "UNAVAILABLE": {
+        "text": "#FF9B9B",
+        "fill": "#FF7A7A1A"
+      },
+      "UNAVAILABLE_EXPECTED": {
+        "text": "#AAB3C7",
+        "fill": "#232A3D",
+        "note": "Used when nothing is expected to be connected (no feed configured). Never used after a drop"
+      },
+      "UNKNOWN": {
+        "text": "#AAB3C7",
+        "fill": "transparent",
+        "ring": "#2A3144"
+      }
+    },
+    "dockDot": {
+      "OPERATIONAL": "pos",
+      "CONNECTING": "inf + pulse",
+      "RECONNECTING": "wrn + pulse",
+      "DEGRADED": "wrn",
+      "UNAVAILABLE": "neg (dis when expected)",
+      "UNKNOWN": "dis"
+    },
+    "recovery": [
+      "CONNECTED",
+      "DISCONNECTED",
+      "RECONNECTING",
+      "RESTORED",
+      "RETRY FAILED"
+    ]
+  },
+  "errorSeverities": {
+    "INFO": "inf",
+    "SUCCESS": "pos",
+    "WARNING": "wrn",
+    "ERROR": "neg",
+    "CRITICAL": {
+      "token": "neg filled",
+      "rule": "rare: unexpected-error fallback and safety rules only"
+    }
+  },
+  "regionStates": [
+    "READY",
+    "LOADING",
+    "EMPTY",
+    "PARTIAL",
+    "STALE",
+    "DEGRADED",
+    "ERROR",
+    "UNAVAILABLE",
+    "LOCKED",
+    "NOT_CONFIGURED"
+  ],
+  "behaviour": {
+    "loadingSlowAfterMs": 8000,
+    "loadingTimeoutAfterMs": 20000,
+    "startupSlowAfterMs": 800,
+    "reconnectMaxAttempts": 3,
+    "restoredHoldMs": 3000,
+    "toastMax": 3,
+    "staleOpacity": 0.6,
+    "note": "Behaviour thresholds, not motion. They apply in FULL, REDUCED and OFF alike. The reference compresses them for demos only (DEMO_ONLY)."
+  }
+}

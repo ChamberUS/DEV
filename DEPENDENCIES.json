@@ -1,0 +1,72 @@
+﻿[
+    {
+        "file":  "fxplayer-1.2.6.jar",
+        "url":  "https://repo.maven.apache.org/maven2/com/lottie4j/fxplayer/1.2.6/fxplayer-1.2.6.jar",
+        "sha256":  "8501996a554751639e462460835685be30623711ff745900a7b5a4c7f0072dac"
+    },
+    {
+        "file":  "core-1.2.6.jar",
+        "url":  "https://repo.maven.apache.org/maven2/com/lottie4j/core/1.2.6/core-1.2.6.jar",
+        "sha256":  "0076dd68c5e91adba7005771f85281064079a13fe9c56a49ed44d64a34d365fa"
+    },
+    {
+        "file":  "jackson-annotations-2.21.jar",
+        "url":  "https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.jar",
+        "sha256":  "53ca085f4a150f703f49e1aabd935bd03b43e1ea3d55d135438292af22cef56b"
+    },
+    {
+        "file":  "jackson-core-2.20.0.jar",
+        "url":  "https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-core/2.20.0/jackson-core-2.20.0.jar",
+        "sha256":  "bc0cf46075877201f8406ee7de2741ae7df6c066f5f0457bd80632a718c06e72"
+    },
+    {
+        "file":  "jackson-databind-2.20.0.jar",
+        "url":  "https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.20.0/jackson-databind-2.20.0.jar",
+        "sha256":  "a70e146a6bf2cba4f9cd367169787f50adcfbb57122bc2e9c8390cd0b397ac30"
+    },
+    {
+        "file":  "jackson-core-3.1.1.jar",
+        "url":  "https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.1/jackson-core-3.1.1.jar",
+        "sha256":  "4cd270bee1a1aa34be18da78268f3879355b6ea09154beff496831785b6194c9"
+    },
+    {
+        "file":  "jackson-databind-3.1.1.jar",
+        "url":  "https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.1/jackson-databind-3.1.1.jar",
+        "sha256":  "a80302c80cb02803e33d7b3301a0d619146d3191d285e6bbd39fa17d3aa5f24a"
+    },
+    {
+        "file":  "slf4j-api-2.0.17.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar",
+        "sha256":  "7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832"
+    },
+    {
+        "file":  "javafx-base-21.0.5.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/openjfx/javafx-base/21.0.5/javafx-base-21.0.5.jar",
+        "sha256":  "184dfc4542305fc57b06454807f36d6b71ac53018a69589de7fdc77410989025"
+    },
+    {
+        "file":  "javafx-base-21.0.5-win.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/openjfx/javafx-base/21.0.5/javafx-base-21.0.5-win.jar",
+        "sha256":  "4e9de66524a39fa59ee2cd4952270900bc9fe495b28477435efa08144de1d206"
+    },
+    {
+        "file":  "javafx-graphics-21.0.5.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/openjfx/javafx-graphics/21.0.5/javafx-graphics-21.0.5.jar",
+        "sha256":  "0a33d1d46d215215704882400c4a0efd5cc6b47d58848adcb048c6c818c01027"
+    },
+    {
+        "file":  "javafx-graphics-21.0.5-win.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/openjfx/javafx-graphics/21.0.5/javafx-graphics-21.0.5-win.jar",
+        "sha256":  "0c5ce5a4f27be1d0c898c29fae86356f5ccf78401cc6bd243fc146f4a61dff74"
+    },
+    {
+        "file":  "javafx-controls-21.0.5.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/openjfx/javafx-controls/21.0.5/javafx-controls-21.0.5.jar",
+        "sha256":  "7e74ff934c0b07fd789d853ae808909ff5e546a508c6b0c5c358e41c503a77f4"
+    },
+    {
+        "file":  "javafx-controls-21.0.5-win.jar",
+        "url":  "https://repo.maven.apache.org/maven2/org/openjfx/javafx-controls/21.0.5/javafx-controls-21.0.5-win.jar",
+        "sha256":  "c689de189abaa839eaf628d4b34aa176f6661e0d62ca918cb4af7544172e6a60"
+    }
+]

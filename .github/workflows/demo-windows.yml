@@ -1,0 +1,61 @@
+name: BYX-MVP DEMO Windows Build
+on:
+  push:
+    branches: [feature/byx-mvp-demo-windows-x64]
+permissions:
+  contents: read
+jobs:
+  windows-demo:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '21'
+          architecture: x64
+      - name: Build, unit tests, locked dependencies and portable packaging
+        run: |
+          ./scripts/build-demo-windows.ps1 -Output "$env:RUNNER_TEMP/byx-demo-build"
+      - name: Audit sanitized source and distribution
+        run: |
+          ./scripts/audit-demo.ps1 -Image "$env:RUNNER_TEMP/byx-demo-build/image/BYX-MVP" -Report "$env:RUNNER_TEMP/byx-demo-build/audit.json"
+      - name: Packaged EXE startup, bundled runtime, close and reopen
+        run: |
+          ./scripts/test-demo-launcher.ps1 -Zip "$env:RUNNER_TEMP/byx-demo-build/BYX-MVP-Demo-Windows-x64-Portable.zip" -Destination "$env:RUNNER_TEMP/QA BYX spaces [alpha]" -Report "$env:RUNNER_TEMP/byx-demo-build/launcher-qa.json"
+      - name: Additional Unicode path qualification (report limitations)
+        continue-on-error: true
+        run: |
+          ./scripts/test-demo-launcher.ps1 -Zip "$env:RUNNER_TEMP/byx-demo-build/BYX-MVP-Demo-Windows-x64-Portable.zip" -Destination "$env:RUNNER_TEMP/QA espaço BYX Ω" -Report "$env:RUNNER_TEMP/byx-demo-build/launcher-unicode-qa.json"
+      - name: Automated UI against distributed JARs (separate from EXE UAT)
+        run: |
+          ./scripts/test-demo-ui.ps1 -Image "$env:RUNNER_TEMP/byx-demo-build/image/BYX-MVP" -Evidence "$env:RUNNER_TEMP/byx-demo-build/ui"
+      - name: Runner identity and limitations
+        if: always()
+        run: |
+          $out = "$env:RUNNER_TEMP/byx-demo-build"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          [pscustomobject]@{ commit=$env:GITHUB_SHA; os=(Get-CimInstance Win32_OperatingSystem).Caption; arch=$env:PROCESSOR_ARCHITECTURE; exeVisualUat='NOT_EXECUTED'; physicalInternetDisconnect='NOT_EXECUTED'; installerQualification='NOT_EXECUTED'; releaseAutomatic=$false } | ConvertTo-Json | Set-Content "$out/runner.json"
+      - name: Preserve artifacts and evidence even when blocked
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: byx-demo-windows-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/byx-demo-build/BYX-MVP-Demo-Windows-x64-Portable.zip
+            ${{ runner.temp }}/byx-demo-build/SHA256SUMS.txt
+            ${{ runner.temp }}/byx-demo-build/distribution-inventory.json
+            ${{ runner.temp }}/byx-demo-build/build.log
+            ${{ runner.temp }}/byx-demo-build/audit.json
+            ${{ runner.temp }}/byx-demo-build/launcher*.json*
+            ${{ runner.temp }}/byx-demo-build/runner.json
+            ${{ runner.temp }}/byx-demo-build/ui/
+            target/surefire-reports/

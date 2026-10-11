@@ -1,0 +1,84 @@
+{
+  "status": "LEGAL_PLACEHOLDER",
+  "version": "[DOC_VERSION]",
+  "updated": "[DATE]",
+  "terms": [
+    {
+      "id": "acceptance",
+      "title": "Acceptance of these terms",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts and access",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "use",
+      "title": "Acceptable use",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "environments",
+      "title": "Test assets and environments",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "availability",
+      "title": "Service availability",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "liability",
+      "title": "Limitation of liability",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "changes",
+      "title": "Changes to these terms",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "contact",
+      "title": "Contact",
+      "body": "[LEGAL_PLACEHOLDER]"
+    }
+  ],
+  "privacy": [
+    {
+      "id": "scope",
+      "title": "Scope",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "data",
+      "title": "Data we process",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "use",
+      "title": "How data is used",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "diagnostics",
+      "title": "Diagnostics and logs",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "retention",
+      "title": "Retention",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "rights",
+      "title": "Your rights",
+      "body": "[LEGAL_PLACEHOLDER]"
+    },
+    {
+      "id": "contact",
+      "title": "Contact",
+      "body": "[LEGAL_PLACEHOLDER]"
+    }
+  ]
+}
