@@ -29,6 +29,11 @@ jobs:
       - name: Packaged EXE startup, bundled runtime, close and reopen
         run: |
           ./scripts/test-demo-launcher.ps1 -Zip "$env:RUNNER_TEMP/byx-demo-build/BYX-MVP-Demo-Windows-x64-Portable.zip" -Destination "$env:RUNNER_TEMP/QA BYX spaces [alpha]" -Report "$env:RUNNER_TEMP/byx-demo-build/launcher-qa.json"
+      - name: Native EXE login and navigation automation (desktop dependent)
+        continue-on-error: true
+        shell: powershell
+        run: |
+          ./scripts/test-demo-native-ui.ps1 -Executable "$env:RUNNER_TEMP/QA BYX spaces [alpha]/BYX-MVP.exe" -Report "$env:RUNNER_TEMP/byx-demo-build/native-ui-qa.json"
       - name: Additional Unicode path qualification (report limitations)
         continue-on-error: true
         run: |
@@ -56,6 +61,7 @@ jobs:
             ${{ runner.temp }}/byx-demo-build/build.log
             ${{ runner.temp }}/byx-demo-build/audit.json
             ${{ runner.temp }}/byx-demo-build/launcher*.json*
+            ${{ runner.temp }}/byx-demo-build/native-ui-qa.json
             ${{ runner.temp }}/byx-demo-build/runner.json
             ${{ runner.temp }}/byx-demo-build/ui/
             target/surefire-reports/

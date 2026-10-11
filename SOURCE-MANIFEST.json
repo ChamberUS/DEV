@@ -11,8 +11,8 @@
     },
     {
         "path":  ".github/workflows/demo-windows.yml",
-        "bytes":  3224,
-        "sha256":  "9b077b5ab7a8e5b5730896810f20af0234c984b196be7ab25c0e17f73d38ee8d"
+        "bytes":  3609,
+        "sha256":  "3644c7abde8ecb1bf4563d3ffcb7ce0849d7733ad301dcdeb4f3196c305158bb"
     },
     {
         "path":  ".gitignore",
@@ -26,8 +26,8 @@
     },
     {
         "path":  "docs/BUILD-RELEASE.md",
-        "bytes":  3585,
-        "sha256":  "d62d457e8c53139d5447a2dcb5cdde11c66f0092b510de4361f98e36d6858fae"
+        "bytes":  4014,
+        "sha256":  "ae14f8a0dff6924925340fb144690e38bca42385b8f2d029830819b1518733e0"
     },
     {
         "path":  "docs/SECURITY-ARCHITECTURE.md",
@@ -141,8 +141,8 @@
     },
     {
         "path":  "README.md",
-        "bytes":  4568,
-        "sha256":  "0da832b9cffebd3354db134e82cacef5c9f15251e89e52461d010205e9e3abb5"
+        "bytes":  4865,
+        "sha256":  "e22cafe0457996bba1c891a6e2288110012b63e20549faf0ec9214e03bfa45a7"
     },
     {
         "path":  "scripts/audit-demo.ps1",
@@ -158,6 +158,11 @@
         "path":  "scripts/test-demo-launcher.ps1",
         "bytes":  4256,
         "sha256":  "9dc5a41dda4c156850738f69bde38251b06ab31d7d34add882b422c04f37f749"
+    },
+    {
+        "path":  "scripts/test-demo-native-ui.ps1",
+        "bytes":  5587,
+        "sha256":  "19703005970d20348b93b2f8df96e2deaa271d40e2a5fd0c6a6e8e6e70ccd50d"
     },
     {
         "path":  "scripts/test-demo-ui.ps1",
